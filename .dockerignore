@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+.env*
+!.env.local.example
+*.log
+README.md
+DEPLOY.md
+.github
+coverage

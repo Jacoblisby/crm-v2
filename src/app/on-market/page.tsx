@@ -1,11 +1,12 @@
 /**
- * On-market — viser scrappede listings fra Boligsiden 4700 Næstved.
- * I Uge 1-2: viser POC-data fra ~/Desktop/CRM-v2-poc/manifest.json som demo.
- * I Uge 5: trækker fra on_market_candidates Supabase-tabel.
+ * On-market — viser kandidater fra Boligsiden 4700 Næstved.
+ * Læser fra on_market_candidates-tabellen. Falder tilbage til POC-manifest
+ * som demo-data hvis tabellen er tom (Uge 5 fylder den).
  */
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { listActiveOnMarketCandidates } from '@/lib/db/queries';
 
 interface ManifestListing {
   address: string;
@@ -29,87 +30,127 @@ interface Manifest {
   listings: Record<string, ManifestListing>;
 }
 
-export default function OnMarketPage() {
-  const manifestPath = path.join(os.homedir(), 'Desktop/CRM-v2-poc/manifest.json');
-  let manifest: Manifest | null = null;
-  let error: string | null = null;
+interface OnMarketRow {
+  key: string;
+  address: string;
+  brokerKind: string | null;
+  kvm: number | null;
+  listPrice: number | null;
+  monthlyExpense: number | null;
+  pdfStatus: string;
+  caseNumber?: number | null;
+}
 
+export default async function OnMarketPage() {
+  // Først: forsøg at læse fra DB. Hvis det fejler eller er tomt, fald tilbage til POC.
+  let dbRows: OnMarketRow[] = [];
+  let dbError: string | null = null;
   try {
-    if (fs.existsSync(manifestPath)) {
-      manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    } else {
-      error = `Manifest ikke fundet: ${manifestPath}`;
+    const candidates = await listActiveOnMarketCandidates();
+    dbRows = candidates.map((c) => ({
+      key: c.id,
+      address: c.address,
+      brokerKind: c.brokerKind,
+      kvm: c.kvm,
+      listPrice: c.listPrice,
+      monthlyExpense: c.monthlyExpense,
+      pdfStatus: c.pdfStatus,
+    }));
+  } catch (err) {
+    dbError = err instanceof Error ? err.message : String(err);
+  }
+
+  // Fallback: POC-manifest hvis DB tom eller fejlet
+  let pocRows: OnMarketRow[] = [];
+  let pocUpdated: string | null = null;
+  let pocError: string | null = null;
+  if (dbRows.length === 0) {
+    const manifestPath = path.join(os.homedir(), 'Desktop/CRM-v2-poc/manifest.json');
+    try {
+      if (fs.existsSync(manifestPath)) {
+        const manifest: Manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        pocUpdated = manifest.updated;
+        pocRows = Object.entries(manifest.listings).map(([slug, l]) => ({
+          key: slug,
+          address: l.address,
+          brokerKind: l.broker_kind,
+          kvm: l.kvm,
+          listPrice: l.price_cash,
+          monthlyExpense: l.monthly_expense,
+          pdfStatus: l.pdf_status,
+          caseNumber: l.case_number,
+        }));
+      } else {
+        pocError = `POC-manifest ikke fundet: ${manifestPath}`;
+      }
+    } catch (e) {
+      pocError = e instanceof Error ? e.message : String(e);
     }
-  } catch (e: unknown) {
-    error = e instanceof Error ? e.message : String(e);
   }
 
-  if (!manifest) {
-    return (
-      <div>
-        <h1 className="text-2xl font-bold mb-1">On-market</h1>
-        <p className="text-sm text-slate-500 mb-4">Boligsiden 4700 Næstved · ejerlejligheder</p>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
-          <strong>Manifest ikke tilgængelig.</strong> {error}
-        </div>
-      </div>
-    );
-  }
-
-  const listings = Object.entries(manifest.listings)
-    .map(([slug, l]) => ({ slug, ...l }))
-    .sort((a, b) => (b.monthly_expense || 0) / (b.kvm || 1) - (a.monthly_expense || 0) / (a.kvm || 1));
-
-  const downloaded = listings.filter(l => l.pdf_status === 'downloaded').length;
+  const rows = dbRows.length > 0 ? dbRows : pocRows;
+  const isPocFallback = dbRows.length === 0 && pocRows.length > 0;
+  const downloaded = rows.filter((r) => r.pdfStatus === 'downloaded').length;
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">On-market</h1>
       <p className="text-sm text-slate-500 mb-4">
-        {listings.length} listings i 4700 Næstved · {downloaded} med salgsopstilling hentet
+        {rows.length} listings · {downloaded} med salgsopstilling hentet
+        {isPocFallback && ' · viser POC-data (DB-tabel er tom indtil Uge 5)'}
       </p>
 
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left">
-              <tr>
-                <th className="px-3 py-2 font-medium">Adresse</th>
-                <th className="px-3 py-2 font-medium">m²</th>
-                <th className="px-3 py-2 font-medium text-right">Pris</th>
-                <th className="px-3 py-2 font-medium text-right">Ejerudg/md</th>
-                <th className="px-3 py-2 font-medium">Mægler</th>
-                <th className="px-3 py-2 font-medium">PDF</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {listings.map(l => (
-                <tr key={l.slug} className="hover:bg-slate-50">
-                  <td className="px-3 py-2">
-                    <div className="font-medium">{l.address}</div>
-                    <div className="text-xs text-slate-500">Case #{l.case_number}</div>
-                  </td>
-                  <td className="px-3 py-2 text-slate-600">{l.kvm}</td>
-                  <td className="px-3 py-2 text-right">{l.price_cash?.toLocaleString('da-DK') || '—'}</td>
-                  <td className="px-3 py-2 text-right text-slate-600">{l.monthly_expense?.toLocaleString('da-DK') || '—'}</td>
-                  <td className="px-3 py-2">
-                    <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                      {l.broker_kind}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <PdfStatus status={l.pdf_status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {rows.length === 0 ? (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+          <strong>Ingen listings.</strong>
+          {dbError && <div className="text-xs mt-1">DB-fejl: {dbError}</div>}
+          {pocError && <div className="text-xs mt-1">POC-fejl: {pocError}</div>}
         </div>
-      </div>
+      ) : (
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-left">
+                <tr>
+                  <th className="px-3 py-2 font-medium">Adresse</th>
+                  <th className="px-3 py-2 font-medium">m²</th>
+                  <th className="px-3 py-2 font-medium text-right">Pris</th>
+                  <th className="px-3 py-2 font-medium text-right">Ejerudg/md</th>
+                  <th className="px-3 py-2 font-medium">Mægler</th>
+                  <th className="px-3 py-2 font-medium">PDF</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rows.map((r) => (
+                  <tr key={r.key} className="hover:bg-slate-50">
+                    <td className="px-3 py-2">
+                      <div className="font-medium">{r.address}</div>
+                      {r.caseNumber != null && <div className="text-xs text-slate-500">Case #{r.caseNumber}</div>}
+                    </td>
+                    <td className="px-3 py-2 text-slate-600">{r.kvm ?? '—'}</td>
+                    <td className="px-3 py-2 text-right">{r.listPrice?.toLocaleString('da-DK') || '—'}</td>
+                    <td className="px-3 py-2 text-right text-slate-600">{r.monthlyExpense?.toLocaleString('da-DK') || '—'}</td>
+                    <td className="px-3 py-2">
+                      {r.brokerKind && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700">{r.brokerKind}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <PdfStatus status={r.pdfStatus} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
-      <p className="text-xs text-slate-400 mt-3">
-        Data fra POC-manifest ({manifest.updated.slice(0, 10)}). Uge 5: migreres til <code>on_market_candidates</code>-tabel.
-      </p>
+      {isPocFallback && pocUpdated && (
+        <p className="text-xs text-slate-400 mt-3">
+          Data fra POC-manifest ({pocUpdated.slice(0, 10)}). Uge 5: migreres til <code>on_market_candidates</code>-tabel.
+        </p>
+      )}
     </div>
   );
 }
@@ -121,6 +162,7 @@ function PdfStatus({ status }: { status: string }) {
     pending_login: 'bg-blue-100 text-blue-700 border-blue-200',
     missing: 'bg-slate-100 text-slate-500 border-slate-200',
     failed: 'bg-red-100 text-red-700 border-red-200',
+    pending: 'bg-slate-100 text-slate-500 border-slate-200',
   };
   const label: Record<string, string> = {
     downloaded: '✓ hentet',
@@ -128,11 +170,8 @@ function PdfStatus({ status }: { status: string }) {
     pending_login: '🔑 login',
     missing: 'mangler',
     failed: '✗ fejlet',
+    pending: 'venter',
   };
   const cls = styles[status] || 'bg-slate-100 text-slate-500';
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded border ${cls}`}>
-      {label[status] || status}
-    </span>
-  );
+  return <span className={`text-xs px-2 py-0.5 rounded border ${cls}`}>{label[status] || status}</span>;
 }

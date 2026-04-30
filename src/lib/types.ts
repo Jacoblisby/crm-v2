@@ -1,128 +1,50 @@
 /**
- * Schema-types for 365 Ejendomme CRM v2.
- * Mirror af eksisterende Loveable-Supabase-skema (project 46b03c04-...).
+ * Re-eksport af de Drizzle-genererede typer + brand types der bruges i UI-laget.
  *
- * Stages tilføjes via migration 0001_add_archive_stages.sql i Uge 3:
- *   'Arkiveret' og 'Tabt' (terminale stages, ingen SLA)
+ * Drizzle's $inferSelect/$inferInsert er sandheden for DB-rækker.
+ * Disse types er bare aliasser så routes ikke skal importere fra db/schema direkte.
  */
+export type {
+  PipelineStage,
+  HousingAssociation,
+  Property,
+  Lead,
+  LeadCommunication,
+  LeadStageHistoryRow,
+  Event,
+  Campaign,
+  PortfolioCompany,
+  PortfolioProperty,
+  Tenant,
+  LeaseAgreement,
+  OnMarketCandidate,
+} from './db/schema';
 
-export type LeadStage =
-  | 'Ny'
-  | 'Kvalificering'
-  | 'Interesse'
-  | 'Fremvisning'
-  | 'Aktivt bud'
-  | 'Underskrevet'
-  | 'Lukket'
-  | 'Arkiveret'  // ← v2 tilføjelse
-  | 'Tabt';      // ← v2 tilføjelse
-
+// SLA-status som beregnes af vw_leads_with_sla view eller computeSLA() i kode.
 export type SLAStatus = 'breach' | 'warning' | 'ok';
 
-export interface Lead {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  stage_changed_at: string;
-
-  // Identitet
-  full_name: string | null;
-  email: string | null;
-  phone: string | null;
-
-  // Bolig
-  address: string | null;
-  postal_code: string | null;
-  city: string | null;
-  property_type: string | null;
-  housing_area_m2: number | null;
-  rooms: number | null;
-  year_built: number | null;
-  list_price: number | null;
-
-  // Pipeline
-  stage: LeadStage;
-  notes: string | null;
-
-  // Kampagne (off-market — fra brevkampagner)
-  campaign_id: string | null;
-  campaign_letter_sent_at: string | null;
-
-  // Computed (via vw_leads_with_sla)
-  sla_status?: SLAStatus;
-  days_in_stage?: number;
-}
-
-export interface LeadCommunication {
-  id: string;
-  lead_id: string;
-  created_at: string;
-  type: 'email' | 'phone' | 'sms' | 'note' | 'letter';
-  direction: 'in' | 'out';
-  subject: string | null;
-  body: string | null;
-  resend_id: string | null;  // Resend message ID for emails
-}
-
-export interface LeadStageHistory {
-  id: string;
-  lead_id: string;
-  changed_at: string;
-  from_stage: LeadStage | null;
-  to_stage: LeadStage;
-  changed_by: string | null;  // User email/name
-}
-
-export interface OnMarketCandidate {
-  id: string;
-  scraped_at: string;
-  source: 'boligsiden';
-  source_id: string;          // Boligsiden caseID
-  source_url: string;          // Boligsiden adresse-URL
-  case_url: string | null;     // Mæglerens egen URL
-  realtor_name: string | null;
-  broker_kind: string | null;  // 'edc' | 'nybolig' | 'home' | ... | 'unknown'
-
-  address: string;
-  postal_code: string;
-  city: string;
-  housing_area_m2: number;
-  rooms: number;
-  year_built: number | null;
-  list_price: number;
-  monthly_expense: number | null;
-
-  // AVM-output (Uge 5)
-  avm_value: number | null;
-  avm_calculated_at: string | null;
-
-  // Tilbud (Uge 6 — efter tilbudsformel)
-  bid_dkk: number | null;
-  margin_pct: number | null;
-
-  // Salgsopstilling-tracking
-  pdf_filename: string | null;
-  pdf_status: 'pending' | 'downloaded' | 'failed' | 'pending_email' | 'pending_login';
-  pdf_downloaded_at: string | null;
-
-  // Status
-  status: 'active' | 'sold' | 'withdrawn' | 'archived';
-}
-
-/**
- * SLA-grænser per stage (dage).
- * Defineret eksplicit i design-doc'en. Terminale stages har ingen SLA.
- */
-export const SLA_DAYS: Record<LeadStage, number | null> = {
-  'Ny': 1,
-  'Kvalificering': 3,
-  'Interesse': 7,
-  'Fremvisning': 14,
-  'Aktivt bud': 7,
-  'Underskrevet': 14,
-  'Lukket': null,
-  'Arkiveret': null,
-  'Tabt': null,
+// Lead-row beriget med SLA-felter (svarer 1:1 til vw_leads_with_sla).
+import type { Lead } from './db/schema';
+export type LeadWithSLA = Lead & {
+  stage_name: string;
+  sla_days: number | null;
+  is_terminal: boolean;
+  is_bid_ready: boolean;
+  stage_color: string | null;
+  stage_sort_order: number;
+  days_in_stage: number;
+  sla_status: SLAStatus;
 };
 
-export const BID_READY_STAGES: LeadStage[] = ['Interesse', 'Fremvisning', 'Aktivt bud'];
+// Subset of pipeline_stages der bruges i UI hvor vi ikke vil hente alt fra DB
+// (fx hardcoded fallback hvis pipeline_stages ikke er seedet).
+export const STAGE_FALLBACK = [
+  { slug: 'ny-lead',         name: 'Ny lead',         sortOrder: 10 },
+  { slug: 'kontaktet',       name: 'Kontaktet',       sortOrder: 20 },
+  { slug: 'mail-sendt',      name: 'Mail sendt',      sortOrder: 30 },
+  { slug: 'interesse',       name: 'Interesse',       sortOrder: 40 },
+  { slug: 'afventer-lejer',  name: 'Afventer lejer',  sortOrder: 50 },
+  { slug: 'fremvisning',     name: 'Fremvisning',     sortOrder: 60 },
+  { slug: 'aktivt-bud',      name: 'Aktivt bud',      sortOrder: 70 },
+  { slug: 'koebt',           name: 'Købt',            sortOrder: 80 },
+] as const;
