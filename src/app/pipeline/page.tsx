@@ -2,6 +2,7 @@
  * Pipeline — kanban-view af alle aktive leads.
  * Mirror af Loveable's pipeline. READ-ONLY i Uge 1-2 (drag-drop kommer i Uge 3).
  */
+import Link from 'next/link';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { Lead, LeadStage, SLA_DAYS } from '@/lib/types';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
@@ -71,7 +72,11 @@ function Column({ stage, leads }: { stage: LeadStage; leads: Lead[] }) {
         {leads.map(l => {
           const sla = computeSLA(l);
           return (
-            <div key={l.id} className="bg-white rounded p-2 shadow-sm border border-slate-200">
+            <Link
+              key={l.id}
+              href={`/leads/${l.id}`}
+              className="block bg-white rounded p-2 shadow-sm border border-slate-200 hover:border-slate-400 transition-colors"
+            >
               <div className="font-medium text-sm truncate">{l.full_name || '(uden navn)'}</div>
               <div className="text-xs text-slate-500 truncate">{l.address || '—'}</div>
               <div className="flex items-center justify-between mt-1.5">
@@ -84,7 +89,7 @@ function Column({ stage, leads }: { stage: LeadStage; leads: Lead[] }) {
                   {sla.daysInStage}d
                 </span>
               </div>
-            </div>
+            </Link>
           );
         })}
         {leads.length === 0 && (

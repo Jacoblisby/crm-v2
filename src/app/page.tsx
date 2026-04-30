@@ -2,6 +2,7 @@
  * Inbox — startsiden. 3 sektioner: SLA-brud, Opfølgning, Afventer.
  * Mirror af Loveable's InboxView. READ-ONLY i Uge 1-2.
  */
+import Link from 'next/link';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { Lead } from '@/lib/types';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
@@ -58,27 +59,29 @@ function Section({ title, tone, count, leads }: {
       </div>
       <ul className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100">
         {leads.map(l => (
-          <li key={l.id} className="px-4 py-3 hover:bg-slate-50">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="font-medium truncate">{l.full_name || '(uden navn)'}</div>
-                <div className="text-xs text-slate-500 truncate">
-                  {l.address || '(uden adresse)'} · {l.city || ''}
+          <li key={l.id}>
+            <Link href={`/leads/${l.id}`} className="block px-4 py-3 hover:bg-slate-50">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium truncate">{l.full_name || '(uden navn)'}</div>
+                  <div className="text-xs text-slate-500 truncate">
+                    {l.address || '(uden adresse)'} · {l.city || ''}
+                  </div>
+                  {l.notes && (
+                    <div className="text-xs text-slate-600 mt-1 line-clamp-1">{l.notes}</div>
+                  )}
                 </div>
-                {l.notes && (
-                  <div className="text-xs text-slate-600 mt-1 line-clamp-1">{l.notes}</div>
-                )}
-              </div>
-              <div className="text-right shrink-0">
-                <span className={`inline-block px-2 py-0.5 text-xs rounded border ${slaBadgeColor(l._sla.status)}`}>
-                  {l.stage}
-                </span>
-                <div className="text-xs text-slate-400 mt-1">
-                  {l._sla.daysInStage}d
-                  {l._sla.slaDays != null && ` / ${l._sla.slaDays}d SLA`}
+                <div className="text-right shrink-0">
+                  <span className={`inline-block px-2 py-0.5 text-xs rounded border ${slaBadgeColor(l._sla.status)}`}>
+                    {l.stage}
+                  </span>
+                  <div className="text-xs text-slate-400 mt-1">
+                    {l._sla.daysInStage}d
+                    {l._sla.slaDays != null && ` / ${l._sla.slaDays}d SLA`}
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </li>
         ))}
       </ul>
