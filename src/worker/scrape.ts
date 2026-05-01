@@ -21,12 +21,6 @@ export const POSTAL_CODES = ['4700', '2630', '4000', '4100', '4400'];
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
-interface ListingSummary {
-  slug: string;
-  url: string;
-  caseId?: string;
-}
-
 interface ListingDetail {
   slug: string;
   url: string;
@@ -44,6 +38,34 @@ interface ListingDetail {
   m2Pris: number | null;
   broker: string;
   caseUrl: string | null;
+  daysOnMarket?: number | null;
+  lat?: number | null;
+  lon?: number | null;
+  latestValuation?: number | null;
+}
+
+function classifyBrokerFromUrl(url: string | null): string {
+  if (!url) return 'unknown';
+  const u = url.toLowerCase();
+  if (u.includes('edc.dk')) return 'edc';
+  if (u.includes('nybolig.dk')) return 'nybolig';
+  if (u.includes('home.dk')) return 'home';
+  if (u.includes('realmaegler') || u.includes('realequity')) return 'realmaeglerne';
+  if (u.includes('danbolig.dk')) return 'danbolig';
+  if (u.includes('estate.dk')) return 'estate';
+  if (u.includes('lokalbolig')) return 'lokalbolig';
+  if (u.includes('boligone')) return 'boligone';
+  if (u.includes('boligmaegler')) return 'boligmaegler';
+  if (u.includes('brikk')) return 'brikk';
+  if (u.includes('robinhus')) return 'robinhus';
+  if (u.includes('gunde')) return 'gunde';
+  if (u.includes('minkundeklub')) return 'minkundeklub';
+  if (u.includes('paulvendelbo')) return 'paulvendelbo';
+  if (u.includes('adamschnack')) return 'adamschnack';
+  if (u.includes('jesperbendtsen')) return 'jesperbendtsen';
+  if (u.includes('kf-bolig')) return 'kfbolig';
+  if (u.includes('bedreboligsalg') || u.includes('bedre-boligsalg')) return 'bedreboligsalg';
+  return 'other';
 }
 
 const SLUG_BROKER_MAP: Array<[RegExp, string]> = [
@@ -67,27 +89,51 @@ const SLUG_BROKER_MAP: Array<[RegExp, string]> = [
   [/robinhus/i, 'robinhus'],
 ];
 
-async function fetchBoligsidenList(postnr: string): Promise<ListingSummary[]> {
-  // Use Boligsiden's public API to list cases by zip code
-  const all: ListingSummary[] = [];
+interface BoligsidenCase {
+  caseID?: string;
+  caseUrl?: string;
+  defaultImage?: { url?: string; thumbnail?: string };
+  descriptionBody?: string;
+  descriptionTitle?: string;
+  housingArea?: number;
+  numberOfRooms?: number;
+  priceCash?: number;
+  monthlyExpense?: number;
+  perAreaPrice?: number;
+  yearBuilt?: number;
+  daysOnMarket?: number;
+  realtor?: { name?: string };
+  images?: Array<{ url?: string; thumbnail?: string }>;
+  slugAddress?: string;
+  slug?: string;
+  address?: {
+    cityName?: string;
+    door?: string;
+    floor?: string;
+    houseNumber?: string;
+    latestValuation?: number;
+    livingArea?: number;
+    road?: { name?: string };
+    roadName?: string;
+    coordinates?: { lat?: number; lon?: number };
+    zipCode?: number;
+    buildings?: Array<{ yearBuilt?: number; numberOfRooms?: number }>;
+  };
+}
+
+async function fetchBoligsidenCondos(postnr: string): Promise<ListingDetail[]> {
+  const all: ListingDetail[] = [];
   let page = 1;
   while (page <= 10) {
-    const apiUrl = `https://api.boligsiden.dk/search/cases?zipCodes=${postnr}&addressTypes=condominium&per_page=50&page=${page}`;
+    const apiUrl = `https://api.boligsiden.dk/search/cases?zipCodes=${postnr}&addressTypes=condo&per_page=50&page=${page}`;
     const r = await fetch(apiUrl, { headers: { 'User-Agent': UA, 'Accept': 'application/json' } });
     if (!r.ok) break;
-    const data = await r.json() as { cases?: Array<{ slug?: string; slugAddress?: string; caseID?: string }>; totalHits?: number };
+    const data = await r.json() as { cases?: BoligsidenCase[]; totalHits?: number };
     const cases = data.cases || [];
     if (cases.length === 0) break;
     for (const c of cases) {
-      const slug = c.slugAddress || c.slug;
-      if (!slug) continue;
-      // Boligsiden URL slug uses just the address part, before the underscore
-      const urlSlug = slug.split('_')[0];
-      all.push({
-        slug: urlSlug,
-        url: `https://www.boligsiden.dk/adresse/${urlSlug}`,
-        caseId: c.caseID,
-      });
+      const detail = parseBoligsidenCase(c);
+      if (detail) all.push(detail);
     }
     if (cases.length < 50) break;
     page++;
@@ -95,102 +141,53 @@ async function fetchBoligsidenList(postnr: string): Promise<ListingSummary[]> {
   return all;
 }
 
-function classifyBroker(html: string): { broker: string; caseUrl: string | null } {
-  const efm = html.match(/\/ejendomsmaegler\/([a-z0-9-]+)/i);
-  let broker = 'unknown';
-  if (efm) {
-    const slug = efm[1].toLowerCase();
-    for (const [pat, name] of SLUG_BROKER_MAP) {
-      if (pat.test(slug)) {
-        broker = name;
-        break;
-      }
-    }
-    if (broker === 'unknown') broker = 'unknown_efm';
-  }
-  // The actual broker case URL is hidden behind viderestilling/<uuid>.
-  // We capture what we can find directly.
-  const caseUrlMatch = html.match(/https?:\/\/(?:www\.)?(?:edc\.dk\/sag\/\?sagsnr=\d+|home\.dk\/sag\/\d+|nybolig\.dk\/services\/redirect\/case\/[^"'<>\s]+|realmaeglerne\.dk\/[^"'<>\s]+sagsnr=[^"'<>\s]+)/i);
-  return { broker, caseUrl: caseUrlMatch?.[0] || null };
+function parseBoligsidenCase(c: BoligsidenCase): ListingDetail | null {
+  const slugAddress = c.slugAddress;
+  if (!slugAddress) return null;
+  const addr = c.address || {};
+  const buildings = addr.buildings || [];
+  const building = buildings[0] || {};
+  const roadName = addr.road?.name || addr.roadName || '';
+  const houseNumber = addr.houseNumber || '';
+  const floor = addr.floor;
+  const door = addr.door;
+  let address = `${roadName} ${houseNumber}`.trim();
+  if (floor) address += `, ${floor}.`;
+  if (door) address += ` ${door}`;
+  address = address.trim();
+
+  const kvm = c.housingArea || addr.livingArea || 0;
+  const listPrice = c.priceCash || 0;
+  if (!address || !kvm || !listPrice) return null;
+
+  const broker = classifyBrokerFromUrl(c.caseUrl || null);
+  const images = (c.images || []).map((i) => i.url || i.thumbnail).filter(Boolean) as string[];
+  const primaryImage = c.defaultImage?.url || c.defaultImage?.thumbnail || images[0] || null;
+
+  return {
+    slug: slugAddress,
+    url: `https://www.boligsiden.dk/adresse/${slugAddress}`,
+    address,
+    postalCode: String(addr.zipCode || ''),
+    city: addr.cityName || '',
+    kvm: Math.round(kvm),
+    rooms: c.numberOfRooms ?? building.numberOfRooms ?? null,
+    yearBuilt: building.yearBuilt ?? null,
+    listPrice: Math.round(listPrice),
+    monthlyExpense: c.monthlyExpense || null,
+    description: c.descriptionBody || null,
+    primaryImage,
+    images,
+    m2Pris: c.perAreaPrice || (kvm > 0 ? Math.round(listPrice / kvm) : null),
+    broker,
+    caseUrl: c.caseUrl || null,
+    daysOnMarket: c.daysOnMarket ?? null,
+    lat: addr.coordinates?.lat ?? null,
+    lon: addr.coordinates?.lon ?? null,
+    latestValuation: addr.latestValuation ?? null,
+  };
 }
 
-async function fetchListingDetail(url: string): Promise<ListingDetail | null> {
-  try {
-    const slug = url.split('/').pop() || '';
-    const r = await fetch(url, { headers: { 'User-Agent': UA } });
-    if (!r.ok) return null;
-    const html = await r.text();
-    const { broker, caseUrl } = classifyBroker(html);
-
-    // Extract structured data from JSON-LD
-    const jsonLdMatch = html.match(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g) || [];
-    let address = '', postalCode = '', city = '', primaryImage: string | null = null;
-    let kvm = 0, rooms: number | null = null, listPrice = 0;
-    for (const block of jsonLdMatch) {
-      const jsonStr = block.replace(/<script[^>]+>/, '').replace(/<\/script>/, '');
-      try {
-        const data = JSON.parse(jsonStr);
-        const items = Array.isArray(data) ? data : [data];
-        for (const item of items) {
-          const t = item['@type'];
-          if (t === 'Apartment' || t === 'SingleFamilyResidence' || t === 'House' || t === 'Residence') {
-            const addr = item.Address || item.address;
-            if (addr) {
-              address = addr.streetAddress || address;
-              postalCode = addr.postalCode || postalCode;
-              city = addr.addressLocality || city;
-            }
-            if (item.floorSize?.value) kvm = Math.round(item.floorSize.value);
-            else if (typeof item.floorSize === 'number') kvm = Math.round(item.floorSize);
-            if (item.numberOfRooms) rooms = Number(item.numberOfRooms);
-            if (item.image && !primaryImage) primaryImage = item.image;
-          } else if (t === 'Product' && item.offers) {
-            const price = item.offers.price || item.offers.priceSpecification?.price;
-            if (price) listPrice = Math.round(price);
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    // Extract description from meta or json-ld
-    let description: string | null = null;
-    const ldDesc = html.match(/"description":"((?:[^"\\]|\\.)+)"/);
-    if (ldDesc) {
-      description = ldDesc[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').slice(0, 5000);
-    }
-
-    // Fallback price from HTML
-    if (!listPrice) {
-      const priceMatch = html.match(/"priceCash":(\d+)/);
-      if (priceMatch) listPrice = Number(priceMatch[1]);
-    }
-
-    if (!address || !kvm || !listPrice) return null;
-
-    return {
-      slug,
-      url,
-      address,
-      postalCode,
-      city,
-      kvm,
-      rooms,
-      yearBuilt: null,
-      listPrice,
-      monthlyExpense: null,
-      description,
-      primaryImage,
-      images: primaryImage ? [primaryImage] : [],
-      m2Pris: kvm > 0 ? Math.round(listPrice / kvm) : null,
-      broker,
-      caseUrl,
-    };
-  } catch {
-    return null;
-  }
-}
 
 export interface ScrapeRunResult {
   jobId: string;
@@ -222,33 +219,35 @@ export async function runScrapeJob(opts: {
 
   try {
     for (const postnr of codes) {
-      const summaries = await fetchBoligsidenList(postnr);
-      for (const sum of summaries) {
+      const details = await fetchBoligsidenCondos(postnr);
+      for (const detail of details) {
         scraped++;
-        seenSourceIds.push(sum.slug);
-        const detail = await fetchListingDetail(sum.url);
-        if (!detail) continue;
+        seenSourceIds.push(detail.slug);
 
         // UPSERT
         const result = await db.execute(sql`
           INSERT INTO on_market_candidates
-            (source, source_id, source_url, address, postal_code, city, kvm, rooms, list_price,
-             description, primary_image, images, m2_pris, broker_kind, case_url, last_seen_at, first_seen_at, status)
+            (source, source_id, source_url, address, postal_code, city, kvm, rooms, year_built, list_price,
+             monthly_expense, description, primary_image, images, m2_pris, broker_kind, case_url,
+             last_seen_at, first_seen_at, status)
           VALUES
             ('boligsiden', ${detail.slug}, ${detail.url}, ${detail.address}, ${detail.postalCode}, ${detail.city},
-             ${detail.kvm}, ${detail.rooms}, ${detail.listPrice}, ${detail.description}, ${detail.primaryImage},
+             ${detail.kvm}, ${detail.rooms}, ${detail.yearBuilt}, ${detail.listPrice},
+             ${detail.monthlyExpense}, ${detail.description}, ${detail.primaryImage},
              ${JSON.stringify(detail.images)}::jsonb, ${detail.m2Pris}, ${detail.broker}, ${detail.caseUrl},
              now(), now(), 'active')
           ON CONFLICT (source, source_id) DO UPDATE SET
             address = EXCLUDED.address,
             list_price = EXCLUDED.list_price,
+            year_built = COALESCE(on_market_candidates.year_built, EXCLUDED.year_built),
+            monthly_expense = COALESCE(on_market_candidates.monthly_expense, EXCLUDED.monthly_expense),
             description = COALESCE(on_market_candidates.description, EXCLUDED.description),
             primary_image = COALESCE(on_market_candidates.primary_image, EXCLUDED.primary_image),
             images = CASE WHEN jsonb_array_length(on_market_candidates.images) = 0
                           THEN EXCLUDED.images ELSE on_market_candidates.images END,
             m2_pris = COALESCE(on_market_candidates.m2_pris, EXCLUDED.m2_pris),
-            broker_kind = COALESCE(on_market_candidates.broker_kind, EXCLUDED.broker_kind),
-            case_url = COALESCE(on_market_candidates.case_url, EXCLUDED.case_url),
+            broker_kind = EXCLUDED.broker_kind,
+            case_url = EXCLUDED.case_url,
             last_seen_at = now(),
             status = CASE WHEN on_market_candidates.status = 'sold' THEN 'active'
                           ELSE on_market_candidates.status END,
