@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Link from 'next/link';
-import { listActiveOnMarketCandidates } from '@/lib/db/queries';
+import { listOnMarketCandidates } from '@/lib/db/queries';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,12 +48,19 @@ interface OnMarketRow {
   dage?: number | null;
 }
 
-export default async function OnMarketPage() {
+export default async function OnMarketPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const sp = await searchParams;
+  const filterStatus = (sp.status === 'sold' || sp.status === 'all') ? sp.status : 'active';
+
   // Først: forsøg at læse fra DB. Hvis det fejler eller er tomt, fald tilbage til POC.
   let dbRows: OnMarketRow[] = [];
   let dbError: string | null = null;
   try {
-    const candidates = await listActiveOnMarketCandidates();
+    const candidates = await listOnMarketCandidates({ status: filterStatus });
     dbRows = candidates.map((c) => ({
       key: c.id,
       id: c.id,
@@ -114,10 +121,21 @@ export default async function OnMarketPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-1">On-market</h1>
-      <p className="text-sm text-slate-500 mb-4">
+      <p className="text-sm text-slate-500 mb-2">
         {rows.length} listings · {downloaded} med salgsopstilling hentet
         {isPocFallback && ' · viser POC-data (DB-tabel er tom indtil Uge 5)'}
       </p>
+      <nav className="mb-4 flex gap-2 text-sm">
+        {(['active','sold','all'] as const).map((s) => (
+          <Link
+            key={s}
+            href={s === 'active' ? '/on-market' : `/on-market?status=${s}`}
+            className={`px-3 py-1 rounded ${filterStatus === s ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          >
+            {s === 'active' ? 'Aktive' : s === 'sold' ? 'Solgte' : 'Alle'}
+          </Link>
+        ))}
+      </nav>
 
       {rows.length === 0 ? (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">

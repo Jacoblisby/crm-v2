@@ -415,8 +415,13 @@ export const onMarketCandidates = pgTable(
     pdfFilename: text('pdf_filename'),
     pdfStatus: text('pdf_status').notNull().default('pending'),
     pdfDownloadedAt: timestamp('pdf_downloaded_at', { withTimezone: true }),
+    pdfFetchAttempts: integer('pdf_fetch_attempts').notNull().default(0),
+    pdfLastError: text('pdf_last_error'),
 
+    // Lifecycle: status='active' → 'sold' når listing forsvinder fra Boligsiden
     status: text('status').notNull().default('active'),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
+    soldAt: timestamp('sold_at', { withTimezone: true }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -426,6 +431,33 @@ export const onMarketCandidates = pgTable(
     index('on_market_postal_code_idx').on(t.postalCode, t.status),
     index('on_market_status_idx').on(t.status, t.scrapedAt),
     index('on_market_property_idx').on(t.propertyId),
+  ],
+);
+
+// ─── G2. Scrape-jobs — kører nightly, tracker status pr run ──────────────
+
+export const scrapeJobs = pgTable(
+  'scrape_jobs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    status: text('status').notNull().default('running'),  // running | success | failed
+    runKind: text('run_kind').notNull().default('cron'),  // cron | manual
+    postnrCodes: jsonb('postnr_codes').$type<string[]>().notNull().default([]),
+    listingsScraped: integer('listings_scraped').notNull().default(0),
+    listingsNew: integer('listings_new').notNull().default(0),
+    listingsUpdated: integer('listings_updated').notNull().default(0),
+    listingsMarkedSold: integer('listings_marked_sold').notNull().default(0),
+    pdfsFetched: integer('pdfs_fetched').notNull().default(0),
+    pdfsFailed: integer('pdfs_failed').notNull().default(0),
+    afkastRecomputed: integer('afkast_recomputed').notNull().default(0),
+    log: text('log'),  // optional summary/log
+    error: text('error'),
+  },
+  (t) => [
+    index('scrape_jobs_started_idx').on(t.startedAt),
+    index('scrape_jobs_status_idx').on(t.status, t.startedAt),
   ],
 );
 
@@ -452,3 +484,5 @@ export type PortfolioProperty = typeof portfolioProperties.$inferSelect;
 export type Tenant = typeof tenants.$inferSelect;
 export type LeaseAgreement = typeof leaseAgreements.$inferSelect;
 export type OnMarketCandidate = typeof onMarketCandidates.$inferSelect;
+export type ScrapeJob = typeof scrapeJobs.$inferSelect;
+export type NewScrapeJob = typeof scrapeJobs.$inferInsert;

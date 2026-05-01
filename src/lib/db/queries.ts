@@ -123,6 +123,18 @@ export async function listActiveOnMarketCandidates() {
     .orderBy(desc(onMarketCandidates.scrapedAt));
 }
 
+export async function listOnMarketCandidates(opts: { status?: 'active' | 'sold' | 'all' } = {}) {
+  const status = opts.status ?? 'active';
+  if (status === 'all') {
+    return db.select().from(onMarketCandidates).orderBy(desc(onMarketCandidates.scrapedAt));
+  }
+  return db
+    .select()
+    .from(onMarketCandidates)
+    .where(eq(onMarketCandidates.status, status))
+    .orderBy(desc(onMarketCandidates.scrapedAt));
+}
+
 export async function getOnMarketCandidateById(id: string) {
   const rows = await db
     .select()
