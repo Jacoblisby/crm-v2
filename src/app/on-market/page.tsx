@@ -39,6 +39,8 @@ interface OnMarketRow {
   monthlyExpense: number | null;
   pdfStatus: string;
   caseNumber?: number | null;
+  bidDkk?: number | null;
+  marginPct?: number | null;
 }
 
 export default async function OnMarketPage() {
@@ -55,6 +57,8 @@ export default async function OnMarketPage() {
       listPrice: c.listPrice,
       monthlyExpense: c.monthlyExpense,
       pdfStatus: c.pdfStatus,
+      bidDkk: c.bidDkk,
+      marginPct: c.marginPct ? Number(c.marginPct) : null,
     }));
   } catch (err) {
     dbError = err instanceof Error ? err.message : String(err);
@@ -88,9 +92,15 @@ export default async function OnMarketPage() {
     }
   }
 
-  const rows = dbRows.length > 0 ? dbRows : pocRows;
+  const unsortedRows = dbRows.length > 0 ? dbRows : pocRows;
   const isPocFallback = dbRows.length === 0 && pocRows.length > 0;
-  const downloaded = rows.filter((r) => r.pdfStatus === 'downloaded').length;
+  const downloaded = unsortedRows.filter((r) => r.pdfStatus === 'downloaded').length;
+  // Sortér efter ROE Netto faldende (rows uden ROE i bunden)
+  const rows = [...unsortedRows].sort((a, b) => {
+    const ar = a.marginPct ?? -Infinity;
+    const br = b.marginPct ?? -Infinity;
+    return br - ar;
+  });
 
   return (
     <div>
@@ -115,6 +125,8 @@ export default async function OnMarketPage() {
                   <th className="px-3 py-2 font-medium">Adresse</th>
                   <th className="px-3 py-2 font-medium">m²</th>
                   <th className="px-3 py-2 font-medium text-right">Pris</th>
+                  <th className="px-3 py-2 font-medium text-right">Bud (20% ROE)</th>
+                  <th className="px-3 py-2 font-medium text-right">ROE Netto</th>
                   <th className="px-3 py-2 font-medium text-right">Ejerudg/md</th>
                   <th className="px-3 py-2 font-medium">Mægler</th>
                   <th className="px-3 py-2 font-medium">PDF</th>
@@ -129,6 +141,16 @@ export default async function OnMarketPage() {
                     </td>
                     <td className="px-3 py-2 text-slate-600">{r.kvm ?? '—'}</td>
                     <td className="px-3 py-2 text-right">{r.listPrice?.toLocaleString('da-DK') || '—'}</td>
+                    <td className="px-3 py-2 text-right">
+                      {r.bidDkk ? (
+                        <span className="font-medium text-emerald-700">{r.bidDkk.toLocaleString('da-DK')}</span>
+                      ) : (
+                        <span className="text-xs text-slate-400">ikke nået</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <RoeBadge pct={r.marginPct} />
+                    </td>
                     <td className="px-3 py-2 text-right text-slate-600">{r.monthlyExpense?.toLocaleString('da-DK') || '—'}</td>
                     <td className="px-3 py-2">
                       {r.brokerKind && (
@@ -153,6 +175,15 @@ export default async function OnMarketPage() {
       )}
     </div>
   );
+}
+
+function RoeBadge({ pct }: { pct: number | null | undefined }) {
+  if (pct == null) return <span className="text-slate-400">—</span>;
+  // Færge-skala: ≥10% grøn, 5-10% gul, <5% rød
+  let cls = 'text-red-700';
+  if (pct >= 10) cls = 'text-emerald-700 font-semibold';
+  else if (pct >= 5) cls = 'text-amber-700';
+  return <span className={cls}>{pct.toFixed(1)}%</span>;
 }
 
 function PdfStatus({ status }: { status: string }) {
