@@ -89,10 +89,13 @@ const SLUG_BROKER_MAP: Array<[RegExp, string]> = [
   [/robinhus/i, 'robinhus'],
 ];
 
+interface ImageSource { url?: string; size?: { width?: number; height?: number } }
+interface BoligsidenImage { imageSources?: ImageSource[] }
+
 interface BoligsidenCase {
   caseID?: string;
   caseUrl?: string;
-  defaultImage?: { url?: string; thumbnail?: string };
+  defaultImage?: BoligsidenImage;
   descriptionBody?: string;
   descriptionTitle?: string;
   housingArea?: number;
@@ -103,7 +106,7 @@ interface BoligsidenCase {
   yearBuilt?: number;
   daysOnMarket?: number;
   realtor?: { name?: string };
-  images?: Array<{ url?: string; thumbnail?: string }>;
+  images?: BoligsidenImage[];
   slugAddress?: string;
   slug?: string;
   address?: {
@@ -119,6 +122,19 @@ interface BoligsidenCase {
     zipCode?: number;
     buildings?: Array<{ yearBuilt?: number; numberOfRooms?: number }>;
   };
+}
+
+function pickBestImage(img?: BoligsidenImage): string | null {
+  const sources = img?.imageSources || [];
+  if (sources.length === 0) return null;
+  // Pick largest by area
+  let best = sources[0];
+  let bestArea = (best.size?.width || 0) * (best.size?.height || 0);
+  for (const s of sources) {
+    const area = (s.size?.width || 0) * (s.size?.height || 0);
+    if (area > bestArea) { best = s; bestArea = area; }
+  }
+  return best.url || null;
 }
 
 async function fetchBoligsidenCondos(postnr: string): Promise<ListingDetail[]> {
@@ -165,8 +181,8 @@ function parseBoligsidenCase(c: BoligsidenCase): ListingDetail | null {
   if (!address || !kvm || !listPrice) return null;
 
   const broker = classifyBrokerFromUrl(c.caseUrl || null);
-  const images = (c.images || []).map((i) => i.url || i.thumbnail).filter(Boolean) as string[];
-  const primaryImage = c.defaultImage?.url || c.defaultImage?.thumbnail || images[0] || null;
+  const images = (c.images || []).map(pickBestImage).filter((u): u is string => !!u);
+  const primaryImage = pickBestImage(c.defaultImage) || images[0] || null;
 
   return {
     slug: slugAddress,
@@ -228,40 +244,63 @@ export async function runScrapeJob(opts: {
         scraped++;
         seenSourceIds.push(detail.slug);
 
-        // UPSERT
-        const result = await db.execute(sql`
-          INSERT INTO on_market_candidates
-            (source, source_id, source_url, address, postal_code, city, kvm, rooms, year_built, list_price,
-             monthly_expense, description, primary_image, images, m2_pris, broker_kind, case_url,
-             last_seen_at, first_seen_at, status)
-          VALUES
-            ('boligsiden', ${detail.slug}, ${detail.url}, ${detail.address}, ${detail.postalCode}, ${detail.city},
-             ${detail.kvm}, ${detail.rooms}, ${detail.yearBuilt}, ${detail.listPrice},
-             ${detail.monthlyExpense}, ${detail.description}, ${detail.primaryImage},
-             ${JSON.stringify(detail.images)}::jsonb, ${detail.m2Pris}, ${detail.broker}, ${detail.caseUrl},
-             now(), now(), 'active')
-          ON CONFLICT (source, source_id) DO UPDATE SET
-            address = EXCLUDED.address,
-            list_price = EXCLUDED.list_price,
-            year_built = COALESCE(on_market_candidates.year_built, EXCLUDED.year_built),
-            monthly_expense = COALESCE(on_market_candidates.monthly_expense, EXCLUDED.monthly_expense),
-            description = COALESCE(on_market_candidates.description, EXCLUDED.description),
-            primary_image = COALESCE(on_market_candidates.primary_image, EXCLUDED.primary_image),
-            images = CASE WHEN jsonb_array_length(on_market_candidates.images) = 0
-                          THEN EXCLUDED.images ELSE on_market_candidates.images END,
-            m2_pris = COALESCE(on_market_candidates.m2_pris, EXCLUDED.m2_pris),
-            broker_kind = EXCLUDED.broker_kind,
-            case_url = EXCLUDED.case_url,
-            last_seen_at = now(),
-            status = CASE WHEN on_market_candidates.status = 'sold' THEN 'active'
-                          ELSE on_market_candidates.status END,
-            sold_at = NULL,
-            updated_at = now()
-          RETURNING (xmax = 0) AS inserted
-        `);
-        const row = (result as unknown as { rows: Array<{ inserted: boolean }> }).rows?.[0];
-        if (row?.inserted) newListings++;
-        else updated++;
+        // UPSERT via Drizzle builder API
+        try {
+          const inserted = await db
+            .insert(onMarketCandidates)
+            .values({
+              source: 'boligsiden',
+              sourceId: detail.slug,
+              sourceUrl: detail.url,
+              address: detail.address,
+              postalCode: detail.postalCode,
+              city: detail.city,
+              kvm: detail.kvm,
+              rooms: detail.rooms != null ? String(detail.rooms) : null,
+              yearBuilt: detail.yearBuilt,
+              listPrice: detail.listPrice,
+              monthlyExpense: detail.monthlyExpense,
+              description: detail.description,
+              primaryImage: detail.primaryImage,
+              images: detail.images,
+              m2Pris: detail.m2Pris,
+              brokerKind: detail.broker,
+              caseUrl: detail.caseUrl,
+              lastSeenAt: new Date(),
+              firstSeenAt: new Date(),
+              status: 'active',
+            })
+            .onConflictDoUpdate({
+              target: [onMarketCandidates.source, onMarketCandidates.sourceId],
+              set: {
+                address: detail.address,
+                listPrice: detail.listPrice,
+                yearBuilt: detail.yearBuilt ?? undefined,
+                monthlyExpense: detail.monthlyExpense ?? undefined,
+                description: detail.description ?? undefined,
+                primaryImage: detail.primaryImage ?? undefined,
+                m2Pris: detail.m2Pris ?? undefined,
+                brokerKind: detail.broker,
+                caseUrl: detail.caseUrl,
+                lastSeenAt: new Date(),
+                soldAt: null,
+                updatedAt: new Date(),
+              },
+            })
+            .returning({ id: onMarketCandidates.id, scrapedAt: onMarketCandidates.scrapedAt });
+          const row = inserted[0];
+          // Distinguish insert vs update by checking if scraped_at == createdAt (=now() default = new row)
+          // Simpler: track first_seen via SELECT
+          if (row) {
+            // Heuristic: if scrapedAt is within last 5 sec, this was a new INSERT (default now())
+            const isNew = Date.now() - new Date(row.scrapedAt).getTime() < 5000;
+            if (isNew) newListings++;
+            else updated++;
+          }
+        } catch (insErr) {
+          const m = insErr instanceof Error ? insErr.message : String(insErr);
+          errors.push(`${detail.slug}: ${m.slice(0, 200)}`);
+        }
       }
     }
 
