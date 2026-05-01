@@ -6,7 +6,10 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import Link from 'next/link';
 import { listActiveOnMarketCandidates } from '@/lib/db/queries';
+
+export const dynamic = 'force-dynamic';
 
 interface ManifestListing {
   address: string;
@@ -32,6 +35,7 @@ interface Manifest {
 
 interface OnMarketRow {
   key: string;
+  id?: string;
   address: string;
   brokerKind: string | null;
   kvm: number | null;
@@ -41,6 +45,7 @@ interface OnMarketRow {
   caseNumber?: number | null;
   bidDkk?: number | null;
   marginPct?: number | null;
+  dage?: number | null;
 }
 
 export default async function OnMarketPage() {
@@ -51,6 +56,7 @@ export default async function OnMarketPage() {
     const candidates = await listActiveOnMarketCandidates();
     dbRows = candidates.map((c) => ({
       key: c.id,
+      id: c.id,
       address: c.address,
       brokerKind: c.brokerKind,
       kvm: c.kvm,
@@ -59,6 +65,9 @@ export default async function OnMarketPage() {
       pdfStatus: c.pdfStatus,
       bidDkk: c.bidDkk,
       marginPct: c.marginPct ? Number(c.marginPct) : null,
+      dage: c.firstSeenAt
+        ? Math.floor((Date.now() - new Date(c.firstSeenAt).getTime()) / 86_400_000)
+        : null,
     }));
   } catch (err) {
     dbError = err instanceof Error ? err.message : String(err);
@@ -123,6 +132,7 @@ export default async function OnMarketPage() {
               <thead className="bg-slate-50 text-left">
                 <tr>
                   <th className="px-3 py-2 font-medium">Adresse</th>
+                  <th className="px-3 py-2 font-medium text-center">Dage</th>
                   <th className="px-3 py-2 font-medium">m²</th>
                   <th className="px-3 py-2 font-medium text-right">Pris</th>
                   <th className="px-3 py-2 font-medium text-right">Bud (20% ROE)</th>
@@ -136,9 +146,16 @@ export default async function OnMarketPage() {
                 {rows.map((r) => (
                   <tr key={r.key} className="hover:bg-slate-50">
                     <td className="px-3 py-2">
-                      <div className="font-medium">{r.address}</div>
+                      {r.id ? (
+                        <Link href={`/on-market/${r.id}`} className="font-medium text-blue-700 hover:underline">
+                          {r.address}
+                        </Link>
+                      ) : (
+                        <div className="font-medium">{r.address}</div>
+                      )}
                       {r.caseNumber != null && <div className="text-xs text-slate-500">Case #{r.caseNumber}</div>}
                     </td>
+                    <td className="px-3 py-2 text-center"><DageBadge dage={r.dage} /></td>
                     <td className="px-3 py-2 text-slate-600">{r.kvm ?? '—'}</td>
                     <td className="px-3 py-2 text-right">{r.listPrice?.toLocaleString('da-DK') || '—'}</td>
                     <td className="px-3 py-2 text-right">
@@ -175,6 +192,15 @@ export default async function OnMarketPage() {
       )}
     </div>
   );
+}
+
+function DageBadge({ dage }: { dage: number | null | undefined }) {
+  if (dage == null) return <span className="text-slate-400 text-xs">—</span>;
+  const cls =
+    dage < 14 ? 'bg-emerald-100 text-emerald-700'
+      : dage < 60 ? 'bg-amber-100 text-amber-700'
+      : 'bg-red-100 text-red-700';
+  return <span className={`text-xs px-2 py-0.5 rounded ${cls}`}>{dage} d</span>;
 }
 
 function RoeBadge({ pct }: { pct: number | null | undefined }) {

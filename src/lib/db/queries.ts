@@ -123,6 +123,14 @@ export async function listActiveOnMarketCandidates() {
     .orderBy(desc(onMarketCandidates.scrapedAt));
 }
 
+export async function getOnMarketCandidateById(id: string) {
+  const rows = await db
+    .select()
+    .from(onMarketCandidates)
+    .where(eq(onMarketCandidates.id, id));
+  return rows[0] ?? null;
+}
+
 // ─── Events ────────────────────────────────────────────────────────────────
 
 export async function logEvent(input: {

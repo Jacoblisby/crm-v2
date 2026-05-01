@@ -373,6 +373,35 @@ export const onMarketCandidates = pgTable(
     listPrice: bigint('list_price', { mode: 'number' }).notNull(),
     monthlyExpense: integer('monthly_expense'),
 
+    // Beskrivelse + medier (fra boligsiden-scrape)
+    description: text('description'),
+    primaryImage: text('primary_image'),
+    images: jsonb('images').$type<string[]>().notNull().default([]),
+    m2Pris: integer('m2_pris'),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }),
+
+    // Udspecificerede ejerudgifter (fra prospekt) — DKK/år
+    costGrundvaerdi: integer('cost_grundvaerdi').notNull().default(0),
+    costFaellesudgifter: integer('cost_faellesudgifter').notNull().default(0),
+    costRottebekempelse: integer('cost_rottebekempelse').notNull().default(0),
+    costRenovation: integer('cost_renovation').notNull().default(0),
+    costForsikringer: integer('cost_forsikringer').notNull().default(0),
+    costFaelleslaan: integer('cost_faelleslaan').notNull().default(0),
+    costGrundfond: integer('cost_grundfond').notNull().default(0),
+    costVicevaert: integer('cost_vicevaert').notNull().default(0),
+    costVedligeholdelse: integer('cost_vedligeholdelse').notNull().default(0),
+    costAndreDrift: integer('cost_andre_drift').notNull().default(0),
+
+    // Istandsættelse (refurbish) — engangsomkostninger DKK
+    refurbGulv: integer('refurb_gulv').notNull().default(0),
+    refurbMaling: integer('refurb_maling').notNull().default(0),
+    refurbRengoring: integer('refurb_rengoring').notNull().default(0),
+    refurbAndre: integer('refurb_andre').notNull().default(0),
+
+    // Brugerredigerbare estimater
+    estimeretLejeMd: integer('estimeret_leje_md'),
+    forhandletPris: bigint('forhandlet_pris', { mode: 'number' }),
+
     // AVM (Uge 5)
     avmValue: bigint('avm_value', { mode: 'number' }),
     avmCalculatedAt: timestamp('avm_calculated_at', { withTimezone: true }),
@@ -380,6 +409,7 @@ export const onMarketCandidates = pgTable(
     // Tilbud (Uge 6)
     bidDkk: bigint('bid_dkk', { mode: 'number' }),
     marginPct: numeric('margin_pct', { precision: 5, scale: 2 }),
+    afkastCalculatedAt: timestamp('afkast_calculated_at', { withTimezone: true }),
 
     // Salgsopstilling
     pdfFilename: text('pdf_filename'),
