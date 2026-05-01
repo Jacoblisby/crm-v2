@@ -12,7 +12,7 @@
  * PDF-fetch + parse + afkast-recompute er separate workers (kommer i v2).
  */
 
-import { eq, and, lt, isNull, sql } from 'drizzle-orm';
+import { eq, and, lt, sql, inArray, notInArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { onMarketCandidates, scrapeJobs } from '@/lib/db/schema';
 import type { ScrapeJob } from '@/lib/db/schema';
@@ -306,17 +306,21 @@ export async function runScrapeJob(opts: {
 
     // Mark-sold: any active row for these postnr that wasn't seen in this run AND is older than 24h
     if (seenSourceIds.length > 0) {
-      const soldResult = await db.execute(sql`
-        UPDATE on_market_candidates
-        SET status = 'sold', sold_at = now(), updated_at = now()
-        WHERE source = 'boligsiden'
-          AND status = 'active'
-          AND postal_code = ANY(${codes})
-          AND source_id != ALL(${seenSourceIds})
-          AND first_seen_at < now() - interval '24 hours'
-        RETURNING id
-      `);
-      markedSold = (soldResult as unknown as { rows: Array<unknown> }).rows?.length ?? 0;
+      // Use Drizzle's notInArray operator + raw arrays for ANY/ALL postgres semantics
+      const soldRows = await db
+        .update(onMarketCandidates)
+        .set({ status: 'sold', soldAt: new Date(), updatedAt: new Date() })
+        .where(
+          and(
+            eq(onMarketCandidates.source, 'boligsiden'),
+            eq(onMarketCandidates.status, 'active'),
+            inArray(onMarketCandidates.postalCode, codes),
+            notInArray(onMarketCandidates.sourceId, seenSourceIds),
+            lt(onMarketCandidates.firstSeenAt, sql`now() - interval '24 hours'`),
+          ),
+        )
+        .returning({ id: onMarketCandidates.id });
+      markedSold = soldRows.length;
     }
 
     // 4. Mark job success
