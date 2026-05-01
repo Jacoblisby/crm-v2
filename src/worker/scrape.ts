@@ -123,9 +123,14 @@ interface BoligsidenCase {
 
 async function fetchBoligsidenCondos(postnr: string): Promise<ListingDetail[]> {
   const all: ListingDetail[] = [];
-  let page = 1;
-  while (page <= 10) {
-    const apiUrl = `https://api.boligsiden.dk/search/cases?zipCodes=${postnr}&addressTypes=condo&per_page=50&page=${page}`;
+  for (let page = 1; page <= 10; page++) {
+    const params = new URLSearchParams({
+      zipCodes: postnr,
+      addressTypes: 'condo',
+      per_page: '50',
+      page: String(page),
+    });
+    const apiUrl = 'https://api.boligsiden.dk/search/cases?' + params.toString();
     const r = await fetch(apiUrl, { headers: { 'User-Agent': UA, 'Accept': 'application/json' } });
     if (!r.ok) break;
     const data = await r.json() as { cases?: BoligsidenCase[]; totalHits?: number };
@@ -136,7 +141,6 @@ async function fetchBoligsidenCondos(postnr: string): Promise<ListingDetail[]> {
       if (detail) all.push(detail);
     }
     if (cases.length < 50) break;
-    page++;
   }
   return all;
 }
