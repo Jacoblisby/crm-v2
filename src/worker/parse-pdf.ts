@@ -11,7 +11,7 @@
  * Triggeres automatisk fra setPdfUrlAction OG via cron 04:30.
  */
 import { eq, and, isNotNull, sql } from 'drizzle-orm';
-import { PDFParse } from 'pdf-parse';
+import { extractText, getDocumentProxy } from 'unpdf';
 import { db } from '@/lib/db/client';
 import { onMarketCandidates } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
@@ -146,9 +146,10 @@ export async function runParsePdfJob(opts: {
     attempted++;
     try {
       const pdfBytes = await fetchPdfBytes(c.pdfUrl);
-      const parser = new PDFParse({ data: pdfBytes });
-      const data = await parser.getText();
-      const breakdown = parseSalgsopstilling(data.text);
+      const pdf = await getDocumentProxy(new Uint8Array(pdfBytes));
+      const { text } = await extractText(pdf, { mergePages: true });
+      const fullText = Array.isArray(text) ? text.join('\n') : text;
+      const breakdown = parseSalgsopstilling(fullText);
 
       // Recompute afkast med ny breakdown
       const driftTotal =
