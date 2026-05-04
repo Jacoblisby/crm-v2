@@ -83,6 +83,47 @@ export async function getLeadById(id: string) {
   return rows[0] ?? null;
 }
 
+/**
+ * Liste af aktive leads sorteret efter seneste kommunikation (nyeste først).
+ * Til Inbox "Samtaler"-view. Inkluderer `latestComm` (kan være null hvis aldrig kontaktet).
+ */
+export async function listLeadsByLatestComm() {
+  // Subquery: latest comm per lead via DISTINCT ON
+  const latestComms = db
+    .selectDistinctOn([leadCommunications.leadId], {
+      leadId: leadCommunications.leadId,
+      type: leadCommunications.type,
+      direction: leadCommunications.direction,
+      subject: leadCommunications.subject,
+      body: leadCommunications.body,
+      createdAt: leadCommunications.createdAt,
+    })
+    .from(leadCommunications)
+    .orderBy(leadCommunications.leadId, desc(leadCommunications.createdAt))
+    .as('latest_comms');
+
+  return db
+    .select({
+      lead: leads,
+      stage: pipelineStages,
+      latestComm: {
+        type: latestComms.type,
+        direction: latestComms.direction,
+        subject: latestComms.subject,
+        body: latestComms.body,
+        createdAt: latestComms.createdAt,
+      },
+    })
+    .from(leads)
+    .innerJoin(pipelineStages, eq(leads.stageSlug, pipelineStages.slug))
+    .leftJoin(latestComms, eq(latestComms.leadId, leads.id))
+    .where(and(eq(pipelineStages.isTerminal, false), isNull(leads.deletedAt)))
+    .orderBy(
+      sql`${latestComms.createdAt} DESC NULLS LAST`,
+      desc(leads.stageChangedAt),
+    );
+}
+
 export async function getLeadCommunications(leadId: string) {
   return db
     .select()
