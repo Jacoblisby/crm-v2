@@ -131,6 +131,13 @@ async function migrateProperties(rows: BoligerRow[]) {
     const lastSaleDate = parseDate(r.seneste_handelsdato);
     const grundskyld = parsePrice(r.grundskyld);
 
+    // Cap rooms at 99.9 (numeric(3,1) limit) — værdier over er ejerforening-summary rows
+    const rooms =
+      r.antal_vaerelser != null && r.antal_vaerelser <= 99 ? String(r.antal_vaerelser) : null;
+    // Skip Invalid Date (e.g. "1970-01-01" in Lovable means "ukendt" — use null)
+    const safeLastSaleDate =
+      lastSaleDate && lastSaleDate.getFullYear() > 1990 ? lastSaleDate : null;
+
     const data = {
       bfeNumber: String(r.bfe_nummer),
       address: r.adresse,
@@ -138,13 +145,13 @@ async function migrateProperties(rows: BoligerRow[]) {
       city: r.by_navn ?? 'Ukendt',
       associationId,
       kvm: r.kvm ?? null,
-      rooms: r.antal_vaerelser != null ? String(r.antal_vaerelser) : null,
+      rooms,
       ownerName: r.ejer_navn ?? null,
       ownerKind,
       ownerAddress: r.ejer_adresse ?? null,
       livesInProperty: r.bor_i_lejlighed ?? null,
       lastSalePrice,
-      lastSaleDate,
+      lastSaleDate: safeLastSaleDate,
       grundskyldKr: grundskyld,
       importSource: 'lovable',
     };
@@ -183,6 +190,8 @@ async function migrateLeads(rows: LeadsRow[]) {
       skipped++;
       continue;
     }
+    const rooms =
+      r.vaerelser != null && r.vaerelser <= 99 ? String(r.vaerelser) : null;
     const data = {
       id: r.id, // preserve UUID
       fullName: r.navn,
@@ -191,7 +200,7 @@ async function migrateLeads(rows: LeadsRow[]) {
       address: r.adresse ?? null,
       city: r.kommune ?? null,
       kvm: r.stoerrelse ?? null,
-      rooms: r.vaerelser != null ? String(r.vaerelser) : null,
+      rooms,
       conditionRating: r.stand ?? null,
       notes: r.stand_notat ?? null,
       stageSlug,
