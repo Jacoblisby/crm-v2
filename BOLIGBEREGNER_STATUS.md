@@ -105,11 +105,48 @@ Du burde modtage email på jacob@faurholt.com med alle data + estimat.
 
 ---
 
-## Ting der kunne brydes (kendt)
+## ✅ E2E test PASSED (kørt af mig kl 20:10)
+
+Test-adresse: **Bogensevej 53, 2. th, 4700 Næstved**
+
+Resultater:
+- ✅ DAWA autocomplete: 6 forslag for "Bogensevej 53, 4700"
+- ✅ Auto-lookup: kvm=116, værelser=4, byggeår=1987, BFE=319149
+- ✅ Comparables: 5 sammenlignelige boliger fundet
+- ✅ Markedsestimat: 1.986.384 kr (17.124 kr/m²)
+- ✅ Lead oprettet i CRM (stage = "Interesse" pga. smart routing)
+- ✅ Comm logget med estimat-detaljer
+- ✅ Inbox viser leadet i "Igangværende samtaler"
+
+Test-leadet kan slettes (eller bare ignoreres — det forsvinder når du flytter til "Tabt" eller arkiverer).
+
+## ⚠️ Kendt UX-issue: Breakdown summer ikke til finalOffer
+
+**Hvad jeg så på estimat-siden for Bogensevej 53:**
+```
+Vurderet markedsværdi:        1.986.384 kr
+- Gns afslag (~7%):            -139.047 kr
+- Mæglersalær sparet:           -74.660 kr
+- Ejertids-omk:                 -15.508 kr
+                              ────────────
+Vores tilbud:                   971.000 kr   ← skulle være ~1.757k baseret på linjerne over
+```
+
+Forskellen (786k) skyldes at afkast-modellen siger ved 20% ROE, given drift + leje-rate, kan vi maks afford 971k. Det er **matematisk korrekt** men kunden vil tænke "wait, dine 3 træk-linjer giver kun 229k afslag, ikke 1.015k".
+
+**3 mulige fix når du vågner — du beslutter:**
+1. **Cap offer ved 85% af marked** — `finalOffer = max(afkast.budAt20PctRoe, marketPrice × 0.85)`. Du afgiver maks 15% rabat. Sikker for kunde, men du tager mere risiko.
+2. **Tilføj 5. linje "Afkast-justering"** der fanger restdelen — fuld transparens men kunde forstår måske ikke hvad det er.
+3. **Erstat breakdown med simpel** "Markedsværdi → Vores tilbud (51% under marked)" + kort forklaring nedenunder.
+
+Min anbefaling: **#1** for fase 1 (sikrer at tilbud aldrig virker urealistisk lavt). Du har stadig kontrol — du kan altid sænke endeligt tilbud efter besigtigelse.
+
+## ⚠️ Andre kendte begrænsninger
 
 - **Boligsiden API**: hvis adressen ikke er i de 5 postnumre vi har data om, kan auto-lookup fejle. Vi har graceful fallback (estimat baseret på 28k/m² national avg).
 - **DAWA fuzzy search**: nogle gange foreslår den ikke det perfekte match — bruger må skrive mere af adressen.
 - **Foto-upload**: dataURL'er kan overskride localStorage quota ved >5MB pr foto. Hvis det sker, fortsætter funnel'en bare uden persistence.
+- **Få comparables**: kun 5 sammenlignelige boliger på Bogensevej 53 (ud af 1900 i DB). Boligsiden-scrape giver løbende flere.
 
 ---
 
