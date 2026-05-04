@@ -8,6 +8,9 @@ import { notFound } from 'next/navigation';
 import { getLeadById, getLeadCommunications, getLeadStageHistory } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
+import { SendEmailForm } from './SendEmailForm';
+
+export const dynamic = 'force-dynamic';
 
 type Tab = 'oversigt' | 'kommunikation' | 'historik' | 'noter';
 
@@ -65,7 +68,12 @@ export default async function LeadDetailPage({
 
       <div className="pt-2">
         {tab === 'oversigt' && <OversigtTab lead={lead} />}
-        {tab === 'kommunikation' && <KommunikationTab comms={comms} />}
+        {tab === 'kommunikation' && (
+          <div className="space-y-3">
+            <SendEmailForm leadId={lead.id} toEmail={lead.email} toName={lead.fullName} />
+            <KommunikationTab comms={comms} />
+          </div>
+        )}
         {tab === 'historik' && <HistorikTab history={history} />}
         {tab === 'noter' && <NoterTab lead={lead} />}
       </div>
