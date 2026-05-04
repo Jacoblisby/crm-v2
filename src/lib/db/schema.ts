@@ -413,6 +413,7 @@ export const onMarketCandidates = pgTable(
 
     // Salgsopstilling
     pdfFilename: text('pdf_filename'),
+    pdfUrl: text('pdf_url'),  // Direkte link til PDF (broker-host)
     pdfStatus: text('pdf_status').notNull().default('pending'),
     pdfDownloadedAt: timestamp('pdf_downloaded_at', { withTimezone: true }),
     pdfFetchAttempts: integer('pdf_fetch_attempts').notNull().default(0),
