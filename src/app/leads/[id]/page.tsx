@@ -5,10 +5,11 @@
  */
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getLeadById, getLeadCommunications, getLeadStageHistory } from '@/lib/db/queries';
+import { getLeadById, getLeadCommunications, getLeadStageHistory, listPipelineStages } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
 import { SendEmailForm } from './SendEmailForm';
+import { LeadActions } from './LeadActions';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,11 @@ export default async function LeadDetailPage({
   const { lead, stage } = result;
   const sla = computeSLA({ stageChangedAt: lead.stageChangedAt, stage });
 
-  const [comms, history] = await Promise.all([getLeadCommunications(id), getLeadStageHistory(id)]);
+  const [comms, history, stages] = await Promise.all([
+    getLeadCommunications(id),
+    getLeadStageHistory(id),
+    listPipelineStages(),
+  ]);
 
   return (
     <div className="space-y-4">
@@ -58,6 +63,8 @@ export default async function LeadDetailPage({
           </div>
         </div>
       </div>
+
+      <LeadActions leadId={lead.id} currentStage={lead.stageSlug} stages={stages} />
 
       <div className="flex gap-1 border-b border-slate-200 -mx-4 px-4 overflow-x-auto">
         <TabLink id={id} tab="oversigt" active={tab} label="Oversigt" />
