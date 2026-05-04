@@ -70,3 +70,21 @@ export async function updateEstimaterAction(input: UpdateEstimaterInput) {
   revalidatePath(`/on-market/${input.id}`);
   return { ok: true, afk };
 }
+
+export async function setPdfUrlAction(input: { id: string; pdfUrl: string | null }) {
+  if (input.pdfUrl && !/^https?:\/\//.test(input.pdfUrl)) {
+    return { ok: false, error: 'URL skal starte med http(s)://' };
+  }
+  await db
+    .update(onMarketCandidates)
+    .set({
+      pdfUrl: input.pdfUrl || null,
+      pdfStatus: input.pdfUrl ? 'url_known' : 'pending',
+      updatedAt: new Date(),
+    })
+    .where(eq(onMarketCandidates.id, input.id));
+
+  revalidatePath('/on-market');
+  revalidatePath(`/on-market/${input.id}`);
+  return { ok: true };
+}

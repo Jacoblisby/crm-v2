@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { getOnMarketCandidateById } from '@/lib/db/queries';
 import { computeAfkast, COST_LABELS, REFURB_LABELS } from '@/lib/afkast';
 import { EditEstimaterForm } from './EditEstimaterForm';
+import { PdfUrlForm } from './PdfUrlForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -181,6 +182,14 @@ export default async function OnMarketDetailPage({
           />
         </div>
       </section>
+
+      {/* PDF URL form */}
+      <PdfUrlForm
+        id={c.id}
+        currentUrl={c.pdfUrl}
+        caseUrl={c.caseUrl}
+        brokerKind={c.brokerKind}
+      />
 
       {/* Editable form */}
       <EditEstimaterForm
