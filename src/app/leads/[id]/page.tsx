@@ -32,7 +32,7 @@ export default async function LeadDetailPage({
   if (result && 'error' in result) return <ConnectionWarning error={result.error} />;
   if (!result) notFound();
 
-  const { lead, stage } = result;
+  const { lead, stage, property } = result;
   const sla = computeSLA({ stageChangedAt: lead.stageChangedAt, stage });
 
   const [comms, history, stages] = await Promise.all([
@@ -74,7 +74,7 @@ export default async function LeadDetailPage({
       </div>
 
       <div className="pt-2">
-        {tab === 'oversigt' && <OversigtTab lead={lead} />}
+        {tab === 'oversigt' && <OversigtTab lead={lead} property={property} />}
         {tab === 'kommunikation' && (
           <div className="space-y-3">
             <SendEmailForm leadId={lead.id} toEmail={lead.email} toName={lead.fullName} />
@@ -102,23 +102,54 @@ function TabLink({ id, tab, active, label }: { id: string; tab: Tab; active: Tab
   );
 }
 
-function OversigtTab({ lead }: { lead: Lead }) {
+type Property = {
+  bfeNumber: string | null;
+  kvm: number | null;
+  rooms: string | null;
+  yearBuilt: number | null;
+  energyClass: string | null;
+  ownerName: string | null;
+  ownerKind: string | null;
+  ownerAddress: string | null;
+  livesInProperty: boolean | null;
+  lastSalePrice: number | null;
+  lastSaleDate: Date | null;
+  grundskyldKr: number | null;
+  associationId: string | null;
+} | null;
+
+function OversigtTab({ lead, property }: { lead: Lead; property: Property }) {
+  // Foretrek property-data (rigest), fall-back til lead-snapshot
+  const kvm = property?.kvm ?? lead.kvm;
+  const rooms = property?.rooms ?? lead.rooms;
+  const yearBuilt = property?.yearBuilt ?? lead.yearBuilt;
+  const lastSalePrice = property?.lastSalePrice ?? null;
+  const lastSaleDate = property?.lastSaleDate ?? null;
+
   const fields: [string, string | number | null][] = [
     ['Email', lead.email],
     ['Telefon', lead.phone],
     ['Adresse', lead.address],
     ['Postnr / By', `${lead.postalCode || ''} ${lead.city || ''}`.trim() || null],
     ['Boligtype', lead.propertyType],
-    ['Boligareal (m²)', lead.kvm],
-    ['Værelser', lead.rooms ? Number(lead.rooms) : null],
-    ['Byggeår', lead.yearBuilt],
+    ['Boligareal (m²)', kvm],
+    ['Værelser', rooms ? Number(rooms) : null],
+    ['Byggeår', yearBuilt],
+    ['Energimærke', property?.energyClass ?? null],
+    ['Sidst handelspris', lastSalePrice ? `${lastSalePrice.toLocaleString('da-DK')} kr` : null],
+    ['Sidst handelsdato', lastSaleDate ? lastSaleDate.toISOString().slice(0, 10) : null],
+    ['Ejer', property?.ownerName ?? null],
+    ['Ejertype', property?.ownerKind === 'company' ? 'Selskab' : property?.ownerKind === 'private' ? 'Privatperson' : null],
+    ['Ejer adresse', property?.ownerAddress ?? null],
+    ['Bor selv i lejligheden?', property?.livesInProperty === true ? 'Ja' : property?.livesInProperty === false ? 'Nej (udlejer)' : null],
+    ['Grundskyld/år', property?.grundskyldKr ? `${property.grundskyldKr.toLocaleString('da-DK')} kr` : null],
+    ['BFE-nummer', property?.bfeNumber ?? null],
     ['Listpris', lead.listPrice ? `${lead.listPrice.toLocaleString('da-DK')} kr` : null],
     ['Vurdering', lead.valuationDkk ? `${lead.valuationDkk.toLocaleString('da-DK')} kr` : null],
     ['Bud', lead.bidDkk ? `${lead.bidDkk.toLocaleString('da-DK')} kr (${lead.bidStatus || '—'})` : null],
     ['Stand', lead.conditionRating != null ? `${lead.conditionRating}/10` : null],
     ['Prioritet', '★'.repeat(lead.priority || 0) || null],
     ['Kilde', lead.source],
-    ['Kampagne ID', lead.campaignId],
     ['Oprettet', lead.createdAt instanceof Date ? lead.createdAt.toISOString().slice(0, 16).replace('T', ' ') : String(lead.createdAt).slice(0, 16).replace('T', ' ')],
     ['Sidst opdateret', lead.updatedAt instanceof Date ? lead.updatedAt.toISOString().slice(0, 16).replace('T', ' ') : String(lead.updatedAt).slice(0, 16).replace('T', ' ')],
   ];

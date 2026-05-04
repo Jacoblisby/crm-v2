@@ -364,6 +364,42 @@ async function migrateLeases(rows: LejemaalRow[]) {
   return { inserted, skipped, total: rows.length };
 }
 
+interface LeadPropertyLinkRow {
+  leadId: string;
+  bfeNumber: number;
+}
+
+async function linkLeadsToProperties(rows: LeadPropertyLinkRow[]) {
+  let linked = 0, missingProperty = 0, missingLead = 0;
+  // Pre-fetch property by bfe → uuid map
+  const propsByBfe = new Map(
+    (await db.select({ id: properties.id, bfe: properties.bfeNumber }).from(properties))
+      .filter((p) => p.bfe)
+      .map((p) => [p.bfe!, p.id]),
+  );
+  const existingLeadIds = new Set(
+    (await db.select({ id: leads.id }).from(leads)).map((l) => l.id),
+  );
+
+  for (const r of rows) {
+    if (!existingLeadIds.has(r.leadId)) {
+      missingLead++;
+      continue;
+    }
+    const propId = propsByBfe.get(String(r.bfeNumber));
+    if (!propId) {
+      missingProperty++;
+      continue;
+    }
+    await db
+      .update(leads)
+      .set({ propertyId: propId, updatedAt: new Date() })
+      .where(eq(leads.id, r.leadId));
+    linked++;
+  }
+  return { linked, missingProperty, missingLead, total: rows.length };
+}
+
 async function migrateCommunications(rows: KommunikationRow[]) {
   let inserted = 0, skipped = 0;
   // Pre-fetch existing lead IDs to avoid FK violation
@@ -413,6 +449,7 @@ export async function POST(req: NextRequest) {
     else if (table === 'communications') result = await migrateCommunications(rows);
     else if (table === 'portfolio') result = await migratePortfolio(rows);
     else if (table === 'leases') result = await migrateLeases(rows);
+    else if (table === 'lead-property-links') result = await linkLeadsToProperties(rows);
     else {
       return NextResponse.json(
         { error: 'table must be properties|leads|communications|portfolio|leases' },

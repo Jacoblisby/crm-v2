@@ -75,9 +75,11 @@ export async function getLeadById(id: string) {
     .select({
       lead: leads,
       stage: pipelineStages,
+      property: properties,
     })
     .from(leads)
     .innerJoin(pipelineStages, eq(leads.stageSlug, pipelineStages.slug))
+    .leftJoin(properties, eq(leads.propertyId, properties.id))
     .where(and(eq(leads.id, id), isNull(leads.deletedAt)))
     .limit(1);
   return rows[0] ?? null;
