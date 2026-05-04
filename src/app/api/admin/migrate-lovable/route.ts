@@ -7,7 +7,7 @@
  * Body: { rows: Array<LovableRow> }
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import {
   properties,
@@ -15,6 +15,10 @@ import {
   leadCommunications,
   housingAssociations,
   pipelineStages,
+  portfolioCompanies,
+  portfolioProperties,
+  tenants,
+  leaseAgreements,
 } from '@/lib/db/schema';
 
 export const dynamic = 'force-dynamic';
@@ -224,6 +228,142 @@ async function migrateLeads(rows: LeadsRow[]) {
   return { inserted, skipped, total: rows.length };
 }
 
+interface PortfolioRow {
+  id: number;
+  bfe_nummer: number;
+  adresse: string;
+  postnr?: string | null;
+  by_navn?: string | null;
+  kommune?: string | null;
+  energimaerke?: string | null;
+  opfoerelsesaar?: number | null;
+  antal_vaerelser?: number | null;
+  enhedsareal_beboelse?: number | null;
+  seneste_handelspris?: string | null;
+  seneste_handelsdato?: string | null;
+  type?: string | null;
+  vejnavn?: string | null;
+  husnr?: string | null;
+  etage?: string | null;
+  doer?: string | null;
+}
+
+async function migratePortfolio(rows: PortfolioRow[]) {
+  let inserted = 0, skipped = 0;
+  // Default selskab — Sommerhave ApS
+  const companies = await db.select().from(portfolioCompanies);
+  const defaultCompany = companies.find((c) => /sommerhave/i.test(c.name)) ?? companies[0];
+  if (!defaultCompany) {
+    return { inserted: 0, skipped: rows.length, total: rows.length, error: 'no portfolio_companies seeded' };
+  }
+  // Match property by bfe_number
+  const propsByBfe = new Map(
+    (await db.select({ id: properties.id, bfe: properties.bfeNumber }).from(properties))
+      .filter((p) => p.bfe)
+      .map((p) => [p.bfe!, p.id]),
+  );
+
+  for (const r of rows) {
+    if (!r.bfe_nummer || !r.adresse) {
+      skipped++;
+      continue;
+    }
+    const rooms =
+      r.antal_vaerelser != null && r.antal_vaerelser <= 99 ? String(r.antal_vaerelser) : null;
+    const purchasePrice = parsePrice(r.seneste_handelspris);
+    const purchaseDate = parseDate(r.seneste_handelsdato);
+    const safePurchaseDate = purchaseDate && purchaseDate.getFullYear() > 1990 ? purchaseDate : null;
+
+    const data = {
+      companyId: defaultCompany.id,
+      propertyId: propsByBfe.get(String(r.bfe_nummer)) ?? null,
+      address: r.adresse,
+      postalCode: r.postnr ?? '0000',
+      city: r.by_navn ?? 'Ukendt',
+      kommune: r.kommune ?? null,
+      kvm: r.enhedsareal_beboelse ?? null,
+      rooms,
+      yearBuilt: r.opfoerelsesaar ?? null,
+      energyClass: r.energimaerke ?? null,
+      purchasePrice,
+      purchaseDate: safePurchaseDate,
+    };
+    await db.insert(portfolioProperties).values(data);
+    inserted++;
+  }
+  return { inserted, skipped, total: rows.length };
+}
+
+interface LejemaalRow {
+  id: number;
+  adresse: string;
+  lejer: string;
+  nummer?: string | null;
+  status?: string | null;
+  areal?: number | null;
+  boligleje?: number | null;
+  leje_pr_kvm?: number | null;
+  aarlig_leje?: number | null;
+  indflytning?: string | null;
+  udflytning?: string | null;
+  created_at?: string | null;
+}
+
+// "Date(2024,7,1)" → JS Date (month 0-indexed) → 2024-08-01
+function parseDateFn(s: string | null | undefined): Date | null {
+  if (!s) return null;
+  const m = String(s).match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (m) return new Date(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+  return parseDate(s);
+}
+
+async function migrateLeases(rows: LejemaalRow[]) {
+  let inserted = 0, skipped = 0;
+  // Match portfolio_property by address
+  const portfolios = await db.select({ id: portfolioProperties.id, address: portfolioProperties.address }).from(portfolioProperties);
+  const propByAddr = new Map(portfolios.map((p) => [p.address.toLowerCase().replace(/\s+/g, ' ').trim(), p.id]));
+
+  for (const r of rows) {
+    if (!r.adresse || !r.lejer) {
+      skipped++;
+      continue;
+    }
+    const propId = propByAddr.get(r.adresse.toLowerCase().replace(/\s+/g, ' ').trim());
+    if (!propId) {
+      skipped++;
+      continue;
+    }
+    const startDate = parseDateFn(r.indflytning);
+    if (!startDate) {
+      skipped++;
+      continue;
+    }
+    const endDate = parseDateFn(r.udflytning);
+    const monthlyRent = r.boligleje ?? 0;
+    if (monthlyRent <= 0) {
+      skipped++;
+      continue;
+    }
+    // Insert tenant first
+    const [tenant] = await db
+      .insert(tenants)
+      .values({ fullName: r.lejer })
+      .returning({ id: tenants.id });
+
+    // Insert lease
+    await db.insert(leaseAgreements).values({
+      portfolioPropertyId: propId,
+      tenantId: tenant.id,
+      monthlyRentDkk: monthlyRent,
+      startDate,
+      endDate,
+      notes: r.nummer ? `Lejemål nr. ${r.nummer}` : null,
+    });
+    inserted++;
+  }
+  return { inserted, skipped, total: rows.length };
+}
+
 async function migrateCommunications(rows: KommunikationRow[]) {
   let inserted = 0, skipped = 0;
   // Pre-fetch existing lead IDs to avoid FK violation
@@ -271,9 +411,11 @@ export async function POST(req: NextRequest) {
     if (table === 'properties') result = await migrateProperties(rows);
     else if (table === 'leads') result = await migrateLeads(rows);
     else if (table === 'communications') result = await migrateCommunications(rows);
+    else if (table === 'portfolio') result = await migratePortfolio(rows);
+    else if (table === 'leases') result = await migrateLeases(rows);
     else {
       return NextResponse.json(
-        { error: 'table must be properties|leads|communications' },
+        { error: 'table must be properties|leads|communications|portfolio|leases' },
         { status: 400 },
       );
     }
