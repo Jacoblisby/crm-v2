@@ -20,8 +20,21 @@ export function PdfUrlForm({ id, currentUrl, caseUrl, brokerKind }: Props) {
     setMsg(null);
     startTransition(async () => {
       const r = await setPdfUrlAction({ id, pdfUrl: url || null });
-      if (r.ok) setMsg(url ? 'Gemt' : 'Ryddet');
-      else setMsg(`Fejl: ${r.error}`);
+      if (r.ok) {
+        if (url && r.parseResult) {
+          if (r.parseResult.parsed) {
+            setMsg('Gemt + PDF parsed → afkast opdateret');
+          } else if (r.parseResult.failed) {
+            setMsg('Gemt — PDF kunne ikke parses (URL gemt alligevel)');
+          } else {
+            setMsg('Gemt — parser blev ikke kørt');
+          }
+        } else {
+          setMsg(url ? 'Gemt' : 'Ryddet');
+        }
+      } else {
+        setMsg(`Fejl: ${r.error}`);
+      }
     });
   }
 

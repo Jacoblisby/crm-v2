@@ -84,7 +84,19 @@ export async function setPdfUrlAction(input: { id: string; pdfUrl: string | null
     })
     .where(eq(onMarketCandidates.id, input.id));
 
+  // Auto-trigger PDF parse i baggrunden (best-effort, ignorer fejl)
+  let parseResult: { parsed: number; failed: number } | null = null;
+  if (input.pdfUrl) {
+    try {
+      const { runParsePdfJob } = await import('@/worker/parse-pdf');
+      const r = await runParsePdfJob({ listingId: input.id });
+      parseResult = { parsed: r.parsed, failed: r.failed };
+    } catch {
+      // ignorer — bruger kan re-trigge manuelt
+    }
+  }
+
   revalidatePath('/on-market');
   revalidatePath(`/on-market/${input.id}`);
-  return { ok: true };
+  return { ok: true, parseResult };
 }
