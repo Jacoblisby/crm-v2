@@ -106,6 +106,24 @@ export default async function OnMarketDetailPage({
               Boligsiden ↗
             </a>
           )}
+          {c.caseUrl && (
+            <a
+              href={c.caseUrl}
+              target="_blank"
+              className="px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100"
+            >
+              Mægler ↗
+            </a>
+          )}
+          {c.pdfUrl && (
+            <a
+              href={c.pdfUrl}
+              target="_blank"
+              className="px-2 py-1 rounded bg-emerald-100 text-emerald-700 hover:bg-emerald-200 font-medium"
+            >
+              📄 Hent salgsopstilling
+            </a>
+          )}
         </div>
       </header>
 
