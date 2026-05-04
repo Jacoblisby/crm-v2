@@ -7,6 +7,8 @@ import { listActiveLeadsWithStage } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { SLAStatus } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export default async function InboxPage() {
   let rows: Awaited<ReturnType<typeof listActiveLeadsWithStage>>;
   try {

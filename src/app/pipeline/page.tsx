@@ -7,6 +7,8 @@ import { listLeadsForPipeline, listPipelineStages } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, PipelineStage } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PipelinePage() {
   let stages: PipelineStage[];
   let rows: Awaited<ReturnType<typeof listLeadsForPipeline>>;
