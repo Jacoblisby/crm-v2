@@ -61,13 +61,14 @@ export interface AfkastResult {
     refusionMd3: number;             // leje × 3 (refusion til lejer)
     tinglysningSkode: number;        // 1.850 + pris × 0.6%
     handelsomkostninger: number;     // tinglysning + refurb
-    realkreditProv: number;          // bankvurd × 0.8 − hæftelse
+    realkreditProv: number;          // bankvurd × 0.8
     hovedstol: number;               // realkreditProv / kurs
     lansgsgebyr: number;             // 22.500 fast
     kurtage: number;                 // hovedstol × 0.15%
     tinglysningLaan: number;         // hovedstol × 1.45%
     laanomkTotal: number;            // sum af 3 ovenstående
-    laaneprov: number;               // hovedstol − låneomk (netto kontant fra lån)
+    haeftelseFraLaaneprov: number;   // EF-hæftelse — trækkes fra låneprovenu
+    laaneprov: number;               // hovedstol − låneomk − hæftelse (netto kontant)
     aarligYdelse: number;            // hovedstol × 29.600 / 1.000.000
     selskabsskat: number;            // ebt × 22% (kun hvis ebt>0)
   };
@@ -91,12 +92,15 @@ function deriveAt(price: number, inp: AfkastInputs) {
   const kapitalbehov = price - refusion - refusion;
   const tinglysningSkode = 1850 + price * 0.006;
   const handelsomk = tinglysningSkode + inp.refurbTotal;
-  const realkreditProv = bankvurd * REALKREDIT_PCT - haeft;
+  // Realkreditlån baseret KUN på bankvurdering — hæftelsen reducerer ikke lånet
+  const realkreditProv = bankvurd * REALKREDIT_PCT;
   const hovedstol = realkreditProv / (KURS / 100);
   const kurtageKr = hovedstol * KURTAGE;
   const tinglysningLaanKr = hovedstol * TINGLYSNING_LAAN;
   const laanomk = LAANSAG + kurtageKr + tinglysningLaanKr;
-  const laaneprov = hovedstol - laanomk;
+  // Hæftelsen trækkes fra låneprovenuet (kontant til disposition) — den skal
+  // afregnes til ejerforeningen ved overdragelse, så vi modtager mindre.
+  const laaneprov = hovedstol - laanomk - haeft;
   const finAar = (hovedstol * betalingPrMio) / 1_000_000;
   const egenkapital = kapitalbehov + handelsomk - laaneprov;
   return {
@@ -113,6 +117,7 @@ function deriveAt(price: number, inp: AfkastInputs) {
     tinglysningLaanKr,
     laanomk,
     laaneprov,
+    haeft,
   };
 }
 
@@ -175,6 +180,7 @@ export function computeAfkast(inp: AfkastInputs): AfkastResult {
       kurtage: Math.round(d.kurtageKr),
       tinglysningLaan: Math.round(d.tinglysningLaanKr),
       laanomkTotal: Math.round(d.laanomk),
+      haeftelseFraLaaneprov: Math.round(d.haeft),
       laaneprov: Math.round(d.laaneprov),
       aarligYdelse: Math.round(d.finAar),
       selskabsskat: Math.round(skatBeloeb),

@@ -168,15 +168,18 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
 
             <SectionRow title="C. REALKREDIT-LÅN" />
             <Row label="Bankvurdering" value={fmt(t.bankvurdering)} formula={`pris × ${(AFKAST_CONSTANTS.BANKVURD_PCT * 100).toFixed(0)}% (Antagelser B3)`} />
-            <Row label="Realkredit-provenu" value={fmt(t.realkreditProv)} formula={`bankvurd × ${(AFKAST_CONSTANTS.REALKREDIT_PCT * 100).toFixed(0)}% − hæftelse EF`} />
+            <Row label="Realkredit-provenu" value={fmt(t.realkreditProv)} formula={`bankvurd × ${(AFKAST_CONSTANTS.REALKREDIT_PCT * 100).toFixed(0)}% (lån fra realkredit)`} />
             <Row label="Hovedstol" value={fmt(t.hovedstol)} formula={`provenu / kurs ${AFKAST_CONSTANTS.KURS}`} />
 
-            <SectionRow title="D. LÅNEOMKOSTNINGER" />
+            <SectionRow title="D. LÅNEOMKOSTNINGER + HÆFTELSE" />
             <Row label="Lånsagsgebyr" value={fmt(t.lansgsgebyr)} formula="fast" />
             <Row label="+ Kurtage" value={fmt(t.kurtage)} formula={`hovedstol × ${(AFKAST_CONSTANTS.KURTAGE * 100).toFixed(2)}%`} />
             <Row label="+ Tinglysning lån" value={fmt(t.tinglysningLaan)} formula={`hovedstol × ${(AFKAST_CONSTANTS.TINGLYSNING_LAAN * 100).toFixed(2)}%`} />
             <Row label="= Låneomk total" value={fmt(t.laanomkTotal)} formula="sum" highlight />
-            <Row label="Låneprovenu (kontant)" value={fmt(t.laaneprov)} formula="hovedstol − låneomk" />
+            {t.haeftelseFraLaaneprov > 0 && (
+              <Row label="− Hæftelse til ejerforening" value={`-${fmt(t.haeftelseFraLaaneprov)}`} formula="afregnes til EF ved overdragelse — du modtager mindre kontant" />
+            )}
+            <Row label="Låneprovenu (kontant til dig)" value={fmt(t.laaneprov)} formula={t.haeftelseFraLaaneprov > 0 ? "hovedstol − låneomk − hæftelse" : "hovedstol − låneomk"} highlight />
 
             <SectionRow title="E. EGENKAPITAL" />
             <Row label="Kapitalbehov" value={fmt(result.kapitalbehov)} formula="fra A" />
