@@ -149,8 +149,13 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     haeftelseEf: input.haeftelseEf ?? 0,
   });
 
-  // 5. Bud@20% ROE er det maksimale vi vil byde
-  const finalOffer = afk.budAt20PctRoe ?? Math.round(marketEstimate * 0.85);
+  // 5. Bud@20% ROE er det maksimale vi vil byde — men aldrig over markedsestimatet
+  // (vi tjener intet på at byde mere end markedsprisen). Hvis ROE-beregningen
+  // siger vi *kunne* byde mere, sætter vi loftet ved 95% af marked.
+  const MAX_BID_PCT_OF_MARKET = 0.95;
+  const ceilingFromMarket = Math.round(marketEstimate * MAX_BID_PCT_OF_MARKET);
+  const roeBased = afk.budAt20PctRoe ?? Math.round(marketEstimate * 0.85);
+  const finalOffer = Math.min(roeBased, ceilingFromMarket);
 
   // 6. Breakdown — hvor stor er forskellen mellem markedsestimat og finalOffer?
   const totalDelta = marketEstimate - finalOffer;

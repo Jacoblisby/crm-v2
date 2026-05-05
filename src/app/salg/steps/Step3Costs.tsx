@@ -209,16 +209,30 @@ export function Step3Costs() {
       </section>
 
       {/* === TOTAL === */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2">
+      <div
+        className={`rounded-xl p-4 space-y-2 border ${
+          baseDrift === 0
+            ? 'bg-slate-50 border-slate-200'
+            : 'bg-emerald-50 border-emerald-200'
+        }`}
+      >
         <div className="flex items-baseline justify-between">
           <span className="text-slate-700 text-sm">Drift (uden vand/varme):</span>
-          <span className="text-2xl font-bold text-emerald-700">
-            {baseDrift.toLocaleString('da-DK')} kr/år
+          <span
+            className={`text-2xl font-bold ${
+              baseDrift === 0 ? 'text-slate-400' : 'text-emerald-700'
+            }`}
+          >
+            {baseDrift === 0
+              ? 'Indtast for at se total'
+              : `${baseDrift.toLocaleString('da-DK')} kr/år`}
           </span>
         </div>
-        <div className="text-xs text-slate-500 text-right">
-          ~{Math.round(baseDrift / 12).toLocaleString('da-DK')} kr/md
-        </div>
+        {baseDrift > 0 && (
+          <div className="text-xs text-slate-500 text-right">
+            ~{Math.round(baseDrift / 12).toLocaleString('da-DK')} kr/md
+          </div>
+        )}
         {(waterCost > 0 || heatCost > 0) && (
           <div className="border-t border-emerald-200 pt-2 mt-2 space-y-1 text-xs text-slate-600">
             <div className="flex justify-between">
@@ -293,6 +307,14 @@ function CostInput({
   onChange: (v: number) => void;
   suffix?: string;
 }) {
+  // Live preview af tallet med tusind-separator + per-md-omregning når relevant
+  const showPreview = value > 0;
+  const formatted = value.toLocaleString('da-DK');
+  const perMonth =
+    suffix === 'kr/år' && value > 0
+      ? `(~${Math.round(value / 12).toLocaleString('da-DK')} kr/md)`
+      : null;
+
   return (
     <label className="block">
       <div className="text-sm font-medium text-slate-700 mb-1">{label}</div>
@@ -309,7 +331,12 @@ function CostInput({
           {suffix}
         </span>
       </div>
-      {hint && <div className="text-xs text-slate-500 mt-1">{hint}</div>}
+      {showPreview && (
+        <div className="text-xs text-emerald-700 mt-1 font-medium">
+          = {formatted} {suffix} {perMonth}
+        </div>
+      )}
+      {hint && !showPreview && <div className="text-xs text-slate-500 mt-1">{hint}</div>}
     </label>
   );
 }
