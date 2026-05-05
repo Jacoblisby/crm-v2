@@ -187,6 +187,21 @@ export const leads = pgTable(
     assignedTo: text('assigned_to'),
     notes: text('notes'),
 
+    // Boligberegner inputs (snapshot ved submit) — bruges til at re-køre afkast i CRM
+    afkastInputs: jsonb('afkast_inputs').$type<{
+      rentMd?: number;
+      driftTotal?: number;
+      refurbTotal?: number;
+      haeftelseEf?: number;
+      betalingPrMio?: number;
+      targetRoe?: number;
+      listePris?: number;
+      // Comparables snapshot
+      medianPricePerSqm?: number;
+      sampleSize?: number;
+      sameEfCount?: number;
+    }>(),
+
     // Kampagne-tracking
     campaignId: uuid('campaign_id').references(() => campaigns.id),
 

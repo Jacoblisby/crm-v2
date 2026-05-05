@@ -3,14 +3,28 @@
 import { useState, useMemo } from 'react';
 import { computeAfkast, AFKAST_CONSTANTS } from '@/lib/afkast';
 
-export function AfkastDebug() {
-  const [pris, setPris] = useState<number>(1_500_000);
-  const [lejeMd, setLejeMd] = useState<number>(8_500);
-  const [drift, setDrift] = useState<number>(36_000);
-  const [refurb, setRefurb] = useState<number>(45_000);
-  const [haeftelse, setHaeftelse] = useState<number>(0);
-  const [betalingPrMio, setBetalingPrMio] = useState<number>(AFKAST_CONSTANTS.BETALING_PR_MIO);
-  const [targetRoe, setTargetRoe] = useState<number>(AFKAST_CONSTANTS.TARGET_ROE * 100);
+export interface AfkastInitial {
+  pris?: number;
+  lejeMd?: number;
+  drift?: number;
+  refurb?: number;
+  haeftelse?: number;
+  betalingPrMio?: number;
+  targetRoePct?: number; // 20 = 20%
+}
+
+export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
+  const [pris, setPris] = useState<number>(initial?.pris ?? 1_500_000);
+  const [lejeMd, setLejeMd] = useState<number>(initial?.lejeMd ?? 8_500);
+  const [drift, setDrift] = useState<number>(initial?.drift ?? 36_000);
+  const [refurb, setRefurb] = useState<number>(initial?.refurb ?? 45_000);
+  const [haeftelse, setHaeftelse] = useState<number>(initial?.haeftelse ?? 0);
+  const [betalingPrMio, setBetalingPrMio] = useState<number>(
+    initial?.betalingPrMio ?? AFKAST_CONSTANTS.BETALING_PR_MIO,
+  );
+  const [targetRoe, setTargetRoe] = useState<number>(
+    initial?.targetRoePct ?? AFKAST_CONSTANTS.TARGET_ROE * 100,
+  );
 
   const result = useMemo(() => {
     return computeAfkast({

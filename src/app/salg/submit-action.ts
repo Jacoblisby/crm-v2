@@ -176,6 +176,17 @@ export async function submitFunnelAction(
       priority: hasFullData ? 2 : 1,
       source: state.utmSource ?? 'boligberegner',
       notes,
+      // Snapshot af alle afkast-inputs så vi kan re-køre kalkulationen i CRM
+      afkastInputs: {
+        rentMd: estimate.estimatedRentMd,
+        driftTotal,
+        refurbTotal: estimate.refurbTotal,
+        haeftelseEf: num(state.ejerforeningHaeftelseKr),
+        listePris: estimate.marketEstimate,
+        medianPricePerSqm: estimate.medianPricePerSqm,
+        sampleSize: estimate.sampleSize,
+        sameEfCount: estimate.sameEfCount,
+      },
     })
     .returning({ id: leads.id });
 
@@ -232,67 +243,185 @@ async function sendNotificationEmails(
   const offer = estimate.netForkortet.finalOffer.toLocaleString('da-DK');
   const market = estimate.marketEstimate.toLocaleString('da-DK');
 
-  // Email til Jacob (admin)
+  // Email til Jacob (admin) — kort og handlings-orienteret
   await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from,
       to: adminEmail,
-      subject: `📐 Ny boligberegner-lead: ${state.fullName} (${state.fullAddress})`,
+      subject: `📐 Ny lead: ${state.fullName} · ${state.fullAddress} · tilbud ${offer} kr`,
       text: [
-        `Ny lead fra boligberegneren:`,
+        `Ny boligberegner-lead — håndtér i CRM:`,
         ``,
-        `Navn: ${state.fullName}`,
-        `Email: ${state.email}`,
-        `Telefon: ${state.phone}`,
+        `→ https://crm.365ejendom.dk/leads/${leadId}?tab=afkast`,
         ``,
-        `Adresse: ${state.fullAddress}`,
-        `m²: ${state.kvm} · Værelser: ${state.rooms ?? '?'} · Byggeår: ${state.yearBuilt ?? '?'}`,
-        `Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
-        `Fotos: ${photoCount}`,
-        ``,
-        `Markedsestimat: ${market} kr`,
-        `Vores tilbud: ${offer} kr`,
-        `ROE Netto: ${estimate.afkast.roeNettoPct}%`,
-        ``,
-        `→ Åbn lead: https://crm.365ejendom.dk/leads/${leadId}`,
+        `Hurtig info:`,
+        `· ${state.fullName} (${state.email}, ${state.phone})`,
+        `· ${state.fullAddress}`,
+        `· ${state.kvm} m² · ${state.rooms ?? '?'} værelser · byggeår ${state.yearBuilt ?? '?'}`,
+        `· Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
+        `· Markedsestimat: ${market} kr · Tilbud@20% ROE: ${offer} kr`,
+        `· ${estimate.sampleSize} comparables, ${estimate.sameEfCount} i samme EF`,
       ].join('\n'),
     }),
   });
 
-  // Email til kunde — bekræftelse + estimat
+  // Email til kunde — rich HTML med breakdown + comparables
+  const html = customerEmailHtml(state, estimate, photoCount);
   await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from,
       to: state.email,
+      reply_to: 'jacob@faurholt.com',
       subject: `Dit foreløbige tilbud: ${offer} kr — ${state.fullAddress}`,
-      text: [
-        `Hej ${state.fullName.split(' ')[0]},`,
-        ``,
-        `Tak for at bruge vores boligberegner. Her er dit foreløbige tilbud:`,
-        ``,
-        `┌─────────────────────────────────────────┐`,
-        `│ Vurderet markedsværdi:  ${market} kr`,
-        `│ Vores tilbud:           ${offer} kr`,
-        `└─────────────────────────────────────────┘`,
-        ``,
-        `Tilbuddet er foreløbigt og bygger på ${estimate.sampleSize} sammenlignelige`,
-        `handler i ${state.postalCode} ${state.city} samt dine oplysninger.`,
-        ``,
-        `Næste skridt:`,
-        `Jacob ringer dig op indenfor 24 timer for at aftale en gratis,`,
-        `uforpligtende besigtigelse. Efter besigtigelsen giver vi et endeligt`,
-        `bindende tilbud.`,
-        ``,
-        `Hvis du vil ringe direkte: +45 89 87 66 34`,
-        `Eller skriv: jacob@faurholt.com`,
-        ``,
-        `Mvh.`,
-        `Jacob, 365 Ejendomme`,
-      ].join('\n'),
+      html,
     }),
   });
+}
+
+function customerEmailHtml(
+  state: FunnelState,
+  estimate: Awaited<ReturnType<typeof computeEstimate>>,
+  photoCount: number,
+): string {
+  const firstName = state.fullName.split(' ')[0] || 'der';
+  const fmt = (n: number) => n.toLocaleString('da-DK');
+  const offer = fmt(estimate.netForkortet.finalOffer);
+  const market = fmt(estimate.marketEstimate);
+  const discount = fmt(estimate.netForkortet.minusMarketDiscount);
+  const broker = fmt(estimate.netForkortet.minusBrokerSavings);
+  const ownership = fmt(estimate.netForkortet.minusOwnershipCosts);
+  const compsHtml = estimate.comparables
+    .filter((c) => !c.isCurrentListing)
+    .slice(0, 5)
+    .map(
+      (c) => `
+        <tr>
+          <td style="padding:6px 0;font-size:13px;">
+            <strong>${escapeHtml(c.address)}</strong> · ${c.kvm}m²
+            ${c.weight >= 3 ? '<span style="background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:6px;">Samme EF</span>' : ''}
+          </td>
+          <td style="padding:6px 0;text-align:right;font-size:13px;">
+            <strong>${fmt(c.price)} kr</strong>
+            <span style="color:#64748b;font-size:11px;">· ${c.date?.slice(0, 7) ?? ''}</span>
+          </td>
+        </tr>
+      `,
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dit foreløbige tilbud</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;">
+<div style="max-width:600px;margin:0 auto;background:white;">
+
+  <!-- Header -->
+  <div style="padding:20px;border-bottom:1px solid #e2e8f0;">
+    <div style="font-size:14px;color:#64748b;font-weight:bold;">365 EJENDOMME</div>
+  </div>
+
+  <!-- Hero -->
+  <div style="padding:32px 24px 16px;text-align:center;">
+    <p style="margin:0;color:#64748b;font-size:14px;">Hej ${escapeHtml(firstName)},</p>
+    <p style="margin:8px 0 0;color:#475569;font-size:15px;line-height:1.5;">
+      Tak fordi du brugte vores boligberegner. Her er dit foreløbige tilbud baseret på
+      <strong>${estimate.sampleSize} sammenlignelige tinglyste handler</strong>${estimate.sameEfCount > 0 ? `, heraf <strong>${estimate.sameEfCount} i din ejerforening</strong>` : ''}:
+    </p>
+  </div>
+
+  <!-- Price hero -->
+  <div style="margin:0 24px 24px;padding:32px 20px;background:#ecfdf5;border:2px solid #10b981;border-radius:12px;text-align:center;">
+    <div style="color:#065f46;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Vi byder</div>
+    <div style="color:#047857;font-size:48px;font-weight:bold;margin:8px 0;letter-spacing:-1px;">${offer} kr</div>
+    <div style="color:#475569;font-size:13px;">${escapeHtml(state.fullAddress)}</div>
+    <div style="color:#64748b;font-size:12px;margin-top:8px;font-style:italic;">Endeligt bindende tilbud efter gratis besigtigelse</div>
+  </div>
+
+  <!-- Breakdown -->
+  <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+    <div style="background:#f8fafc;padding:12px 16px;font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">
+      Sådan kommer vi til prisen
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:10px 16px;font-size:14px;">Vurderet markedsværdi</td><td style="padding:10px 16px;text-align:right;font-size:14px;font-weight:600;">${market} kr</td></tr>
+      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">Markedet sælger ~${estimate.averageDiscountPct.toFixed(0)}% under listepris</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#dc2626;">−${discount} kr</td></tr>
+      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">Du sparer mæglersalær (~2,5% + grundgebyr)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#dc2626;">−${broker} kr</td></tr>
+      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">Du sparer ejertids-omkostninger (~5 mdr)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#dc2626;">−${ownership} kr</td></tr>
+      <tr style="border-top:2px solid #10b981;background:#ecfdf5;"><td style="padding:12px 16px;font-size:14px;font-weight:bold;color:#047857;">Vores tilbud</td><td style="padding:12px 16px;text-align:right;font-size:16px;font-weight:bold;color:#047857;">${offer} kr</td></tr>
+    </table>
+  </div>
+
+  ${compsHtml ? `
+  <!-- Comparables -->
+  <div style="margin:0 24px 24px;">
+    <div style="font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+      📊 Sammenlignelige handler vi brugte
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      ${compsHtml}
+    </table>
+    <div style="font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic;">
+      ${estimate.sampleSize} handler total · vi vægter samme ejerforening højest · data fra Vurderingsstyrelsen
+    </div>
+  </div>
+  ` : ''}
+
+  <!-- Next steps -->
+  <div style="margin:0 24px 24px;padding:20px;background:#0f172a;border-radius:8px;color:white;">
+    <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">🚀 Næste skridt</div>
+    <p style="margin:0 0 12px;font-size:13px;color:#cbd5e1;line-height:1.5;">
+      Jeg ringer dig op indenfor 24 timer på <strong style="color:white;">${escapeHtml(state.phone)}</strong> for at aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen giver jeg et endeligt bindende tilbud.
+    </p>
+    <p style="margin:0;font-size:13px;color:#cbd5e1;">
+      📞 Eller ring direkte: <a href="tel:+4561789071" style="color:#34d399;text-decoration:none;font-weight:600;">+45 61 78 90 71</a><br>
+      ✉️ Eller skriv: <a href="mailto:jacob@faurholt.com" style="color:#34d399;text-decoration:none;font-weight:600;">jacob@faurholt.com</a>
+    </p>
+  </div>
+
+  <!-- Trust signals -->
+  <div style="padding:16px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+    <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">
+      Hvad du får når du sælger til os
+    </div>
+    <div style="font-size:12px;color:#475569;line-height:1.6;">
+      ✓ Kontant betaling, ingen bank-forbehold<br>
+      ✓ Vi har købt 87+ ejerlejligheder siden 2024<br>
+      ✓ Du sparer ~50.000-70.000 kr i mæglersalær<br>
+      ✓ Du vælger selv overtagelsesdato — typisk 14 dage
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:24px;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
+      Bedste hilsner,<br>
+      <strong style="color:#475569;">Jacob Faurholt</strong> · 365 Ejendomme
+    </p>
+    <p style="margin:12px 0 0;font-size:11px;color:#cbd5e1;">
+      Du modtog denne email fordi du brugte vores boligberegner. Vi gemmer ikke dine data uden samtykke — skriv til
+      <a href="mailto:administration@365ejendom.dk" style="color:#94a3b8;">administration@365ejendom.dk</a>
+      hvis du vil have dem slettet.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

@@ -10,10 +10,11 @@ import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
 import { SendEmailForm } from './SendEmailForm';
 import { LeadActions } from './LeadActions';
+import { AfkastDebug } from '@/app/admin/afkast/AfkastDebug';
 
 export const dynamic = 'force-dynamic';
 
-type Tab = 'oversigt' | 'kommunikation' | 'historik' | 'noter';
+type Tab = 'oversigt' | 'kommunikation' | 'historik' | 'noter' | 'afkast';
 
 export default async function LeadDetailPage({
   params,
@@ -68,6 +69,9 @@ export default async function LeadDetailPage({
 
       <div className="flex gap-1 border-b border-slate-200 -mx-4 px-4 overflow-x-auto">
         <TabLink id={id} tab="oversigt" active={tab} label="Oversigt" />
+        {lead.afkastInputs && (
+          <TabLink id={id} tab="afkast" active={tab} label="💰 Afkast" />
+        )}
         <TabLink id={id} tab="kommunikation" active={tab} label={`Kommunikation (${comms.length})`} />
         <TabLink id={id} tab="historik" active={tab} label={`Historik (${history.length})`} />
         <TabLink id={id} tab="noter" active={tab} label="Noter" />
@@ -75,6 +79,9 @@ export default async function LeadDetailPage({
 
       <div className="pt-2">
         {tab === 'oversigt' && <OversigtTab lead={lead} property={property} />}
+        {tab === 'afkast' && lead.afkastInputs && (
+          <AfkastTab lead={lead} />
+        )}
         {tab === 'kommunikation' && (
           <div className="space-y-3">
             <SendEmailForm leadId={lead.id} toEmail={lead.email} toName={lead.fullName} />
@@ -84,6 +91,57 @@ export default async function LeadDetailPage({
         {tab === 'historik' && <HistorikTab history={history} />}
         {tab === 'noter' && <NoterTab lead={lead} />}
       </div>
+    </div>
+  );
+}
+
+function AfkastTab({ lead }: { lead: Lead }) {
+  const inp = lead.afkastInputs;
+  if (!inp) {
+    return (
+      <div className="text-sm text-slate-400 text-center py-12 bg-white border border-slate-200 rounded-lg">
+        Denne lead har ikke afkast-data — kun leads fra boligberegneren har det.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            📊 <strong>Beregner-snapshot</strong> for {lead.address}
+          </div>
+          <div className="flex items-center gap-3 text-xs text-slate-600">
+            <span>
+              Median pr m²: <strong>{inp.medianPricePerSqm?.toLocaleString('da-DK') ?? '—'}</strong>
+            </span>
+            <span>
+              Comparables: <strong>{inp.sampleSize ?? 0}</strong>
+            </span>
+            {(inp.sameEfCount ?? 0) > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
+                {inp.sameEfCount} i samme EF
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="text-xs text-slate-500 mt-1">
+          Justér tallene nedenunder for at se hvad det betyder for buddet. Det opdaterer ikke
+          leadet — brug det til at simulere alternative scenarier.
+        </div>
+      </div>
+      <AfkastDebug
+        initial={{
+          pris: inp.listePris ?? 0,
+          lejeMd: inp.rentMd ?? 0,
+          drift: inp.driftTotal ?? 0,
+          refurb: inp.refurbTotal ?? 0,
+          haeftelse: inp.haeftelseEf ?? 0,
+          betalingPrMio: inp.betalingPrMio,
+          targetRoePct: inp.targetRoe ? inp.targetRoe * 100 : undefined,
+        }}
+      />
     </div>
   );
 }
