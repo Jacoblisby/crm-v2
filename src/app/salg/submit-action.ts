@@ -33,6 +33,8 @@ export async function submitFunnelAction(
   }
 
   // 1. Beregn estimat
+  const waterCost = state.waterPaidViaAssoc ? state.waterAcontoYearly : state.waterUsageLastYearKr;
+  const heatCost = state.heatPaidViaAssoc ? state.heatAcontoYearly : state.heatUsageLastYearKr;
   const driftTotal =
     state.costGrundvaerdi +
     state.costFaellesudgifter +
@@ -40,7 +42,9 @@ export async function submitFunnelAction(
     state.costRenovation +
     state.costForsikringer +
     state.costFaelleslaan +
-    state.costAndreDrift;
+    state.costAndreDrift +
+    waterCost +
+    heatCost;
 
   const estimate = await computeEstimate({
     postalCode: state.postalCode,
@@ -92,19 +96,51 @@ export async function submitFunnelAction(
       : 'ny-lead';
 
   // 4. Opret lead
+  const appliances = [
+    state.applVaskemaskine && 'Vaskemaskine',
+    state.applTorretumbler && 'Tørretumbler',
+    state.applOpvaskemaskine && 'Opvaskemaskine',
+    state.applKoeleFryseskab && 'Køle-/fryseskab',
+    state.applOvn && 'Ovn',
+    state.applKomfur && 'Komfur',
+    state.applMikroovn && 'Mikroovn',
+    state.applEmhaette && 'Emhætte',
+  ].filter(Boolean) as string[];
+
   const notes = [
     `📐 BOLIGBEREGNER LEAD`,
     `Foreløbigt estimat: ${estimate.netForkortet.finalOffer.toLocaleString('da-DK')} kr (markedsestimat: ${estimate.marketEstimate.toLocaleString('da-DK')} kr)`,
-    state.standNote ? `Stand-note: ${state.standNote}` : '',
-    `Stand: ${state.stand}`,
-    `Fotos uploadet: ${photoCount}`,
+    ``,
+    `STAND: ${state.stand}`,
+    state.kitchenYear ? `Køkken: ${state.kitchenYear}${state.kitchenBrand ? ' (' + state.kitchenBrand + ')' : ''}` : '',
+    state.bathroomYear ? `Bad: ${state.bathroomYear}` : '',
+    appliances.length > 0 ? `Hvidevarer: ${appliances.join(', ')}` : '',
+    state.standNote ? `Note: ${state.standNote}` : '',
+    ``,
+    `UDGIFTER (kr/år):`,
+    `· Fællesudg: ${state.costFaellesudgifter.toLocaleString('da-DK')}`,
+    `· Grundskyld: ${state.costGrundvaerdi.toLocaleString('da-DK')}`,
+    `· Fælleslån: ${state.costFaelleslaan.toLocaleString('da-DK')}`,
+    `· Renovation: ${state.costRenovation.toLocaleString('da-DK')}`,
+    `· Vand: ${waterCost.toLocaleString('da-DK')} (${state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
+    `· Varme: ${heatCost.toLocaleString('da-DK')} (${state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
+    `· TOTAL: ${driftTotal.toLocaleString('da-DK')} kr/år`,
+    ``,
+    `SÆRLIGE FORHOLD:`,
     state.hasAltan ? '✓ Altan' : '',
     state.hasElevator ? '✓ Elevator' : '',
-    state.isRented ? '⚠️ Aktuelt udlejet' : '',
     state.hasEjerforeningHaeftelse ? '⚠️ Hæftelse til EF >50k' : '',
+    state.isRented
+      ? `⚠️ AKTUELT UDLEJET — leje ${state.rentalMonthlyRent.toLocaleString('da-DK')} kr/md, depositum ${state.rentalDeposit.toLocaleString('da-DK')} kr, indflytning ${state.rentalStartDate || '?'}${state.rentalUopsigelig ? ` (UOPSIGELIG ${state.rentalUopsigeligMaaneder} mdr endnu)` : ''}${state.rentalContract ? ` — kontrakt vedhæftet: ${state.rentalContract.name}` : ''}`
+      : '',
+    ``,
+    `MEDIA:`,
+    `· Fotos: ${photoCount}`,
+    state.documents.length > 0 ? `· Dokumenter: ${state.documents.map((d) => d.name).join(', ')}` : '',
+    ``,
     state.utmSource ? `Kilde: ${state.utmSource}/${state.utmMedium ?? ''}/${state.utmCampaign ?? ''}` : '',
   ]
-    .filter(Boolean)
+    .filter((l) => l !== '')
     .join('\n');
 
   const [lead] = await db

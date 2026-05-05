@@ -32,7 +32,7 @@ export interface FunnelState {
   photoIds: string[]; // server-assigned UUIDs efter upload
   photoUrls: string[]; // til preview
 
-  // Step 3: Ejerudgifter (årlig sum)
+  // Step 3: Ejerudgifter (alle pr år)
   costGrundvaerdi: number;
   costFaellesudgifter: number;
   costRottebekempelse: number;
@@ -40,12 +40,42 @@ export interface FunnelState {
   costForsikringer: number;
   costFaelleslaan: number;
   costAndreDrift: number;
-  // Hvis kunden har uploadet PDF, gemmer vi reference
-  pdfId: string | null;
+  // Vand
+  waterPaidViaAssoc: boolean;          // Betales acontobeløb for vand til ejerforeningen?
+  waterAcontoYearly: number;            // Acontobeløb (kr/år) hvis ja
+  waterUsageLastYearKr: number;         // Faktisk forbrug sidste år (kr) hvis nej
+  // Varme
+  heatPaidViaAssoc: boolean;
+  heatAcontoYearly: number;
+  heatUsageLastYearKr: number;
+  // Relaterede dokumenter (valgfri)
+  documents: { name: string; size: number; kind: string }[];
 
   // Step 4: Stand
   stand: StandLevel | null;
   standNote: string;
+  // Køkken
+  kitchenYear: number | null;
+  kitchenBrand: string;
+  // Badeværelse
+  bathroomYear: number | null;
+  // Hvidevare-tilbehør (følger med i salget)
+  applVaskemaskine: boolean;
+  applTorretumbler: boolean;
+  applOpvaskemaskine: boolean;
+  applKoeleFryseskab: boolean;
+  applOvn: boolean;
+  applKomfur: boolean;
+  applMikroovn: boolean;
+  applEmhaette: boolean;
+  // Udlejning-detaljer (kun hvis isRented=true)
+  rentalMonthlyRent: number;
+  rentalDeposit: number;
+  rentalPrepaidRent: number;
+  rentalStartDate: string;              // YYYY-MM-DD
+  rentalUopsigelig: boolean;
+  rentalUopsigeligMaaneder: number;
+  rentalContract: { name: string; size: number } | null;
 
   // Step 5: Kontakt
   fullName: string;
@@ -91,9 +121,33 @@ export const initialState: FunnelState = {
   costForsikringer: 0,
   costFaelleslaan: 0,
   costAndreDrift: 0,
-  pdfId: null,
+  waterPaidViaAssoc: false,
+  waterAcontoYearly: 0,
+  waterUsageLastYearKr: 0,
+  heatPaidViaAssoc: false,
+  heatAcontoYearly: 0,
+  heatUsageLastYearKr: 0,
+  documents: [],
   stand: null,
   standNote: '',
+  kitchenYear: null,
+  kitchenBrand: '',
+  bathroomYear: null,
+  applVaskemaskine: false,
+  applTorretumbler: false,
+  applOpvaskemaskine: false,
+  applKoeleFryseskab: false,
+  applOvn: false,
+  applKomfur: false,
+  applMikroovn: false,
+  applEmhaette: false,
+  rentalMonthlyRent: 0,
+  rentalDeposit: 0,
+  rentalPrepaidRent: 0,
+  rentalStartDate: '',
+  rentalUopsigelig: false,
+  rentalUopsigeligMaaneder: 0,
+  rentalContract: null,
   fullName: '',
   email: '',
   phone: '',
