@@ -234,6 +234,17 @@ function AfkastTab({ lead }: { lead: Lead }) {
           haeftelse: inp.haeftelseEf ?? 0,
           betalingPrMio: inp.betalingPrMio,
           targetRoePct: inp.targetRoe ? inp.targetRoe * 100 : undefined,
+          driftBreakdown: hasCostBreakdown
+            ? {
+                fællesudgifter: inp.costFaellesudgifter,
+                grundskyld: inp.costGrundvaerdi,
+                fælleslån: inp.costFaelleslaan,
+                renovation: inp.costRenovation,
+                forsikringer: inp.costForsikringer,
+                rottebekæmpelse: inp.costRottebekempelse,
+                andreDrift: inp.costAndreDrift,
+              }
+            : undefined,
         }}
       />
     </div>

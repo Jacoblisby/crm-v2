@@ -11,6 +11,16 @@ export interface AfkastInitial {
   haeftelse?: number;
   betalingPrMio?: number;
   targetRoePct?: number; // 20 = 20%
+  // Drift udspecificeret — vises i mellemregningernes sektion F hvis sat
+  driftBreakdown?: {
+    fællesudgifter?: number;
+    grundskyld?: number;
+    fælleslån?: number;
+    renovation?: number;
+    forsikringer?: number;
+    rottebekæmpelse?: number;
+    andreDrift?: number;
+  };
 }
 
 export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
@@ -189,7 +199,38 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
 
             <SectionRow title="F. RESULTAT (PR ÅR)" />
             <Row label="Lejeindtægter" value={fmt(result.revenue)} formula={`${lejeMd} × 12`} />
-            <Row label="− Drift" value={`-${fmt(result.totalCosts)}`} formula="input" />
+            {initial?.driftBreakdown ? (
+              <>
+                <Row
+                  label="− Drift TOTAL"
+                  value={`-${fmt(result.totalCosts)}`}
+                  formula="sum af nedenstående"
+                />
+                {(initial.driftBreakdown.fællesudgifter ?? 0) > 0 && (
+                  <Row label="    · Fællesudgifter" value={`-${fmt(initial.driftBreakdown.fællesudgifter ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.grundskyld ?? 0) > 0 && (
+                  <Row label="    · Grundskyld" value={`-${fmt(initial.driftBreakdown.grundskyld ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.fælleslån ?? 0) > 0 && (
+                  <Row label="    · Fælleslån-ydelse" value={`-${fmt(initial.driftBreakdown.fælleslån ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.renovation ?? 0) > 0 && (
+                  <Row label="    · Renovation" value={`-${fmt(initial.driftBreakdown.renovation ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.forsikringer ?? 0) > 0 && (
+                  <Row label="    · Bygningsforsikring" value={`-${fmt(initial.driftBreakdown.forsikringer ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.rottebekæmpelse ?? 0) > 0 && (
+                  <Row label="    · Rottebekæmpelse" value={`-${fmt(initial.driftBreakdown.rottebekæmpelse ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.andreDrift ?? 0) > 0 && (
+                  <Row label="    · Andre driftsomkostninger" value={`-${fmt(initial.driftBreakdown.andreDrift ?? 0)}`} formula="input" muted />
+                )}
+              </>
+            ) : (
+              <Row label="− Drift" value={`-${fmt(result.totalCosts)}`} formula="input" />
+            )}
             <Row label="= EBIT" value={fmt(result.ebit)} formula="lejeind − drift" highlight />
             <Row label="− Finansiering (årlig ydelse)" value={`-${fmt(t.aarligYdelse)}`} formula={`hovedstol × ${ydelsePct.toFixed(2)}%`} />
             <Row label="= EBT (resultat før skat)" value={fmt(result.ebt)} formula="EBIT − finansiering" highlight />
