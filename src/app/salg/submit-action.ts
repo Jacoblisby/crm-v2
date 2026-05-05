@@ -56,6 +56,8 @@ export async function submitFunnelAction(
     kvm: state.kvm,
     yearBuilt: state.yearBuilt,
     rooms: state.rooms,
+    roadName: state.streetName,
+    houseNumber: state.houseNumber,
     stand: state.stand as StandLevel,
     driftTotalYearly: driftTotal,
     currentListingPrice: state.currentListingPrice,

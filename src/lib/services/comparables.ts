@@ -2,36 +2,45 @@
  * Comparables-lookup: find sammenlignelige boliger til markedsprisestimat.
  *
  * Datakilder:
- * 1. Egne handler (`portfolio_properties` + `properties.lastSalePrice`)
- * 2. On-market kandidater (`on_market_candidates`)
- * 3. Properties-tabellen generelt (alle Lovable-boliger med last_sale_price)
+ *  1. Historiske tinglyste handler (`historical-transactions.json`) — 145 rows
+ *     primær kilde, vægtet efter ejerforening (vejnavn-match)
+ *  2. On-market kandidater (Boligsiden listings) — sekundær, sætter loft for marked
+ *  3. Properties.lastSalePrice (egne handler) — ekstra signal
  *
  * Algoritme:
- * - Filter: samme postnr, kvm ±20%, byggeår ±10
- * - Score: vægt nyhed (sale_date) + kvm-similarity
- * - Returner top 8-12, og medianpris pr m² × subject's m² = markedsestimat
+ *  - Filter: samme postnr, kvm ±20%, byggeår ±10 år
+ *  - Vægt: samme vejnavn 3x, samme husnr 4x, recency boost
+ *  - Vægtet median pr m² × subject.kvm = markedsestimat
+ *  - Gennemsnitligt afslag = listing pr m² ÷ historisk pr m² − 1
  */
-import { and, eq, gte, lte, sql, isNotNull, desc } from 'drizzle-orm';
+import { and, eq, gte, lte, isNotNull } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { properties, onMarketCandidates } from '@/lib/db/schema';
+import { onMarketCandidates } from '@/lib/db/schema';
+import {
+  findHistoricalComparables,
+  weightedMedianPricePerSqm,
+  type WeightedTransaction,
+} from './historical-transactions';
 
 export interface Comparable {
-  source: 'own' | 'on-market' | 'historical';
+  source: 'historical' | 'on-market' | 'own';
   address: string;
   postalCode: string;
+  roadName: string | null;
+  houseNumber: string | null;
   kvm: number;
   rooms: number | null;
   yearBuilt: number | null;
-  /** Salgs- eller listepris afhængigt af kilde */
   price: number;
   pricePerSqm: number;
-  /** Dato for salg eller "i salg nu" */
   date: string | null;
   isCurrentListing: boolean;
+  /** Vægt i median-beregningen (1=base, 3=samme EF, 4=samme bygning) */
+  weight: number;
 }
 
 export interface ComparablesResult {
-  /** Median markedspris pr m² baseret på de bedste matches */
+  /** Vægtet median markedspris pr m² */
   medianPricePerSqm: number;
   /** Markedsestimat = medianPricePerSqm × subject.kvm */
   marketEstimate: number;
@@ -41,10 +50,14 @@ export interface ComparablesResult {
   topComparables: Comparable[];
   /** Antal samples vi har bygget medianen på */
   sampleSize: number;
+  /** Hvor mange er i samme ejerforening (samme vejnavn) */
+  sameEfCount: number;
 }
 
 interface SubjectProperty {
   postalCode: string;
+  roadName?: string | null;
+  houseNumber?: string | null;
   kvm: number;
   yearBuilt: number | null;
   rooms?: number | null;
@@ -53,39 +66,19 @@ interface SubjectProperty {
 export async function findComparables(
   subject: SubjectProperty,
 ): Promise<ComparablesResult> {
+  // 1. HISTORISKE HANDLER (primær — vægtet efter EF)
+  const historical = findHistoricalComparables({
+    postalCode: subject.postalCode,
+    roadName: subject.roadName,
+    houseNumber: subject.houseNumber,
+    kvm: subject.kvm,
+  });
+
+  const sameEfCount = historical.filter((h) => h.weight >= 3.0).length;
+
+  // 2. ON-MARKET LISTINGS (secondary — viser den aktuelle marked-snapshot)
   const kvmMin = Math.floor(subject.kvm * 0.8);
   const kvmMax = Math.ceil(subject.kvm * 1.2);
-  const yearMin = subject.yearBuilt ? subject.yearBuilt - 10 : 1900;
-  const yearMax = subject.yearBuilt ? subject.yearBuilt + 10 : 2030;
-
-  // Egne historiske handler (properties.last_sale_price)
-  const ownHandler = await db
-    .select({
-      address: properties.address,
-      postalCode: properties.postalCode,
-      kvm: properties.kvm,
-      rooms: properties.rooms,
-      yearBuilt: properties.yearBuilt,
-      price: properties.lastSalePrice,
-      date: properties.lastSaleDate,
-    })
-    .from(properties)
-    .where(
-      and(
-        eq(properties.postalCode, subject.postalCode),
-        isNotNull(properties.lastSalePrice),
-        isNotNull(properties.kvm),
-        gte(properties.kvm, kvmMin),
-        lte(properties.kvm, kvmMax),
-        ...(subject.yearBuilt
-          ? [gte(properties.yearBuilt, yearMin), lte(properties.yearBuilt, yearMax)]
-          : []),
-      ),
-    )
-    .orderBy(desc(properties.lastSaleDate))
-    .limit(20);
-
-  // On-market listings (current asking prices) — fra Boligsiden scrape
   const onMarketResult = await db
     .select({
       address: onMarketCandidates.address,
@@ -101,37 +94,42 @@ export async function findComparables(
       and(
         eq(onMarketCandidates.postalCode, subject.postalCode),
         eq(onMarketCandidates.status, 'active'),
+        isNotNull(onMarketCandidates.kvm),
         gte(onMarketCandidates.kvm, kvmMin),
         lte(onMarketCandidates.kvm, kvmMax),
       ),
     )
     .limit(15);
 
-  // Solgte (status=sold) on-market listings — vi kender deres opnåede pris
-  // For nu: kun aktive — vi har ingen sold_price tracking endnu
+  // 3. KOMBINER TIL VISNING
+  const allComps: Comparable[] = [];
 
-  const comps: Comparable[] = [];
-  for (const r of ownHandler) {
-    if (!r.kvm || !r.price || r.price <= 0) continue;
-    comps.push({
+  for (const h of historical) {
+    allComps.push({
       source: 'historical',
-      address: r.address,
-      postalCode: r.postalCode,
-      kvm: r.kvm,
-      rooms: r.rooms ? Number(r.rooms) : null,
-      yearBuilt: r.yearBuilt,
-      price: r.price,
-      pricePerSqm: Math.round(r.price / r.kvm),
-      date: r.date instanceof Date ? r.date.toISOString().slice(0, 10) : (r.date as string | null),
+      address: h.address,
+      postalCode: h.postalCode || '',
+      roadName: h.roadName,
+      houseNumber: h.houseNumber,
+      kvm: h.kvm,
+      rooms: null,
+      yearBuilt: null,
+      price: h.price,
+      pricePerSqm: h.pricePerSqm ?? 0,
+      date: h.date,
       isCurrentListing: false,
+      weight: h.weight,
     });
   }
+
   for (const r of onMarketResult) {
     if (!r.kvm || !r.listPrice || r.listPrice <= 0) continue;
-    comps.push({
+    allComps.push({
       source: 'on-market',
       address: r.address,
       postalCode: r.postalCode,
+      roadName: null,
+      houseNumber: null,
       kvm: r.kvm,
       rooms: r.rooms ? Number(r.rooms) : null,
       yearBuilt: r.yearBuilt,
@@ -139,48 +137,44 @@ export async function findComparables(
       pricePerSqm: Math.round(r.listPrice / r.kvm),
       date: r.firstSeenAt instanceof Date ? r.firstSeenAt.toISOString().slice(0, 10) : (r.firstSeenAt as string | null),
       isCurrentListing: true,
+      weight: 0.5, // listings vægter halvt så meget som faktiske handler
     });
   }
 
-  // Sortér efter relevans: tæt på subject.kvm + nyere
-  comps.sort((a, b) => {
-    const aDiff = Math.abs(a.kvm - subject.kvm);
-    const bDiff = Math.abs(b.kvm - subject.kvm);
-    if (aDiff !== bDiff) return aDiff - bDiff;
-    if (a.date && b.date) return b.date.localeCompare(a.date);
-    return 0;
-  });
-
-  const topComparables = comps.slice(0, 12);
-  const pricesPerSqm = topComparables.map((c) => c.pricePerSqm).filter((p) => p > 0);
-  const medianPricePerSqm = pricesPerSqm.length > 0 ? median(pricesPerSqm) : 0;
+  // 4. VÆGTET MEDIAN (kun historiske handler — den bedste signal)
+  const medianPricePerSqm = weightedMedianPricePerSqm(historical);
   const marketEstimate = Math.round(medianPricePerSqm * subject.kvm);
 
-  // Grov estimat af "gns afslag" — listings sælges typisk 5-8% under listepris
-  // Faldback: hvis vi kun har listings, antag 7%. Hvis vi har historiske + listings,
-  // sammenlign median listepris vs median sælgepris.
-  const listings = topComparables.filter((c) => c.isCurrentListing);
-  const sold = topComparables.filter((c) => !c.isCurrentListing);
-  let averageDiscountPct = 7; // default
-  if (listings.length >= 2 && sold.length >= 2) {
-    const medListing = median(listings.map((l) => l.pricePerSqm));
-    const medSold = median(sold.map((s) => s.pricePerSqm));
-    if (medListing > 0) {
-      averageDiscountPct = Math.max(2, Math.min(15, ((medListing - medSold) / medListing) * 100));
+  // 5. AVERAGE DISCOUNT — sammenlign listing-pr-m² med historisk-pr-m²
+  let averageDiscountPct = 7;
+  const listings = allComps.filter((c) => c.isCurrentListing);
+  if (listings.length >= 2 && historical.length >= 3) {
+    const sortedListings = [...listings.map((l) => l.pricePerSqm)].sort((a, b) => a - b);
+    const medListing = sortedListings[Math.floor(sortedListings.length / 2)];
+    const medHist = medianPricePerSqm;
+    if (medListing > 0 && medHist > 0) {
+      averageDiscountPct = Math.max(2, Math.min(15, ((medListing - medHist) / medListing) * 100));
     }
   }
+
+  // 6. TOP 12 — prioritér samme EF + recency
+  const topComparables = allComps
+    .sort((a, b) => {
+      if (b.weight !== a.weight) return b.weight - a.weight;
+      if (a.date && b.date) return b.date.localeCompare(a.date);
+      return 0;
+    })
+    .slice(0, 12);
 
   return {
     medianPricePerSqm,
     marketEstimate,
     averageDiscountPct,
     topComparables,
-    sampleSize: pricesPerSqm.length,
+    sampleSize: historical.length,
+    sameEfCount,
   };
 }
 
-function median(arr: number[]): number {
-  const sorted = [...arr].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
-}
+// Backwards-compat for existing imports — vil fjernes senere
+export type { Comparable as TopComparable };

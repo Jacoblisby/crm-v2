@@ -152,29 +152,56 @@ export function Step6Estimate() {
 
       {/* COMPARABLES */}
       {comparables.length > 0 && (
-        <details className="bg-white border border-slate-200 rounded-xl p-4">
+        <details className="bg-white border border-slate-200 rounded-xl p-4" open>
           <summary className="cursor-pointer font-medium text-slate-900 flex items-center justify-between">
-            <span>📊 Bygger på {sampleSize} sammenlignelige handler</span>
-            <span className="text-xs text-slate-500">Klik for at vise</span>
+            <span>
+              📊 Bygger på {sampleSize} tinglyste handler
+              {estimate.sameEfCount > 0 && (
+                <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
+                  {estimate.sameEfCount} i samme ejerforening
+                </span>
+              )}
+            </span>
+            <span className="text-xs text-slate-500">Klik for at skjule</span>
           </summary>
           <div className="mt-3 space-y-1.5 text-sm">
-            {comparables.slice(0, 8).map((c, i) => (
+            {comparables.slice(0, 10).map((c, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between gap-2 py-1.5 px-2 hover:bg-slate-50 rounded text-xs sm:text-sm"
+                className={`flex items-center justify-between gap-2 py-1.5 px-2 rounded text-xs sm:text-sm ${
+                  c.weight >= 3
+                    ? 'bg-emerald-50 border border-emerald-200'
+                    : c.isCurrentListing
+                      ? 'bg-amber-50/50'
+                      : 'hover:bg-slate-50'
+                }`}
               >
                 <div className="min-w-0 flex-1">
                   <span className="font-medium">{c.address}</span>
                   <span className="text-slate-500 ml-2">
-                    {c.kvm}m² · {c.yearBuilt ?? '?'}
+                    {c.kvm}m²
                   </span>
+                  {c.weight >= 4 && (
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                      Samme bygning
+                    </span>
+                  )}
+                  {c.weight === 3 && (
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-500 text-white">
+                      Samme EF
+                    </span>
+                  )}
+                  {c.isCurrentListing && (
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
+                      Til salg nu
+                    </span>
+                  )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="font-medium">
-                    {c.price.toLocaleString('da-DK')} kr
-                  </div>
+                  <div className="font-medium">{c.price.toLocaleString('da-DK')} kr</div>
                   <div className="text-xs text-slate-500">
-                    {c.pricePerSqm.toLocaleString('da-DK')}/m² · {c.isCurrentListing ? 'til salg nu' : c.date?.slice(0, 7)}
+                    {c.pricePerSqm.toLocaleString('da-DK')}/m²
+                    {c.date && <span> · {c.date.slice(0, 7)}</span>}
                   </div>
                 </div>
               </div>

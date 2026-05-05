@@ -1,0 +1,2322 @@
+[
+  {
+    "address": "Parkvej 172, 1. 114, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "172",
+    "floor": "1",
+    "door": "114",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 845000,
+    "pricePerSqm": 17604,
+    "date": "2026-04-15",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "H C Andersens Vej 63, 2. tv, 4700 Næstved",
+    "roadName": "H C Andersens Vej",
+    "houseNumber": "63",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 75,
+    "price": 1125000,
+    "pricePerSqm": 15000,
+    "date": "2026-04-14",
+    "coordinates": {
+      "lon": 11.743385022883903,
+      "lat": 55.23194537561155
+    }
+  },
+  {
+    "address": "Bogensevej 7, 2. th, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "7",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 1050000,
+    "pricePerSqm": 12651,
+    "date": "2026-04-01",
+    "coordinates": {
+      "lon": 11.76096479385281,
+      "lat": 55.212278868491225
+    }
+  },
+  {
+    "address": "Præstøvej 57A, st. th, 4700 Næstved",
+    "roadName": "Præstøvej",
+    "houseNumber": "57A",
+    "floor": "st",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 59,
+    "price": 1085000,
+    "pricePerSqm": 18390,
+    "date": "2026-04-01",
+    "coordinates": {
+      "lon": 11.772299124077096,
+      "lat": 55.224953030240975
+    }
+  },
+  {
+    "address": "Niels Juels Vej 9, 1. tv, 4700 Næstved",
+    "roadName": "Niels Juels Vej",
+    "houseNumber": "9",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 57,
+    "price": 880000,
+    "pricePerSqm": 15439,
+    "date": "2026-03-25",
+    "coordinates": {
+      "lon": 11.763430282740678,
+      "lat": 55.22595127735287
+    }
+  },
+  {
+    "address": "Parkvej 174, st. 1, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "174",
+    "floor": "st",
+    "door": "1",
+    "postalCode": "4700",
+    "kvm": 105,
+    "price": 1400000,
+    "pricePerSqm": 13333,
+    "date": "2026-03-19",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Parkvej 164, 2. 69, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "164",
+    "floor": "2",
+    "door": "69",
+    "postalCode": "4700",
+    "kvm": 105,
+    "price": 1295000,
+    "pricePerSqm": 12333,
+    "date": "2026-03-18",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Møllestræde 1A, 2. th, 4400 Kalundborg",
+    "roadName": "Møllestræde",
+    "houseNumber": "1A",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4400",
+    "kvm": 72,
+    "price": 1195000,
+    "pricePerSqm": 16597,
+    "date": "2026-03-16",
+    "coordinates": {
+      "lon": 11.087408701976056,
+      "lat": 55.68107534758733
+    }
+  },
+  {
+    "address": "Bogensevej 35, 1. 199, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "35",
+    "floor": "1",
+    "door": "199",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 820000,
+    "pricePerSqm": 17083,
+    "date": "2026-03-15",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Marievej 1, kl. tv, 4700 Næstved",
+    "roadName": "Marievej",
+    "houseNumber": "1",
+    "floor": "kl",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 61,
+    "price": 845000,
+    "pricePerSqm": 13852,
+    "date": "2026-03-13",
+    "coordinates": {
+      "lon": 11.761445757702907,
+      "lat": 55.23568646043905
+    }
+  },
+  {
+    "address": "Odensevej 109, st. tv, 4700 Næstved",
+    "roadName": "Odensevej",
+    "houseNumber": "109",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 1345000,
+    "pricePerSqm": 16012,
+    "date": "2026-03-13",
+    "coordinates": {
+      "lon": 11.760329957070782,
+      "lat": 55.21285948963853
+    }
+  },
+  {
+    "address": "Bogensevej 19, 2. 262, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "19",
+    "floor": "2",
+    "door": "262",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 745000,
+    "pricePerSqm": 15521,
+    "date": "2026-03-09",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Lundevej 25, 4400 Kalundborg",
+    "roadName": "Lundevej",
+    "houseNumber": "25",
+    "floor": null,
+    "door": null,
+    "postalCode": "4400",
+    "kvm": 198,
+    "price": 3000000,
+    "pricePerSqm": 15152,
+    "date": "2026-03-01",
+    "coordinates": {
+      "lon": 11.079674237898564,
+      "lat": 55.679821086304436
+    }
+  },
+  {
+    "address": "Odensevej 56, 1. th, 4700 Næstved",
+    "roadName": "Odensevej",
+    "houseNumber": "56",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 107,
+    "price": 1395000,
+    "pricePerSqm": 13037,
+    "date": "2026-02-25",
+    "coordinates": {
+      "lon": 11.761925476189178,
+      "lat": 55.21402479903284
+    }
+  },
+  {
+    "address": "H C Andersens Vej 53, 1. tv, 4700 Næstved",
+    "roadName": "H C Andersens Vej",
+    "houseNumber": "53",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 75,
+    "price": 1345000,
+    "pricePerSqm": 17933,
+    "date": "2026-02-17",
+    "coordinates": {
+      "lon": 11.74446559196557,
+      "lat": 55.231457419377726
+    }
+  },
+  {
+    "address": "Bag Slotsgraven 2A, 1., 4400 Kalundborg",
+    "roadName": "Bag Slotsgraven",
+    "houseNumber": "2A",
+    "floor": "1",
+    "door": null,
+    "postalCode": "4400",
+    "kvm": 90,
+    "price": 1345000,
+    "pricePerSqm": 14944,
+    "date": "2026-02-17",
+    "coordinates": {
+      "lon": 11.085820724123277,
+      "lat": 55.67936069680331
+    }
+  },
+  {
+    "address": "Bogensevej 23, 2. 323, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "23",
+    "floor": "2",
+    "door": "323",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 810000,
+    "pricePerSqm": 16875,
+    "date": "2026-02-16",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Hvedevænget 90, 2. th, 4700 Næstved",
+    "roadName": "Hvedevænget",
+    "houseNumber": "90",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 72,
+    "price": 1350000,
+    "pricePerSqm": 18750,
+    "date": "2026-02-12",
+    "coordinates": {
+      "lon": 11.77828480903815,
+      "lat": 55.23427453064716
+    }
+  },
+  {
+    "address": "Grønlandsvej 18, 1. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "18",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 74,
+    "price": 1195000,
+    "pricePerSqm": 16149,
+    "date": "2026-02-12",
+    "coordinates": {
+      "lon": 11.757009876834417,
+      "lat": 55.21845313247166
+    }
+  },
+  {
+    "address": "Parkvej 28, 2. th, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "28",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 95,
+    "price": 950000,
+    "pricePerSqm": 10000,
+    "date": "2026-02-06",
+    "coordinates": {
+      "lon": 11.755896710180473,
+      "lat": 55.21756120229831
+    }
+  },
+  {
+    "address": "Sterkelsvej 19, 1. th, 4700 Næstved",
+    "roadName": "Sterkelsvej",
+    "houseNumber": "19",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 37,
+    "price": 375000,
+    "pricePerSqm": 10135,
+    "date": "2026-02-05",
+    "coordinates": {
+      "lon": 11.772585343383051,
+      "lat": 55.23238126930765
+    }
+  },
+  {
+    "address": "Bogensevej 77, st. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "77",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 94,
+    "price": 1260000,
+    "pricePerSqm": 13404,
+    "date": "2026-02-03",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Grønlandsvej 26, st. mf, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "26",
+    "floor": "st",
+    "door": "mf",
+    "postalCode": "4700",
+    "kvm": 59,
+    "price": 1050000,
+    "pricePerSqm": 17797,
+    "date": "2026-02-03",
+    "coordinates": {
+      "lon": 11.756972408958918,
+      "lat": 55.21777903974587
+    }
+  },
+  {
+    "address": "Grønlandsvej 15, 1. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "15",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 1200000,
+    "pricePerSqm": 14286,
+    "date": "2026-01-28",
+    "coordinates": {
+      "lon": 11.758621675467714,
+      "lat": 55.21852991046202
+    }
+  },
+  {
+    "address": "Odinsvej 14, 3. tv, 4700 Næstved",
+    "roadName": "Odinsvej",
+    "houseNumber": "14",
+    "floor": "3",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 124,
+    "price": 1575000,
+    "pricePerSqm": 12702,
+    "date": "2026-01-26",
+    "coordinates": {
+      "lon": 11.771279904466843,
+      "lat": 55.22633646607368
+    }
+  },
+  {
+    "address": "Bogensevej 39, 1. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "39",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 108,
+    "price": 1550000,
+    "pricePerSqm": 14352,
+    "date": "2026-01-22",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Parkvej 180, 1. 42, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "180",
+    "floor": "1",
+    "door": "42",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 880000,
+    "pricePerSqm": 18333,
+    "date": "2026-01-22",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Bogensevej 65, 2. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "65",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 105,
+    "price": 1455000,
+    "pricePerSqm": 13857,
+    "date": "2026-01-22",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "H C Andersens Vej 53, 2. th, 4700 Næstved",
+    "roadName": "H C Andersens Vej",
+    "houseNumber": "53",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 1300000,
+    "pricePerSqm": 15476,
+    "date": "2026-01-21",
+    "coordinates": {
+      "lon": 11.74446559196557,
+      "lat": 55.231457419377726
+    }
+  },
+  {
+    "address": "Parkvej 178, 2. 34, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "178",
+    "floor": "2",
+    "door": "34",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 850000,
+    "pricePerSqm": 17708,
+    "date": "2026-01-17",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Kindhestegade 24, 2. tv, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "24",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 89,
+    "price": 1600000,
+    "pricePerSqm": 17978,
+    "date": "2026-01-08",
+    "coordinates": {
+      "lon": 11.755295639372646,
+      "lat": 55.231442020773294
+    }
+  },
+  {
+    "address": "Kählersvej 1A, 2. th, 4700 Næstved",
+    "roadName": "Kählersvej",
+    "houseNumber": "1A",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 73,
+    "price": 1275000,
+    "pricePerSqm": 17466,
+    "date": "2026-01-05",
+    "coordinates": {
+      "lon": 11.767456845488166,
+      "lat": 55.227521317998125
+    }
+  },
+  {
+    "address": "Kindhestegade 20B, 1. 3, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "20B",
+    "floor": "1",
+    "door": "3",
+    "postalCode": "4700",
+    "kvm": 108,
+    "price": 2170000,
+    "pricePerSqm": 20093,
+    "date": "2025-12-22",
+    "coordinates": {
+      "lon": 11.755662370399257,
+      "lat": 55.2317279495381
+    }
+  },
+  {
+    "address": "Østergade 21D, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "21D",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 120,
+    "price": 2750000,
+    "pricePerSqm": 22917,
+    "date": "2025-12-18",
+    "coordinates": {
+      "lon": 11.76348905314619,
+      "lat": 55.22818588185302
+    }
+  },
+  {
+    "address": "Parkvej 168, 1. 92, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "168",
+    "floor": "1",
+    "door": "92",
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1425000,
+    "pricePerSqm": 14109,
+    "date": "2025-12-18",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Parkvej 4, 1. tv, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "4",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 910000,
+    "pricePerSqm": 10964,
+    "date": "2025-12-17",
+    "coordinates": {
+      "lon": 11.754425016966872,
+      "lat": 55.21791924801158
+    }
+  },
+  {
+    "address": "Parkvej 28, 5. th, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "28",
+    "floor": "5",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 95,
+    "price": 975000,
+    "pricePerSqm": 10263,
+    "date": "2025-12-11",
+    "coordinates": {
+      "lon": 11.755896710180473,
+      "lat": 55.21756120229831
+    }
+  },
+  {
+    "address": "Brandtsgade 26, 2., 4700 Næstved",
+    "roadName": "Brandtsgade",
+    "houseNumber": "26",
+    "floor": "2",
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 91,
+    "price": 1365000,
+    "pricePerSqm": 15000,
+    "date": "2025-12-10",
+    "coordinates": {
+      "lon": 11.760900080231664,
+      "lat": 55.22604155717103
+    }
+  },
+  {
+    "address": "Odinsvej 14, st. tv, 4700 Næstved",
+    "roadName": "Odinsvej",
+    "houseNumber": "14",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 124,
+    "price": 1410000,
+    "pricePerSqm": 11371,
+    "date": "2025-12-09",
+    "coordinates": {
+      "lon": 11.771279904466843,
+      "lat": 55.22633646607368
+    }
+  },
+  {
+    "address": "Parkvej 170, st. 98, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "170",
+    "floor": "st",
+    "door": "98",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 840000,
+    "pricePerSqm": 17500,
+    "date": "2025-12-08",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Parkvej 174, 1. 5, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "174",
+    "floor": "1",
+    "door": "5",
+    "postalCode": "4700",
+    "kvm": 105,
+    "price": 1595000,
+    "pricePerSqm": 15190,
+    "date": "2025-12-08",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Parkvej 168, 2. 95, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "168",
+    "floor": "2",
+    "door": "95",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 850000,
+    "pricePerSqm": 17708,
+    "date": "2025-12-06",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Bryggervænget 1, 4., 4400 Kalundborg",
+    "roadName": "Bryggervænget",
+    "houseNumber": "1",
+    "floor": "4",
+    "door": null,
+    "postalCode": "4400",
+    "kvm": 151,
+    "price": 3050000,
+    "pricePerSqm": 20199,
+    "date": "2025-12-05",
+    "coordinates": {
+      "lon": 11.094969369491311,
+      "lat": 55.68023698399771
+    }
+  },
+  {
+    "address": "Piet Heins Vej 13, 4700 Næstved",
+    "roadName": "Piet Heins Vej",
+    "houseNumber": "13",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 119,
+    "price": 2150000,
+    "pricePerSqm": 18067,
+    "date": "2025-12-02",
+    "coordinates": {
+      "lon": 11.747310691410002,
+      "lat": 55.228860079858414
+    }
+  },
+  {
+    "address": "Nordre Farimagsvej 13A, 2. 36, 4700 Næstved",
+    "roadName": "Nordre Farimagsvej",
+    "houseNumber": "13A",
+    "floor": "2",
+    "door": "36",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 1600000,
+    "pricePerSqm": 19048,
+    "date": "2025-12-01",
+    "coordinates": {
+      "lon": 11.762418858841192,
+      "lat": 55.23488662230644
+    }
+  },
+  {
+    "address": "Bogensevej 19, st. 256, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "19",
+    "floor": "st",
+    "door": "256",
+    "postalCode": "4700",
+    "kvm": 92,
+    "price": 1451000,
+    "pricePerSqm": 15772,
+    "date": "2025-11-29",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "H C Andersens Vej 61, st. tv, 4700 Næstved",
+    "roadName": "H C Andersens Vej",
+    "houseNumber": "61",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 80,
+    "price": 1325000,
+    "pricePerSqm": 16562,
+    "date": "2025-11-24",
+    "coordinates": {
+      "lon": 11.743385022883903,
+      "lat": 55.23194537561155
+    }
+  },
+  {
+    "address": "Jernbanegade 14E, 2. th, 4700 Næstved",
+    "roadName": "Jernbanegade",
+    "houseNumber": "14E",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 64,
+    "price": 1295000,
+    "pricePerSqm": 20234,
+    "date": "2025-11-23",
+    "coordinates": {
+      "lon": 11.765777984003728,
+      "lat": 55.23053307085506
+    }
+  },
+  {
+    "address": "Østergade 10, 3. tv, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "10",
+    "floor": "3",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 57,
+    "price": 1325000,
+    "pricePerSqm": 23246,
+    "date": "2025-11-22",
+    "coordinates": {
+      "lon": 11.760830781906016,
+      "lat": 55.22895212176509
+    }
+  },
+  {
+    "address": "Niels Juels Vej 9, 2. th, 4700 Næstved",
+    "roadName": "Niels Juels Vej",
+    "houseNumber": "9",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 54,
+    "price": 1115000,
+    "pricePerSqm": 20648,
+    "date": "2025-11-20",
+    "coordinates": {
+      "lon": 11.763430282740678,
+      "lat": 55.22595127735287
+    }
+  },
+  {
+    "address": "Grønlandsvej 24, 2. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "24",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 74,
+    "price": 1220000,
+    "pricePerSqm": 16486,
+    "date": "2025-11-19",
+    "coordinates": {
+      "lon": 11.756972408958918,
+      "lat": 55.21777903974587
+    }
+  },
+  {
+    "address": "Parkvej 162, 2. 179, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "162",
+    "floor": "2",
+    "door": "179",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 725000,
+    "pricePerSqm": 15104,
+    "date": "2025-11-19",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Kählersvej 1A, 1. th, 4700 Næstved",
+    "roadName": "Kählersvej",
+    "houseNumber": "1A",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 79,
+    "price": 1295000,
+    "pricePerSqm": 16392,
+    "date": "2025-11-17",
+    "coordinates": {
+      "lon": 11.767456845488166,
+      "lat": 55.227521317998125
+    }
+  },
+  {
+    "address": "Ringstedgade 44, 3. tv, 4700 Næstved",
+    "roadName": "Ringstedgade",
+    "houseNumber": "44",
+    "floor": "3",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 68,
+    "price": 1125000,
+    "pricePerSqm": 16544,
+    "date": "2025-11-13",
+    "coordinates": {
+      "lon": 11.761149994688761,
+      "lat": 55.23595582779527
+    }
+  },
+  {
+    "address": "Slagkildevej 1B, 2., 4700 Næstved",
+    "roadName": "Slagkildevej",
+    "houseNumber": "1B",
+    "floor": "2",
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 151,
+    "price": 3100000,
+    "pricePerSqm": 20530,
+    "date": "2025-11-13",
+    "coordinates": {
+      "lon": 11.759935591714918,
+      "lat": 55.228894372994105
+    }
+  },
+  {
+    "address": "Bogensevej 57, st. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "57",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 76,
+    "price": 1050000,
+    "pricePerSqm": 13816,
+    "date": "2025-11-13",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Østervej 14B, 1. th, 4700 Næstved",
+    "roadName": "Østervej",
+    "houseNumber": "14B",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 68,
+    "price": 900000,
+    "pricePerSqm": 13235,
+    "date": "2025-11-11",
+    "coordinates": {
+      "lon": 11.764220725261227,
+      "lat": 55.23889794067541
+    }
+  },
+  {
+    "address": "Farimagsvej 19, 2. 5, 4700 Næstved",
+    "roadName": "Farimagsvej",
+    "houseNumber": "19",
+    "floor": "2",
+    "door": "5",
+    "postalCode": "4700",
+    "kvm": 52,
+    "price": 785000,
+    "pricePerSqm": 15096,
+    "date": "2025-11-05",
+    "coordinates": {
+      "lon": 11.764739376454795,
+      "lat": 55.23291278712342
+    }
+  },
+  {
+    "address": "Teatergade 3, 3. 8, 4700 Næstved",
+    "roadName": "Teatergade",
+    "houseNumber": "3",
+    "floor": "3",
+    "door": "8",
+    "postalCode": "4700",
+    "kvm": 179,
+    "price": 3850000,
+    "pricePerSqm": 21508,
+    "date": "2025-11-04",
+    "coordinates": {
+      "lon": 11.763374908857786,
+      "lat": 55.2301321210738
+    }
+  },
+  {
+    "address": "Parkvej 160, st. 159, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "160",
+    "floor": "st",
+    "door": "159",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 825000,
+    "pricePerSqm": 17188,
+    "date": "2025-10-30",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Bryggervænget 3, 4., 4400 Kalundborg",
+    "roadName": "Bryggervænget",
+    "houseNumber": "3",
+    "floor": "4",
+    "door": null,
+    "postalCode": "4400",
+    "kvm": 150,
+    "price": 3100000,
+    "pricePerSqm": 20667,
+    "date": "2025-10-28",
+    "coordinates": {
+      "lon": 11.094969369491311,
+      "lat": 55.68023698399771
+    }
+  },
+  {
+    "address": "Kindhestegade 20B, 2. tv, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "20B",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 132,
+    "price": 1675000,
+    "pricePerSqm": 12689,
+    "date": "2025-10-24",
+    "coordinates": {
+      "lon": 11.755662370399257,
+      "lat": 55.2317279495381
+    }
+  },
+  {
+    "address": "Grønlandsvej 11, st. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "11",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 1175000,
+    "pricePerSqm": 14157,
+    "date": "2025-10-23",
+    "coordinates": {
+      "lon": 11.759448322485314,
+      "lat": 55.21836966117229
+    }
+  },
+  {
+    "address": "Kindhestegade 12E, st. th, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "12E",
+    "floor": "st",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 79,
+    "price": 1125000,
+    "pricePerSqm": 14241,
+    "date": "2025-10-22",
+    "coordinates": {
+      "lon": 11.756376428439484,
+      "lat": 55.23219056800437
+    }
+  },
+  {
+    "address": "Parkvej 164, 2. 71, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "164",
+    "floor": "2",
+    "door": "71",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 850000,
+    "pricePerSqm": 17708,
+    "date": "2025-10-22",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Farimagsvej 19, 1. 3, 4700 Næstved",
+    "roadName": "Farimagsvej",
+    "houseNumber": "19",
+    "floor": "1",
+    "door": "3",
+    "postalCode": "4700",
+    "kvm": 42,
+    "price": 675000,
+    "pricePerSqm": 16071,
+    "date": "2025-10-16",
+    "coordinates": {
+      "lon": 11.764739376454795,
+      "lat": 55.23291278712342
+    }
+  },
+  {
+    "address": "Østergade 29C, 2. th, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "29C",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1590000,
+    "pricePerSqm": 15743,
+    "date": "2025-10-16",
+    "coordinates": {
+      "lon": 11.764021316158455,
+      "lat": 55.22750714840741
+    }
+  },
+  {
+    "address": "H C Andersens Vej 75, kl. 2, 4700 Næstved",
+    "roadName": "H C Andersens Vej",
+    "houseNumber": "75",
+    "floor": "kl",
+    "door": "2",
+    "postalCode": "4700",
+    "kvm": 23,
+    "price": 100000,
+    "pricePerSqm": 4348,
+    "date": "2025-10-16",
+    "coordinates": {
+      "lon": 11.742222683909382,
+      "lat": 55.23240781407391
+    }
+  },
+  {
+    "address": "Bogensevej 11, 2. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "11",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 1150000,
+    "pricePerSqm": 13855,
+    "date": "2025-10-12",
+    "coordinates": {
+      "lon": 11.76096479385281,
+      "lat": 55.212278868491225
+    }
+  },
+  {
+    "address": "Torvestræde 15, 2. th, 4700 Næstved",
+    "roadName": "Torvestræde",
+    "houseNumber": "15",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 167,
+    "price": 3995000,
+    "pricePerSqm": 23922,
+    "date": "2025-10-08",
+    "coordinates": {
+      "lon": 11.760382905360432,
+      "lat": 55.230126718187634
+    }
+  },
+  {
+    "address": "Torvegade 16C, 2. th, 4640 Faxe",
+    "roadName": "Torvegade",
+    "houseNumber": "16C",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4640",
+    "kvm": 135,
+    "price": 1195000,
+    "pricePerSqm": 8852,
+    "date": "2025-10-07",
+    "coordinates": {
+      "lon": 12.120449198117589,
+      "lat": 55.25780564234223
+    }
+  },
+  {
+    "address": "Odensevej 119, 2. tv, 4700 Næstved",
+    "roadName": "Odensevej",
+    "houseNumber": "119",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 81,
+    "price": 1275000,
+    "pricePerSqm": 15741,
+    "date": "2025-10-03",
+    "coordinates": {
+      "lon": 11.760329957070782,
+      "lat": 55.21285948963853
+    }
+  },
+  {
+    "address": "Nordre Farimagsvej 23, 1. 102, 4700 Næstved",
+    "roadName": "Nordre Farimagsvej",
+    "houseNumber": "23",
+    "floor": "1",
+    "door": "102",
+    "postalCode": "4700",
+    "kvm": 27,
+    "price": 300000,
+    "pricePerSqm": 11111,
+    "date": "2025-10-02",
+    "coordinates": {
+      "lon": 11.761992381549444,
+      "lat": 55.23539370133996
+    }
+  },
+  {
+    "address": "Parkvej 156, 1. 137, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "156",
+    "floor": "1",
+    "door": "137",
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1450000,
+    "pricePerSqm": 14356,
+    "date": "2025-10-01",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Bogensevej 61, 2. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "61",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 105,
+    "price": 1575000,
+    "pricePerSqm": 15000,
+    "date": "2025-10-01",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Kindhestegade 20C, st. tv, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "20C",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 128,
+    "price": 1900000,
+    "pricePerSqm": 14844,
+    "date": "2025-10-01",
+    "coordinates": {
+      "lon": 11.755662370399257,
+      "lat": 55.2317279495381
+    }
+  },
+  {
+    "address": "Nordre Farimagsvej 23, st. 1, 4700 Næstved",
+    "roadName": "Nordre Farimagsvej",
+    "houseNumber": "23",
+    "floor": "st",
+    "door": "1",
+    "postalCode": "4700",
+    "kvm": 29,
+    "price": 350000,
+    "pricePerSqm": 12069,
+    "date": "2025-09-30",
+    "coordinates": {
+      "lon": 11.761992381549444,
+      "lat": 55.23539370133996
+    }
+  },
+  {
+    "address": "Østergade 21A, 1. tv, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "21A",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 74,
+    "price": 1615000,
+    "pricePerSqm": 21824,
+    "date": "2025-09-27",
+    "coordinates": {
+      "lon": 11.76348905314619,
+      "lat": 55.22818588185302
+    }
+  },
+  {
+    "address": "Hvedevænget 94, 2. th, 4700 Næstved",
+    "roadName": "Hvedevænget",
+    "houseNumber": "94",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 1125000,
+    "pricePerSqm": 13393,
+    "date": "2025-09-26",
+    "coordinates": {
+      "lon": 11.77828480903815,
+      "lat": 55.23427453064716
+    }
+  },
+  {
+    "address": "Niels W Gades Vej 80, 1. th, 4700 Næstved",
+    "roadName": "Niels W Gades Vej",
+    "houseNumber": "80",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 78,
+    "price": 1295000,
+    "pricePerSqm": 16603,
+    "date": "2025-09-22",
+    "coordinates": {
+      "lon": 11.761434423784197,
+      "lat": 55.25567365713685
+    }
+  },
+  {
+    "address": "Bogensevej 39, st. th, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "39",
+    "floor": "st",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 94,
+    "price": 1495000,
+    "pricePerSqm": 15904,
+    "date": "2025-09-18",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Grønlandsvej 33, 1. th, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "33",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 68,
+    "price": 1050000,
+    "pricePerSqm": 15441,
+    "date": "2025-09-15",
+    "coordinates": {
+      "lon": 11.757823176429907,
+      "lat": 55.217118570620535
+    }
+  },
+  {
+    "address": "Parkvej 4, 6. tv, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "4",
+    "floor": "6",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 845000,
+    "pricePerSqm": 10181,
+    "date": "2025-09-15",
+    "coordinates": {
+      "lon": 11.754425016966872,
+      "lat": 55.21791924801158
+    }
+  },
+  {
+    "address": "Parkvej 164, 2. 72, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "164",
+    "floor": "2",
+    "door": "72",
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1395000,
+    "pricePerSqm": 13812,
+    "date": "2025-09-05",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Lundevej 36, st. 2, 4400 Kalundborg",
+    "roadName": "Lundevej",
+    "houseNumber": "36",
+    "floor": "st",
+    "door": "2",
+    "postalCode": "4400",
+    "kvm": 102,
+    "price": 1695000,
+    "pricePerSqm": 16618,
+    "date": "2025-09-02",
+    "coordinates": {
+      "lon": 11.073723447046655,
+      "lat": 55.68194889822619
+    }
+  },
+  {
+    "address": "Parkvej 180, 1. 44, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "180",
+    "floor": "1",
+    "door": "44",
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1315000,
+    "pricePerSqm": 13020,
+    "date": "2025-09-01",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Grønlandsvej 26, 2. mf, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "26",
+    "floor": "2",
+    "door": "mf",
+    "postalCode": "4700",
+    "kvm": 59,
+    "price": 685000,
+    "pricePerSqm": 11610,
+    "date": "2025-08-31",
+    "coordinates": {
+      "lon": 11.756972408958918,
+      "lat": 55.21777903974587
+    }
+  },
+  {
+    "address": "Nørre Alle 44, st. tv, 4400 Kalundborg",
+    "roadName": "Nørre Alle",
+    "houseNumber": "44",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4400",
+    "kvm": 78,
+    "price": 1195000,
+    "pricePerSqm": 15321,
+    "date": "2025-08-29",
+    "coordinates": {
+      "lon": 11.10484706595584,
+      "lat": 55.68286156551908
+    }
+  },
+  {
+    "address": "Hvedevænget 92, st. tv, 4700 Næstved",
+    "roadName": "Hvedevænget",
+    "houseNumber": "92",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 60,
+    "price": 1115000,
+    "pricePerSqm": 18583,
+    "date": "2025-08-26",
+    "coordinates": {
+      "lon": 11.77828480903815,
+      "lat": 55.23427453064716
+    }
+  },
+  {
+    "address": "Bogensevej 33, st. 206, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "33",
+    "floor": "st",
+    "door": "206",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 795000,
+    "pricePerSqm": 16562,
+    "date": "2025-08-23",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Grønlandsvej 13, st. 1, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "13",
+    "floor": "st",
+    "door": "1",
+    "postalCode": "4700",
+    "kvm": 86,
+    "price": 1595000,
+    "pricePerSqm": 18547,
+    "date": "2025-08-22",
+    "coordinates": {
+      "lon": 11.758621675467714,
+      "lat": 55.21852991046202
+    }
+  },
+  {
+    "address": "Østergade 21B, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "21B",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 70,
+    "price": 1550000,
+    "pricePerSqm": 22143,
+    "date": "2025-08-20",
+    "coordinates": {
+      "lon": 11.76348905314619,
+      "lat": 55.22818588185302
+    }
+  },
+  {
+    "address": "Blegdammen 38, st. tv, 4400 Kalundborg",
+    "roadName": "Blegdammen",
+    "houseNumber": "38",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4400",
+    "kvm": 61,
+    "price": 820000,
+    "pricePerSqm": 13443,
+    "date": "2025-08-15",
+    "coordinates": {
+      "lon": 11.104150068351647,
+      "lat": 55.682270762681256
+    }
+  },
+  {
+    "address": "Nordre Farimagsvej 13A, 1. 32, 4700 Næstved",
+    "roadName": "Nordre Farimagsvej",
+    "houseNumber": "13A",
+    "floor": "1",
+    "door": "32",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 1395000,
+    "pricePerSqm": 16607,
+    "date": "2025-08-15",
+    "coordinates": {
+      "lon": 11.762418858841192,
+      "lat": 55.23488662230644
+    }
+  },
+  {
+    "address": "Parkvej 20, st. tv, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "20",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 53,
+    "price": 775000,
+    "pricePerSqm": 14623,
+    "date": "2025-08-14",
+    "coordinates": {
+      "lon": 11.755501826612639,
+      "lat": 55.218168825069355
+    }
+  },
+  {
+    "address": "Grønlandsvej 33, st. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "33",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 49,
+    "price": 600000,
+    "pricePerSqm": 12245,
+    "date": "2025-08-13",
+    "coordinates": {
+      "lon": 11.757823176429907,
+      "lat": 55.217118570620535
+    }
+  },
+  {
+    "address": "Odensevej 54, st. mf, 4700 Næstved",
+    "roadName": "Odensevej",
+    "houseNumber": "54",
+    "floor": "st",
+    "door": "mf",
+    "postalCode": "4700",
+    "kvm": 45,
+    "price": 850000,
+    "pricePerSqm": 18889,
+    "date": "2025-08-13",
+    "coordinates": {
+      "lon": 11.761925476189178,
+      "lat": 55.21402479903284
+    }
+  },
+  {
+    "address": "Kildemarksvej 143, 1. th, 4700 Næstved",
+    "roadName": "Kildemarksvej",
+    "houseNumber": "143",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 78,
+    "price": 1145000,
+    "pricePerSqm": 14679,
+    "date": "2025-08-11",
+    "coordinates": {
+      "lon": 11.787294237323913,
+      "lat": 55.234157385389004
+    }
+  },
+  {
+    "address": "Grønlandsvej 24, 2. th, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "24",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 74,
+    "price": 1200000,
+    "pricePerSqm": 16216,
+    "date": "2025-08-11",
+    "coordinates": {
+      "lon": 11.756972408958918,
+      "lat": 55.21777903974587
+    }
+  },
+  {
+    "address": "Kindhestegade 20B, 1. 4, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "20B",
+    "floor": "1",
+    "door": "4",
+    "postalCode": "4700",
+    "kvm": 104,
+    "price": 1600000,
+    "pricePerSqm": 15385,
+    "date": "2025-08-09",
+    "coordinates": {
+      "lon": 11.755662370399257,
+      "lat": 55.2317279495381
+    }
+  },
+  {
+    "address": "Kählersvej 2D, st., 4700 Næstved",
+    "roadName": "Kählersvej",
+    "houseNumber": "2D",
+    "floor": "st",
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 55,
+    "price": 1195000,
+    "pricePerSqm": 21727,
+    "date": "2025-08-05",
+    "coordinates": {
+      "lon": 11.768055464326125,
+      "lat": 55.226783004186544
+    }
+  },
+  {
+    "address": "Bogensevej 67, 2. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "67",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 62,
+    "price": 935000,
+    "pricePerSqm": 15081,
+    "date": "2025-07-27",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Bogensevej 27, 2. 299, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "27",
+    "floor": "2",
+    "door": "299",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 800000,
+    "pricePerSqm": 16667,
+    "date": "2025-07-24",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Bogensevej 41, 1. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "41",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 90,
+    "price": 1495000,
+    "pricePerSqm": 16611,
+    "date": "2025-07-23",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Østergade 29C, 1. tv, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "29C",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 100,
+    "price": 1800000,
+    "pricePerSqm": 18000,
+    "date": "2025-07-14",
+    "coordinates": {
+      "lon": 11.764021316158455,
+      "lat": 55.22750714840741
+    }
+  },
+  {
+    "address": "Bogensevej 31, 2. 226, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "31",
+    "floor": "2",
+    "door": "226",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 895000,
+    "pricePerSqm": 18646,
+    "date": "2025-07-14",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Teatergade 3, 4. 6, 4700 Næstved",
+    "roadName": "Teatergade",
+    "houseNumber": "3",
+    "floor": "4",
+    "door": "6",
+    "postalCode": "4700",
+    "kvm": 166,
+    "price": 4250000,
+    "pricePerSqm": 25602,
+    "date": "2025-07-13",
+    "coordinates": {
+      "lon": 11.763374908857786,
+      "lat": 55.2301321210738
+    }
+  },
+  {
+    "address": "Kählersvej 1C, 1. tv, 4700 Næstved",
+    "roadName": "Kählersvej",
+    "houseNumber": "1C",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 98,
+    "price": 1595000,
+    "pricePerSqm": 16276,
+    "date": "2025-07-13",
+    "coordinates": {
+      "lon": 11.767456845488166,
+      "lat": 55.227521317998125
+    }
+  },
+  {
+    "address": "Piet Heins Vej 2, 4700 Næstved",
+    "roadName": "Piet Heins Vej",
+    "houseNumber": "2",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 119,
+    "price": 2250000,
+    "pricePerSqm": 18908,
+    "date": "2025-07-03",
+    "coordinates": {
+      "lon": 11.747310691410002,
+      "lat": 55.228860079858414
+    }
+  },
+  {
+    "address": "Bogensevej 37, 2. 190, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "37",
+    "floor": "2",
+    "door": "190",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 645000,
+    "pricePerSqm": 13438,
+    "date": "2025-07-02",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Parkvej 180, 2. 47, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "180",
+    "floor": "2",
+    "door": "47",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 715000,
+    "pricePerSqm": 14896,
+    "date": "2025-07-01",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Parkvej 162, st. 171, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "162",
+    "floor": "st",
+    "door": "171",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 885000,
+    "pricePerSqm": 18438,
+    "date": "2025-07-01",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Svendborgvej 59, 1., 4700 Næstved",
+    "roadName": "Svendborgvej",
+    "houseNumber": "59",
+    "floor": "1",
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 67,
+    "price": 925000,
+    "pricePerSqm": 13806,
+    "date": "2025-06-27",
+    "coordinates": {
+      "lon": 11.761223919456278,
+      "lat": 55.20854001522688
+    }
+  },
+  {
+    "address": "Odinsvej 14, 3. th, 4700 Næstved",
+    "roadName": "Odinsvej",
+    "houseNumber": "14",
+    "floor": "3",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 70,
+    "price": 1195000,
+    "pricePerSqm": 17071,
+    "date": "2025-06-26",
+    "coordinates": {
+      "lon": 11.771279904466843,
+      "lat": 55.22633646607368
+    }
+  },
+  {
+    "address": "Bogensevej 5, st. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "5",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 1300000,
+    "pricePerSqm": 15663,
+    "date": "2025-06-26",
+    "coordinates": {
+      "lon": 11.76096479385281,
+      "lat": 55.212278868491225
+    }
+  },
+  {
+    "address": "Parkvej 180, st. 39, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "180",
+    "floor": "st",
+    "door": "39",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 750000,
+    "pricePerSqm": 15625,
+    "date": "2025-06-25",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Bogensevej 75, 2. th, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "75",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 90,
+    "price": 1404000,
+    "pricePerSqm": 15600,
+    "date": "2025-06-24",
+    "coordinates": {
+      "lon": 11.761906891877027,
+      "lat": 55.20944544563447
+    }
+  },
+  {
+    "address": "Parkvej 160, 1. 162, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "160",
+    "floor": "1",
+    "door": "162",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 835000,
+    "pricePerSqm": 17396,
+    "date": "2025-06-23",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Hvedevænget 11, 1. tv, 4700 Næstved",
+    "roadName": "Hvedevænget",
+    "houseNumber": "11",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 75,
+    "price": 1070000,
+    "pricePerSqm": 14267,
+    "date": "2025-06-23",
+    "coordinates": {
+      "lon": 11.764853970653567,
+      "lat": 55.23628975301786
+    }
+  },
+  {
+    "address": "Piet Heins Vej 12, 4700 Næstved",
+    "roadName": "Piet Heins Vej",
+    "houseNumber": "12",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1945000,
+    "pricePerSqm": 19257,
+    "date": "2025-06-19",
+    "coordinates": {
+      "lon": 11.747310691410002,
+      "lat": 55.228860079858414
+    }
+  },
+  {
+    "address": "H C Andersens Vej 75, 1. th, 4700 Næstved",
+    "roadName": "H C Andersens Vej",
+    "houseNumber": "75",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 85,
+    "price": 1295000,
+    "pricePerSqm": 15235,
+    "date": "2025-06-19",
+    "coordinates": {
+      "lon": 11.742222683909382,
+      "lat": 55.23240781407391
+    }
+  },
+  {
+    "address": "Parkvej 2, 2. tv, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "2",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 110,
+    "price": 970000,
+    "pricePerSqm": 8818,
+    "date": "2025-06-18",
+    "coordinates": {
+      "lon": 11.754425016966872,
+      "lat": 55.21791924801158
+    }
+  },
+  {
+    "address": "Grønlandsvej 27, 1. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "27",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 68,
+    "price": 1095000,
+    "pricePerSqm": 16103,
+    "date": "2025-06-18",
+    "coordinates": {
+      "lon": 11.757823176429907,
+      "lat": 55.217118570620535
+    }
+  },
+  {
+    "address": "Kindhestegade 18B, 1. th, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "18B",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 82,
+    "price": 1100000,
+    "pricePerSqm": 13415,
+    "date": "2025-06-17",
+    "coordinates": {
+      "lon": 11.755662370399257,
+      "lat": 55.2317279495381
+    }
+  },
+  {
+    "address": "Parkvej 18, 2. th, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "18",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 825000,
+    "pricePerSqm": 9940,
+    "date": "2025-06-16",
+    "coordinates": {
+      "lon": 11.755501826612639,
+      "lat": 55.218168825069355
+    }
+  },
+  {
+    "address": "Grønlandsvej 13, 1. 4, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "13",
+    "floor": "1",
+    "door": "4",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 1100000,
+    "pricePerSqm": 13253,
+    "date": "2025-06-09",
+    "coordinates": {
+      "lon": 11.758621675467714,
+      "lat": 55.21852991046202
+    }
+  },
+  {
+    "address": "Kindhestegade 4, 2. 4, 4700 Næstved",
+    "roadName": "Kindhestegade",
+    "houseNumber": "4",
+    "floor": "2",
+    "door": "4",
+    "postalCode": "4700",
+    "kvm": 137,
+    "price": 2400000,
+    "pricePerSqm": 17518,
+    "date": "2025-06-06",
+    "coordinates": {
+      "lon": 11.757224107512519,
+      "lat": 55.23216066247339
+    }
+  },
+  {
+    "address": "Bogensevej 21, 1. 246, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "21",
+    "floor": "1",
+    "door": "246",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 945000,
+    "pricePerSqm": 19688,
+    "date": "2025-06-02",
+    "coordinates": {
+      "lon": 11.761916547997943,
+      "lat": 55.21047066096802
+    }
+  },
+  {
+    "address": "Parkvej 166, 1. 78, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "166",
+    "floor": "1",
+    "door": "78",
+    "postalCode": "4700",
+    "kvm": 48,
+    "price": 730000,
+    "pricePerSqm": 15208,
+    "date": "2025-06-02",
+    "coordinates": {
+      "lon": 11.765846269076752,
+      "lat": 55.20906842716364
+    }
+  },
+  {
+    "address": "Nordre Farimagsvej 23, 2. 208, 4700 Næstved",
+    "roadName": "Nordre Farimagsvej",
+    "houseNumber": "23",
+    "floor": "2",
+    "door": "208",
+    "postalCode": "4700",
+    "kvm": 29,
+    "price": 255585,
+    "pricePerSqm": 8813,
+    "date": "2025-06-01",
+    "coordinates": {
+      "lon": 11.761992381549444,
+      "lat": 55.23539370133996
+    }
+  },
+  {
+    "address": "Amtmandsstien 1A, 4700 Næstved",
+    "roadName": "Amtmandsstien",
+    "houseNumber": "1A",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 187,
+    "price": 3850000,
+    "pricePerSqm": 20588,
+    "date": "2025-05-31",
+    "coordinates": {
+      "lon": 11.764651182242796,
+      "lat": 55.228712381686
+    }
+  },
+  {
+    "address": "Bryggervænget 1, 2. th, 4400 Kalundborg",
+    "roadName": "Bryggervænget",
+    "houseNumber": "1",
+    "floor": "2",
+    "door": "th",
+    "postalCode": "4400",
+    "kvm": 59,
+    "price": 1505000,
+    "pricePerSqm": 25508,
+    "date": "2025-05-30",
+    "coordinates": {
+      "lon": 11.094969369491311,
+      "lat": 55.68023698399771
+    }
+  },
+  {
+    "address": "Piet Heins Vej 4, 4700 Næstved",
+    "roadName": "Piet Heins Vej",
+    "houseNumber": "4",
+    "floor": null,
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 101,
+    "price": 1999000,
+    "pricePerSqm": 19792,
+    "date": "2025-05-29",
+    "coordinates": {
+      "lon": 11.747310691410002,
+      "lat": 55.228860079858414
+    }
+  },
+  {
+    "address": "Jernbanegade 9, 3. tv, 4700 Næstved",
+    "roadName": "Jernbanegade",
+    "houseNumber": "9",
+    "floor": "3",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 168,
+    "price": 2475000,
+    "pricePerSqm": 14732,
+    "date": "2025-05-28",
+    "coordinates": {
+      "lon": 11.762854520533011,
+      "lat": 55.23100945272221
+    }
+  },
+  {
+    "address": "Grønlandsvej 27, 2. tv, 4700 Næstved",
+    "roadName": "Grønlandsvej",
+    "houseNumber": "27",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 68,
+    "price": 750000,
+    "pricePerSqm": 11029,
+    "date": "2025-05-28",
+    "coordinates": {
+      "lon": 11.757823176429907,
+      "lat": 55.217118570620535
+    }
+  },
+  {
+    "address": "Bryggervænget 3, 1. mf, 4400 Kalundborg",
+    "roadName": "Bryggervænget",
+    "houseNumber": "3",
+    "floor": "1",
+    "door": "mf",
+    "postalCode": "4400",
+    "kvm": 97,
+    "price": 1850000,
+    "pricePerSqm": 19072,
+    "date": "2025-05-28",
+    "coordinates": {
+      "lon": 11.094969369491311,
+      "lat": 55.68023698399771
+    }
+  },
+  {
+    "address": "Lundevej 36, 1. 7, 4400 Kalundborg",
+    "roadName": "Lundevej",
+    "houseNumber": "36",
+    "floor": "1",
+    "door": "7",
+    "postalCode": "4400",
+    "kvm": 90,
+    "price": 1650000,
+    "pricePerSqm": 18333,
+    "date": "2025-05-26",
+    "coordinates": {
+      "lon": 11.073723447046655,
+      "lat": 55.68194889822619
+    }
+  },
+  {
+    "address": "Bogensevej 1, 2. tv, 4700 Næstved",
+    "roadName": "Bogensevej",
+    "houseNumber": "1",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 1000000,
+    "pricePerSqm": 12048,
+    "date": "2025-05-22",
+    "coordinates": {
+      "lon": 11.76096479385281,
+      "lat": 55.212278868491225
+    }
+  },
+  {
+    "address": "Præstøvej 57A, 1. th, 4700 Næstved",
+    "roadName": "Præstøvej",
+    "houseNumber": "57A",
+    "floor": "1",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 60,
+    "price": 1050000,
+    "pricePerSqm": 17500,
+    "date": "2025-05-21",
+    "coordinates": {
+      "lon": 11.772299124077096,
+      "lat": 55.224953030240975
+    }
+  },
+  {
+    "address": "Parkvej 8, 1. tv, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "8",
+    "floor": "1",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 83,
+    "price": 825000,
+    "pricePerSqm": 9940,
+    "date": "2025-05-20",
+    "coordinates": {
+      "lon": 11.754425016966872,
+      "lat": 55.21791924801158
+    }
+  },
+  {
+    "address": "Østergade 12B, st. tv, 4700 Næstved",
+    "roadName": "Østergade",
+    "houseNumber": "12B",
+    "floor": "st",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 113,
+    "price": 2075000,
+    "pricePerSqm": 18363,
+    "date": "2025-05-15",
+    "coordinates": {
+      "lon": 11.76106458008683,
+      "lat": 55.22884442628461
+    }
+  },
+  {
+    "address": "Parkvej 12, 2. tv, 4700 Næstved",
+    "roadName": "Parkvej",
+    "houseNumber": "12",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 84,
+    "price": 810000,
+    "pricePerSqm": 9643,
+    "date": "2025-05-14",
+    "coordinates": {
+      "lon": 11.755501826612639,
+      "lat": 55.218168825069355
+    }
+  },
+  {
+    "address": "Ørnevej 1A, 1., 4700 Næstved",
+    "roadName": "Ørnevej",
+    "houseNumber": "1A",
+    "floor": "1",
+    "door": null,
+    "postalCode": "4700",
+    "kvm": 75,
+    "price": 1195000,
+    "pricePerSqm": 15933,
+    "date": "2025-05-13",
+    "coordinates": {
+      "lon": 11.780828675739736,
+      "lat": 55.23101789704677
+    }
+  },
+  {
+    "address": "Niels Juels Vej 11, st. th, 4700 Næstved",
+    "roadName": "Niels Juels Vej",
+    "houseNumber": "11",
+    "floor": "st",
+    "door": "th",
+    "postalCode": "4700",
+    "kvm": 57,
+    "price": 1050000,
+    "pricePerSqm": 18421,
+    "date": "2025-05-11",
+    "coordinates": {
+      "lon": 11.763430282740678,
+      "lat": 55.22595127735287
+    }
+  },
+  {
+    "address": "Odensevej 116, 2. tv, 4700 Næstved",
+    "roadName": "Odensevej",
+    "houseNumber": "116",
+    "floor": "2",
+    "door": "tv",
+    "postalCode": "4700",
+    "kvm": 75,
+    "price": 1155000,
+    "pricePerSqm": 15400,
+    "date": "2025-05-07",
+    "coordinates": {
+      "lon": 11.758492972503841,
+      "lat": 55.21305736246409
+    }
+  }
+]

@@ -42,6 +42,10 @@ export interface PriceEngineInput {
   driftTotalYearly: number;
   /** Antal værelser, til evt. leje-justering */
   rooms?: number | null;
+  /** Vejnavn — bruges til at vægte same-EF comparables højere */
+  roadName?: string | null;
+  /** Husnr — bruges til same-bygning vægt */
+  houseNumber?: string | null;
   /** Hvis kunden har en aktuel listing/listepris fra mægler — bruges som sanity check */
   currentListingPrice?: number | null;
   /** Hæftelse til ejerforening (engangs gæld kunden hæfter for, fra tinglysning) */
@@ -55,6 +59,7 @@ export interface PriceEngineResult {
   averageDiscountPct: number;
   comparables: Awaited<ReturnType<typeof findComparables>>['topComparables'];
   sampleSize: number;
+  sameEfCount: number;
   // Beregning
   estimatedRentMd: number;
   refurbTotal: number;
@@ -78,9 +83,11 @@ const SAVED_BROKER_FIXED = 25_000;           // grundgebyr / annoncering
  * Beregn fuldt prissat estimat.
  */
 export async function computeEstimate(input: PriceEngineInput): Promise<PriceEngineResult> {
-  // 1. Comparables
+  // 1. Comparables — vægtet efter ejerforening
   const comps = await findComparables({
     postalCode: input.postalCode,
+    roadName: input.roadName,
+    houseNumber: input.houseNumber,
     kvm: input.kvm,
     yearBuilt: input.yearBuilt,
     rooms: input.rooms,
@@ -144,6 +151,7 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     averageDiscountPct: comps.averageDiscountPct,
     comparables: comps.topComparables,
     sampleSize: comps.sampleSize,
+    sameEfCount: comps.sameEfCount,
     estimatedRentMd,
     refurbTotal,
     netForkortet: {
