@@ -151,7 +151,13 @@ export function computeAfkast(inp: AfkastInputs): AfkastResult {
     if (roeEbtT >= targetRoe) budSolve = trial;
     else if (budSolve != null) break; // ROE faldet under target → fundet højeste
   }
-  const bud = budSolve != null ? Math.round(budSolve / 1000) * 1000 : null;
+  // Cap bud ved 95% af listepris — vi byder aldrig OVER markedet.
+  // Hvis ROE-engine'n siger vi godt kan byde mere (typisk når drift er
+  // urealistisk lavt), trækker capping det ned.
+  const MAX_BID_PCT_OF_LIST = 0.95;
+  const ceiling = Math.round(inp.listePris * MAX_BID_PCT_OF_LIST);
+  const cappedBud = budSolve != null ? Math.min(budSolve, ceiling) : null;
+  const bud = cappedBud != null ? Math.round(cappedBud / 1000) * 1000 : null;
 
   return {
     forhandletPris: price,
