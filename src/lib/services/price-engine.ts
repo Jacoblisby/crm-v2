@@ -10,8 +10,10 @@
  */
 import { computeAfkast } from '@/lib/afkast';
 import { findComparables } from './comparables';
+import { estimateMonthlyRent } from './our-rentals';
 
-// Konservative leje-satser per postnr (kr/m²/md, ejerlejlighed udlejning)
+// Fallback leje-satser per postnr (kr/m²/md). Bruges KUN når vi ikke har
+// faktiske lejedata for området — vores ~218 ejede lejemål overskriver dette.
 const LEJE_PR_M2_PR_MD: Record<string, number> = {
   '2630': 120, // Taastrup
   '4000': 115, // Roskilde
@@ -63,6 +65,8 @@ export interface PriceEngineResult {
   sameEfCount: number;
   // Beregning
   estimatedRentMd: number;
+  rentSource: 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
+  rentSampleSize: number;
   refurbTotal: number;
   // Endeligt tilbud
   netForkortet: {
@@ -110,9 +114,26 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     }
   }
 
-  // 2. Estimeret leje
-  const lejeRate = LEJE_PR_M2_PR_MD[input.postalCode] ?? DEFAULT_LEJE_RATE;
-  const estimatedRentMd = Math.round(input.kvm * lejeRate);
+  // 2. Estimeret leje — vores faktiske udlejnings-data slår altid en hardcoded rate.
+  //    Hvis vi har lejemål på samme vej (proxy for samme EF), bruger vi median-lejen.
+  //    Falder ellers tilbage til postnr-rate × m².
+  const ourRentMatch = estimateMonthlyRent({
+    postalCode: input.postalCode,
+    roadName: input.roadName,
+  });
+  let estimatedRentMd: number;
+  let rentSource: PriceEngineResult['rentSource'];
+  if (ourRentMatch.source === 'same-vej' && ourRentMatch.monthlyRent > 0) {
+    estimatedRentMd = ourRentMatch.monthlyRent;
+    rentSource = 'same-vej';
+  } else if (ourRentMatch.source === 'same-postal' && ourRentMatch.monthlyRent > 0) {
+    estimatedRentMd = ourRentMatch.monthlyRent;
+    rentSource = 'same-postal';
+  } else {
+    const lejeRate = LEJE_PR_M2_PR_MD[input.postalCode] ?? DEFAULT_LEJE_RATE;
+    estimatedRentMd = Math.round(input.kvm * lejeRate);
+    rentSource = 'kvm-fallback';
+  }
 
   // 3. Refurbish baseret på stand
   const refurbPerM2 = REFURB_PER_M2[input.stand] ?? REFURB_PER_M2.middel;
@@ -154,6 +175,8 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     sampleSize: comps.sampleSize,
     sameEfCount: comps.sameEfCount,
     estimatedRentMd,
+    rentSource,
+    rentSampleSize: ourRentMatch.sampleSize,
     refurbTotal,
     netForkortet: {
       marketEstimate,

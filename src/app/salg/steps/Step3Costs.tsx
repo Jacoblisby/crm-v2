@@ -14,8 +14,6 @@ export function Step3Costs() {
     ? state.heatAcontoYearly
     : state.heatUsageLastYearKr;
 
-  const totalAllInclusive = baseDrift + waterCost + heatCost;
-
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -185,18 +183,33 @@ export function Step3Costs() {
       </section>
 
       {/* === TOTAL === */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-1">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2">
         <div className="flex items-baseline justify-between">
-          <span className="text-slate-700 text-sm">Total drift inkl. vand/varme:</span>
+          <span className="text-slate-700 text-sm">Drift (uden vand/varme):</span>
           <span className="text-2xl font-bold text-emerald-700">
-            {totalAllInclusive.toLocaleString('da-DK')} kr/år
+            {baseDrift.toLocaleString('da-DK')} kr/år
           </span>
         </div>
         <div className="text-xs text-slate-500 text-right">
-          ~{Math.round(totalAllInclusive / 12).toLocaleString('da-DK')} kr/md
+          ~{Math.round(baseDrift / 12).toLocaleString('da-DK')} kr/md
         </div>
+        {(waterCost > 0 || heatCost > 0) && (
+          <div className="border-t border-emerald-200 pt-2 mt-2 space-y-1 text-xs text-slate-600">
+            <div className="flex justify-between">
+              <span>💧 Vand ({state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'}):</span>
+              <span className="font-medium">{waterCost.toLocaleString('da-DK')} kr/år</span>
+            </div>
+            <div className="flex justify-between">
+              <span>🔥 Varme ({state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'}):</span>
+              <span className="font-medium">{heatCost.toLocaleString('da-DK')} kr/år</span>
+            </div>
+            <div className="text-[11px] text-slate-500 italic pt-1">
+              Vand/varme indgår ikke i ROE-beregningen — viderefaktureres til lejer.
+            </div>
+          </div>
+        )}
         {state.ejerforeningHaeftelseKr > 0 && (
-          <div className="text-xs text-slate-600 border-t border-emerald-200 pt-2 mt-2 flex justify-between">
+          <div className="border-t border-emerald-200 pt-2 mt-2 flex justify-between text-xs text-slate-600">
             <span>+ Hæftelse til EF (engang):</span>
             <span className="font-medium">
               {state.ejerforeningHaeftelseKr.toLocaleString('da-DK')} kr

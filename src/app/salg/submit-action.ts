@@ -34,6 +34,8 @@ export async function submitFunnelAction(
 
   // 1. Beregn estimat — defensive coercion mod undefined fra gammel client-state
   const num = (v: number | undefined | null) => (typeof v === 'number' ? v : 0);
+  // Vand og varme er aconto/forbrug — IKKE en del af drift, da vi viderefakturerer
+  // til lejer. Vi gemmer beløbene som info i lead-noten, men de indgår ikke i ROE-beregningen.
   const waterCost = state.waterPaidViaAssoc
     ? num(state.waterAcontoYearly)
     : num(state.waterUsageLastYearKr);
@@ -47,9 +49,7 @@ export async function submitFunnelAction(
     num(state.costRenovation) +
     num(state.costForsikringer) +
     num(state.costFaelleslaan) +
-    num(state.costAndreDrift) +
-    waterCost +
-    heatCost;
+    num(state.costAndreDrift);
 
   const estimate = await computeEstimate({
     postalCode: state.postalCode,

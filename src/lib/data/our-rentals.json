@@ -1,0 +1,2182 @@
+[
+  {
+    "address": "Benløseparken 103, st. th, 4100 Ringsted",
+    "postal": "4100",
+    "city": "Ringsted",
+    "monthlyRent": 8027,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Benløseparken",
+    "lobenr": "004-006-001"
+  },
+  {
+    "address": "Benløseparken 125, 1. th, 4100 Ringsted",
+    "postal": "4100",
+    "city": "Ringsted",
+    "monthlyRent": 8394,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Benløseparken",
+    "lobenr": "004-006-002"
+  },
+  {
+    "address": "Benløseparken 15, 2. th, 4100 Ringsted",
+    "postal": "4100",
+    "city": "Ringsted",
+    "monthlyRent": 8334,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Benløseparken",
+    "lobenr": "004-006-003"
+  },
+  {
+    "address": "Blegdammen 42, 1. th, 4400 Kalundborg",
+    "postal": "4400",
+    "city": "Kalundborg",
+    "monthlyRent": 6150,
+    "vandAconto": 300,
+    "varmeAconto": 590,
+    "ejendom": "Blegdammen",
+    "lobenr": "004-027-001"
+  },
+  {
+    "address": "Bogensevej 11, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9000,
+    "vandAconto": 450,
+    "varmeAconto": 750,
+    "ejendom": "Bogensevej",
+    "lobenr": "004-002-001"
+  },
+  {
+    "address": "Bogensevej 61, 2. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8500,
+    "vandAconto": 350,
+    "varmeAconto": 650,
+    "ejendom": "Bogensevej Sommmerhaven",
+    "lobenr": "002-001-001"
+  },
+  {
+    "address": "Byskov Alle 10, 1. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 5350,
+    "vandAconto": 205,
+    "varmeAconto": 324,
+    "ejendom": "Byskov Alle",
+    "lobenr": "004-021-002"
+  },
+  {
+    "address": "Byskov Alle 40, 2. tv, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 9600,
+    "vandAconto": 550,
+    "varmeAconto": 550,
+    "ejendom": "Byskov Alle",
+    "lobenr": "004-021-001"
+  },
+  {
+    "address": "Dania 4, 2. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5100,
+    "vandAconto": 0,
+    "varmeAconto": 550,
+    "ejendom": "Dania Sommerhaven",
+    "lobenr": "002-002-001"
+  },
+  {
+    "address": "Dania 8, 2. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6340,
+    "vandAconto": 400,
+    "varmeAconto": 560,
+    "ejendom": "Dania",
+    "lobenr": "004-019-001"
+  },
+  {
+    "address": "Erantisvej 14, 2. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8300,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Erantisvej",
+    "lobenr": "004-023-001"
+  },
+  {
+    "address": "Farimagsvej 19, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5961,
+    "vandAconto": 300,
+    "varmeAconto": 390,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-009"
+  },
+  {
+    "address": "Farimagsvej 19, 2. 2., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6000,
+    "vandAconto": 350,
+    "varmeAconto": 400,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-004"
+  },
+  {
+    "address": "Farimagsvej 19, st. 5, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6749,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-003"
+  },
+  {
+    "address": "Farimagsvej 19, st. 6, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5317,
+    "vandAconto": 280,
+    "varmeAconto": 280,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-002"
+  },
+  {
+    "address": "Farimagsvej 19, st. 7, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5828,
+    "vandAconto": 450,
+    "varmeAconto": 390,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-007"
+  },
+  {
+    "address": "Farimagsvej 21, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5325,
+    "vandAconto": 425,
+    "varmeAconto": 650,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-010"
+  },
+  {
+    "address": "Farimagsvej 21, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5113,
+    "vandAconto": 200,
+    "varmeAconto": 300,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-005"
+  },
+  {
+    "address": "Farimagsvej 21, 2. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6500,
+    "vandAconto": 300,
+    "varmeAconto": 500,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-008"
+  },
+  {
+    "address": "Farimagsvej 21, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6700,
+    "vandAconto": 300,
+    "varmeAconto": 450,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-011"
+  },
+  {
+    "address": "Farimagsvej 21, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6900,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-012"
+  },
+  {
+    "address": "Farimagsvej 21, st. 9, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5292,
+    "vandAconto": 300,
+    "varmeAconto": 487,
+    "ejendom": "Farimagsvej",
+    "lobenr": "004-010-006"
+  },
+  {
+    "address": "Grønlandsvej 7, 2. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8600,
+    "vandAconto": 400,
+    "varmeAconto": 60,
+    "ejendom": "Grønlandsvej",
+    "lobenr": "004-022-001"
+  },
+  {
+    "address": "H C Andersens Vej 55, 1. mf, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6300,
+    "vandAconto": 0,
+    "varmeAconto": 300,
+    "ejendom": "H C Andersens Vej",
+    "lobenr": "004-024-001"
+  },
+  {
+    "address": "Helleristen 96, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8700,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Helleristen",
+    "lobenr": "004-029-001"
+  },
+  {
+    "address": "Herlufsvænge 1, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5470,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-005"
+  },
+  {
+    "address": "Herlufsvænge 1, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-006"
+  },
+  {
+    "address": "Herlufsvænge 1, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5600,
+    "vandAconto": 300,
+    "varmeAconto": 460,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-007"
+  },
+  {
+    "address": "Herlufsvænge 1, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5250,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-008"
+  },
+  {
+    "address": "Herlufsvænge 1, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4950,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-001"
+  },
+  {
+    "address": "Herlufsvænge 1, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-002"
+  },
+  {
+    "address": "Herlufsvænge 1, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5650,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-003"
+  },
+  {
+    "address": "Herlufsvænge 1, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5000,
+    "vandAconto": 450,
+    "varmeAconto": 310,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-004"
+  },
+  {
+    "address": "Herlufsvænge 10, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6350,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-058"
+  },
+  {
+    "address": "Herlufsvænge 10, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6599,
+    "vandAconto": 410,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-059"
+  },
+  {
+    "address": "Herlufsvænge 10, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6450,
+    "vandAconto": 550,
+    "varmeAconto": 400,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-060"
+  },
+  {
+    "address": "Herlufsvænge 10, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6900,
+    "vandAconto": 460,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-061"
+  },
+  {
+    "address": "Herlufsvænge 10, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6650,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-054"
+  },
+  {
+    "address": "Herlufsvænge 10, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6300,
+    "vandAconto": 410,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-055"
+  },
+  {
+    "address": "Herlufsvænge 10, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6650,
+    "vandAconto": 410,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-056"
+  },
+  {
+    "address": "Herlufsvænge 10, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4181,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-057"
+  },
+  {
+    "address": "Herlufsvænge 11, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3400,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-066"
+  },
+  {
+    "address": "Herlufsvænge 11, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3750,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-067"
+  },
+  {
+    "address": "Herlufsvænge 11, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3850,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-068"
+  },
+  {
+    "address": "Herlufsvænge 11, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3850,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-069"
+  },
+  {
+    "address": "Herlufsvænge 11, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3400,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-062"
+  },
+  {
+    "address": "Herlufsvænge 11, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3400,
+    "vandAconto": 259,
+    "varmeAconto": 259,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-063"
+  },
+  {
+    "address": "Herlufsvænge 11, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3750,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-064"
+  },
+  {
+    "address": "Herlufsvænge 11, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3850,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-065"
+  },
+  {
+    "address": "Herlufsvænge 12, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11750,
+    "vandAconto": 870,
+    "varmeAconto": 1090,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-072"
+  },
+  {
+    "address": "Herlufsvænge 12, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11250,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-073"
+  },
+  {
+    "address": "Herlufsvænge 12, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11750,
+    "vandAconto": 950,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-070"
+  },
+  {
+    "address": "Herlufsvænge 12, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11150,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-071"
+  },
+  {
+    "address": "Herlufsvænge 13, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12000,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-076"
+  },
+  {
+    "address": "Herlufsvænge 13, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12500,
+    "vandAconto": 950,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-077"
+  },
+  {
+    "address": "Herlufsvænge 13, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11250,
+    "vandAconto": 810,
+    "varmeAconto": 1020,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-074"
+  },
+  {
+    "address": "Herlufsvænge 13, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12500,
+    "vandAconto": 950,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-075"
+  },
+  {
+    "address": "Herlufsvænge 15, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7669,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-083"
+  },
+  {
+    "address": "Herlufsvænge 15, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7565,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-085"
+  },
+  {
+    "address": "Herlufsvænge 15, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9638,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-084"
+  },
+  {
+    "address": "Herlufsvænge 15, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7151,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-082"
+  },
+  {
+    "address": "Herlufsvænge 15, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7462,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-079"
+  },
+  {
+    "address": "Herlufsvænge 15, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7669,
+    "vandAconto": 450,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-080"
+  },
+  {
+    "address": "Herlufsvænge 15, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9714,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-078"
+  },
+  {
+    "address": "Herlufsvænge 15, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6840,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-081"
+  },
+  {
+    "address": "Herlufsvænge 16, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7771,
+    "vandAconto": 450,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-091"
+  },
+  {
+    "address": "Herlufsvænge 16, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9638,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-093"
+  },
+  {
+    "address": "Herlufsvænge 16, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7565,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-092"
+  },
+  {
+    "address": "Herlufsvænge 16, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7773,
+    "vandAconto": 450,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-090"
+  },
+  {
+    "address": "Herlufsvænge 16, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7617,
+    "vandAconto": 450,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-086"
+  },
+  {
+    "address": "Herlufsvænge 16, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9816,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-087"
+  },
+  {
+    "address": "Herlufsvænge 16, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7900,
+    "vandAconto": 450,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-089"
+  },
+  {
+    "address": "Herlufsvænge 16, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7900,
+    "vandAconto": 450,
+    "varmeAconto": 500,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-088"
+  },
+  {
+    "address": "Herlufsvænge 17, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11750,
+    "vandAconto": 870,
+    "varmeAconto": 1090,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-096"
+  },
+  {
+    "address": "Herlufsvænge 17, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11000,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-097"
+  },
+  {
+    "address": "Herlufsvænge 17, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11950,
+    "vandAconto": 870,
+    "varmeAconto": 1090,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-094"
+  },
+  {
+    "address": "Herlufsvænge 17, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11500,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-095"
+  },
+  {
+    "address": "Herlufsvænge 18, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12475,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-100"
+  },
+  {
+    "address": "Herlufsvænge 18, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 13650,
+    "vandAconto": 950,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-101"
+  },
+  {
+    "address": "Herlufsvænge 18, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12000,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-098"
+  },
+  {
+    "address": "Herlufsvænge 18, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12500,
+    "vandAconto": 950,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-099"
+  },
+  {
+    "address": "Herlufsvænge 1A, Kontor, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 0,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-009"
+  },
+  {
+    "address": "Herlufsvænge 2, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 410,
+    "varmeAconto": 550,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-014"
+  },
+  {
+    "address": "Herlufsvænge 2, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5500,
+    "vandAconto": 360,
+    "varmeAconto": 400,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-015"
+  },
+  {
+    "address": "Herlufsvænge 2, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5600,
+    "vandAconto": 360,
+    "varmeAconto": 400,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-016"
+  },
+  {
+    "address": "Herlufsvænge 2, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5300,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-017"
+  },
+  {
+    "address": "Herlufsvænge 2, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-010"
+  },
+  {
+    "address": "Herlufsvænge 2, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 410,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-011"
+  },
+  {
+    "address": "Herlufsvænge 2, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4950,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-012"
+  },
+  {
+    "address": "Herlufsvænge 2, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5500,
+    "vandAconto": 360,
+    "varmeAconto": 400,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-013"
+  },
+  {
+    "address": "Herlufsvænge 3, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-022"
+  },
+  {
+    "address": "Herlufsvænge 3, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5600,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-023"
+  },
+  {
+    "address": "Herlufsvænge 3, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-024"
+  },
+  {
+    "address": "Herlufsvænge 3, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5600,
+    "vandAconto": 360,
+    "varmeAconto": 400,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-025"
+  },
+  {
+    "address": "Herlufsvænge 3, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4950,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-018"
+  },
+  {
+    "address": "Herlufsvænge 3, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5250,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-019"
+  },
+  {
+    "address": "Herlufsvænge 3, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5350,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-020"
+  },
+  {
+    "address": "Herlufsvænge 3, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5000,
+    "vandAconto": 310,
+    "varmeAconto": 450,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-021"
+  },
+  {
+    "address": "Herlufsvænge 4, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11750,
+    "vandAconto": 870,
+    "varmeAconto": 1090,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-028"
+  },
+  {
+    "address": "Herlufsvænge 4, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 10250,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-029"
+  },
+  {
+    "address": "Herlufsvænge 4, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12700,
+    "vandAconto": 910,
+    "varmeAconto": 1050,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-026"
+  },
+  {
+    "address": "Herlufsvænge 4, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 10950,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-027"
+  },
+  {
+    "address": "Herlufsvænge 5, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 10800,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-032"
+  },
+  {
+    "address": "Herlufsvænge 5, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11000,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-033"
+  },
+  {
+    "address": "Herlufsvænge 5, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 11150,
+    "vandAconto": 820,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-030"
+  },
+  {
+    "address": "Herlufsvænge 5, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 12000,
+    "vandAconto": 950,
+    "varmeAconto": 1010,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-031"
+  },
+  {
+    "address": "Herlufsvænge 6, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9150,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-036"
+  },
+  {
+    "address": "Herlufsvænge 6, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8775,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-037"
+  },
+  {
+    "address": "Herlufsvænge 6, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8550,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-034"
+  },
+  {
+    "address": "Herlufsvænge 6, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8775,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-035"
+  },
+  {
+    "address": "Herlufsvænge 7, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8775,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-040"
+  },
+  {
+    "address": "Herlufsvænge 7, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9150,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-041"
+  },
+  {
+    "address": "Herlufsvænge 7, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9400,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-038"
+  },
+  {
+    "address": "Herlufsvænge 7, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9400,
+    "vandAconto": 530,
+    "varmeAconto": 730,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-039"
+  },
+  {
+    "address": "Herlufsvænge 8, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9509,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-044"
+  },
+  {
+    "address": "Herlufsvænge 8, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9500,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-045"
+  },
+  {
+    "address": "Herlufsvænge 8, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6667,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-042"
+  },
+  {
+    "address": "Herlufsvænge 8, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8550,
+    "vandAconto": 630,
+    "varmeAconto": 630,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-043"
+  },
+  {
+    "address": "Herlufsvænge 9, 1. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3400,
+    "vandAconto": 282,
+    "varmeAconto": 282,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-050"
+  },
+  {
+    "address": "Herlufsvænge 9, 1. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3750,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-051"
+  },
+  {
+    "address": "Herlufsvænge 9, 1. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3750,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-052"
+  },
+  {
+    "address": "Herlufsvænge 9, 1. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3850,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-053"
+  },
+  {
+    "address": "Herlufsvænge 9, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3850,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-046"
+  },
+  {
+    "address": "Herlufsvænge 9, st. 2, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3750,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-047"
+  },
+  {
+    "address": "Herlufsvænge 9, st. 3, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3400,
+    "vandAconto": 265,
+    "varmeAconto": 265,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-048"
+  },
+  {
+    "address": "Herlufsvænge 9, st. 4, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 3937,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Herlufsvænge 1 - 18",
+    "lobenr": "001-001-049"
+  },
+  {
+    "address": "Hertelsvej 1, 1. th, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 5195,
+    "vandAconto": 400,
+    "varmeAconto": 400,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-003"
+  },
+  {
+    "address": "Hertelsvej 1, 1. tv, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 5900,
+    "vandAconto": 300,
+    "varmeAconto": 460,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-004"
+  },
+  {
+    "address": "Hertelsvej 1, st. th, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 3466,
+    "vandAconto": 0,
+    "varmeAconto": 1000,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-001"
+  },
+  {
+    "address": "Hertelsvej 1, st. tv, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 7000,
+    "vandAconto": 400,
+    "varmeAconto": 560,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-002"
+  },
+  {
+    "address": "Hertelsvej 10, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 9750,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-018"
+  },
+  {
+    "address": "Hertelsvej 12, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 0,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-019"
+  },
+  {
+    "address": "Hertelsvej 3, 1. th, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 3466,
+    "vandAconto": 0,
+    "varmeAconto": 1000,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-007"
+  },
+  {
+    "address": "Hertelsvej 3, 1. tv, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 5750,
+    "vandAconto": 300,
+    "varmeAconto": 460,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-008"
+  },
+  {
+    "address": "Hertelsvej 3, st. th, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 3988,
+    "vandAconto": 0,
+    "varmeAconto": 1000,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-005"
+  },
+  {
+    "address": "Hertelsvej 3, st. tv, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 6850,
+    "vandAconto": 400,
+    "varmeAconto": 560,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-006"
+  },
+  {
+    "address": "Hertelsvej 4, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 10750,
+    "vandAconto": 500,
+    "varmeAconto": 600,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-009"
+  },
+  {
+    "address": "Hertelsvej 5, 1. th, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 9122,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-012"
+  },
+  {
+    "address": "Hertelsvej 5, 1. tv, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 5250,
+    "vandAconto": 300,
+    "varmeAconto": 460,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-013"
+  },
+  {
+    "address": "Hertelsvej 5, st. th, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 9750,
+    "vandAconto": 500,
+    "varmeAconto": 600,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-010"
+  },
+  {
+    "address": "Hertelsvej 5, st. tv, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 2831,
+    "vandAconto": 0,
+    "varmeAconto": 900,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-011"
+  },
+  {
+    "address": "Hertelsvej 6, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 0,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-014"
+  },
+  {
+    "address": "Hertelsvej 7, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 6498,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-015"
+  },
+  {
+    "address": "Hertelsvej 8, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 6426,
+    "vandAconto": 0,
+    "varmeAconto": 1300,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-016"
+  },
+  {
+    "address": "Hertelsvej 9, 4640 Faxe",
+    "postal": "4640",
+    "city": "Faxe",
+    "monthlyRent": 7106,
+    "vandAconto": 0,
+    "varmeAconto": 1300,
+    "ejendom": "Hertelsvej 1 - 12",
+    "lobenr": "003-001-017"
+  },
+  {
+    "address": "Hvedevænget 88, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8487,
+    "vandAconto": 550,
+    "varmeAconto": 700,
+    "ejendom": "Hvedevænget",
+    "lobenr": "004-012-002"
+  },
+  {
+    "address": "Hvedevænget 92, 2. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7669,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Hvedevænget",
+    "lobenr": "004-012-001"
+  },
+  {
+    "address": "Indre Vordingborgvej 36A, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4875,
+    "vandAconto": 400,
+    "varmeAconto": 500,
+    "ejendom": "Indre Vordingborgvej Sommerhaven",
+    "lobenr": "002-003-001"
+  },
+  {
+    "address": "Indre Vordingborgvej 36B, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7700,
+    "vandAconto": 350,
+    "varmeAconto": 500,
+    "ejendom": "Indre Vordingborgvej Sommerhaven",
+    "lobenr": "002-003-002"
+  },
+  {
+    "address": "Indre Vordingborgvej 36C, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 10779,
+    "vandAconto": 550,
+    "varmeAconto": 750,
+    "ejendom": "Indre Vordingborgvej Sommerhaven",
+    "lobenr": "002-003-003"
+  },
+  {
+    "address": "Kildemarksvej 133, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7980,
+    "vandAconto": 220,
+    "varmeAconto": 770,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-001"
+  },
+  {
+    "address": "Kildemarksvej 133, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8998,
+    "vandAconto": 500,
+    "varmeAconto": 500,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-005"
+  },
+  {
+    "address": "Kildemarksvej 135, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7083,
+    "vandAconto": 350,
+    "varmeAconto": 650,
+    "ejendom": "Kildemarksvej Sommerhaven",
+    "lobenr": "002-004-001"
+  },
+  {
+    "address": "Kildemarksvej 135, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5900,
+    "vandAconto": 300,
+    "varmeAconto": 350,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-002"
+  },
+  {
+    "address": "Kildemarksvej 137, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9100,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-007"
+  },
+  {
+    "address": "Kildemarksvej 137, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7362,
+    "vandAconto": 300,
+    "varmeAconto": 500,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-008"
+  },
+  {
+    "address": "Kildemarksvej 137, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7400,
+    "vandAconto": 300,
+    "varmeAconto": 500,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-006"
+  },
+  {
+    "address": "Kildemarksvej 145, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8071,
+    "vandAconto": 545,
+    "varmeAconto": 1030,
+    "ejendom": "Kildemarksvej Sommerhaven",
+    "lobenr": "002-004-002"
+  },
+  {
+    "address": "Kildemarksvej 145, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7669,
+    "vandAconto": 450,
+    "varmeAconto": 600,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-004"
+  },
+  {
+    "address": "Kildemarksvej 147, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7567,
+    "vandAconto": 220,
+    "varmeAconto": 770,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-003"
+  },
+  {
+    "address": "Kildemarksvej 151, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8900,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Kildemarksvej",
+    "lobenr": "004-003-009"
+  },
+  {
+    "address": "Kildemarksvej 155, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7400,
+    "vandAconto": 350,
+    "varmeAconto": 400,
+    "ejendom": "Kildemarksvej Sommerhaven",
+    "lobenr": "002-004-003"
+  },
+  {
+    "address": "Kählersvej 1B, st. mf, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5000,
+    "vandAconto": 0,
+    "varmeAconto": 500,
+    "ejendom": "Kählersvej",
+    "lobenr": "004-025-001"
+  },
+  {
+    "address": "Langdyssen 66, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4500,
+    "vandAconto": 0,
+    "varmeAconto": 180,
+    "ejendom": "Langdyssen",
+    "lobenr": "004-030-001"
+  },
+  {
+    "address": "Lindebo 27, 2. 167, 2630 Taastrup",
+    "postal": "2630",
+    "city": "Taastrup",
+    "monthlyRent": 8282,
+    "vandAconto": 400,
+    "varmeAconto": 500,
+    "ejendom": "Lindebo",
+    "lobenr": "004-032-001"
+  },
+  {
+    "address": "Lindebo 9, st. 51, 2630 Taastrup",
+    "postal": "2630",
+    "city": "Taastrup",
+    "monthlyRent": 8300,
+    "vandAconto": 300,
+    "varmeAconto": 450,
+    "ejendom": "Lindebo",
+    "lobenr": "004-032-002"
+  },
+  {
+    "address": "Lupinvej 15, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7075,
+    "vandAconto": 250,
+    "varmeAconto": 500,
+    "ejendom": "Lupinvej",
+    "lobenr": "004-004-002"
+  },
+  {
+    "address": "Lupinvej 17, 2. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8487,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Lupinvej",
+    "lobenr": "004-004-001"
+  },
+  {
+    "address": "Marievej 3, 2. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6749,
+    "vandAconto": 400,
+    "varmeAconto": 400,
+    "ejendom": "Marievej",
+    "lobenr": "004-018-001"
+  },
+  {
+    "address": "Nic Rumps Vej 6, 2. th, 4220 Korsør",
+    "postal": "4220",
+    "city": "Korsør",
+    "monthlyRent": 6150,
+    "vandAconto": 300,
+    "varmeAconto": 500,
+    "ejendom": "Nic Rumps Vej",
+    "lobenr": "004-028-001"
+  },
+  {
+    "address": "Nordre Farimagsvej 13B, st. 14, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5215,
+    "vandAconto": 360,
+    "varmeAconto": 400,
+    "ejendom": "Nordre Farimagsvej",
+    "lobenr": "004-013-001"
+  },
+  {
+    "address": "Nordre Farimagsvej 13C, 2. 11, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6000,
+    "vandAconto": 300,
+    "varmeAconto": 300,
+    "ejendom": "Nordre Farimagsvej",
+    "lobenr": "004-013-004"
+  },
+  {
+    "address": "Nordre Farimagsvej 23, 1. 110, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4644,
+    "vandAconto": 0,
+    "varmeAconto": 300,
+    "ejendom": "Nordre Farimagsvej",
+    "lobenr": "004-013-002"
+  },
+  {
+    "address": "Nordre Farimagsvej 23, 1. 116, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4900,
+    "vandAconto": 200,
+    "varmeAconto": 350,
+    "ejendom": "Nordre Farimagsvej",
+    "lobenr": "004-013-005"
+  },
+  {
+    "address": "Nordre Farimagsvej 23, st. 1, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4900,
+    "vandAconto": 300,
+    "varmeAconto": 450,
+    "ejendom": "Nordre Farimagsvej",
+    "lobenr": "004-013-003"
+  },
+  {
+    "address": "Nørre Alle 44, 1. th, 4400 Kalundborg",
+    "postal": "4400",
+    "city": "Kalundborg",
+    "monthlyRent": 7669,
+    "vandAconto": 300,
+    "varmeAconto": 700,
+    "ejendom": "Nørre Alle",
+    "lobenr": "004-007-001"
+  },
+  {
+    "address": "Nørre Alle 48, 2. th, 4400 Kalundborg",
+    "postal": "4400",
+    "city": "Kalundborg",
+    "monthlyRent": 9203,
+    "vandAconto": 400,
+    "varmeAconto": 800,
+    "ejendom": "Nørre Alle",
+    "lobenr": "004-007-002"
+  },
+  {
+    "address": "Odensevej 114, st. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8489,
+    "vandAconto": 300,
+    "varmeAconto": 430,
+    "ejendom": "Odensevej 114 Sommerhaven",
+    "lobenr": "002-007-001"
+  },
+  {
+    "address": "Odensevej 116, 2. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7824,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Odensevej 116 Sommerhaven",
+    "lobenr": "002-008-001"
+  },
+  {
+    "address": "Odensevej 120, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8200,
+    "vandAconto": 400,
+    "varmeAconto": 500,
+    "ejendom": "Odensevej",
+    "lobenr": "004-020-001"
+  },
+  {
+    "address": "Odensevej 50, 2. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5675,
+    "vandAconto": 325,
+    "varmeAconto": 250,
+    "ejendom": "Odensevej",
+    "lobenr": "004-020-002"
+  },
+  {
+    "address": "Odensevej 52, 2. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5624,
+    "vandAconto": 425,
+    "varmeAconto": 550,
+    "ejendom": "Odensevej 52 Sommerhaven",
+    "lobenr": "002-009-001"
+  },
+  {
+    "address": "Parkvej 166, 1. 79, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6340,
+    "vandAconto": 278,
+    "varmeAconto": 400,
+    "ejendom": "Parkvej",
+    "lobenr": "004-011-001"
+  },
+  {
+    "address": "Parkvej 28, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8900,
+    "vandAconto": 400,
+    "varmeAconto": 600,
+    "ejendom": "Parkvej Sommerhaven",
+    "lobenr": "002-011-002"
+  },
+  {
+    "address": "Parkvej 8, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 9169,
+    "vandAconto": 450,
+    "varmeAconto": 907,
+    "ejendom": "Parkvej Sommerhaven",
+    "lobenr": "002-011-001"
+  },
+  {
+    "address": "Runddyssen 42, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8340,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Runddyssen",
+    "lobenr": "004-031-001"
+  },
+  {
+    "address": "Runddyssen 76, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 4500,
+    "vandAconto": 0,
+    "varmeAconto": 0,
+    "ejendom": "Runddyssen",
+    "lobenr": "004-031-002"
+  },
+  {
+    "address": "Sandholmsvej 13, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8135,
+    "vandAconto": 600,
+    "varmeAconto": 0,
+    "ejendom": "Sandholmsvej Sommerhaven",
+    "lobenr": "002-012-001"
+  },
+  {
+    "address": "Sandholmsvej 15, 1. tv, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8000,
+    "vandAconto": 600,
+    "varmeAconto": 0,
+    "ejendom": "Sandholmsvej",
+    "lobenr": "004-026-001"
+  },
+  {
+    "address": "Svendborgvej 13, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7980,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-001"
+  },
+  {
+    "address": "Svendborgvej 141, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7656,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-007"
+  },
+  {
+    "address": "Svendborgvej 15, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7968,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-008"
+  },
+  {
+    "address": "Svendborgvej 177, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7980,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-002"
+  },
+  {
+    "address": "Svendborgvej 211, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7529,
+    "vandAconto": 0,
+    "varmeAconto": 1000,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-001"
+  },
+  {
+    "address": "Svendborgvej 213, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7900,
+    "vandAconto": 0,
+    "varmeAconto": 710,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-002"
+  },
+  {
+    "address": "Svendborgvej 23, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8027,
+    "vandAconto": 0,
+    "varmeAconto": 550,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-011"
+  },
+  {
+    "address": "Svendborgvej 237, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7873,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-003"
+  },
+  {
+    "address": "Svendborgvej 253, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7980,
+    "vandAconto": 0,
+    "varmeAconto": 800,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-004"
+  },
+  {
+    "address": "Svendborgvej 27, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7950,
+    "vandAconto": 0,
+    "varmeAconto": 985,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-003"
+  },
+  {
+    "address": "Svendborgvej 277, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7410,
+    "vandAconto": 0,
+    "varmeAconto": 800,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-005"
+  },
+  {
+    "address": "Svendborgvej 283, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 5400,
+    "vandAconto": 0,
+    "varmeAconto": 500,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-010"
+  },
+  {
+    "address": "Svendborgvej 33, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8000,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-009"
+  },
+  {
+    "address": "Svendborgvej 41, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8002,
+    "vandAconto": 0,
+    "varmeAconto": 800,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-004"
+  },
+  {
+    "address": "Svendborgvej 49, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7669,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-006"
+  },
+  {
+    "address": "Svendborgvej 51, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 6944,
+    "vandAconto": 0,
+    "varmeAconto": 500,
+    "ejendom": "Svendborgvej",
+    "lobenr": "004-001-007"
+  },
+  {
+    "address": "Svendborgvej 53, 1., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7873,
+    "vandAconto": 0,
+    "varmeAconto": 730,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-005"
+  },
+  {
+    "address": "Svendborgvej 79, st., 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7812,
+    "vandAconto": 0,
+    "varmeAconto": 600,
+    "ejendom": "Svendborgvej Sommerhaven",
+    "lobenr": "002-013-006"
+  },
+  {
+    "address": "Søndermarksvej 1, 3. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 6135,
+    "vandAconto": 500,
+    "varmeAconto": 500,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-006"
+  },
+  {
+    "address": "Søndermarksvej 1, st. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 7158,
+    "vandAconto": 450,
+    "varmeAconto": 350,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-005"
+  },
+  {
+    "address": "Søndermarksvej 11, 1. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 5115,
+    "vandAconto": 250,
+    "varmeAconto": 350,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-004"
+  },
+  {
+    "address": "Søndermarksvej 25, 3. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 6100,
+    "vandAconto": 450,
+    "varmeAconto": 310,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-007"
+  },
+  {
+    "address": "Søndermarksvej 35, 3. tv, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 8765,
+    "vandAconto": 445,
+    "varmeAconto": 750,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-003"
+  },
+  {
+    "address": "Søndermarksvej 5, 1. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 4925,
+    "vandAconto": 300,
+    "varmeAconto": 400,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-008"
+  },
+  {
+    "address": "Søndermarksvej 5, 1. tv, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 8350,
+    "vandAconto": 445,
+    "varmeAconto": 710,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-002"
+  },
+  {
+    "address": "Søndermarksvej 5, st. mf, 4200 Slagelse",
+    "postal": "4200",
+    "city": "Slagelse",
+    "monthlyRent": 7000,
+    "vandAconto": 350,
+    "varmeAconto": 350,
+    "ejendom": "Søndermarksvej",
+    "lobenr": "004-015-001"
+  },
+  {
+    "address": "Østerparken 3, 1. 2, 2630 Taastrup",
+    "postal": "2630",
+    "city": "Taastrup",
+    "monthlyRent": 8300,
+    "vandAconto": 300,
+    "varmeAconto": 450,
+    "ejendom": "Østerparken",
+    "lobenr": "004-016-003"
+  },
+  {
+    "address": "Østervej 14A, st. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 7947,
+    "vandAconto": 450,
+    "varmeAconto": 725,
+    "ejendom": "Østervej Sommerhaven",
+    "lobenr": "002-017-001"
+  },
+  {
+    "address": "Østervej 14D, 1. th, 4700 Næstved",
+    "postal": "4700",
+    "city": "Næstved",
+    "monthlyRent": 8426,
+    "vandAconto": 400,
+    "varmeAconto": 550,
+    "ejendom": "Østervej",
+    "lobenr": "004-017-001"
+  }
+]
