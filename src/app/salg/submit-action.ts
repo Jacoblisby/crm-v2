@@ -241,48 +241,116 @@ async function sendNotificationEmails(
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM || 'administration@365ejendom.dk';
   const adminEmail = 'jacob@faurholt.com';
-  if (!apiKey) return;
+  if (!apiKey) {
+    await logEmailEvent(leadId, 'admin', adminEmail, 'skipped', 'RESEND_API_KEY ikke sat');
+    await logEmailEvent(leadId, 'kunde', state.email, 'skipped', 'RESEND_API_KEY ikke sat');
+    return;
+  }
 
   const offer = estimate.netForkortet.finalOffer.toLocaleString('da-DK');
   const market = estimate.marketEstimate.toLocaleString('da-DK');
 
-  // Email til Jacob (admin) — kort og handlings-orienteret
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to: adminEmail,
-      subject: `📐 Ny lead: ${state.fullName} · ${state.fullAddress} · tilbud ${offer} kr`,
-      text: [
-        `Ny boligberegner-lead — håndtér i CRM:`,
-        ``,
-        `→ https://crm.365ejendom.dk/leads/${leadId}?tab=afkast`,
-        ``,
-        `Hurtig info:`,
-        `· ${state.fullName} (${state.email}, ${state.phone})`,
-        `· ${state.fullAddress}`,
-        `· ${state.kvm} m² · ${state.rooms ?? '?'} værelser · byggeår ${state.yearBuilt ?? '?'}`,
-        `· Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
-        `· Markedsestimat: ${market} kr · Tilbud@20% ROE: ${offer} kr`,
-        `· ${estimate.sampleSize} comparables, ${estimate.sameEfCount} i samme EF`,
-      ].join('\n'),
-    }),
+  const adminSubject = `📐 Ny lead: ${state.fullName} · ${state.fullAddress} · tilbud ${offer} kr`;
+  const adminResult = await sendResendEmail(apiKey, {
+    from,
+    to: adminEmail,
+    subject: adminSubject,
+    text: [
+      `Ny boligberegner-lead — håndtér i CRM:`,
+      ``,
+      `→ https://crm.365ejendom.dk/leads/${leadId}?tab=afkast`,
+      ``,
+      `Hurtig info:`,
+      `· ${state.fullName} (${state.email}, ${state.phone})`,
+      `· ${state.fullAddress}`,
+      `· ${state.kvm} m² · ${state.rooms ?? '?'} værelser · byggeår ${state.yearBuilt ?? '?'}`,
+      `· Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
+      `· Markedsestimat: ${market} kr · Tilbud@20% ROE: ${offer} kr`,
+      `· ${estimate.sampleSize} comparables, ${estimate.sameEfCount} i samme EF`,
+    ].join('\n'),
   });
+  await logEmailEvent(
+    leadId,
+    'admin',
+    adminEmail,
+    adminResult.ok ? 'sendt' : 'fejlet',
+    adminResult.ok ? `Resend id: ${adminResult.id}` : adminResult.error,
+    adminSubject,
+  );
 
-  // Email til kunde — rich HTML med breakdown + comparables
+  const customerSubject = `Dit foreløbige tilbud: ${offer} kr — ${state.fullAddress}`;
   const html = customerEmailHtml(state, estimate, photoCount);
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to: state.email,
-      reply_to: 'jacob@faurholt.com',
-      subject: `Dit foreløbige tilbud: ${offer} kr — ${state.fullAddress}`,
-      html,
-    }),
+  const customerResult = await sendResendEmail(apiKey, {
+    from,
+    to: state.email,
+    reply_to: 'jacob@faurholt.com',
+    subject: customerSubject,
+    html,
   });
+  await logEmailEvent(
+    leadId,
+    'kunde',
+    state.email,
+    customerResult.ok ? 'sendt' : 'fejlet',
+    customerResult.ok ? `Resend id: ${customerResult.id}` : customerResult.error,
+    customerSubject,
+  );
+}
+
+interface ResendPayload {
+  from: string;
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  reply_to?: string;
+}
+
+type ResendResult = { ok: true; id: string } | { ok: false; error: string };
+
+async function sendResendEmail(apiKey: string, payload: ResendPayload): Promise<ResendResult> {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
+    if (!res.ok) {
+      return { ok: false, error: `HTTP ${res.status}: ${body.message ?? 'ukendt fejl'}` };
+    }
+    return { ok: true, id: body.id ?? 'ukendt' };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+async function logEmailEvent(
+  leadId: string,
+  recipient: 'admin' | 'kunde',
+  toAddress: string,
+  status: 'sendt' | 'fejlet' | 'skipped',
+  detail: string,
+  subject?: string,
+) {
+  try {
+    const icon = status === 'sendt' ? '✅' : status === 'fejlet' ? '❌' : '⚠️';
+    const role = recipient === 'admin' ? 'Admin (Jacob)' : 'Kunde';
+    await db.insert(leadCommunications).values({
+      leadId,
+      type: 'email',
+      direction: 'out',
+      subject: subject ?? `Boligberegner-mail til ${role}`,
+      body: [
+        `${icon} ${status.toUpperCase()} — ${role}: ${toAddress}`,
+        detail,
+      ].join('\n'),
+      createdBy: 'boligberegner',
+    });
+  } catch (err) {
+    // Logging må aldrig crashe submit-flowet
+    console.error('[boligberegner] kunne ikke logge email-event:', err);
+  }
 }
 
 function customerEmailHtml(
