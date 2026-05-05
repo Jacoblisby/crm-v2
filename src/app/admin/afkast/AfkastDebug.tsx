@@ -19,6 +19,9 @@ export interface AfkastInitial {
     renovation?: number;
     forsikringer?: number;
     rottebekæmpelse?: number;
+    grundfond?: number;
+    vicevært?: number;
+    vedligeholdelse?: number;
     andreDrift?: number;
   };
 }
@@ -223,6 +226,15 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
                 )}
                 {(initial.driftBreakdown.rottebekæmpelse ?? 0) > 0 && (
                   <Row label="    · Rottebekæmpelse" value={`-${fmt(initial.driftBreakdown.rottebekæmpelse ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.grundfond ?? 0) > 0 && (
+                  <Row label="    · Grundfond" value={`-${fmt(initial.driftBreakdown.grundfond ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.vicevært ?? 0) > 0 && (
+                  <Row label="    · Vicevært/administration" value={`-${fmt(initial.driftBreakdown.vicevært ?? 0)}`} formula="input" muted />
+                )}
+                {(initial.driftBreakdown.vedligeholdelse ?? 0) > 0 && (
+                  <Row label="    · Vedligeholdelse" value={`-${fmt(initial.driftBreakdown.vedligeholdelse ?? 0)}`} formula="input" muted />
                 )}
                 {(initial.driftBreakdown.andreDrift ?? 0) > 0 && (
                   <Row label="    · Andre driftsomkostninger" value={`-${fmt(initial.driftBreakdown.andreDrift ?? 0)}`} formula="input" muted />
