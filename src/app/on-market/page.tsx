@@ -46,21 +46,30 @@ interface OnMarketRow {
   bidDkk?: number | null;
   marginPct?: number | null;
   dage?: number | null;
+  reviewStatus?: 'ny' | 'interesseret' | 'passet' | 'købt';
 }
 
 export default async function OnMarketPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; review?: string }>;
 }) {
   const sp = await searchParams;
   const filterStatus = (sp.status === 'sold' || sp.status === 'all') ? sp.status : 'active';
+  const filterReview = (
+    ['all', 'ny', 'interesseret', 'passet', 'købt'].includes(sp.review ?? '')
+      ? sp.review
+      : 'all'
+  ) as 'all' | 'ny' | 'interesseret' | 'passet' | 'købt';
 
   // Først: forsøg at læse fra DB. Hvis det fejler eller er tomt, fald tilbage til POC.
   let dbRows: OnMarketRow[] = [];
   let dbError: string | null = null;
   try {
-    const candidates = await listOnMarketCandidates({ status: filterStatus });
+    const candidates = await listOnMarketCandidates({
+      status: filterStatus,
+      reviewStatus: filterReview,
+    });
     dbRows = candidates.map((c) => ({
       key: c.id,
       id: c.id,
@@ -75,6 +84,7 @@ export default async function OnMarketPage({
       dage: c.firstSeenAt
         ? Math.floor((Date.now() - new Date(c.firstSeenAt).getTime()) / 86_400_000)
         : null,
+      reviewStatus: c.reviewStatus as 'ny' | 'interesseret' | 'passet' | 'købt',
     }));
   } catch (err) {
     dbError = err instanceof Error ? err.message : String(err);
@@ -125,17 +135,41 @@ export default async function OnMarketPage({
         {rows.length} listings · {downloaded} med salgsopstilling hentet
         {isPocFallback && ' · viser POC-data (DB-tabel er tom indtil Uge 5)'}
       </p>
-      <nav className="mb-4 flex gap-2 text-sm">
-        {(['active','sold','all'] as const).map((s) => (
-          <Link
-            key={s}
-            href={s === 'active' ? '/on-market' : `/on-market?status=${s}`}
-            className={`px-3 py-1 rounded ${filterStatus === s ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-          >
-            {s === 'active' ? 'Aktive' : s === 'sold' ? 'Solgte' : 'Alle'}
-          </Link>
-        ))}
-      </nav>
+      <div className="mb-4 space-y-2">
+        <nav className="flex gap-2 text-sm">
+          {(['active', 'sold', 'all'] as const).map((s) => (
+            <Link
+              key={s}
+              href={`/on-market?status=${s}${filterReview !== 'all' ? `&review=${filterReview}` : ''}`}
+              className={`px-3 py-1 rounded ${filterStatus === s ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            >
+              {s === 'active' ? 'Aktive' : s === 'sold' ? 'Solgte' : 'Alle'}
+            </Link>
+          ))}
+        </nav>
+        <nav className="flex gap-2 text-sm">
+          <span className="text-xs text-slate-500 self-center pr-1">Min review:</span>
+          {(['all', 'ny', 'interesseret', 'passet', 'købt'] as const).map((r) => (
+            <Link
+              key={r}
+              href={`/on-market?status=${filterStatus}${r !== 'all' ? `&review=${r}` : ''}`}
+              className={`px-3 py-1 rounded text-xs ${
+                filterReview === r
+                  ? r === 'interesseret'
+                    ? 'bg-blue-600 text-white'
+                    : r === 'købt'
+                      ? 'bg-emerald-600 text-white'
+                      : r === 'passet'
+                        ? 'bg-slate-500 text-white'
+                        : 'bg-slate-900 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {r === 'all' ? 'Alle' : r === 'ny' ? '🆕 Ny' : r === 'interesseret' ? '👀 Interesseret' : r === 'passet' ? '👋 Passet' : '🎉 Købt'}
+            </Link>
+          ))}
+        </nav>
+      </div>
 
       {rows.length === 0 ? (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
@@ -150,6 +184,7 @@ export default async function OnMarketPage({
               <thead className="bg-slate-50 text-left">
                 <tr>
                   <th className="px-3 py-2 font-medium">Adresse</th>
+                  <th className="px-3 py-2 font-medium">Review</th>
                   <th className="px-3 py-2 font-medium text-center">Dage</th>
                   <th className="px-3 py-2 font-medium">m²</th>
                   <th className="px-3 py-2 font-medium text-right">Pris</th>
@@ -173,6 +208,7 @@ export default async function OnMarketPage({
                       )}
                       {r.caseNumber != null && <div className="text-xs text-slate-500">Case #{r.caseNumber}</div>}
                     </td>
+                    <td className="px-3 py-2"><ReviewBadge status={r.reviewStatus} /></td>
                     <td className="px-3 py-2 text-center"><DageBadge dage={r.dage} /></td>
                     <td className="px-3 py-2 text-slate-600">{r.kvm ?? '—'}</td>
                     <td className="px-3 py-2 text-right">{r.listPrice?.toLocaleString('da-DK') || '—'}</td>
@@ -219,6 +255,19 @@ function DageBadge({ dage }: { dage: number | null | undefined }) {
       : dage < 60 ? 'bg-amber-100 text-amber-700'
       : 'bg-red-100 text-red-700';
   return <span className={`text-xs px-2 py-0.5 rounded ${cls}`}>{dage} d</span>;
+}
+
+function ReviewBadge({ status }: { status?: 'ny' | 'interesseret' | 'passet' | 'købt' }) {
+  if (!status || status === 'ny') {
+    return <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">🆕 ny</span>;
+  }
+  const map: Record<string, { cls: string; label: string }> = {
+    interesseret: { cls: 'bg-blue-100 text-blue-700', label: '👀 interesseret' },
+    passet: { cls: 'bg-slate-200 text-slate-500 line-through', label: '👋 passet' },
+    'købt': { cls: 'bg-emerald-100 text-emerald-700 font-semibold', label: '🎉 købt' },
+  };
+  const m = map[status];
+  return <span className={`text-xs px-1.5 py-0.5 rounded ${m.cls}`}>{m.label}</span>;
 }
 
 function RoeBadge({ pct }: { pct: number | null | undefined }) {

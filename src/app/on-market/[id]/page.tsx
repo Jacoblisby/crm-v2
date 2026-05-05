@@ -15,6 +15,8 @@ import { computeEstimate } from '@/lib/services/price-engine';
 import { AfkastDebug } from '@/app/admin/afkast/AfkastDebug';
 import { EditEstimaterForm } from './EditEstimaterForm';
 import { PdfUrlForm } from './PdfUrlForm';
+import { ReviewStatusForm } from './ReviewStatusForm';
+import type { ReviewStatus } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +39,10 @@ export default async function OnMarketDetailPage({
 
   // Drift fra udspecificerede prospekt-felter. Hvis ingen er tastet (typisk
   // når salgsopstilling endnu ikke er parsed), fald tilbage til Boligsidens
-  // samlede 'ejerudgift/md × 12'. Det er ikke 100% præcist men bedre end 0.
+  // samlede 'ejerudgift/md × 12' GANGE 1.3 som konservativ buffer — Boligsidens
+  // tal mangler typisk fælleslån/grundskyld/vedligeholdelse og er 30-50% for
+  // lavt sammenlignet med faktiske drift. Markeres tydeligt som usikkert.
+  const MONTHLY_EXPENSE_BUFFER = 1.3;
   const driftFromBreakdown =
     c.costGrundvaerdi +
     c.costFaellesudgifter +
@@ -53,7 +58,7 @@ export default async function OnMarketDetailPage({
     driftFromBreakdown > 0
       ? driftFromBreakdown
       : c.monthlyExpense
-        ? c.monthlyExpense * 12
+        ? Math.round(c.monthlyExpense * 12 * MONTHLY_EXPENSE_BUFFER)
         : 0;
   const driftSource: 'breakdown' | 'monthly-expense' | 'none' =
     driftFromBreakdown > 0
@@ -207,6 +212,13 @@ export default async function OnMarketDetailPage({
         </div>
       )}
 
+      {/* === REVIEW STATUS === */}
+      <ReviewStatusForm
+        id={c.id}
+        current={(c.reviewStatus as ReviewStatus) ?? 'ny'}
+        currentNote={c.reviewNote ?? null}
+      />
+
       {/* === AFKAST-OVERSIGT === */}
       <section className="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -333,33 +345,50 @@ export default async function OnMarketDetailPage({
       </div>
 
       {/* === DRIFT-KILDE === */}
-      <div className="bg-white border border-slate-200 rounded-lg p-3 text-sm flex items-center justify-between flex-wrap gap-2">
-        <div>
-          💰 <strong>Drift-kilde:</strong>{' '}
-          <span
-            className={
-              driftSource === 'breakdown'
-                ? 'text-emerald-700 font-semibold'
+      <div
+        className={`border rounded-lg p-3 text-sm space-y-1 ${
+          driftSource === 'breakdown'
+            ? 'bg-white border-slate-200'
+            : driftSource === 'monthly-expense'
+              ? 'bg-amber-50 border-amber-200'
+              : 'bg-red-50 border-red-200'
+        }`}
+      >
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            💰 <strong>Drift-kilde:</strong>{' '}
+            <span
+              className={
+                driftSource === 'breakdown'
+                  ? 'text-emerald-700 font-semibold'
+                  : driftSource === 'monthly-expense'
+                    ? 'text-amber-700 font-semibold'
+                    : 'text-red-600 font-semibold'
+              }
+            >
+              {driftSource === 'breakdown'
+                ? 'Udspecificeret fra prospekt ✓'
                 : driftSource === 'monthly-expense'
-                  ? 'text-amber-700 font-semibold'
-                  : 'text-red-600 font-semibold'
-            }
-          >
-            {driftSource === 'breakdown'
-              ? 'Udspecificeret fra prospekt'
-              : driftSource === 'monthly-expense'
-                ? `Boligsidens "ejerudgift/md × 12" (ej udspecificeret)`
-                : 'Ingen data — drift = 0'}
-          </span>
-        </div>
-        <div className="text-xs text-slate-600">
-          Brugt drift: <strong>{driftTotal.toLocaleString('da-DK')} kr/år</strong>
-          {driftSource === 'monthly-expense' && c.monthlyExpense != null && (
-            <span className="ml-2 text-slate-400">
-              ({c.monthlyExpense.toLocaleString('da-DK')} × 12)
+                  ? `⚠️ Boligsidens "ejerudgift/md × 12 × 1.3 buffer" (USIKKERT — parse PDF)`
+                  : '❌ Ingen data — drift = 0'}
             </span>
-          )}
+          </div>
+          <div className="text-xs text-slate-600">
+            Brugt drift: <strong>{driftTotal.toLocaleString('da-DK')} kr/år</strong>
+            {driftSource === 'monthly-expense' && c.monthlyExpense != null && (
+              <span className="ml-2 text-slate-400">
+                ({c.monthlyExpense.toLocaleString('da-DK')} × 12 × 1.3)
+              </span>
+            )}
+          </div>
         </div>
+        {driftSource === 'monthly-expense' && (
+          <p className="text-xs text-amber-900">
+            Boligsidens "ejerudgift/md" mangler typisk fælleslån, grundskyld og
+            vedligeholdelse — vi har lagt 30% buffer på, men det er stadig usikkert.
+            Bidet bør IKKE handles på før salgsopstillingen er gennemgået.
+          </p>
+        )}
       </div>
 
       {/* === MELLEMREGNINGER === */}

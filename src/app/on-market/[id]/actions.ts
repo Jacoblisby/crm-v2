@@ -71,6 +71,27 @@ export async function updateEstimaterAction(input: UpdateEstimaterInput) {
   return { ok: true, afk };
 }
 
+export type ReviewStatus = 'ny' | 'interesseret' | 'passet' | 'købt';
+
+export async function setReviewStatusAction(input: {
+  id: string;
+  reviewStatus: ReviewStatus;
+  reviewNote?: string | null;
+}) {
+  await db
+    .update(onMarketCandidates)
+    .set({
+      reviewStatus: input.reviewStatus,
+      reviewNote: input.reviewNote ?? null,
+      reviewUpdatedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(onMarketCandidates.id, input.id));
+  revalidatePath('/on-market');
+  revalidatePath(`/on-market/${input.id}`);
+  return { ok: true };
+}
+
 export async function setPdfUrlAction(input: { id: string; pdfUrl: string | null }) {
   if (input.pdfUrl && !/^https?:\/\//.test(input.pdfUrl)) {
     return { ok: false, error: 'URL skal starte med http(s)://' };

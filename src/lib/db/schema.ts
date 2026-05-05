@@ -457,6 +457,13 @@ export const onMarketCandidates = pgTable(
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
     soldAt: timestamp('sold_at', { withTimezone: true }),
 
+    // Vores manuelle review-status: 'ny' (default) | 'interesseret' | 'passet' | 'købt'
+    // Sættes via UI på listing-detail. Adskilt fra status (lifecycle) — review er kun
+    // et flag for *vores* triage, ikke noget der skifter når Boligsiden opdaterer.
+    reviewStatus: text('review_status').notNull().default('ny'),
+    reviewNote: text('review_note'),
+    reviewUpdatedAt: timestamp('review_updated_at', { withTimezone: true }),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

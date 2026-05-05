@@ -17,6 +17,14 @@ const MIGRATIONS: Record<string, () => Promise<void>> = {
       sql`ALTER TABLE "leads" ADD COLUMN IF NOT EXISTS "afkast_inputs" jsonb`,
     );
   },
+  '0005_review_status': async () => {
+    await db.execute(sql`
+      ALTER TABLE "on_market_candidates"
+      ADD COLUMN IF NOT EXISTS "review_status" text NOT NULL DEFAULT 'ny',
+      ADD COLUMN IF NOT EXISTS "review_note" text,
+      ADD COLUMN IF NOT EXISTS "review_updated_at" timestamp with time zone
+    `);
+  },
 };
 
 export async function POST(req: NextRequest) {

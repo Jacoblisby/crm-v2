@@ -204,16 +204,27 @@ export async function listActiveOnMarketCandidates() {
     .orderBy(desc(onMarketCandidates.scrapedAt));
 }
 
-export async function listOnMarketCandidates(opts: { status?: 'active' | 'sold' | 'all' } = {}) {
+export async function listOnMarketCandidates(opts: {
+  status?: 'active' | 'sold' | 'all';
+  reviewStatus?: 'all' | 'ny' | 'interesseret' | 'passet' | 'købt';
+} = {}) {
   const status = opts.status ?? 'active';
-  if (status === 'all') {
-    return db.select().from(onMarketCandidates).orderBy(desc(onMarketCandidates.scrapedAt));
-  }
-  return db
-    .select()
-    .from(onMarketCandidates)
-    .where(eq(onMarketCandidates.status, status))
-    .orderBy(desc(onMarketCandidates.scrapedAt));
+  const reviewStatus = opts.reviewStatus ?? 'all';
+
+  // Sortér efter ROE-margin desc (bedste deals øverst), null/0 i bunden.
+  // Recency tie-break når marginer er ens.
+  const orderBy = [
+    sql`${onMarketCandidates.marginPct} DESC NULLS LAST`,
+    desc(onMarketCandidates.scrapedAt),
+  ];
+
+  const conditions = [];
+  if (status !== 'all') conditions.push(eq(onMarketCandidates.status, status));
+  if (reviewStatus !== 'all') conditions.push(eq(onMarketCandidates.reviewStatus, reviewStatus));
+
+  let query = db.select().from(onMarketCandidates).$dynamic();
+  if (conditions.length > 0) query = query.where(and(...conditions));
+  return query.orderBy(...orderBy);
 }
 
 export async function getOnMarketCandidateById(id: string) {
