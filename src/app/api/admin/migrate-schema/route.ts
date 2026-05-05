@@ -25,6 +25,21 @@ const MIGRATIONS: Record<string, () => Promise<void>> = {
       ADD COLUMN IF NOT EXISTS "review_updated_at" timestamp with time zone
     `);
   },
+  '0006_sla_days_defaults': async () => {
+    // Sæt fornuftige SLA-tærskler for stages der ikke har dem.
+    // 'ny-lead' = 3 dage (skal triages hurtigt), 'interesse' = 7,
+    // 'forhandling' = 14, 'tilbud-afgivet' = 21.
+    await db.execute(sql`
+      UPDATE pipeline_stages SET sla_days = 3
+        WHERE slug = 'ny-lead' AND (sla_days IS NULL OR sla_days = 0);
+      UPDATE pipeline_stages SET sla_days = 7
+        WHERE slug = 'interesse' AND (sla_days IS NULL OR sla_days = 0);
+      UPDATE pipeline_stages SET sla_days = 14
+        WHERE slug = 'forhandling' AND (sla_days IS NULL OR sla_days = 0);
+      UPDATE pipeline_stages SET sla_days = 21
+        WHERE slug = 'tilbud-afgivet' AND (sla_days IS NULL OR sla_days = 0);
+    `);
+  },
 };
 
 export async function POST(req: NextRequest) {

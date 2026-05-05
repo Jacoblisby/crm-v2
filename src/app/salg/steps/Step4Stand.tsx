@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useFunnel } from '../FunnelContext';
 import type { StandLevel } from '@/lib/services/price-engine';
 
@@ -46,17 +47,34 @@ const OPTIONS: StandOption[] = [
 export function Step4Stand() {
   const { state, update, next, prev } = useFunnel();
 
+  // Auto-vis 'detaljer' hvis brugeren har udfyldt noget
+  const hasDetails =
+    !!state.kitchenYear ||
+    !!state.bathroomYear ||
+    state.applVaskemaskine ||
+    state.applTorretumbler ||
+    state.applOpvaskemaskine ||
+    state.applKoeleFryseskab ||
+    state.applOvn ||
+    state.applKomfur ||
+    state.applMikroovn ||
+    state.applEmhaette ||
+    state.hasAltan ||
+    state.hasElevator ||
+    !!state.standNote;
+  const [showDetails, setShowDetails] = useState(hasDetails);
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
         <h2 className="text-xl font-semibold">Hvordan er standen?</h2>
         <p className="text-sm text-slate-500">
-          Vælg overall niveau først, og udfyld så detaljer nedenunder. Jo mere konkret, jo bedre
-          tilbud.
+          Vælg det niveau der passer bedst. Det styrer hvor meget vi regner med at
+          istandsætte for.
         </p>
       </div>
 
-      {/* OVERALL */}
+      {/* OVERALL — primær action */}
       <div className="space-y-2">
         {OPTIONS.map((opt) => (
           <button
@@ -87,165 +105,208 @@ export function Step4Stand() {
         ))}
       </div>
 
-      {/* KØKKEN */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          🍳 Køkken
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <NumberField
-            label="Årgang"
-            placeholder="2015"
-            value={state.kitchenYear}
-            onChange={(v) => update({ kitchenYear: v })}
-            min={1900}
-            max={2030}
-          />
-          <TextField
-            label="Mærke (valgfrit)"
-            placeholder="HTH, Svane, IKEA…"
-            value={state.kitchenBrand}
-            onChange={(v) => update({ kitchenBrand: v })}
-          />
+      {/* EKSTRA DETALJER — collapsible */}
+      {state.stand && (
+        <div className="border-t border-slate-200 pt-4">
+          {!showDetails ? (
+            <button
+              type="button"
+              onClick={() => setShowDetails(true)}
+              className="w-full text-left p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100"
+            >
+              <div className="text-sm font-medium text-slate-700">
+                + Tilføj detaljer for et mere præcist tilbud (valgfri)
+              </div>
+              <div className="text-xs text-slate-500 mt-0.5">
+                Køkken-årgang, hvidevarer, altan/elevator m.m. — kan give op til{' '}
+                <strong>30.000 kr højere tilbud</strong>
+              </div>
+            </button>
+          ) : (
+            <div className="space-y-5">
+              {/* KØKKEN + BAD */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+                  🍳 Køkken & 🚿 Bad
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <NumberField
+                    label="Køkken-årgang"
+                    placeholder="2015"
+                    helperText="Året køkkenet sidst blev udskiftet"
+                    value={state.kitchenYear}
+                    onChange={(v) => update({ kitchenYear: v })}
+                    min={1900}
+                    max={2030}
+                  />
+                  <NumberField
+                    label="Bad-årgang"
+                    placeholder="2020"
+                    helperText="Året badet sidst blev renoveret"
+                    value={state.bathroomYear}
+                    onChange={(v) => update({ bathroomYear: v })}
+                    min={1900}
+                    max={2030}
+                  />
+                </div>
+                <TextField
+                  label="Køkken-mærke (valgfri)"
+                  placeholder="HTH, Svane, IKEA…"
+                  value={state.kitchenBrand}
+                  onChange={(v) => update({ kitchenBrand: v })}
+                />
+              </section>
+
+              {/* HVIDEVARER */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+                  🔌 Hvidevarer der følger med
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <ApplianceToggle
+                    label="Vaskemaskine"
+                    value={state.applVaskemaskine}
+                    onChange={(v) => update({ applVaskemaskine: v })}
+                  />
+                  <ApplianceToggle
+                    label="Tørretumbler"
+                    value={state.applTorretumbler}
+                    onChange={(v) => update({ applTorretumbler: v })}
+                  />
+                  <ApplianceToggle
+                    label="Opvaskemaskine"
+                    value={state.applOpvaskemaskine}
+                    onChange={(v) => update({ applOpvaskemaskine: v })}
+                  />
+                  <ApplianceToggle
+                    label="Køle-/fryseskab"
+                    value={state.applKoeleFryseskab}
+                    onChange={(v) => update({ applKoeleFryseskab: v })}
+                  />
+                  <ApplianceToggle
+                    label="Ovn"
+                    value={state.applOvn}
+                    onChange={(v) => update({ applOvn: v })}
+                  />
+                  <ApplianceToggle
+                    label="Komfur"
+                    value={state.applKomfur}
+                    onChange={(v) => update({ applKomfur: v })}
+                  />
+                  <ApplianceToggle
+                    label="Mikroovn"
+                    value={state.applMikroovn}
+                    onChange={(v) => update({ applMikroovn: v })}
+                  />
+                  <ApplianceToggle
+                    label="Emhætte"
+                    value={state.applEmhaette}
+                    onChange={(v) => update({ applEmhaette: v })}
+                  />
+                </div>
+              </section>
+
+              {/* SÆRLIGE FORHOLD */}
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+                  ℹ️ Særlige forhold
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <ApplianceToggle
+                    label="Altan/terrasse"
+                    value={state.hasAltan}
+                    onChange={(v) => update({ hasAltan: v })}
+                  />
+                  <ApplianceToggle
+                    label="Elevator i bygning"
+                    value={state.hasElevator}
+                    onChange={(v) => update({ hasElevator: v })}
+                  />
+                </div>
+              </section>
+
+              {/* NOTE */}
+              <section className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Note til mægler (valgfri)
+                </label>
+                <textarea
+                  value={state.standNote}
+                  onChange={(e) => update({ standNote: e.target.value })}
+                  rows={3}
+                  placeholder='Fx "Køkken fra 2015, opvasker fra 2008" eller "Nyrenoveret bad 2023"'
+                  className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </section>
+            </div>
+          )}
         </div>
-      </section>
+      )}
 
-      {/* BADEVÆRELSE */}
-      <section className="space-y-3">
+      {/* AKTUELT UDLEJET — egen sektion fordi det udløser meget data */}
+      <section className="border-t border-slate-200 pt-4 space-y-3">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          🚿 Badeværelse
+          🏘️ Er lejligheden udlejet i dag?
         </h3>
-        <NumberField
-          label="Senest renoveret/årgang"
-          placeholder="2020"
-          value={state.bathroomYear}
-          onChange={(v) => update({ bathroomYear: v })}
-          min={1900}
-          max={2030}
-        />
-      </section>
-
-      {/* HVIDEVARER */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          🔌 Hvidevarer der følger med boligen
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          <ApplianceToggle
-            label="Vaskemaskine"
-            value={state.applVaskemaskine}
-            onChange={(v) => update({ applVaskemaskine: v })}
-          />
-          <ApplianceToggle
-            label="Tørretumbler"
-            value={state.applTorretumbler}
-            onChange={(v) => update({ applTorretumbler: v })}
-          />
-          <ApplianceToggle
-            label="Opvaskemaskine"
-            value={state.applOpvaskemaskine}
-            onChange={(v) => update({ applOpvaskemaskine: v })}
-          />
-          <ApplianceToggle
-            label="Køle-/fryseskab"
-            value={state.applKoeleFryseskab}
-            onChange={(v) => update({ applKoeleFryseskab: v })}
-          />
-          <ApplianceToggle
-            label="Ovn"
-            value={state.applOvn}
-            onChange={(v) => update({ applOvn: v })}
-          />
-          <ApplianceToggle
-            label="Komfur"
-            value={state.applKomfur}
-            onChange={(v) => update({ applKomfur: v })}
-          />
-          <ApplianceToggle
-            label="Mikroovn"
-            value={state.applMikroovn}
-            onChange={(v) => update({ applMikroovn: v })}
-          />
-          <ApplianceToggle
-            label="Emhætte"
-            value={state.applEmhaette}
-            onChange={(v) => update({ applEmhaette: v })}
-          />
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => update({ isRented: false })}
+            className={`flex-1 px-4 py-3 rounded-lg border-2 text-sm font-medium ${
+              !state.isRented
+                ? 'border-slate-900 bg-slate-900 text-white'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+            }`}
+          >
+            Nej — jeg bor selv eller står tom
+          </button>
+          <button
+            type="button"
+            onClick={() => update({ isRented: true })}
+            className={`flex-1 px-4 py-3 rounded-lg border-2 text-sm font-medium ${
+              state.isRented
+                ? 'border-amber-600 bg-amber-50 text-amber-900'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+            }`}
+          >
+            Ja — har en lejer
+          </button>
         </div>
-      </section>
 
-      {/* SÆRLIGE FORHOLD */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          ℹ️ Særlige forhold
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          <ApplianceToggle
-            label="Altan/terrasse"
-            value={state.hasAltan}
-            onChange={(v) => update({ hasAltan: v })}
-          />
-          <ApplianceToggle
-            label="Elevator i bygning"
-            value={state.hasElevator}
-            onChange={(v) => update({ hasElevator: v })}
-          />
-          <ApplianceToggle
-            label="Aktuelt udlejet"
-            value={state.isRented}
-            onChange={(v) => update({ isRented: v })}
-          />
-        </div>
-        {state.ejerforeningHaeftelseKr > 0 && (
-          <div className="text-xs text-slate-600 bg-slate-50 rounded px-3 py-2">
-            ✓ Hæftelse til ejerforening: <strong>{state.ejerforeningHaeftelseKr.toLocaleString('da-DK')} kr</strong>{' '}
-            (angivet under Udgifter)
-          </div>
-        )}
-      </section>
-
-      {/* UDLEJNINGS-DETALJER */}
-      {state.isRented && (
-        <section className="space-y-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <h3 className="text-sm font-semibold text-amber-900 uppercase tracking-wide">
-            🏘️ Aktuelt udlejet — vi har brug for kontrakt-detaljer
-          </h3>
-          <p className="text-xs text-amber-800">
-            Vi køber gerne udlejede lejligheder. Detaljerne nedenunder afgør om vi kan beholde
-            lejer (godt for os) eller om kontrakten skal ophæves.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <NumberField
-              label="Månedlig leje"
-              suffix="kr/md"
-              placeholder="8.500"
-              value={state.rentalMonthlyRent}
-              onChange={(v) => update({ rentalMonthlyRent: v })}
+        {state.isRented && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+            <p className="text-xs text-amber-900">
+              Vi køber gerne udlejede lejligheder — sig nej til at de skal flytte.
+              Detaljerne her hjælper os med at vurdere kontrakten.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <NumberField
+                label="Månedlig leje"
+                suffix="kr/md"
+                placeholder="8.500"
+                value={state.rentalMonthlyRent}
+                onChange={(v) => update({ rentalMonthlyRent: v })}
+              />
+              <NumberField
+                label="Depositum"
+                suffix="kr"
+                placeholder="25.500"
+                value={state.rentalDeposit}
+                onChange={(v) => update({ rentalDeposit: v })}
+              />
+              <NumberField
+                label="Forudbetalt leje"
+                suffix="kr"
+                placeholder="0"
+                value={state.rentalPrepaidRent}
+                onChange={(v) => update({ rentalPrepaidRent: v })}
+              />
+            </div>
+            <DateField
+              label="Indflytningsdato"
+              value={state.rentalStartDate}
+              onChange={(v) => update({ rentalStartDate: v })}
             />
-            <NumberField
-              label="Depositum"
-              suffix="kr"
-              placeholder="25.500"
-              value={state.rentalDeposit}
-              onChange={(v) => update({ rentalDeposit: v })}
-            />
-            <NumberField
-              label="Forudbetalt leje"
-              suffix="kr"
-              placeholder="0"
-              value={state.rentalPrepaidRent}
-              onChange={(v) => update({ rentalPrepaidRent: v })}
-            />
-          </div>
-
-          <DateField
-            label="Indflytningsdato"
-            value={state.rentalStartDate}
-            onChange={(v) => update({ rentalStartDate: v })}
-          />
-
-          <div className="space-y-2">
             <ApplianceToggle
               label="Lejekontrakten er uopsigelig"
               value={state.rentalUopsigelig}
@@ -260,9 +321,6 @@ export function Step4Stand() {
                 onChange={(v) => update({ rentalUopsigeligMaaneder: v })}
               />
             )}
-          </div>
-
-          <div className="pt-2">
             <label className="block w-full px-4 py-3 border-2 border-dashed border-amber-300 rounded-lg text-center cursor-pointer hover:border-amber-500 hover:bg-amber-100/30">
               <input
                 type="file"
@@ -277,25 +335,11 @@ export function Step4Stand() {
                 📎{' '}
                 {state.rentalContract
                   ? `${state.rentalContract.name} (${(state.rentalContract.size / 1024).toFixed(0)} kB)`
-                  : 'Vedhæft lejekontrakt (gør tingene 10x hurtigere)'}
+                  : 'Vedhæft lejekontrakt — gør tingene 10x hurtigere'}
               </span>
             </label>
           </div>
-        </section>
-      )}
-
-      {/* NOTE */}
-      <section className="space-y-2">
-        <label className="block text-sm font-medium text-slate-700">
-          Tilføj en note (valgfri)
-        </label>
-        <textarea
-          value={state.standNote}
-          onChange={(e) => update({ standNote: e.target.value })}
-          rows={3}
-          placeholder='Eks. "Køkken renoveret 2015 men opvasker er fra 2008", "Bad nyrenoveret 2023 med gulvvarme"'
-          className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
+        )}
       </section>
 
       <div className="flex justify-between gap-3 pt-2">
@@ -323,6 +367,7 @@ function NumberField({
   onChange,
   placeholder,
   suffix,
+  helperText,
   min,
   max,
 }: {
@@ -331,9 +376,11 @@ function NumberField({
   onChange: (v: number) => void;
   placeholder?: string;
   suffix?: string;
+  helperText?: string;
   min?: number;
   max?: number;
 }) {
+  const showFormatted = value != null && value > 0 && suffix && suffix.includes('kr');
   return (
     <label className="block">
       <div className="text-sm font-medium text-slate-700 mb-1">{label}</div>
@@ -354,6 +401,14 @@ function NumberField({
           </span>
         )}
       </div>
+      {showFormatted && (
+        <div className="text-xs text-emerald-700 mt-1 font-medium">
+          = {value!.toLocaleString('da-DK')} {suffix}
+        </div>
+      )}
+      {!showFormatted && helperText && (
+        <div className="text-xs text-slate-500 mt-1">{helperText}</div>
+      )}
     </label>
   );
 }

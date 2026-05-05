@@ -76,7 +76,15 @@ export async function listLeadsForPipeline() {
     })
     .from(leads)
     .innerJoin(pipelineStages, eq(leads.stageSlug, pipelineStages.slug))
-    .where(and(ne(leads.stageSlug, 'arkiveret'), ne(leads.stageSlug, 'tabt'), isNull(leads.deletedAt)))
+    .where(
+      and(
+        ne(leads.stageSlug, 'arkiveret'),
+        ne(leads.stageSlug, 'tabt'),
+        isNull(leads.deletedAt),
+        // Boligberegner-leads har deres egen /off-market liste — ekskluder fra pipeline
+        sql`(${leads.source} IS NULL OR ${leads.source} NOT LIKE 'boligberegner%')`,
+      ),
+    )
     .orderBy(desc(leads.stageChangedAt));
 }
 
