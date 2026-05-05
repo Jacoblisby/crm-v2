@@ -23,7 +23,12 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setState(JSON.parse(raw));
+      if (raw) {
+        // Merge med initialState så nye felter får default-værdier
+        // (fx hvis vi tilføjer felter senere) — undgår undefined-crashes
+        const parsed = JSON.parse(raw) as Partial<FunnelState>;
+        setState({ ...initialState, ...parsed });
+      }
     } catch {}
     // Capture UTM-params hvis kommet via Ads/brev/SEO
     const params = new URLSearchParams(window.location.search);

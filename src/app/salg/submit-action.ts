@@ -32,17 +32,22 @@ export async function submitFunnelAction(
     return { ok: false, error: 'Mangler stand-vurdering' };
   }
 
-  // 1. Beregn estimat
-  const waterCost = state.waterPaidViaAssoc ? state.waterAcontoYearly : state.waterUsageLastYearKr;
-  const heatCost = state.heatPaidViaAssoc ? state.heatAcontoYearly : state.heatUsageLastYearKr;
+  // 1. Beregn estimat — defensive coercion mod undefined fra gammel client-state
+  const num = (v: number | undefined | null) => (typeof v === 'number' ? v : 0);
+  const waterCost = state.waterPaidViaAssoc
+    ? num(state.waterAcontoYearly)
+    : num(state.waterUsageLastYearKr);
+  const heatCost = state.heatPaidViaAssoc
+    ? num(state.heatAcontoYearly)
+    : num(state.heatUsageLastYearKr);
   const driftTotal =
-    state.costGrundvaerdi +
-    state.costFaellesudgifter +
-    state.costRottebekempelse +
-    state.costRenovation +
-    state.costForsikringer +
-    state.costFaelleslaan +
-    state.costAndreDrift +
+    num(state.costGrundvaerdi) +
+    num(state.costFaellesudgifter) +
+    num(state.costRottebekempelse) +
+    num(state.costRenovation) +
+    num(state.costForsikringer) +
+    num(state.costFaelleslaan) +
+    num(state.costAndreDrift) +
     waterCost +
     heatCost;
 
@@ -131,7 +136,7 @@ export async function submitFunnelAction(
     state.hasElevator ? '✓ Elevator' : '',
     state.hasEjerforeningHaeftelse ? '⚠️ Hæftelse til EF >50k' : '',
     state.isRented
-      ? `⚠️ AKTUELT UDLEJET — leje ${state.rentalMonthlyRent.toLocaleString('da-DK')} kr/md, depositum ${state.rentalDeposit.toLocaleString('da-DK')} kr, indflytning ${state.rentalStartDate || '?'}${state.rentalUopsigelig ? ` (UOPSIGELIG ${state.rentalUopsigeligMaaneder} mdr endnu)` : ''}${state.rentalContract ? ` — kontrakt vedhæftet: ${state.rentalContract.name}` : ''}`
+      ? `⚠️ AKTUELT UDLEJET — leje ${(state.rentalMonthlyRent ?? 0).toLocaleString('da-DK')} kr/md, depositum ${(state.rentalDeposit ?? 0).toLocaleString('da-DK')} kr, indflytning ${state.rentalStartDate || '?'}${state.rentalUopsigelig ? ` (UOPSIGELIG ${state.rentalUopsigeligMaaneder ?? 0} mdr endnu)` : ''}${state.rentalContract ? ` — kontrakt vedhæftet: ${state.rentalContract.name}` : ''}`
       : '',
     ``,
     `MEDIA:`,
