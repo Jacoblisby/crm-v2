@@ -48,6 +48,8 @@ export interface FunnelState {
   heatPaidViaAssoc: boolean;
   heatAcontoYearly: number;
   heatUsageLastYearKr: number;
+  // Hæftelse til ejerforening (engangs gæld kunden hæfter for)
+  ejerforeningHaeftelseKr: number;
   // Relaterede dokumenter (valgfri)
   documents: { name: string; size: number; kind: string }[];
 
@@ -127,6 +129,7 @@ export const initialState: FunnelState = {
   heatPaidViaAssoc: false,
   heatAcontoYearly: 0,
   heatUsageLastYearKr: 0,
+  ejerforeningHaeftelseKr: 0,
   documents: [],
   stand: null,
   standNote: '',

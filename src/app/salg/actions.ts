@@ -46,6 +46,7 @@ export interface ComputeEstimateInput {
   stand: StandLevel;
   driftTotalYearly: number;
   currentListingPrice: number | null;
+  haeftelseEf?: number;
 }
 
 export async function computeEstimateAction(input: ComputeEstimateInput) {

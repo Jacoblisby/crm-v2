@@ -59,6 +59,7 @@ export async function submitFunnelAction(
     stand: state.stand as StandLevel,
     driftTotalYearly: driftTotal,
     currentListingPrice: state.currentListingPrice,
+    haeftelseEf: num(state.ejerforeningHaeftelseKr),
   });
 
   // 2. Find eksisterende property hvis bfe matcher
@@ -130,11 +131,13 @@ export async function submitFunnelAction(
     `· Vand: ${waterCost.toLocaleString('da-DK')} (${state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
     `· Varme: ${heatCost.toLocaleString('da-DK')} (${state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
     `· TOTAL: ${driftTotal.toLocaleString('da-DK')} kr/år`,
+    num(state.ejerforeningHaeftelseKr) > 0
+      ? `· HÆFTELSE EF (engang): ${num(state.ejerforeningHaeftelseKr).toLocaleString('da-DK')} kr`
+      : '',
     ``,
     `SÆRLIGE FORHOLD:`,
     state.hasAltan ? '✓ Altan' : '',
     state.hasElevator ? '✓ Elevator' : '',
-    state.hasEjerforeningHaeftelse ? '⚠️ Hæftelse til EF >50k' : '',
     state.isRented
       ? `⚠️ AKTUELT UDLEJET — leje ${(state.rentalMonthlyRent ?? 0).toLocaleString('da-DK')} kr/md, depositum ${(state.rentalDeposit ?? 0).toLocaleString('da-DK')} kr, indflytning ${state.rentalStartDate || '?'}${state.rentalUopsigelig ? ` (UOPSIGELIG ${state.rentalUopsigeligMaaneder ?? 0} mdr endnu)` : ''}${state.rentalContract ? ` — kontrakt vedhæftet: ${state.rentalContract.name}` : ''}`
       : '',

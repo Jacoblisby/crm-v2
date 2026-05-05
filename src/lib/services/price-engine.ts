@@ -44,6 +44,8 @@ export interface PriceEngineInput {
   rooms?: number | null;
   /** Hvis kunden har en aktuel listing/listepris fra mægler — bruges som sanity check */
   currentListingPrice?: number | null;
+  /** Hæftelse til ejerforening (engangs gæld kunden hæfter for, fra tinglysning) */
+  haeftelseEf?: number;
 }
 
 export interface PriceEngineResult {
@@ -115,6 +117,7 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     forhandletPris: null,
     driftTotal: input.driftTotalYearly,
     refurbTotal,
+    haeftelseEf: input.haeftelseEf ?? 0,
   });
 
   // 5. Bud@20% ROE er det maksimale vi vil byde

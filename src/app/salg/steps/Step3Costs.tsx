@@ -138,6 +138,26 @@ export function Step3Costs() {
         )}
       </section>
 
+      {/* === HÆFTELSE === */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          🏛️ Hæftelse til ejerforening
+        </h3>
+        <p className="text-xs text-slate-600">
+          Hvis ejerforeningen har gæld (fx fra renovering, energiforbedring), hæfter du for din
+          andel. Det fremgår typisk af tinglysningsattesten eller årsregnskabet. Lader du feltet
+          være 0 antager vi at der ingen hæftelse er.
+        </p>
+        <CostInput
+          label="Din andel af ejerforeningens gæld"
+          hint="Engangsgæld — IKKE den månedlige fælleslån-ydelse (den indtastede du ovenover)"
+          placeholder="0"
+          value={state.ejerforeningHaeftelseKr}
+          onChange={(v) => update({ ejerforeningHaeftelseKr: v })}
+          suffix="kr"
+        />
+      </section>
+
       {/* === TOTAL === */}
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-1">
         <div className="flex items-baseline justify-between">
@@ -149,6 +169,14 @@ export function Step3Costs() {
         <div className="text-xs text-slate-500 text-right">
           ~{Math.round(totalAllInclusive / 12).toLocaleString('da-DK')} kr/md
         </div>
+        {state.ejerforeningHaeftelseKr > 0 && (
+          <div className="text-xs text-slate-600 border-t border-emerald-200 pt-2 mt-2 flex justify-between">
+            <span>+ Hæftelse til EF (engang):</span>
+            <span className="font-medium">
+              {state.ejerforeningHaeftelseKr.toLocaleString('da-DK')} kr
+            </span>
+          </div>
+        )}
       </div>
 
       {/* === RELATEREDE DOKUMENTER === */}
@@ -190,12 +218,14 @@ function CostInput({
   placeholder,
   value,
   onChange,
+  suffix = 'kr/år',
 }: {
   label: string;
   hint?: string;
   placeholder?: string;
   value: number;
   onChange: (v: number) => void;
+  suffix?: string;
 }) {
   return (
     <label className="block">
@@ -210,7 +240,7 @@ function CostInput({
           className="w-full px-3 py-2.5 pr-14 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">
-          kr/år
+          {suffix}
         </span>
       </div>
       {hint && <div className="text-xs text-slate-500 mt-1">{hint}</div>}

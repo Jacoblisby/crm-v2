@@ -195,12 +195,13 @@ export function Step4Stand() {
             value={state.isRented}
             onChange={(v) => update({ isRented: v })}
           />
-          <ApplianceToggle
-            label="Hæftelse til EF >50k"
-            value={state.hasEjerforeningHaeftelse}
-            onChange={(v) => update({ hasEjerforeningHaeftelse: v })}
-          />
         </div>
+        {state.ejerforeningHaeftelseKr > 0 && (
+          <div className="text-xs text-slate-600 bg-slate-50 rounded px-3 py-2">
+            ✓ Hæftelse til ejerforening: <strong>{state.ejerforeningHaeftelseKr.toLocaleString('da-DK')} kr</strong>{' '}
+            (angivet under Udgifter)
+          </div>
+        )}
       </section>
 
       {/* UDLEJNINGS-DETALJER */}
