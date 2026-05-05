@@ -9,6 +9,8 @@ export function AfkastDebug() {
   const [drift, setDrift] = useState<number>(36_000);
   const [refurb, setRefurb] = useState<number>(45_000);
   const [haeftelse, setHaeftelse] = useState<number>(0);
+  const [betalingPrMio, setBetalingPrMio] = useState<number>(AFKAST_CONSTANTS.BETALING_PR_MIO);
+  const [targetRoe, setTargetRoe] = useState<number>(AFKAST_CONSTANTS.TARGET_ROE * 100);
 
   const result = useMemo(() => {
     return computeAfkast({
@@ -17,10 +19,13 @@ export function AfkastDebug() {
       driftTotal: drift,
       refurbTotal: refurb,
       haeftelseEf: haeftelse,
+      betalingPrMio,
+      targetRoe: targetRoe / 100,
     });
-  }, [pris, lejeMd, drift, refurb, haeftelse]);
+  }, [pris, lejeMd, drift, refurb, haeftelse, betalingPrMio, targetRoe]);
 
   const t = result.trace;
+  const ydelsePct = (betalingPrMio / 1_000_000) * 100;
 
   return (
     <div className="space-y-6">
@@ -28,49 +33,108 @@ export function AfkastDebug() {
       <section className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
         <h2 className="font-semibold">Inputs</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field
-            label="Pris (forhandlet eller liste)"
-            value={pris}
-            onChange={setPris}
-            suffix="kr"
+          <Field label="Pris (forhandlet eller liste)" value={pris} onChange={setPris} suffix="kr" />
+          <Field label="Leje pr. md" value={lejeMd} onChange={setLejeMd} suffix="kr/md" />
+          <Field label="Drift (årlig sum)" value={drift} onChange={setDrift} suffix="kr/år" />
+          <Field label="Refurbish (engang)" value={refurb} onChange={setRefurb} suffix="kr" />
+          <Field label="Hæftelse EF" value={haeftelse} onChange={setHaeftelse} suffix="kr" />
+        </div>
+      </section>
+
+      {/* HOVEDRESULTAT — ROA + ROE EBT prominent (uden skat) */}
+      <section className="bg-emerald-50 border border-emerald-300 rounded-lg p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <BigStat
+            label="Bud ved target"
+            sublabel={`ROE EBT ≥ ${targetRoe}% (uden skat)`}
+            value={result.budAt20PctRoe ? `${fmt(result.budAt20PctRoe)} kr` : '—'}
+            color="emerald"
           />
-          <Field
-            label="Leje pr. md"
-            value={lejeMd}
-            onChange={setLejeMd}
-            suffix="kr/md"
+          <BigStat
+            label="ROA EBIT"
+            sublabel="EBIT / kapitalbehov"
+            value={`${result.roaEbitPct}%`}
           />
-          <Field
-            label="Drift (årlig sum)"
-            value={drift}
-            onChange={setDrift}
-            suffix="kr/år"
+          <BigStat
+            label="ROE EBT"
+            sublabel="EBT / egenkapital (før skat)"
+            value={`${result.roeEbtPct}%`}
           />
-          <Field
-            label="Refurbish (engang)"
-            value={refurb}
-            onChange={setRefurb}
-            suffix="kr"
-          />
-          <Field
-            label="Hæftelse EF"
-            value={haeftelse}
-            onChange={setHaeftelse}
-            suffix="kr"
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-emerald-200">
+          <Stat label="Cash flow / md (EBT)" value={`${fmt(result.cfMd)} kr`} />
+          <Stat label="Egenkapital" value={`${fmt(result.egenkapital)} kr`} />
+          <Stat label="Kapitalbehov" value={`${fmt(result.kapitalbehov)} kr`} />
+          <Stat
+            label="ROE Netto (m. skat)"
+            value={`${result.roeNettoPct}%`}
+            sublabel="kun til reference"
+            muted
           />
         </div>
       </section>
 
-      {/* HOVEDRESULTAT */}
-      <section className="bg-emerald-50 border border-emerald-300 rounded-lg p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Stat label="Bud@20% ROE" value={result.budAt20PctRoe ? fmt(result.budAt20PctRoe) : '—'} hi />
-        <Stat label="ROE Netto" value={`${result.roeNettoPct}%`} />
-        <Stat label="ROE EBT" value={`${result.roeEbtPct}%`} />
-        <Stat label="ROA EBIT" value={`${result.roaEbitPct}%`} />
-        <Stat label="Cash flow / md (EBT)" value={`${fmt(result.cfMd)} kr`} />
-        <Stat label="Egenkapital" value={`${fmt(result.egenkapital)} kr`} />
-        <Stat label="Kapitalbehov" value={`${fmt(result.kapitalbehov)} kr`} />
-        <Stat label="Netto resultat /år" value={`${fmt(result.netto)} kr`} />
+      {/* RENTE / YDELSE — vigtigt at se tydeligt */}
+      <section className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+        <h2 className="font-semibold">📊 Finansiering — rente & ydelse</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <div className="text-xs text-slate-600 mb-1">
+              Årlig ydelse (rente + evt. afdrag) — kr per lånt mio
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={betalingPrMio || ''}
+                onChange={(e) => setBetalingPrMio(Number(e.target.value) || 0)}
+                className="w-full px-3 py-2 pr-12 text-sm border border-slate-300 rounded font-mono"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                kr/mio
+              </span>
+            </div>
+            <div className="text-xs text-slate-600 mt-1">
+              = <strong>{ydelsePct.toFixed(2)}%</strong> af hovedstol/år
+              {ydelsePct < 4 && <span className="text-amber-600"> (lavt — antager afdragsfri F-kort)</span>}
+              {ydelsePct >= 4 && ydelsePct < 6 && <span className="text-slate-500"> (afdragsfri ved 4-6% rente)</span>}
+              {ydelsePct >= 6 && <span className="text-slate-500"> (typisk 30-år med afdrag + rente)</span>}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-600 mb-1">Target ROE EBT (uden skat)</div>
+            <div className="relative">
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                value={targetRoe || ''}
+                onChange={(e) => setTargetRoe(Number(e.target.value) || 0)}
+                className="w-full px-3 py-2 pr-8 text-sm border border-slate-300 rounded font-mono"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                %
+              </span>
+            </div>
+            <div className="text-xs text-slate-600 mt-1">
+              Bud-modellen finder højeste pris hvor ROE EBT ≥ {targetRoe}%
+            </div>
+          </div>
+          <div className="sm:col-span-2 grid grid-cols-3 gap-3 text-sm bg-white p-3 rounded border border-blue-200">
+            <Stat label="Hovedstol" value={`${fmt(t.hovedstol)} kr`} />
+            <Stat label="Årlig ydelse" value={`${fmt(t.aarligYdelse)} kr`} sublabel={`= ${ydelsePct.toFixed(2)}%`} />
+            <Stat
+              label="Rente-andel ca."
+              value={
+                ydelsePct < 4
+                  ? `~${ydelsePct.toFixed(1)}%`
+                  : `Skal opdeles manuelt`
+              }
+              sublabel="afdragsfri = ren rente"
+              muted
+            />
+          </div>
+        </div>
       </section>
 
       {/* MELLEMREGNINGER */}
@@ -80,12 +144,11 @@ export function AfkastDebug() {
           <tbody className="divide-y divide-slate-100">
             <SectionRow title="A. KAPITALBEHOV" />
             <Row label="Pris (forhandlet)" value={fmt(pris)} formula="input" />
-            <Row label="− Refusion (3 md leje)" value={`-${fmt(t.refusionMd3)}`} formula={`leje × 3 = ${lejeMd} × 3`} />
-            <Row label="− Refusion (3 md leje)" value={`-${fmt(t.refusionMd3)}`} formula="igen — modellen trækker leje × 3 to gange (Excel B14)" />
-            <Row label="= Kapitalbehov" value={fmt(result.kapitalbehov)} formula={`pris − leje×6`} highlight />
+            <Row label="− Refusion (3 md leje × 2)" value={`-${fmt(t.refusionMd3 * 2)}`} formula={`leje × 3 × 2 = ${lejeMd} × 6`} />
+            <Row label="= Kapitalbehov" value={fmt(result.kapitalbehov)} formula="pris − leje×6" highlight />
 
             <SectionRow title="B. HANDELSOMKOSTNINGER" />
-            <Row label="Tinglysning skøde" value={fmt(t.tinglysningSkode)} formula={`1.850 + pris × 0,6%`} />
+            <Row label="Tinglysning skøde" value={fmt(t.tinglysningSkode)} formula="1.850 + pris × 0,6%" />
             <Row label="+ Refurbish" value={fmt(refurb)} formula="input" />
             <Row label="= Handelsomkostninger" value={fmt(t.handelsomkostninger)} formula="sum" highlight />
 
@@ -95,7 +158,7 @@ export function AfkastDebug() {
             <Row label="Hovedstol" value={fmt(t.hovedstol)} formula={`provenu / kurs ${AFKAST_CONSTANTS.KURS}`} />
 
             <SectionRow title="D. LÅNEOMKOSTNINGER" />
-            <Row label="Lånsagsgebyr" value={fmt(t.lansgsgebyr)} formula={`fast (Antagelser B9)`} />
+            <Row label="Lånsagsgebyr" value={fmt(t.lansgsgebyr)} formula="fast" />
             <Row label="+ Kurtage" value={fmt(t.kurtage)} formula={`hovedstol × ${(AFKAST_CONSTANTS.KURTAGE * 100).toFixed(2)}%`} />
             <Row label="+ Tinglysning lån" value={fmt(t.tinglysningLaan)} formula={`hovedstol × ${(AFKAST_CONSTANTS.TINGLYSNING_LAAN * 100).toFixed(2)}%`} />
             <Row label="= Låneomk total" value={fmt(t.laanomkTotal)} formula="sum" highlight />
@@ -108,24 +171,24 @@ export function AfkastDebug() {
             <Row label="= Egenkapital" value={fmt(result.egenkapital)} formula="dit indestående" highlight />
 
             <SectionRow title="F. RESULTAT (PR ÅR)" />
-            <Row label="Lejeindtægter" value={fmt(result.revenue)} formula={`${lejeMd} × 12 = ${fmt(lejeMd * 12)}`} />
+            <Row label="Lejeindtægter" value={fmt(result.revenue)} formula={`${lejeMd} × 12`} />
             <Row label="− Drift" value={`-${fmt(result.totalCosts)}`} formula="input" />
             <Row label="= EBIT" value={fmt(result.ebit)} formula="lejeind − drift" highlight />
-            <Row label="− Finansiering (årlig ydelse)" value={`-${fmt(t.aarligYdelse)}`} formula={`hovedstol × ${AFKAST_CONSTANTS.BETALING_PR_MIO} / 1.000.000 (Antagelser B6)`} />
-            <Row label="= EBT" value={fmt(result.ebt)} formula="EBIT − finansiering" highlight />
-            <Row label="− Selskabsskat" value={`-${fmt(t.selskabsskat)}`} formula={`max(0, EBT) × ${(AFKAST_CONSTANTS.SKAT * 100).toFixed(0)}%`} />
-            <Row label="= Netto resultat" value={fmt(result.netto)} formula="EBT − skat" highlight />
+            <Row label="− Finansiering (årlig ydelse)" value={`-${fmt(t.aarligYdelse)}`} formula={`hovedstol × ${ydelsePct.toFixed(2)}%`} />
+            <Row label="= EBT (resultat før skat)" value={fmt(result.ebt)} formula="EBIT − finansiering" highlight />
+            <Row label="Selskabsskat (KUN INFO)" value={`-${fmt(t.selskabsskat)}`} formula={`max(0, EBT) × ${(AFKAST_CONSTANTS.SKAT * 100).toFixed(0)}% — IKKE i target`} muted />
+            <Row label="Netto resultat efter skat (kun info)" value={fmt(result.netto)} formula="EBT − skat" muted />
 
-            <SectionRow title="G. ROE / ROA" />
-            <Row label="ROA EBIT" value={`${result.roaEbitPct}%`} formula="EBIT / kapitalbehov" />
-            <Row label="ROE EBT" value={`${result.roeEbtPct}%`} formula="EBT / egenkapital" />
-            <Row label="ROE Netto" value={`${result.roeNettoPct}%`} formula="netto / egenkapital" highlight />
+            <SectionRow title="G. ROA / ROE" />
+            <Row label="ROA EBIT" value={`${result.roaEbitPct}%`} formula="EBIT / kapitalbehov" highlight />
+            <Row label="ROE EBT" value={`${result.roeEbtPct}%`} formula="EBT / egenkapital (før skat) ← target" highlight />
+            <Row label="ROE Netto (info)" value={`${result.roeNettoPct}%`} formula="netto / egenkapital (efter skat)" muted />
 
-            <SectionRow title="H. BUD AT TARGET ROE" />
+            <SectionRow title="H. BUD AT TARGET ROE EBT" />
             <Row
-              label={`Bud ved ${(AFKAST_CONSTANTS.TARGET_ROE * 100).toFixed(0)}% ROE Netto`}
+              label={`Bud ved ${targetRoe}% ROE EBT`}
               value={result.budAt20PctRoe ? fmt(result.budAt20PctRoe) : '—'}
-              formula={`Linjesøgning: højeste pris hvor netto/egenkapital ≥ ${(AFKAST_CONSTANTS.TARGET_ROE * 100).toFixed(0)}%`}
+              formula={`Linjesøgning: højeste pris hvor EBT/EK ≥ ${targetRoe}%`}
               highlight
             />
           </tbody>
@@ -134,17 +197,16 @@ export function AfkastDebug() {
 
       {/* CONSTANTS */}
       <section className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs space-y-1">
-        <h3 className="font-semibold text-sm mb-2">Antagelser (constants)</h3>
+        <h3 className="font-semibold text-sm mb-2">Antagelser (constants — ikke editerbare i denne version)</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <Const label="Bankvurd %" value={`${AFKAST_CONSTANTS.BANKVURD_PCT * 100}%`} />
           <Const label="Realkredit %" value={`${AFKAST_CONSTANTS.REALKREDIT_PCT * 100}%`} />
           <Const label="Kurs" value={`${AFKAST_CONSTANTS.KURS}`} />
-          <Const label="Betaling/mio" value={`${AFKAST_CONSTANTS.BETALING_PR_MIO}`} />
-          <Const label="Selskabsskat" value={`${AFKAST_CONSTANTS.SKAT * 100}%`} />
-          <Const label="Lånsagsgebyr" value={`${AFKAST_CONSTANTS.LAANSAG}`} />
+          <Const label="Selskabsskat" value={`${AFKAST_CONSTANTS.SKAT * 100}% (kun info)`} />
+          <Const label="Lånsagsgebyr" value={`${AFKAST_CONSTANTS.LAANSAG} kr`} />
           <Const label="Kurtage" value={`${AFKAST_CONSTANTS.KURTAGE * 100}%`} />
           <Const label="Tinglysning lån" value={`${AFKAST_CONSTANTS.TINGLYSNING_LAAN * 100}%`} />
-          <Const label="Target ROE" value={`${AFKAST_CONSTANTS.TARGET_ROE * 100}%`} />
+          <Const label="Default target ROE" value={`${AFKAST_CONSTANTS.TARGET_ROE * 100}% EBT`} />
         </div>
       </section>
     </div>
@@ -183,21 +245,46 @@ function Field({
   );
 }
 
-function Stat({
+function BigStat({
   label,
+  sublabel,
   value,
-  hi,
+  color,
 }: {
   label: string;
+  sublabel?: string;
   value: string;
-  hi?: boolean;
+  color?: 'emerald';
 }) {
   return (
     <div>
       <div className="text-xs text-slate-600">{label}</div>
-      <div className={`font-bold tabular-nums ${hi ? 'text-2xl text-emerald-700' : 'text-base text-slate-900'}`}>
+      {sublabel && <div className="text-[10px] text-slate-500 italic">{sublabel}</div>}
+      <div className={`font-bold tabular-nums text-2xl mt-1 ${color === 'emerald' ? 'text-emerald-700' : 'text-slate-900'}`}>
         {value}
       </div>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  sublabel,
+  muted,
+}: {
+  label: string;
+  value: string;
+  sublabel?: string;
+  muted?: boolean;
+}) {
+  return (
+    <div>
+      <div className={`text-xs ${muted ? 'text-slate-400' : 'text-slate-600'}`}>{label}</div>
+      <div className={`font-medium tabular-nums ${muted ? 'text-slate-500' : 'text-slate-900'}`}>
+        {value}
+      </div>
+      {sublabel && <div className="text-[10px] text-slate-500 italic">{sublabel}</div>}
     </div>
   );
 }
@@ -217,14 +304,16 @@ function Row({
   value,
   formula,
   highlight,
+  muted,
 }: {
   label: string;
   value: string;
   formula?: string;
   highlight?: boolean;
+  muted?: boolean;
 }) {
   return (
-    <tr className={highlight ? 'bg-emerald-50 font-semibold' : ''}>
+    <tr className={highlight ? 'bg-emerald-50 font-semibold' : muted ? 'opacity-60' : ''}>
       <td className="px-4 py-1.5 text-slate-700">{label}</td>
       <td className={`px-4 py-1.5 text-right tabular-nums ${highlight ? 'text-emerald-900' : ''}`}>
         {value}
