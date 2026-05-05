@@ -38,8 +38,12 @@ export async function getStageBySlug(slug: string) {
 
 // ─── Leads ─────────────────────────────────────────────────────────────────
 
+// Boligberegner-leads har source der starter med 'boligberegner' (fx
+// 'boligberegner' eller 'boligberegner-out-of-area'). Vi ekskluderer dem
+// fra Inbox + Pipeline-views, så de holdes på deres egen /off-market-side.
+
 /**
- * Liste af aktive leads (ikke i terminale stages, ikke soft-deleted).
+ * Liste af aktive leads (ikke i terminale stages, ikke soft-deleted, ikke boligberegner).
  * Joiner pipeline_stages så vi kan beregne SLA i app-laget.
  */
 export async function listActiveLeadsWithStage() {
@@ -50,7 +54,13 @@ export async function listActiveLeadsWithStage() {
     })
     .from(leads)
     .innerJoin(pipelineStages, eq(leads.stageSlug, pipelineStages.slug))
-    .where(and(eq(pipelineStages.isTerminal, false), isNull(leads.deletedAt)))
+    .where(
+      and(
+        eq(pipelineStages.isTerminal, false),
+        isNull(leads.deletedAt),
+        sql`(${leads.source} IS NULL OR ${leads.source} NOT LIKE 'boligberegner%')`,
+      ),
+    )
     .orderBy(leads.stageChangedAt);
 }
 
@@ -119,11 +129,39 @@ export async function listLeadsByLatestComm() {
     .from(leads)
     .innerJoin(pipelineStages, eq(leads.stageSlug, pipelineStages.slug))
     .leftJoin(latestComms, eq(latestComms.leadId, leads.id))
-    .where(and(eq(pipelineStages.isTerminal, false), isNull(leads.deletedAt)))
+    .where(
+      and(
+        eq(pipelineStages.isTerminal, false),
+        isNull(leads.deletedAt),
+        sql`(${leads.source} IS NULL OR ${leads.source} NOT LIKE 'boligberegner%')`,
+      ),
+    )
     .orderBy(
       sql`${latestComms.createdAt} DESC NULLS LAST`,
       desc(leads.stageChangedAt),
     );
+}
+
+/**
+ * Off-market leads — alle der er kommet ind via boligberegneren.
+ * Til /off-market list-view. Sorteres nyeste først (efter stage_changed_at som
+ * er sat ved oprettelse).
+ */
+export async function listOffMarketLeads() {
+  return db
+    .select({
+      lead: leads,
+      stage: pipelineStages,
+    })
+    .from(leads)
+    .innerJoin(pipelineStages, eq(leads.stageSlug, pipelineStages.slug))
+    .where(
+      and(
+        isNull(leads.deletedAt),
+        sql`${leads.source} LIKE 'boligberegner%'`,
+      ),
+    )
+    .orderBy(desc(leads.stageChangedAt));
 }
 
 export async function getLeadCommunications(leadId: string) {

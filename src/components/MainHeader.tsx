@@ -27,6 +27,9 @@ export function MainHeader() {
           <Link href="/on-market" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
             On-market
           </Link>
+          <Link href="/off-market" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
+            Off-market
+          </Link>
         </nav>
         <div className="ml-auto text-xs text-slate-500 hidden sm:block">v2 · read-only mirror</div>
       </div>
