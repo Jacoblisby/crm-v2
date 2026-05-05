@@ -21,14 +21,15 @@ const LEJE_PR_M2_PR_MD: Record<string, number> = {
 };
 const DEFAULT_LEJE_RATE = 90;
 
-// Refurbish-estimat per stand-niveau (engangsomkostning, baseret på m²)
-// Disse bruges som fallback når der ikke er AI-vision på fotos
+// Refurbish-estimat per stand-niveau (engangsomkostning, kr per m²)
+// Konservative rates baseret på typiske 4700/4400-ejerlejlighed-renoveringer.
+// Kan overrides direkte på lead via Afkast-debug-tab.
 const REFURB_PER_M2: Record<string, number> = {
-  nyrenoveret: 0,         // ingenting
-  god: 500,               // let polish (maling, rens)
-  middel: 2500,           // gulve + maling
-  trænger: 6000,          // gulve, køkken, bad delvist
-  slidt: 12000,           // fuld renovation
+  nyrenoveret: 0,         // ingenting — alt er nyt
+  god: 300,               // let polish (rengøring, lidt maling)
+  middel: 1000,           // gulve + maling + småting
+  trænger: 2500,          // + delvis renovering af bad ELLER køkken
+  slidt: 5000,            // fuld renovation (køkken + bad + gulve)
 };
 
 export type StandLevel = 'nyrenoveret' | 'god' | 'middel' | 'trænger' | 'slidt';
