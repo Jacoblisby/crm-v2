@@ -35,7 +35,10 @@ export default async function OnMarketDetailPage({
   const c = await getOnMarketCandidateById(id);
   if (!c) notFound();
 
-  const driftTotal =
+  // Drift fra udspecificerede prospekt-felter. Hvis ingen er tastet (typisk
+  // når salgsopstilling endnu ikke er parsed), fald tilbage til Boligsidens
+  // samlede 'ejerudgift/md × 12'. Det er ikke 100% præcist men bedre end 0.
+  const driftFromBreakdown =
     c.costGrundvaerdi +
     c.costFaellesudgifter +
     c.costRottebekempelse +
@@ -46,6 +49,18 @@ export default async function OnMarketDetailPage({
     c.costVicevaert +
     c.costVedligeholdelse +
     c.costAndreDrift;
+  const driftTotal =
+    driftFromBreakdown > 0
+      ? driftFromBreakdown
+      : c.monthlyExpense
+        ? c.monthlyExpense * 12
+        : 0;
+  const driftSource: 'breakdown' | 'monthly-expense' | 'none' =
+    driftFromBreakdown > 0
+      ? 'breakdown'
+      : c.monthlyExpense
+        ? 'monthly-expense'
+        : 'none';
 
   // User-overridden refurb hvis felter er udfyldt, ellers default 'middel'-rate.
   const userRefurbTotal =
@@ -312,6 +327,36 @@ export default async function OnMarketDetailPage({
           {c.estimeretLejeMd == null && (
             <span className="ml-2 text-slate-400">
               (auto · vores forslag {estimate.estimatedRentMd.toLocaleString('da-DK')})
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* === DRIFT-KILDE === */}
+      <div className="bg-white border border-slate-200 rounded-lg p-3 text-sm flex items-center justify-between flex-wrap gap-2">
+        <div>
+          💰 <strong>Drift-kilde:</strong>{' '}
+          <span
+            className={
+              driftSource === 'breakdown'
+                ? 'text-emerald-700 font-semibold'
+                : driftSource === 'monthly-expense'
+                  ? 'text-amber-700 font-semibold'
+                  : 'text-red-600 font-semibold'
+            }
+          >
+            {driftSource === 'breakdown'
+              ? 'Udspecificeret fra prospekt'
+              : driftSource === 'monthly-expense'
+                ? `Boligsidens "ejerudgift/md × 12" (ej udspecificeret)`
+                : 'Ingen data — drift = 0'}
+          </span>
+        </div>
+        <div className="text-xs text-slate-600">
+          Brugt drift: <strong>{driftTotal.toLocaleString('da-DK')} kr/år</strong>
+          {driftSource === 'monthly-expense' && c.monthlyExpense != null && (
+            <span className="ml-2 text-slate-400">
+              ({c.monthlyExpense.toLocaleString('da-DK')} × 12)
             </span>
           )}
         </div>
