@@ -68,13 +68,14 @@ export interface PriceEngineResult {
   rentSource: 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
   rentSampleSize: number;
   refurbTotal: number;
-  // Endeligt tilbud
+  // Endeligt tilbud — alle 4 fradrag + ourMargin summerer til (marketEstimate - finalOffer)
   netForkortet: {
     marketEstimate: number;
     minusMarketDiscount: number;     // gns afslag i området
     minusBrokerSavings: number;      // mæglersalær kunden sparer
     minusOwnershipCosts: number;     // ejertids-omkostninger ved selv-salg
-    finalOffer: number;              // = bud@20% ROE
+    minusOurMargin: number;           // vores afkast-margin (det vi tjener på handlen)
+    finalOffer: number;              // = bud@20% ROE (cappet ved 95% af list)
     targetRoePct: number;
   };
   /** Fuld afkast-output for dybere insights */
@@ -153,20 +154,37 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
   // ved 95% af listePris, så vi tager bare resultatet — eller fallback hvis null.
   const finalOffer = afk.budAt20PctRoe ?? Math.round(marketEstimate * 0.85);
 
-  // 6. Breakdown — hvor stor er forskellen mellem markedsestimat og finalOffer?
+  // 6. Breakdown — fra markedspris til vores bud, matematisk korrekt så de
+  // 4 fradrag + vores margin SUMMERER til delta. Brugeren skal kunne følge
+  // tallene fra top til bund.
   const totalDelta = marketEstimate - finalOffer;
+  const ownershipMonths = 5; // typisk salgstid
 
-  // Fordel deltaen som breakdown:
-  //  - marked-afslag (hvad kunden ville opleve på markedet): marketEstimate × averageDiscountPct
-  //  - mæglersalær: 2.5% × salgspris + 25k fast
-  //  - ejertids-omkostninger: drift × forventet salgs-tid (4-5 mdr typisk)
-  const marketDiscount = Math.round(marketEstimate * (comps.averageDiscountPct / 100));
-  const brokerSavings = Math.round(marketEstimate * SAVED_BROKER_COMMISSION_PCT) + SAVED_BROKER_FIXED;
-  const ownershipMonths = 5;  // typisk salgstid
-  const ownershipCosts = Math.round((input.driftTotalYearly * ownershipMonths) / 12);
+  // 6a. Beregn rå tal for hver "argumentation"
+  const rawMarketDiscount = Math.round(marketEstimate * (comps.averageDiscountPct / 100));
+  const rawBrokerSavings =
+    Math.round(marketEstimate * SAVED_BROKER_COMMISSION_PCT) + SAVED_BROKER_FIXED;
+  const rawOwnershipCosts = Math.round((input.driftTotalYearly * ownershipMonths) / 12);
+  const rawSum = rawMarketDiscount + rawBrokerSavings + rawOwnershipCosts;
 
-  // Sanity: hvis breakdown ikke summer op til delta, tilskriv resten til "andre forhold" (men vi viser ikke 5. række)
-  // Bare lad finalOffer være sandheden; visningen viser vores "argumentation"
+  // 6b. Hvis cap er bindende (rawSum > delta), skaler ned proportionalt.
+  // Ellers brug rå tal og tildel resten til vores afkast-margin.
+  let marketDiscount: number;
+  let brokerSavings: number;
+  let ownershipCosts: number;
+  let ourMargin: number;
+  if (rawSum > totalDelta && totalDelta > 0) {
+    const scale = totalDelta / rawSum;
+    marketDiscount = Math.round(rawMarketDiscount * scale);
+    brokerSavings = Math.round(rawBrokerSavings * scale);
+    ownershipCosts = Math.round(rawOwnershipCosts * scale);
+    ourMargin = totalDelta - marketDiscount - brokerSavings - ownershipCosts;
+  } else {
+    marketDiscount = rawMarketDiscount;
+    brokerSavings = rawBrokerSavings;
+    ownershipCosts = rawOwnershipCosts;
+    ourMargin = Math.max(0, totalDelta - rawSum);
+  }
 
   return {
     marketEstimate,
@@ -184,6 +202,7 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
       minusMarketDiscount: marketDiscount,
       minusBrokerSavings: brokerSavings,
       minusOwnershipCosts: ownershipCosts,
+      minusOurMargin: ourMargin,
       finalOffer,
       targetRoePct: 20,
     },

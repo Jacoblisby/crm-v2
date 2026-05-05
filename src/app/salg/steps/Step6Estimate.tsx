@@ -107,30 +107,52 @@ export function Step6Estimate() {
         </p>
       </div>
 
-      {/* BREAKDOWN */}
-      <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
-        <BreakdownRow label="Vurderet markedsværdi" value={netForkortet.marketEstimate} />
-        <BreakdownRow
-          label={`Gns. afslag på markedet (~${averageDiscountPct.toFixed(0)}%)`}
-          value={-netForkortet.minusMarketDiscount}
-          hint="Listings sælges typisk under listepris"
-        />
-        <BreakdownRow
-          label="Mæglersalær du sparer"
-          value={-netForkortet.minusBrokerSavings}
-          hint="2,5% + grundgebyr — du beholder forskellen"
-        />
-        <BreakdownRow
-          label="Ejertids-omkostninger"
-          value={-netForkortet.minusOwnershipCosts}
-          hint="Drift mens boligen står til salg (~5 mdr)"
-        />
-        <BreakdownRow
-          label="Vores tilbud"
-          value={netForkortet.finalOffer}
-          highlight
-        />
-      </div>
+      {/* BREAKDOWN — vi starter med vores tilbud og lægger sparelse-elementer på,
+          så kunden kan se hvad det svarer til på det åbne marked. */}
+      {(() => {
+        const effectiveMarket =
+          netForkortet.finalOffer +
+          netForkortet.minusBrokerSavings +
+          netForkortet.minusMarketDiscount +
+          netForkortet.minusOwnershipCosts;
+        return (
+          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+            <BreakdownRow
+              label="Vores kontante tilbud"
+              value={netForkortet.finalOffer}
+              highlight
+            />
+            <BreakdownRow
+              label="+ Mæglersalær du IKKE skal betale"
+              value={netForkortet.minusBrokerSavings}
+              hint="2,5% af salgspris + grundgebyr"
+              positive
+            />
+            <BreakdownRow
+              label={`+ Markedsafslag du undgår (~${averageDiscountPct.toFixed(0)}%)`}
+              value={netForkortet.minusMarketDiscount}
+              hint="Slutprisen er typisk under listeprisen"
+              positive
+            />
+            <BreakdownRow
+              label="+ Ejertids-omkostninger du sparer"
+              value={netForkortet.minusOwnershipCosts}
+              hint="Drift mens boligen står til salg (~5 mdr)"
+              positive
+            />
+            <BreakdownRow
+              label="= Det svarer til at sælge for"
+              value={effectiveMarket}
+              hint="…på det åbne marked, efter alle omkostninger"
+              total
+            />
+          </div>
+        );
+      })()}
+      <p className="text-xs text-slate-500 text-center">
+        Vurderet markedsværdi: <strong>{netForkortet.marketEstimate.toLocaleString('da-DK')} kr</strong>
+        {' '}— vi byder kontant uden ventetid eller omkostninger.
+      </p>
 
       {/* CTA */}
       <div className="bg-slate-900 rounded-xl p-5 text-white text-center space-y-3">
@@ -243,29 +265,38 @@ function BreakdownRow({
   value,
   hint,
   highlight,
+  positive,
+  total,
 }: {
   label: string;
   value: number;
   hint?: string;
-  highlight?: boolean;
+  highlight?: boolean; // grøn — vores tilbud (start)
+  positive?: boolean;  // mid-rows: sparelser kunden får
+  total?: boolean;     // sum-row: hvad det svarer til på markedet
 }) {
+  const rowBg = highlight ? 'bg-emerald-50' : total ? 'bg-blue-50' : '';
+  const labelCls = highlight
+    ? 'font-semibold text-emerald-900'
+    : total
+      ? 'font-semibold text-blue-900'
+      : 'text-slate-700';
+  const valueCls = highlight
+    ? 'text-emerald-700 text-lg font-bold'
+    : total
+      ? 'text-blue-700 text-lg font-bold'
+      : positive
+        ? 'text-emerald-600'
+        : value < 0
+          ? 'text-red-600'
+          : 'text-slate-900';
   return (
-    <div className={`px-4 py-3 flex items-baseline justify-between gap-3 ${highlight ? 'bg-emerald-50' : ''}`}>
+    <div className={`px-4 py-3 flex items-baseline justify-between gap-3 ${rowBg}`}>
       <div className="min-w-0">
-        <div className={`text-sm ${highlight ? 'font-semibold text-emerald-900' : 'text-slate-700'}`}>
-          {label}
-        </div>
+        <div className={`text-sm ${labelCls}`}>{label}</div>
         {hint && <div className="text-xs text-slate-500">{hint}</div>}
       </div>
-      <div
-        className={`shrink-0 font-medium tabular-nums ${
-          highlight
-            ? 'text-emerald-700 text-lg'
-            : value < 0
-              ? 'text-red-600'
-              : 'text-slate-900'
-        }`}
-      >
+      <div className={`shrink-0 font-medium tabular-nums ${valueCls}`}>
         {value < 0 ? '−' : ''}
         {Math.abs(value).toLocaleString('da-DK')} kr
       </div>

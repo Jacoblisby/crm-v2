@@ -380,6 +380,7 @@ function customerEmailHtml(
   const discount = fmt(estimate.netForkortet.minusMarketDiscount);
   const broker = fmt(estimate.netForkortet.minusBrokerSavings);
   const ownership = fmt(estimate.netForkortet.minusOwnershipCosts);
+  const ourMargin = estimate.netForkortet.minusOurMargin;
   const compsHtml = estimate.comparables
     .filter((c) => !c.isCurrentListing)
     .slice(0, 5)
@@ -431,18 +432,21 @@ function customerEmailHtml(
     <div style="color:#64748b;font-size:12px;margin-top:8px;font-style:italic;">Endeligt bindende tilbud efter gratis besigtigelse</div>
   </div>
 
-  <!-- Breakdown -->
+  <!-- Breakdown — vores tilbud + sparelser = effektiv markedspris -->
   <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
     <div style="background:#f8fafc;padding:12px 16px;font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">
-      Sådan kommer vi til prisen
+      Hvad svarer vores tilbud til på markedet?
     </div>
     <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:10px 16px;font-size:14px;">Vurderet markedsværdi</td><td style="padding:10px 16px;text-align:right;font-size:14px;font-weight:600;">${market} kr</td></tr>
-      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">Markedet sælger ~${estimate.averageDiscountPct.toFixed(0)}% under listepris</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#dc2626;">−${discount} kr</td></tr>
-      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">Du sparer mæglersalær (~2,5% + grundgebyr)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#dc2626;">−${broker} kr</td></tr>
-      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">Du sparer ejertids-omkostninger (~5 mdr)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#dc2626;">−${ownership} kr</td></tr>
-      <tr style="border-top:2px solid #10b981;background:#ecfdf5;"><td style="padding:12px 16px;font-size:14px;font-weight:bold;color:#047857;">Vores tilbud</td><td style="padding:12px 16px;text-align:right;font-size:16px;font-weight:bold;color:#047857;">${offer} kr</td></tr>
+      <tr style="background:#ecfdf5;"><td style="padding:12px 16px;font-size:14px;font-weight:bold;color:#047857;">Vores kontante tilbud</td><td style="padding:12px 16px;text-align:right;font-size:16px;font-weight:bold;color:#047857;">${offer} kr</td></tr>
+      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">+ Mæglersalær du IKKE skal betale</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#10b981;font-weight:600;">+${broker} kr</td></tr>
+      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">+ Markedsafslag du undgår (~${estimate.averageDiscountPct.toFixed(0)}%)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#10b981;font-weight:600;">+${discount} kr</td></tr>
+      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">+ Ejertids-omkostninger du sparer (~5 mdr drift)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#10b981;font-weight:600;">+${ownership} kr</td></tr>
+      <tr style="border-top:2px solid #3b82f6;background:#eff6ff;"><td style="padding:12px 16px;font-size:14px;font-weight:bold;color:#1e40af;">= Det svarer til at sælge for</td><td style="padding:12px 16px;text-align:right;font-size:16px;font-weight:bold;color:#1e40af;">${fmt(estimate.netForkortet.finalOffer + estimate.netForkortet.minusBrokerSavings + estimate.netForkortet.minusMarketDiscount + estimate.netForkortet.minusOwnershipCosts)} kr</td></tr>
     </table>
+    <div style="padding:8px 16px;background:#f8fafc;font-size:11px;color:#94a3b8;text-align:center;">
+      …på det åbne marked, efter alle omkostninger. Vurderet markedsværdi: ${market} kr.
+    </div>
   </div>
 
   ${compsHtml ? `

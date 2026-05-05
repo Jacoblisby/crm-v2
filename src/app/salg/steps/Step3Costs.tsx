@@ -1,22 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useFunnel } from '../FunnelContext';
 import { TOTAL_DRIFT } from '../types';
 
 export function Step3Costs() {
   const { state, update, next, prev } = useFunnel();
   const baseDrift = TOTAL_DRIFT(state);
-
-  // De ekstra ejerudgifter er ofte 0 — vises kun hvis brugeren udfolder
-  // sektionen, eller hvis de allerede har et beløb fra tidligere.
-  const hasExtraCosts =
-    state.costFaelleslaan > 0 ||
-    state.costRenovation > 0 ||
-    state.costForsikringer > 0 ||
-    state.costRottebekempelse > 0 ||
-    state.costAndreDrift > 0;
-  const [showExtra, setShowExtra] = useState(hasExtraCosts);
 
   const waterCost = state.waterPaidViaAssoc
     ? state.waterAcontoYearly
@@ -41,12 +30,13 @@ export function Step3Costs() {
           Ejerudgifter (kr/år)
         </h3>
         <p className="text-xs text-slate-500">
-          Udfyld kun de udgifter der gælder for dig. Felter du ikke kender lader du bare stå.
+          Udfyld det du kender — felter du ikke har et tal til lader du bare stå tomme. Jo flere
+          du udfylder, jo mere præcist bliver vores tilbud.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CostInput
             label="Fællesudgifter til ejerforeningen"
-            hint="Måneds-opkrævning × 12"
+            hint="Måneds-opkrævning × 12 (typisk 18-30k)"
             placeholder="24.000"
             value={state.costFaellesudgifter}
             onChange={(v) => update({ costFaellesudgifter: v })}
@@ -58,54 +48,42 @@ export function Step3Costs() {
             value={state.costGrundvaerdi}
             onChange={(v) => update({ costGrundvaerdi: v })}
           />
+          <CostInput
+            label="Ydelse på fælleslån"
+            hint="Din andel/år hvis ejerforeningen har lån"
+            placeholder="6.800"
+            value={state.costFaelleslaan}
+            onChange={(v) => update({ costFaelleslaan: v })}
+          />
+          <CostInput
+            label="Renovation"
+            hint="Skraldegebyr — ofte inkl. i fællesudg., skip ellers"
+            placeholder="1.800"
+            value={state.costRenovation}
+            onChange={(v) => update({ costRenovation: v })}
+          />
+          <CostInput
+            label="Bygningsforsikring"
+            hint="Ofte inkl. i fællesudg. — skip ellers"
+            placeholder="0"
+            value={state.costForsikringer}
+            onChange={(v) => update({ costForsikringer: v })}
+          />
+          <CostInput
+            label="Rottebekæmpelse"
+            hint="Lille gebyr fra kommunen — typisk 100-200 kr"
+            placeholder="120"
+            value={state.costRottebekempelse}
+            onChange={(v) => update({ costRottebekempelse: v })}
+          />
+          <CostInput
+            label="Andre driftsomkostninger"
+            hint="Vicevært, antenne, m.m. (ekskl. vand/varme — nedenunder)"
+            placeholder="0"
+            value={state.costAndreDrift}
+            onChange={(v) => update({ costAndreDrift: v })}
+          />
         </div>
-        {!showExtra ? (
-          <button
-            type="button"
-            onClick={() => setShowExtra(true)}
-            className="text-sm text-emerald-700 hover:text-emerald-800 font-medium"
-          >
-            + Tilføj fælleslån, renovation, forsikring m.fl.
-          </button>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-            <CostInput
-              label="Ydelse på fælleslån"
-              hint="Hvis ejerforeningen har lån, din andel/år"
-              placeholder="6.800"
-              value={state.costFaelleslaan}
-              onChange={(v) => update({ costFaelleslaan: v })}
-            />
-            <CostInput
-              label="Renovation"
-              hint="Skraldegebyr, hvis særskilt"
-              placeholder="1.800"
-              value={state.costRenovation}
-              onChange={(v) => update({ costRenovation: v })}
-            />
-            <CostInput
-              label="Bygningsforsikring"
-              hint="Ofte inkl. i fællesudgifter — skip ellers"
-              placeholder="0"
-              value={state.costForsikringer}
-              onChange={(v) => update({ costForsikringer: v })}
-            />
-            <CostInput
-              label="Rottebekæmpelse"
-              hint="Lille gebyr fra kommunen"
-              placeholder="120"
-              value={state.costRottebekempelse}
-              onChange={(v) => update({ costRottebekempelse: v })}
-            />
-            <CostInput
-              label="Andre driftsomkostninger"
-              hint="Vicevært, antenne, m.m. (ekskl. vand/varme — det er nedenunder)"
-              placeholder="0"
-              value={state.costAndreDrift}
-              onChange={(v) => update({ costAndreDrift: v })}
-            />
-          </div>
-        )}
       </section>
 
       {/* === VAND === */}
