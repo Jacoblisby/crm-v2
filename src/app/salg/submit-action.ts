@@ -134,7 +134,10 @@ export async function submitFunnelAction(
     `· Varme: ${heatCost.toLocaleString('da-DK')} (${state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
     `· TOTAL: ${driftTotal.toLocaleString('da-DK')} kr/år`,
     num(state.ejerforeningHaeftelseKr) > 0
-      ? `· HÆFTELSE EF (engang): ${num(state.ejerforeningHaeftelseKr).toLocaleString('da-DK')} kr`
+      ? `· HÆFTELSE EF / andel af restgæld (engang): ${num(state.ejerforeningHaeftelseKr).toLocaleString('da-DK')} kr`
+      : '',
+    num(state.costFaelleslaan) > 0 && state.faelleslaanCanPrepay
+      ? `· Kan fælleslån indfries før tid? ${state.faelleslaanCanPrepay === 'ja' ? 'JA' : state.faelleslaanCanPrepay === 'nej' ? 'NEJ' : 'Ved ikke'}`
       : '',
     ``,
     `SÆRLIGE FORHOLD:`,

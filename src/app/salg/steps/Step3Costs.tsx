@@ -144,18 +144,44 @@ export function Step3Costs() {
           🏛️ Hæftelse til ejerforening
         </h3>
         <p className="text-xs text-slate-600">
-          Hvis ejerforeningen har gæld (fx fra renovering, energiforbedring), hæfter du for din
-          andel. Det fremgår typisk af tinglysningsattesten eller årsregnskabet. Lader du feltet
-          være 0 antager vi at der ingen hæftelse er.
+          {state.costFaelleslaan > 0
+            ? 'Du afdrager på et fælleslån — så er der også en restgæld du hæfter for. Vi har brug for at vide hvor stor din andel er, og om lånet kan indfries før tid.'
+            : 'Hvis ejerforeningen har gæld (fx fra renovering, energiforbedring), hæfter du for din andel. Det fremgår typisk af tinglysningsattesten eller årsregnskabet. Lader du feltet være 0 antager vi at der ingen hæftelse er.'}
         </p>
         <CostInput
-          label="Din andel af ejerforeningens gæld"
+          label={state.costFaelleslaan > 0 ? 'Din andel af foreningens restgæld' : 'Din andel af ejerforeningens gæld'}
           hint="Engangsgæld — IKKE den månedlige fælleslån-ydelse (den indtastede du ovenover)"
           placeholder="0"
           value={state.ejerforeningHaeftelseKr}
           onChange={(v) => update({ ejerforeningHaeftelseKr: v })}
           suffix="kr"
         />
+        {state.costFaelleslaan > 0 && (
+          <div>
+            <div className="text-sm font-medium text-slate-700 mb-1">
+              Kan lånet indfries før tid?
+            </div>
+            <div className="flex gap-2">
+              {(['ja', 'nej', 'vedikke'] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => update({ faelleslaanCanPrepay: opt })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+                    state.faelleslaanCanPrepay === opt
+                      ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
+                      : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
+                  }`}
+                >
+                  {opt === 'ja' ? 'Ja' : opt === 'nej' ? 'Nej' : 'Ved ikke'}
+                </button>
+              ))}
+            </div>
+            <div className="text-xs text-slate-500 mt-1">
+              Står typisk i ejerforeningens årsregnskab eller hos administrator
+            </div>
+          </div>
+        )}
       </section>
 
       {/* === TOTAL === */}

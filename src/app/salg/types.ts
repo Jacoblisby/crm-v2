@@ -48,8 +48,11 @@ export interface FunnelState {
   heatPaidViaAssoc: boolean;
   heatAcontoYearly: number;
   heatUsageLastYearKr: number;
-  // Hæftelse til ejerforening (engangs gæld kunden hæfter for)
+  // Hæftelse til ejerforening (engangs gæld kunden hæfter for) =
+  // ens andel af foreningsrestgælden hvis der er fælleslån
   ejerforeningHaeftelseKr: number;
+  // Kan fælleslånet indfries før tid? — kun relevant hvis costFaelleslaan > 0
+  faelleslaanCanPrepay: 'ja' | 'nej' | 'vedikke' | null;
   // Relaterede dokumenter (valgfri)
   documents: { name: string; size: number; kind: string }[];
 
@@ -130,6 +133,7 @@ export const initialState: FunnelState = {
   heatAcontoYearly: 0,
   heatUsageLastYearKr: 0,
   ejerforeningHaeftelseKr: 0,
+  faelleslaanCanPrepay: null,
   documents: [],
   stand: null,
   standNote: '',
