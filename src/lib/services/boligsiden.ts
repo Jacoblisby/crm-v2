@@ -1,8 +1,11 @@
 /**
  * Boligsiden API integration — bruges til at hente bolig-detalje
- * (kvm, byggeår, værelser, energimærke, seneste handelspris) for en given adresse.
+ * (BFE, kvm, byggeår, værelser, energimærke, seneste handelspris)
+ * for en given adresse.
  *
- * Vi bruger samme API som scraperen — den er undokumenteret men virker.
+ * VIGTIGT: Vi SKAL bruge /addresses/{dawa-uuid}-endpointet, IKKE /search/cases?q=...
+ * /search/cases returnerer 50 random adresser baseret på fuzzy scoring og er IKKE
+ * deterministisk for adresse-opslag. /addresses/{uuid} returnerer præcis match.
  */
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
@@ -22,11 +25,117 @@ export interface PropertyLookupResult {
   isOnMarket: boolean;
   currentListingPrice: number | null;
   caseUrl: string | null;
+  /** BBR-data fra building */
+  basementArea: number | null;
+  totalArea: number | null;
+  buildingName: string | null;
+  externalWallMaterial: string | null;
+  heatingInstallation: string | null;
+  roofingMaterial: string | null;
+  bathroomCondition: string | null;
+  kitchenCondition: string | null;
+  numberOfBathrooms: number | null;
+  numberOfToilets: number | null;
+  /** Adressetype, fx 'condo' for ejerlejlighed */
+  addressType: string | null;
+}
+
+interface BoligsidenAddress {
+  addressID: string;
+  addressType?: string;
+  bfeNumbers?: number[];
+  livingArea?: number;
+  latestValuation?: number;
+  isOnMarket?: boolean;
+  hasMultipleCases?: boolean;
+  registrations?: Array<{ amount: number; date: string; type?: string }>;
+  buildings?: Array<{
+    basementArea?: number;
+    totalArea?: number;
+    housingArea?: number;
+    yearBuilt?: number;
+    numberOfRooms?: number;
+    numberOfBathrooms?: number;
+    numberOfToilets?: number;
+    buildingName?: string;
+    externalWallMaterial?: string;
+    heatingInstallation?: string;
+    roofingMaterial?: string;
+    bathroomCondition?: string;
+    kitchenCondition?: string;
+  }>;
+  // Hvis bolig er aktivt til salg er dette feltet tilstede
+  caseID?: string;
+  caseUrl?: string;
+  casePrice?: number;
 }
 
 /**
- * Slå op på Boligsiden via address-string.
- * Returner null hvis ingen match.
+ * Slå bolig-detalje op via DAWA's adresse-UUID.
+ * Bruges efter `getAddressDetails(addressId)` har returneret accessAddressId.
+ *
+ * Returner null hvis Boligsiden ikke har data for adressen.
+ */
+export async function lookupPropertyByAddressId(
+  dawaAddressId: string,
+): Promise<PropertyLookupResult | null> {
+  try {
+    const r = await fetch(`https://api.boligsiden.dk/addresses/${dawaAddressId}`, {
+      headers: { 'User-Agent': UA, Accept: 'application/json' },
+      next: { revalidate: 86400 },
+    });
+    if (!r.ok) {
+      return null;
+    }
+    const data = (await r.json()) as BoligsidenAddress;
+
+    // Sanity-tjek: addressID skal matche
+    if (!data.addressID || data.addressID !== dawaAddressId) {
+      return null;
+    }
+
+    return parseAddress(data);
+  } catch {
+    return null;
+  }
+}
+
+function parseAddress(data: BoligsidenAddress): PropertyLookupResult {
+  const building = data.buildings?.[0];
+  // Find seneste 'normal' handel (ikke auktion / arv)
+  const lastSale = (data.registrations ?? [])
+    .filter((r) => r.type === 'normal')
+    .sort((a, b) => (b.date > a.date ? 1 : -1))[0];
+
+  return {
+    bfeNumber: data.bfeNumbers?.[0] ?? null,
+    kvm: data.livingArea ?? building?.housingArea ?? null,
+    rooms: building?.numberOfRooms ?? null,
+    yearBuilt: building?.yearBuilt ?? null,
+    energyClass: null, // ikke i denne payload
+    lastSalePrice: lastSale?.amount ?? null,
+    lastSaleDate: lastSale?.date ?? null,
+    latestValuation: data.latestValuation ?? null,
+    isOnMarket: !!data.isOnMarket,
+    currentListingPrice: data.isOnMarket ? data.casePrice ?? null : null,
+    caseUrl: data.caseUrl ?? null,
+    basementArea: building?.basementArea ?? null,
+    totalArea: building?.totalArea ?? null,
+    buildingName: building?.buildingName ?? null,
+    externalWallMaterial: building?.externalWallMaterial ?? null,
+    heatingInstallation: building?.heatingInstallation ?? null,
+    roofingMaterial: building?.roofingMaterial ?? null,
+    bathroomCondition: building?.bathroomCondition ?? null,
+    kitchenCondition: building?.kitchenCondition ?? null,
+    numberOfBathrooms: building?.numberOfBathrooms ?? null,
+    numberOfToilets: building?.numberOfToilets ?? null,
+    addressType: data.addressType ?? null,
+  };
+}
+
+/**
+ * @deprecated Brug `lookupPropertyByAddressId(dawaAddressId)` i stedet.
+ * Den gamle `q=`-baserede søgning returnerer 50 random adresser, IKKE adresse-match.
  */
 export async function lookupPropertyByAddress(
   postalCode: string,
@@ -35,93 +144,10 @@ export async function lookupPropertyByAddress(
   floor?: string | null,
   door?: string | null,
 ): Promise<PropertyLookupResult | null> {
-  // Prøv først at slå adresse op via Boligsiden's address-search
-  // De har en addresses-endpoint der kan finde BFE direkte
-  try {
-    const slugBase = `${streetName}-${houseNumber}`.toLowerCase().replace(/\s+/g, '-');
-    const slugFull = floor || door
-      ? `${slugBase}-${[floor, door].filter(Boolean).join('-')}-${postalCode}-${slugifyPostalCity(postalCode)}`
-      : `${slugBase}-${postalCode}-${slugifyPostalCity(postalCode)}`;
-
-    // Forsøg 1: hent fra Boligsiden via slug-construct
-    const r = await fetch(
-      `https://api.boligsiden.dk/search/cases?addressTypes=condo&q=${encodeURIComponent(`${streetName} ${houseNumber} ${postalCode}`)}&perPage=5`,
-      { headers: { 'User-Agent': UA }, next: { revalidate: 86400 } },
-    );
-    if (!r.ok) return null;
-    const data = (await r.json()) as { cases: BoligsidenCase[] };
-
-    if (!data.cases || data.cases.length === 0) {
-      // Prøv også address-search uden adressetype
-      const r2 = await fetch(
-        `https://api.boligsiden.dk/search/cases?q=${encodeURIComponent(`${streetName} ${houseNumber} ${postalCode}`)}&perPage=5`,
-        { headers: { 'User-Agent': UA }, next: { revalidate: 86400 } },
-      );
-      if (!r2.ok) return null;
-      const d2 = (await r2.json()) as { cases: BoligsidenCase[] };
-      if (!d2.cases || d2.cases.length === 0) return null;
-      return parseCase(d2.cases[0]);
-    }
-
-    // Find bedste match: samme husnr + (samme etage hvis givet)
-    const best =
-      data.cases.find((c) => {
-        if (!c.address) return false;
-        const numMatch = c.address.houseNumber === houseNumber;
-        const floorMatch = !floor || c.address.floor === floor;
-        return numMatch && floorMatch;
-      }) ?? data.cases[0];
-
-    return parseCase(best);
-  } catch {
-    return null;
-  }
-}
-
-interface BoligsidenCase {
-  caseID?: string;
-  caseUrl?: string;
-  isOnMarket?: boolean;
-  casePrice?: number;
-  livingArea?: number;
-  latestValuation?: number;
-  registrations?: Array<{ amount: number; date: string; type?: string }>;
-  address?: {
-    bfeNumbers?: number[];
-    floor?: string;
-    door?: string;
-    houseNumber?: string;
-    buildings?: Array<{
-      housingArea?: number;
-      numberOfRooms?: number;
-      yearBuilt?: number;
-    }>;
-  };
-}
-
-function parseCase(c: BoligsidenCase): PropertyLookupResult {
-  const building = c.address?.buildings?.[0];
-  const lastSale = c.registrations
-    ?.filter((r) => r.type === 'normal')
-    ?.sort((a, b) => (b.date > a.date ? 1 : -1))?.[0];
-
-  return {
-    bfeNumber: c.address?.bfeNumbers?.[0] ?? null,
-    kvm: c.livingArea ?? building?.housingArea ?? null,
-    rooms: building?.numberOfRooms ?? null,
-    yearBuilt: building?.yearBuilt ?? null,
-    energyClass: null, // ikke i denne payload — kan tilføjes senere
-    lastSalePrice: lastSale?.amount ?? null,
-    lastSaleDate: lastSale?.date ?? null,
-    latestValuation: c.latestValuation ?? null,
-    isOnMarket: !!c.isOnMarket,
-    currentListingPrice: c.isOnMarket ? c.casePrice ?? null : null,
-    caseUrl: c.caseUrl ?? null,
-  };
-}
-
-function slugifyPostalCity(postalCode: string): string {
-  // Heuristic: vi ved kun postnummer, ikke bynavn — Boligsiden vil typisk
-  // affinde sig med bare postnummer i søge-query
-  return postalCode;
+  void postalCode;
+  void streetName;
+  void houseNumber;
+  void floor;
+  void door;
+  return null;
 }

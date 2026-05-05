@@ -1,7 +1,7 @@
 'use server';
 
 import { searchAddress, getAddressDetails } from '@/lib/services/dawa';
-import { lookupPropertyByAddress } from '@/lib/services/boligsiden';
+import { lookupPropertyByAddressId } from '@/lib/services/boligsiden';
 import { computeEstimate, type StandLevel } from '@/lib/services/price-engine';
 
 export async function searchAddressAction(query: string) {
@@ -21,14 +21,9 @@ export async function lookupAddressAction(addressId: string) {
     const details = await getAddressDetails(addressId);
     if (!details) return { ok: false as const, error: 'Adresse ikke fundet' };
 
-    // Hent bolig-detaljer (kvm, byggeår, værelser) fra Boligsiden
-    const property = await lookupPropertyByAddress(
-      details.postalCode,
-      details.streetName,
-      details.houseNumber,
-      details.floor,
-      details.door,
-    );
+    // Hent præcis bolig-detalje via Boligsiden's /addresses/{dawa-uuid}-endpoint.
+    // Det er den ENESTE måde at få korrekt BBR-data på den specifikke lejlighed.
+    const property = await lookupPropertyByAddressId(addressId);
 
     return {
       ok: true as const,
