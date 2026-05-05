@@ -137,20 +137,19 @@ export function computeAfkast(inp: AfkastInputs): AfkastResult {
   const roeEbt = d.egenkapital ? ebt / d.egenkapital : 0;
   const roeNetto = d.egenkapital ? netto / d.egenkapital : 0;
 
-  // Find highest price der stadig giver target ROE EBT (FØR skat) — line search
-  // Skat indgår IKKE i target — vi kigger på cash-flow før skat (EBT) som er
-  // det der reelt sammenlignes med vores afkast-krav.
+  // Find highest price der stadig giver target ROE EBT (FØR skat) — line search.
+  // Skat indgår IKKE i target. Range er INVARIANT af input-pris: vi søger
+  // fra 50.000 til 30 mio så bud@target ikke afhænger af hvad man taster ind.
   const targetRoe = inp.targetRoe ?? TARGET_ROE;
   let budSolve: number | null = null;
-  const lo = Math.max(50_000, Math.floor(price * 0.3));
-  const hi = Math.ceil(price * 1.1);
-  for (let trial = lo; trial <= hi; trial += 5_000) {
+  for (let trial = 50_000; trial <= 30_000_000; trial += 5_000) {
     const dt = deriveAt(trial, inp);
     if (dt.egenkapital <= 0) continue;
     const ebitT = revenue - totalCosts;
     const ebtT = ebitT - dt.finAar;
     const roeEbtT = ebtT / dt.egenkapital;
     if (roeEbtT >= targetRoe) budSolve = trial;
+    else if (budSolve != null) break; // ROE faldet under target → fundet højeste
   }
   const bud = budSolve != null ? Math.round(budSolve / 1000) * 1000 : null;
 
