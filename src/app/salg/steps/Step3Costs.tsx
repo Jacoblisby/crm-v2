@@ -208,11 +208,12 @@ export function Step3Costs() {
       {/* === RELATEREDE DOKUMENTER === */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          📎 Relaterede dokumenter (valgfri)
+          📎 Vedhæft dokumentation (valgfri)
         </h3>
         <p className="text-xs text-slate-600">
-          Du kan vedhæfte salgsopstilling, ejerforeningens årsregnskab, vand/varme-regning,
-          vurderingsrapport — alt der hjælper os med at give et præcist tilbud.
+          Vedhæft gerne salgsopstilling, ejerforeningens årsregnskab, vand/varme-regning eller
+          vurderingsrapport — så <strong>dobbelttjekker vi dine tal manuelt</strong>, og kan give
+          et mere præcist tilbud. Vi læser dem, men automatik er der ikke.
         </p>
         <DocumentUpload
           documents={state.documents}

@@ -72,15 +72,14 @@ export function Step2Photos() {
   }
 
   const count = Object.keys(photos).length;
-  const canContinue = count >= 1;
 
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-xl font-semibold">Upload fotos af din lejlighed</h2>
+        <h2 className="text-xl font-semibold">Upload fotos af din lejlighed (valgfri)</h2>
         <p className="text-sm text-slate-500">
-          Minimum 1 foto for at få estimat. Vi anbefaler 4+ — så er vores tilbud{' '}
-          <strong>op til 70.000 kr højere</strong> fordi vi ser den faktiske stand.
+          Du kan springe over, men <strong>4+ fotos giver op til 70.000 kr højere tilbud</strong>{' '}
+          fordi vi ser den faktiske stand i stedet for at skulle gætte.
         </p>
       </div>
 
@@ -99,7 +98,8 @@ export function Step2Photos() {
       <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-600 flex items-center justify-between">
         <span>
           {count}/8 fotos uploadet{' '}
-          {count < 4 && (
+          {count === 0 && <span className="text-slate-500">— du kan også springe over</span>}
+          {count > 0 && count < 4 && (
             <span className="text-amber-700">— flere fotos = bedre estimat</span>
           )}
         </span>
@@ -115,10 +115,9 @@ export function Step2Photos() {
         </button>
         <button
           onClick={next}
-          disabled={!canContinue}
-          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium"
+          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium"
         >
-          Fortsæt →
+          {count === 0 ? 'Spring over →' : 'Fortsæt →'}
         </button>
       </div>
     </div>
