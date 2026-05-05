@@ -114,7 +114,7 @@ export function Step1Address() {
         )}
 
         {showResults && results.length > 0 && (
-          <ul className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-10 max-h-72 overflow-y-auto">
+          <ul className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-30 max-h-72 overflow-y-auto">
             {results.map((s) => (
               <li key={s.adresse.id}>
                 <button

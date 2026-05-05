@@ -47,13 +47,22 @@ export function Step2Photos() {
     }
   }
 
-  function onSelect(slotKey: string, file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      persist({ ...photos, [slotKey]: { dataUrl, name: file.name, size: file.size } });
-    };
-    reader.readAsDataURL(file);
+  async function onSelect(slotKey: string, file: File) {
+    try {
+      const compressed = await compressImage(file);
+      persist({
+        ...photos,
+        [slotKey]: { dataUrl: compressed.dataUrl, name: file.name, size: compressed.bytes },
+      });
+    } catch {
+      // Fallback: hvis komprimering fejler (fx HEIC uden decoder, kæmpe billede), tag original
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        persist({ ...photos, [slotKey]: { dataUrl, name: file.name, size: file.size } });
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   function onRemove(slotKey: string) {
@@ -161,4 +170,57 @@ function PhotoTile({
       />
     </label>
   );
+}
+
+// Resizer billede til max 1280px langside + JPEG 82% kvalitet.
+// 4MB iPhone-foto → typisk 250-400 KB. Holder os langt under 15MB submit-limit
+// uanset om brugeren tilføjer 8 fotos.
+const MAX_DIMENSION = 1280;
+const JPEG_QUALITY = 0.82;
+
+async function compressImage(file: File): Promise<{ dataUrl: string; bytes: number }> {
+  const bitmap = await loadBitmap(file);
+  const { width, height } = scaleToFit(bitmap.width, bitmap.height, MAX_DIMENSION);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas 2D context unavailable');
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  if ('close' in bitmap) (bitmap as ImageBitmap).close();
+  const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+  // Estimer byte-størrelse fra base64 længde (3/4-faktor minus padding)
+  const base64 = dataUrl.split(',')[1] ?? '';
+  const bytes = Math.floor((base64.length * 3) / 4);
+  return { dataUrl, bytes };
+}
+
+async function loadBitmap(file: File): Promise<ImageBitmap | HTMLImageElement> {
+  // ImageBitmap er hurtigere men understøttes ikke i alle browsers — fallback til Image
+  if (typeof createImageBitmap === 'function') {
+    try {
+      return await createImageBitmap(file);
+    } catch {
+      // Falder igennem til Image-fallback fx for HEIC der ikke kan dekodes
+    }
+  }
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Image decode failed'));
+    };
+    img.src = url;
+  });
+}
+
+function scaleToFit(w: number, h: number, max: number) {
+  if (w <= max && h <= max) return { width: w, height: h };
+  const ratio = w > h ? max / w : max / h;
+  return { width: Math.round(w * ratio), height: Math.round(h * ratio) };
 }
