@@ -200,6 +200,24 @@ export const leads = pgTable(
       medianPricePerSqm?: number;
       sampleSize?: number;
       sameEfCount?: number;
+      // Leje-kilde (vores faktiske data eller postnr-fallback)
+      rentSource?: 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
+      rentSampleSize?: number;
+      // Udspecificerede driftsomkostninger (kr/år) — så vi kan se hvad der gik ind
+      costFaellesudgifter?: number;
+      costGrundvaerdi?: number;
+      costFaelleslaan?: number;
+      costRenovation?: number;
+      costForsikringer?: number;
+      costRottebekempelse?: number;
+      costAndreDrift?: number;
+      // Vand/varme — ikke i drift, men gemt til reference
+      waterCost?: number;
+      waterPaidViaAssoc?: boolean;
+      heatCost?: number;
+      heatPaidViaAssoc?: boolean;
+      // Fælleslån-detaljer
+      faelleslaanCanPrepay?: 'ja' | 'nej' | 'vedikke' | null;
     }>(),
 
     // Kampagne-tracking

@@ -189,6 +189,21 @@ export async function submitFunnelAction(
         medianPricePerSqm: estimate.medianPricePerSqm,
         sampleSize: estimate.sampleSize,
         sameEfCount: estimate.sameEfCount,
+        rentSource: estimate.rentSource,
+        rentSampleSize: estimate.rentSampleSize,
+        // Udspecificerede udgifter — så debug-siden kan vise dem
+        costFaellesudgifter: num(state.costFaellesudgifter),
+        costGrundvaerdi: num(state.costGrundvaerdi),
+        costFaelleslaan: num(state.costFaelleslaan),
+        costRenovation: num(state.costRenovation),
+        costForsikringer: num(state.costForsikringer),
+        costRottebekempelse: num(state.costRottebekempelse),
+        costAndreDrift: num(state.costAndreDrift),
+        waterCost,
+        waterPaidViaAssoc: state.waterPaidViaAssoc,
+        heatCost,
+        heatPaidViaAssoc: state.heatPaidViaAssoc,
+        faelleslaanCanPrepay: state.faelleslaanCanPrepay,
       },
     })
     .returning({ id: leads.id });

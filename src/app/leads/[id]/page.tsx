@@ -105,6 +105,24 @@ function AfkastTab({ lead }: { lead: Lead }) {
     );
   }
 
+  const fmt = (n?: number) => (n ?? 0).toLocaleString('da-DK');
+  const costRows: Array<[string, number | undefined]> = [
+    ['Fællesudgifter', inp.costFaellesudgifter],
+    ['Grundskyld', inp.costGrundvaerdi],
+    ['Fælleslån-ydelse', inp.costFaelleslaan],
+    ['Renovation', inp.costRenovation],
+    ['Bygningsforsikring', inp.costForsikringer],
+    ['Rottebekæmpelse', inp.costRottebekempelse],
+    ['Andre driftsomkostninger', inp.costAndreDrift],
+  ];
+  const hasCostBreakdown = costRows.some(([, v]) => (v ?? 0) > 0);
+  const rentSourceLabel: Record<string, string> = {
+    'same-vej': 'Same vej (samme EF)',
+    'same-postal': 'Same postnr',
+    'kvm-fallback': 'Postnr × m² fallback',
+    'no-match': 'Ingen match',
+  };
+
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm">
@@ -131,6 +149,82 @@ function AfkastTab({ lead }: { lead: Lead }) {
           leadet — brug det til at simulere alternative scenarier.
         </div>
       </div>
+
+      {/* Drift-udspecificering — alle udgifter brugeren tastede */}
+      {(hasCostBreakdown || (inp.waterCost ?? 0) > 0 || (inp.heatCost ?? 0) > 0) && (
+        <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
+          <div className="flex items-baseline justify-between">
+            <h3 className="font-semibold text-sm">Drift-udspecificering (kr/år)</h3>
+            <span className="text-xs text-slate-500">
+              Total: <strong>{fmt(inp.driftTotal)}</strong>
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+            {costRows.map(([label, value]) => (
+              <div key={label} className="flex justify-between border-b border-slate-50 py-1">
+                <span className={`${(value ?? 0) === 0 ? 'text-slate-400' : 'text-slate-700'}`}>
+                  {label}
+                </span>
+                <span className={`font-medium ${(value ?? 0) === 0 ? 'text-slate-400' : 'text-slate-900'}`}>
+                  {fmt(value)}
+                </span>
+              </div>
+            ))}
+          </div>
+          {((inp.waterCost ?? 0) > 0 || (inp.heatCost ?? 0) > 0) && (
+            <div className="border-t border-slate-100 pt-3 mt-2 space-y-1 text-sm">
+              <div className="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1">
+                Vand & varme (ikke i drift — viderefaktureres til lejer)
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+                <div className="flex justify-between">
+                  <span>💧 Vand ({inp.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'})</span>
+                  <span className="font-medium">{fmt(inp.waterCost)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>🔥 Varme ({inp.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})</span>
+                  <span className="font-medium">{fmt(inp.heatCost)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          {inp.faelleslaanCanPrepay && (
+            <div className="border-t border-slate-100 pt-2 text-xs text-slate-600">
+              Fælleslån kan indfries før tid:{' '}
+              <strong>
+                {inp.faelleslaanCanPrepay === 'ja' ? 'JA' : inp.faelleslaanCanPrepay === 'nej' ? 'NEJ' : 'Ved ikke'}
+              </strong>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Leje-kilde — hvor præcist er leje-estimatet */}
+      {inp.rentSource && (
+        <div className="bg-white border border-slate-200 rounded-lg p-3 text-sm flex items-center justify-between flex-wrap gap-2">
+          <div>
+            🏠 <strong>Leje-kilde:</strong>{' '}
+            <span
+              className={
+                inp.rentSource === 'same-vej'
+                  ? 'text-emerald-700 font-semibold'
+                  : inp.rentSource === 'same-postal'
+                    ? 'text-amber-700 font-semibold'
+                    : 'text-slate-500'
+              }
+            >
+              {rentSourceLabel[inp.rentSource]}
+            </span>
+            {(inp.rentSampleSize ?? 0) > 0 && (
+              <span className="text-slate-500 text-xs ml-2">({inp.rentSampleSize} af vores lejemål)</span>
+            )}
+          </div>
+          <div className="text-xs text-slate-600">
+            Brugt leje: <strong>{fmt(inp.rentMd)} kr/md</strong>
+          </div>
+        </div>
+      )}
+
       <AfkastDebug
         initial={{
           pris: inp.listePris ?? 0,
