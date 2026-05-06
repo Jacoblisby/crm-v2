@@ -49,6 +49,12 @@ export async function updateEstimaterAction(input: UpdateEstimaterInput) {
     refurbTotal,
   });
 
+  // ON-MARKET cap: aldrig over 95% af listepris (vi forhandler).
+  const ON_MARKET_BID_CAP_PCT = 0.95;
+  const bidCap = Math.round((c.listPrice * ON_MARKET_BID_CAP_PCT) / 1000) * 1000;
+  const cappedBid =
+    afk.budAt20PctRoe != null ? Math.min(afk.budAt20PctRoe, bidCap) : null;
+
   await db
     .update(onMarketCandidates)
     .set({
@@ -57,7 +63,7 @@ export async function updateEstimaterAction(input: UpdateEstimaterInput) {
       refurbMaling: input.refurbMaling,
       refurbRengoring: input.refurbRengoring,
       refurbAndre: input.refurbAndre,
-      bidDkk: afk.budAt20PctRoe,
+      bidDkk: cappedBid,
       marginPct: afk.roeNettoPct.toString(),
       avmValue: afk.forhandletPris,
       avmCalculatedAt: new Date(),

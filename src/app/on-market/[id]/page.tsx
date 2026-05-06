@@ -94,7 +94,7 @@ export default async function OnMarketDetailPage({
 
   // Re-beregn afkast med de aktuelle (potentielt user-edited) leje + refurb-tal.
   // Hvis intet er overrided er resultatet identisk med estimate.afkast.
-  const afk =
+  const afkRaw =
     rentMd === estimate.estimatedRentMd && refurbTotal === estimate.refurbTotal
       ? estimate.afkast
       : computeAfkast({
@@ -104,6 +104,18 @@ export default async function OnMarketDetailPage({
           driftTotal,
           refurbTotal,
         });
+
+  // ON-MARKET cap: vi byder aldrig over 95% af listing — vi forhandler.
+  // Ren matematik viser hvad der OK ud fra ROE; capping giver det vi faktisk byder.
+  const ON_MARKET_BID_CAP_PCT = 0.95;
+  const bidCap = Math.round(c.listPrice * ON_MARKET_BID_CAP_PCT / 1000) * 1000;
+  const cappedBidAtTarget =
+    afkRaw.budAt20PctRoe != null ? Math.min(afkRaw.budAt20PctRoe, bidCap) : null;
+  const isCapped =
+    afkRaw.budAt20PctRoe != null && afkRaw.budAt20PctRoe > bidCap;
+  // Vis det cappede bud i stat-kortene + i UI generelt; mellemregninger
+  // bruger den rene matematik (afkRaw) så det er logisk konsistent.
+  const afk = { ...afkRaw, budAt20PctRoe: cappedBidAtTarget };
 
   const dage = c.firstSeenAt
     ? Math.floor((Date.now() - new Date(c.firstSeenAt).getTime()) / 86_400_000)
@@ -220,10 +232,10 @@ export default async function OnMarketDetailPage({
       />
 
       {/* === AFKAST-OVERSIGT === */}
-      <section className="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-5">
+      <section className="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-5 space-y-3">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Stat
-            label="Bud (20% ROE EBT)"
+            label="Vores bud"
             value={
               afk.budAt20PctRoe
                 ? `${afk.budAt20PctRoe.toLocaleString('da-DK')} kr`
@@ -246,6 +258,16 @@ export default async function OnMarketDetailPage({
             value={`${afk.cfMd.toLocaleString('da-DK')} kr`}
           />
         </div>
+        {isCapped && afkRaw.budAt20PctRoe != null && (
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-xs text-amber-900 space-y-1">
+            <div>
+              <strong>📐 Cap aktiv:</strong> matematisk bud@20% ROE er{' '}
+              <strong>{afkRaw.budAt20PctRoe.toLocaleString('da-DK')} kr</strong> — vi byder dog max
+              95% af listepris ({(c.listPrice * 0.95).toLocaleString('da-DK', {maximumFractionDigits: 0})} kr)
+              fordi vi typisk forhandler under listepris.
+            </div>
+          </div>
+        )}
       </section>
 
       {/* === COMPARABLES + LEJE-KILDE === */}

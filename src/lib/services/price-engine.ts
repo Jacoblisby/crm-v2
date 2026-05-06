@@ -150,8 +150,10 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     haeftelseEf: input.haeftelseEf ?? 0,
   });
 
-  // 5. Bud@20% ROE er det maksimale vi vil byde. computeAfkast capper allerede
-  // ved 95% af listePris, så vi tager bare resultatet — eller fallback hvis null.
+  // 5. Bud@target ROE er præcis hvad computeAfkast siger — ingen cap for off-market.
+  // Sælger ringer til OS, så der er ingen 'listing' at forhandle ned fra.
+  // Bidet er det matematiske svar; resten af markeds-omkostningerne lægger vi
+  // ovenpå i breakdown-visningen som "hvad det svarer til på markedet".
   const finalOffer = afk.budAt20PctRoe ?? Math.round(marketEstimate * 0.85);
 
   // 6. Breakdown — fra markedspris til vores bud, matematisk korrekt så de

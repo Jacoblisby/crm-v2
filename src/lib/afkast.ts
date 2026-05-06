@@ -140,6 +140,10 @@ export function computeAfkast(inp: AfkastInputs): AfkastResult {
   // Find highest price der stadig giver target ROE EBT (FØR skat) — line search.
   // Skat indgår IKKE i target. Range er INVARIANT af input-pris: vi søger
   // fra 50.000 til 30 mio så bud@target ikke afhænger af hvad man taster ind.
+  // Find højeste pris hvor ROE EBT ≥ target. Returnerer den RENE matematiske
+  // værdi — ingen cap. Cap er en business-regel der hører hjemme hos consumer
+  // (on-market: 95% af listePris, off-market: ingen). Det giver 100% logiske
+  // mellemregninger — bud@target er altid hvor ROE = target.
   const targetRoe = inp.targetRoe ?? TARGET_ROE;
   let budSolve: number | null = null;
   for (let trial = 50_000; trial <= 30_000_000; trial += 5_000) {
@@ -151,13 +155,7 @@ export function computeAfkast(inp: AfkastInputs): AfkastResult {
     if (roeEbtT >= targetRoe) budSolve = trial;
     else if (budSolve != null) break; // ROE faldet under target → fundet højeste
   }
-  // Cap bud ved 95% af listepris — vi byder aldrig OVER markedet.
-  // Hvis ROE-engine'n siger vi godt kan byde mere (typisk når drift er
-  // urealistisk lavt), trækker capping det ned.
-  const MAX_BID_PCT_OF_LIST = 0.95;
-  const ceiling = Math.round(inp.listePris * MAX_BID_PCT_OF_LIST);
-  const cappedBud = budSolve != null ? Math.min(budSolve, ceiling) : null;
-  const bud = cappedBud != null ? Math.round(cappedBud / 1000) * 1000 : null;
+  const bud = budSolve != null ? Math.round(budSolve / 1000) * 1000 : null;
 
   return {
     forhandletPris: price,

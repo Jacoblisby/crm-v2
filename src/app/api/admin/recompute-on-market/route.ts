@@ -63,10 +63,16 @@ export async function POST(req: NextRequest) {
       refurbTotal: useRefurb,
     });
 
+    // ON-MARKET cap: aldrig over 95% af listepris (vi forhandler).
+    const ON_MARKET_BID_CAP_PCT = 0.95;
+    const bidCap = Math.round((c.listPrice * ON_MARKET_BID_CAP_PCT) / 1000) * 1000;
+    const cappedBid =
+      afk.budAt20PctRoe != null ? Math.min(afk.budAt20PctRoe, bidCap) : null;
+
     await db
       .update(onMarketCandidates)
       .set({
-        bidDkk: afk.budAt20PctRoe,
+        bidDkk: cappedBid,
         marginPct: afk.roeNettoPct.toString(),
         afkastCalculatedAt: new Date(),
         updatedAt: new Date(),
