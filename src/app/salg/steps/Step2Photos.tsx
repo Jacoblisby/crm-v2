@@ -1,24 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { Sofa, ChefHat, ShowerHead, Bed, Mountain, Ruler, DoorOpen, Plus, type LucideIcon } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 
 interface PhotoSlot {
   key: string;
   label: string;
-  emoji: string;
+  Icon: LucideIcon;
   required?: boolean;
 }
 
 const SLOTS: PhotoSlot[] = [
-  { key: 'stue', label: 'Stue', emoji: '🛋️', required: true },
-  { key: 'kokken', label: 'Køkken', emoji: '🍳' },
-  { key: 'bad', label: 'Bad', emoji: '🚿' },
-  { key: 'sovevaerelse', label: 'Soveværelse', emoji: '🛏️' },
-  { key: 'altan', label: 'Altan/udsigt', emoji: '🏞️' },
-  { key: 'plantegning', label: 'Plantegning', emoji: '📐' },
-  { key: 'gang', label: 'Gang/entré', emoji: '🚪' },
-  { key: 'andet', label: 'Andet rum', emoji: '➕' },
+  { key: 'stue', label: 'Stue', Icon: Sofa, required: true },
+  { key: 'kokken', label: 'Køkken', Icon: ChefHat },
+  { key: 'bad', label: 'Bad', Icon: ShowerHead },
+  { key: 'sovevaerelse', label: 'Soveværelse', Icon: Bed },
+  { key: 'altan', label: 'Altan/udsigt', Icon: Mountain },
+  { key: 'plantegning', label: 'Plantegning', Icon: Ruler },
+  { key: 'gang', label: 'Gang/entré', Icon: DoorOpen },
+  { key: 'andet', label: 'Andet rum', Icon: Plus },
 ];
 
 // Bruger File-objekter i memory + dataURL preview
@@ -76,10 +77,11 @@ export function Step2Photos() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-xl font-semibold">Upload fotos af din lejlighed (valgfri)</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Upload fotos af din lejlighed (valgfri)</h2>
         <p className="text-sm text-slate-500">
-          Du kan springe over, men <strong>4+ fotos giver op til 70.000 kr højere tilbud</strong>{' '}
-          fordi vi ser den faktiske stand i stedet for at skulle gætte.
+          Du kan springe over, men <strong className="text-slate-900">4+ fotos giver op til
+          70.000 kr højere tilbud</strong> fordi vi ser den faktiske stand i stedet for at
+          skulle gætte.
         </p>
       </div>
 
@@ -97,28 +99,28 @@ export function Step2Photos() {
 
       <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-600 flex items-center justify-between">
         <span>
-          {count}/8 fotos uploadet{' '}
-          {count === 0 && <span className="text-slate-500">— du kan også springe over</span>}
+          {count}/8 fotos uploadet
+          {count === 0 && <span className="text-slate-500">. Du kan også springe over.</span>}
           {count > 0 && count < 4 && (
-            <span className="text-amber-700">— flere fotos = bedre estimat</span>
+            <span className="text-slate-500">. Flere fotos giver bedre estimat.</span>
           )}
         </span>
-        {count >= 4 && <span className="text-emerald-600 font-medium">✓ Solid data</span>}
+        {count >= 4 && <span className="text-emerald-700 font-medium">Solid data</span>}
       </div>
 
       <div className="flex justify-between gap-3">
         <button
           onClick={prev}
-          className="px-5 py-3 text-slate-600 hover:bg-slate-100 rounded-xl font-medium"
+          className="px-5 py-3 text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
         >
           ← Tilbage
         </button>
         <button
           onClick={next}
-          className={`px-6 py-3 rounded-xl font-medium ${
+          className={`px-6 py-3 rounded-lg font-medium ${
             count === 0
               ? 'bg-slate-200 hover:bg-slate-300 text-slate-700'
-              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+              : 'bg-slate-900 hover:bg-slate-800 text-white'
           }`}
         >
           {count === 0 ? 'Spring over →' : 'Fortsæt →'}
@@ -141,7 +143,8 @@ function PhotoTile({
 }) {
   if (photo) {
     return (
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group">
+      <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-100 group">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photo.dataUrl} alt={slot.label} className="w-full h-full object-cover" />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white text-xs p-2">
           {slot.label}
@@ -156,11 +159,12 @@ function PhotoTile({
       </div>
     );
   }
+  const Icon = slot.Icon;
   return (
-    <label className="aspect-square rounded-xl border-2 border-dashed border-slate-300 hover:border-emerald-400 hover:bg-emerald-50/50 cursor-pointer flex flex-col items-center justify-center gap-1 transition-colors">
-      <span className="text-3xl">{slot.emoji}</span>
+    <label className="aspect-square rounded-lg border border-dashed border-slate-300 hover:border-slate-500 hover:bg-slate-50 cursor-pointer flex flex-col items-center justify-center gap-1.5 transition-colors">
+      <Icon className="w-7 h-7 text-slate-400" strokeWidth={1.5} />
       <span className="text-xs font-medium text-slate-700">{slot.label}</span>
-      <span className="text-[10px] text-slate-400">+ Tap for at uploade</span>
+      <span className="text-[10px] text-slate-400">Tap for at uploade</span>
       <input
         type="file"
         accept="image/*"

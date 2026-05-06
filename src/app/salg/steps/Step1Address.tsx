@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef } from 'react';
+import { Lock, Check } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { searchAddressAction, lookupAddressAction, submitOutOfAreaLeadAction } from '../actions';
 import type { DawaSuggestion } from '@/lib/services/dawa';
@@ -117,12 +118,13 @@ export function Step1Address() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-xl font-semibold">Hvor ligger din lejlighed?</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Hvor ligger din lejlighed?</h2>
         <p className="text-sm text-slate-500">
-          Skriv adressen — vi henter automatisk størrelse, byggeår og ejendomsdata.
+          Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
         </p>
-        <p className="text-xs text-slate-400 flex items-center gap-1">
-          🔒 Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
+        <p className="text-xs text-slate-400 flex items-center gap-1.5">
+          <Lock className="w-3 h-3" />
+          Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
         </p>
       </div>
 
@@ -133,7 +135,7 @@ export function Step1Address() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
           placeholder="Eks. Bogensevej 53, 2. tv, 4700 Næstved"
-          className="w-full px-4 py-3.5 text-base border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          className="w-full px-4 py-3.5 text-base border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
           autoComplete="off"
         />
         {pending && (
@@ -149,7 +151,7 @@ export function Step1Address() {
                 <button
                   type="button"
                   onClick={() => selectAddress(s)}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-emerald-50 border-b border-slate-100 last:border-b-0"
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 border-b border-slate-100 last:border-b-0"
                 >
                   {s.tekst}
                 </button>
@@ -174,9 +176,9 @@ export function Step1Address() {
       {outOfArea && <OutOfAreaForm />}
 
       {showAutoFilled && !outOfArea && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-emerald-800">
-            <span>✓</span>
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+            <Check className="w-4 h-4" strokeWidth={3} />
             <span>Vi har fundet din lejlighed</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
@@ -206,8 +208,8 @@ export function Step1Address() {
             </div>
           </div>
           {state.isOnMarket && state.currentListingPrice && (
-            <div className="text-xs text-emerald-700 border-t border-emerald-200 pt-2">
-              💡 Vi har set din bolig til salg lige nu på Boligsiden til{' '}
+            <div className="text-xs text-slate-700 border-t border-slate-200 pt-2">
+              Vi har set din bolig til salg lige nu på Boligsiden til{' '}
               <strong>{state.currentListingPrice.toLocaleString('da-DK')} kr</strong>. Vi tager det
               med i beregningen.
             </div>
@@ -220,7 +222,7 @@ export function Step1Address() {
           <button
             onClick={continueIfReady}
             disabled={!hasAddress || lookupPending}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium"
+            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
           >
             Fortsæt →
           </button>
@@ -282,11 +284,14 @@ function OutOfAreaForm() {
 
   if (submitted) {
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 space-y-2">
-        <div className="text-base font-semibold text-emerald-800">✓ Vi har modtaget din henvendelse</div>
-        <p className="text-sm text-emerald-900">
-          Tak! Vi gemmer din kontakt og vender tilbage hvis vi kan tilbyde noget — eller når vi
-          udvider til {state.postalCode}. I mellemtiden er du velkommen til at ringe direkte til Jacob
+      <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 space-y-2">
+        <div className="flex items-center gap-2 text-base font-semibold text-emerald-700">
+          <Check className="w-5 h-5" strokeWidth={3} />
+          Vi har modtaget din henvendelse
+        </div>
+        <p className="text-sm text-slate-700">
+          Tak. Vi gemmer din kontakt og vender tilbage hvis vi kan tilbyde noget. Eller når vi
+          udvider til {state.postalCode}. I mellemtiden er du velkommen til at ringe direkte
           på <a href="tel:+4561789071" className="font-semibold underline">+45 61 78 90 71</a>.
         </p>
       </div>
@@ -294,14 +299,14 @@ function OutOfAreaForm() {
   }
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-4">
+    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
       <div>
-        <div className="text-sm font-semibold text-amber-900">
+        <div className="text-sm font-semibold text-slate-900">
           Vi køber ikke i {state.postalCode} endnu
         </div>
-        <p className="text-sm text-amber-900 mt-1">
+        <p className="text-sm text-slate-700 mt-1">
           Vores hovedområder er Næstved, Ringsted, Kalundborg, Taastrup og Roskilde. Læg dine
-          kontaktoplysninger her — vi vurderer din sag manuelt og vender tilbage indenfor 1-2
+          kontaktoplysninger her, så vurderer vi din sag manuelt og vender tilbage indenfor 1-2
           hverdage.
         </p>
       </div>
@@ -311,28 +316,28 @@ function OutOfAreaForm() {
           placeholder="Fulde navn"
           value={state.fullName}
           onChange={(e) => update({ fullName: e.target.value })}
-          className="px-3 py-2 text-sm border border-amber-300 rounded-lg bg-white"
+          className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
         />
         <input
           type="email"
           placeholder="Email"
           value={state.email}
           onChange={(e) => update({ email: e.target.value })}
-          className="px-3 py-2 text-sm border border-amber-300 rounded-lg bg-white"
+          className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
         />
         <input
           type="tel"
           placeholder="Telefon"
           value={state.phone}
           onChange={(e) => update({ phone: e.target.value })}
-          className="px-3 py-2 text-sm border border-amber-300 rounded-lg bg-white"
+          className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
         />
       </div>
       {error && <div className="text-sm text-red-700">{error}</div>}
       <button
         onClick={submit}
         disabled={pending}
-        className="w-full px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-lg text-sm font-medium"
+        className="w-full px-5 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-lg text-sm font-medium"
       >
         {pending ? 'Sender…' : 'Send min sag til vurdering'}
       </button>

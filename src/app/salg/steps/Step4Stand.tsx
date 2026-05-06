@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import type { StandLevel } from '@/lib/services/price-engine';
 
 interface StandOption {
   level: StandLevel;
-  emoji: string;
   title: string;
   desc: string;
 }
@@ -14,33 +14,28 @@ interface StandOption {
 const OPTIONS: StandOption[] = [
   {
     level: 'nyrenoveret',
-    emoji: '✨',
     title: 'Nyrenoveret',
-    desc: 'Alt opdateret de seneste 2-3 år (køkken, bad, gulve, maling)',
+    desc: 'Alt opdateret de seneste 2-3 år (køkken, bad, gulve, maling).',
   },
   {
     level: 'god',
-    emoji: '👍',
     title: 'God stand',
-    desc: 'Velholdt — moderate opdateringer indenfor 5-10 år',
+    desc: 'Velholdt. Moderate opdateringer indenfor 5-10 år.',
   },
   {
     level: 'middel',
-    emoji: '🔨',
     title: 'Middel',
-    desc: 'Funktionel men ældre overflader — kan flytte ind, men trænger en omgang',
+    desc: 'Funktionel, men ældre overflader. Kan flytte ind, men trænger en omgang.',
   },
   {
     level: 'trænger',
-    emoji: '🎨',
     title: 'Trænger til kærlighed',
-    desc: 'Køkken/bad er ældre — gulve, maling, måske badeværelse skal renoveres',
+    desc: 'Køkken og bad er ældre. Gulve, maling og evt. bad skal renoveres.',
   },
   {
     level: 'slidt',
-    emoji: '🛠️',
     title: 'Slidt / til renovering',
-    desc: 'Original eller meget slidt — fuld istandsættelse er nødvendig',
+    desc: 'Original eller meget slidt. Fuld istandsættelse er nødvendig.',
   },
 ];
 
@@ -76,33 +71,33 @@ export function Step4Stand() {
 
       {/* OVERALL — primær action */}
       <div className="space-y-2">
-        {OPTIONS.map((opt) => (
-          <button
-            key={opt.level}
-            type="button"
-            onClick={() => update({ stand: opt.level })}
-            className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-              state.stand === opt.level
-                ? 'border-emerald-500 bg-emerald-50'
-                : 'border-slate-200 hover:border-slate-300 bg-white'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{opt.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <div
-                  className={`font-semibold ${
-                    state.stand === opt.level ? 'text-emerald-800' : 'text-slate-900'
-                  }`}
-                >
-                  {opt.title}
+        {OPTIONS.map((opt) => {
+          const active = state.stand === opt.level;
+          return (
+            <button
+              key={opt.level}
+              type="button"
+              onClick={() => update({ stand: opt.level })}
+              className={`w-full text-left p-4 rounded-lg border transition-all ${
+                active
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 hover:border-slate-400 bg-white'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className={`font-semibold ${active ? 'text-white' : 'text-slate-900'}`}>
+                    {opt.title}
+                  </div>
+                  <div className={`text-sm ${active ? 'text-slate-300' : 'text-slate-600'}`}>
+                    {opt.desc}
+                  </div>
                 </div>
-                <div className="text-sm text-slate-600">{opt.desc}</div>
+                {active && <Check className="w-4 h-4 text-white shrink-0" strokeWidth={3} />}
               </div>
-              {state.stand === opt.level && <span className="text-emerald-600">✓</span>}
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       {/* EKSTRA DETALJER — collapsible */}
@@ -127,7 +122,7 @@ export function Step4Stand() {
               {/* KØKKEN + BAD */}
               <section className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-                  🍳 Køkken & 🚿 Bad
+                  Køkken & bad
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <NumberField
@@ -160,7 +155,7 @@ export function Step4Stand() {
               {/* HVIDEVARER */}
               <section className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-                  🔌 Hvidevarer der følger med
+                  Hvidevarer der følger med
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <ApplianceToggle
@@ -235,7 +230,7 @@ export function Step4Stand() {
                   onChange={(e) => update({ standNote: e.target.value })}
                   rows={3}
                   placeholder='Fx "Fælles tagterrasse i bygningen", "Husdyr accepteret af EF", "Kommende ombygning af bad i 2026"'
-                  className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </section>
             </div>
@@ -246,37 +241,37 @@ export function Step4Stand() {
       {/* AKTUELT UDLEJET — egen sektion fordi det udløser meget data */}
       <section className="border-t border-slate-200 pt-4 space-y-3">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          🏘️ Er lejligheden udlejet i dag?
+          Er lejligheden udlejet i dag?
         </h3>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => update({ isRented: false })}
-            className={`flex-1 px-4 py-3 rounded-lg border-2 text-sm font-medium ${
+            className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium ${
               !state.isRented
                 ? 'border-slate-900 bg-slate-900 text-white'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'
             }`}
           >
-            Nej — jeg bor selv eller står tom
+            Nej, jeg bor selv eller står tom
           </button>
           <button
             type="button"
             onClick={() => update({ isRented: true })}
-            className={`flex-1 px-4 py-3 rounded-lg border-2 text-sm font-medium ${
+            className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium ${
               state.isRented
-                ? 'border-amber-600 bg-amber-50 text-amber-900'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                ? 'border-slate-900 bg-slate-900 text-white'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'
             }`}
           >
-            Ja — har en lejer
+            Ja, har en lejer
           </button>
         </div>
 
         {state.isRented && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
-            <p className="text-xs text-amber-900">
-              Vi køber gerne udlejede lejligheder — sig nej til at de skal flytte.
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+            <p className="text-xs text-slate-700">
+              Vi køber gerne udlejede lejligheder. Sig nej til at de skal flytte.
               Detaljerne her hjælper os med at vurdere kontrakten.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -321,7 +316,7 @@ export function Step4Stand() {
                 onChange={(v) => update({ rentalUopsigeligMaaneder: v })}
               />
             )}
-            <label className="block w-full px-4 py-3 border-2 border-dashed border-amber-300 rounded-lg text-center cursor-pointer hover:border-amber-500 hover:bg-amber-100/30">
+            <label className="block w-full px-4 py-3 border border-dashed border-slate-300 rounded-lg text-center cursor-pointer hover:border-slate-500 hover:bg-white">
               <input
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
@@ -331,11 +326,10 @@ export function Step4Stand() {
                   if (f) update({ rentalContract: { name: f.name, size: f.size } });
                 }}
               />
-              <span className="text-sm text-amber-900">
-                📎{' '}
+              <span className="text-sm text-slate-700">
                 {state.rentalContract
                   ? `${state.rentalContract.name} (${(state.rentalContract.size / 1024).toFixed(0)} kB)`
-                  : 'Vedhæft lejekontrakt — gør tingene 10x hurtigere'}
+                  : 'Vedhæft lejekontrakt. Gør tingene 10x hurtigere.'}
               </span>
             </label>
           </div>
@@ -352,7 +346,7 @@ export function Step4Stand() {
         <button
           onClick={next}
           disabled={!state.stand}
-          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium"
+          className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
         >
           Fortsæt →
         </button>
@@ -393,7 +387,7 @@ function NumberField({
           value={value ?? ''}
           onChange={(e) => onChange(Number(e.target.value) || 0)}
           placeholder={placeholder}
-          className="w-full px-3 py-2.5 pr-14 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full px-3 py-2.5 pr-14 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
         />
         {suffix && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">
@@ -402,8 +396,8 @@ function NumberField({
         )}
       </div>
       {showFormatted && (
-        <div className="text-xs text-emerald-700 mt-1 font-medium">
-          = {value!.toLocaleString('da-DK')} {suffix}
+        <div className="text-xs text-slate-700 mt-1">
+          {value!.toLocaleString('da-DK')} {suffix}
         </div>
       )}
       {!showFormatted && helperText && (
@@ -475,16 +469,16 @@ function ApplianceToggle({
       onClick={() => onChange(!value)}
       className={`px-3 py-2.5 rounded-lg border text-sm transition-all flex items-center gap-2 ${
         value
-          ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-medium'
-          : 'bg-white border-slate-200 hover:border-slate-300'
+          ? 'bg-slate-900 border-slate-900 text-white font-medium'
+          : 'bg-white border-slate-200 hover:border-slate-400 text-slate-700'
       }`}
     >
       <span
-        className={`w-4 h-4 rounded border flex items-center justify-center text-xs ${
-          value ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300'
+        className={`w-4 h-4 rounded border flex items-center justify-center ${
+          value ? 'bg-white border-white' : 'border-slate-300'
         }`}
       >
-        {value && '✓'}
+        {value && <Check className="w-3 h-3 text-slate-900" strokeWidth={3} />}
       </span>
       <span>{label}</span>
     </button>

@@ -479,7 +479,7 @@ function customerEmailHtml(
         <tr>
           <td style="padding:6px 0;font-size:13px;">
             <strong>${escapeHtml(c.address)}</strong> · ${c.kvm}m²
-            ${c.weight >= 3 ? '<span style="background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:6px;">Samme EF</span>' : ''}
+            ${c.weight >= 3 ? '<span style="background:#0f172a;color:white;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:6px;">Samme EF</span>' : ''}
           </td>
           <td style="padding:6px 0;text-align:right;font-size:13px;">
             <strong>${fmt(c.price)} kr</strong>
@@ -515,33 +515,33 @@ function customerEmailHtml(
   </div>
 
   <!-- Price hero -->
-  <div style="margin:0 24px 24px;padding:32px 20px;background:#ecfdf5;border:2px solid #10b981;border-radius:12px;text-align:center;">
-    <div style="color:#065f46;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Vi byder</div>
-    <div style="color:#047857;font-size:48px;font-weight:bold;margin:8px 0;letter-spacing:-1px;">${offer} kr</div>
-    <div style="color:#475569;font-size:13px;">${escapeHtml(state.fullAddress)}</div>
-    <div style="color:#64748b;font-size:12px;margin-top:8px;font-style:italic;">Endeligt bindende tilbud efter gratis besigtigelse</div>
+  <div style="margin:0 24px 24px;padding:32px 20px;background:#0f172a;border-radius:12px;text-align:center;">
+    <div style="color:#94a3b8;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Vi byder</div>
+    <div style="color:#ffffff;font-size:48px;font-weight:bold;margin:8px 0;letter-spacing:-1px;">${offer} kr</div>
+    <div style="color:#cbd5e1;font-size:13px;">${escapeHtml(state.fullAddress)}</div>
+    <div style="color:#94a3b8;font-size:12px;margin-top:8px;font-style:italic;">Bindende tilbud gives efter gratis besigtigelse</div>
   </div>
 
-  <!-- Hvad du sparer — sælges-bullets, ikke matematik -->
+  <!-- Hvad du sparer -->
   <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;padding:20px;">
     <h3 style="margin:0 0 12px;font-size:14px;font-weight:600;color:#0f172a;">
       Hvad du sparer ved at sælge til os
     </h3>
     <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;vertical-align:top;width:24px;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Mæglersalær</strong> <span style="color:#10b981;float:right;font-weight:600;">${broker} kr</span><br><span style="color:#94a3b8;font-size:11px;">Vi tager intet salær — du beholder ~70.000 kr.</span></td></tr>
-      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Markedsafslag</strong> <span style="color:#10b981;float:right;font-weight:600;">${discount} kr</span><br><span style="color:#94a3b8;font-size:11px;">Slutprisen via mægler er typisk 6% under listeprisen.</span></td></tr>
-      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Drift i salgsperioden</strong> <span style="color:#10b981;float:right;font-weight:600;">${ownership} kr</span><br><span style="color:#94a3b8;font-size:11px;">Du betaler ikke ejerudgifter mens boligen står til salg (3 mdr).</span></td></tr>
+      <tr><td style="padding:8px 0;vertical-align:top;width:24px;"><span style="color:#0f172a;font-size:16px;font-weight:bold;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Mæglersalær</strong> <span style="color:#0f172a;float:right;font-weight:600;">${broker} kr</span><br><span style="color:#94a3b8;font-size:11px;">Vi tager intet salær. Du beholder ~70.000 kr.</span></td></tr>
+      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#0f172a;font-size:16px;font-weight:bold;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Markedsafslag</strong> <span style="color:#0f172a;float:right;font-weight:600;">${discount} kr</span><br><span style="color:#94a3b8;font-size:11px;">Slutprisen via mægler er typisk 6% under listeprisen.</span></td></tr>
+      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#0f172a;font-size:16px;font-weight:bold;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Drift i salgsperioden</strong> <span style="color:#0f172a;float:right;font-weight:600;">${ownership} kr</span><br><span style="color:#94a3b8;font-size:11px;">Du betaler ikke ejerudgifter mens boligen står til salg (3 mdr).</span></td></tr>
     </table>
-    <div style="margin:12px 0 0;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+    <div style="margin:12px 0 0;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
       <table style="width:100%;border-collapse:collapse;">
-        <tr><td style="font-size:13px;color:#1e40af;font-weight:600;">Vores tilbud svarer til at sælge for</td><td style="text-align:right;font-size:16px;color:#1e3a8a;font-weight:bold;">${fmt(estimate.netForkortet.finalOffer + estimate.netForkortet.minusBrokerSavings + estimate.netForkortet.minusMarketDiscount + estimate.netForkortet.minusOwnershipCosts)} kr</td></tr>
+        <tr><td style="font-size:13px;color:#0f172a;font-weight:600;">Vores tilbud svarer til at sælge for</td><td style="text-align:right;font-size:16px;color:#0f172a;font-weight:bold;">${fmt(estimate.netForkortet.finalOffer + estimate.netForkortet.minusBrokerSavings + estimate.netForkortet.minusMarketDiscount + estimate.netForkortet.minusOwnershipCosts)} kr</td></tr>
       </table>
-      <p style="margin:4px 0 0;font-size:11px;color:#1e40af;">
-        …hvis du var gået via mægler. Vores ${offer} kr kontant + de tre poster du sparer ovenfor.
+      <p style="margin:4px 0 0;font-size:11px;color:#475569;">
+        …hvis du var gået via mægler. Vores ${offer} kr kontant plus de tre poster du sparer ovenfor.
       </p>
     </div>
     <p style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">
-      💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
+      Vi betaler kontant. Ingen ventetid, mæglersalær eller bank-forbehold.
     </p>
   </div>
 
@@ -549,7 +549,7 @@ function customerEmailHtml(
   <!-- Comparables -->
   <div style="margin:0 24px 24px;">
     <div style="font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
-      📊 Sammenlignelige handler vi brugte
+      Sammenlignelige handler vi brugte
     </div>
     <table style="width:100%;border-collapse:collapse;">
       ${compsHtml}
@@ -562,13 +562,13 @@ function customerEmailHtml(
 
   <!-- Next steps -->
   <div style="margin:0 24px 24px;padding:20px;background:#0f172a;border-radius:8px;color:white;">
-    <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">🚀 Næste skridt</div>
+    <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">Næste skridt</div>
     <p style="margin:0 0 12px;font-size:13px;color:#cbd5e1;line-height:1.5;">
       Jeg ringer dig op indenfor 24 timer på <strong style="color:white;">${escapeHtml(state.phone)}</strong> for at aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen giver jeg et endeligt bindende tilbud.
     </p>
     <p style="margin:0;font-size:13px;color:#cbd5e1;">
-      📞 Eller ring direkte: <a href="tel:+4561789071" style="color:#34d399;text-decoration:none;font-weight:600;">+45 61 78 90 71</a><br>
-      ✉️ Eller skriv: <a href="mailto:administration@365ejendom.dk" style="color:#34d399;text-decoration:none;font-weight:600;">administration@365ejendom.dk</a>
+      Ring direkte: <a href="tel:+4561789071" style="color:#ffffff;text-decoration:none;font-weight:600;">+45 61 78 90 71</a><br>
+      Email: <a href="mailto:administration@365ejendom.dk" style="color:#ffffff;text-decoration:none;font-weight:600;">administration@365ejendom.dk</a>
     </p>
   </div>
 
@@ -578,10 +578,10 @@ function customerEmailHtml(
       Hvad du får når du sælger til os
     </div>
     <div style="font-size:12px;color:#475569;line-height:1.6;">
-      ✓ Kontant betaling, ingen bank-forbehold<br>
-      ✓ Vi har købt 87+ ejerlejligheder siden 2024<br>
-      ✓ Du sparer ~50.000-70.000 kr i mæglersalær<br>
-      ✓ Du vælger selv overtagelsesdato — typisk 14 dage
+      Kontant betaling, ingen bank-forbehold<br>
+      Vi har købt 87+ ejerlejligheder siden 2024<br>
+      Du sparer ~50.000-70.000 kr i mæglersalær<br>
+      Du vælger selv overtagelsesdato (typisk 14 dage)
     </div>
   </div>
 
@@ -592,7 +592,7 @@ function customerEmailHtml(
       <strong style="color:#475569;">Jacob Lisby</strong> · 365 Ejendomme
     </p>
     <p style="margin:12px 0 0;font-size:11px;color:#cbd5e1;">
-      Du modtog denne email fordi du brugte vores boligberegner. Vi gemmer ikke dine data uden samtykke — skriv til
+      Du modtog denne email fordi du brugte vores boligberegner. Vi gemmer ikke dine data uden samtykke. Skriv til
       <a href="mailto:administration@365ejendom.dk" style="color:#94a3b8;">administration@365ejendom.dk</a>
       hvis du vil have dem slettet.
     </p>

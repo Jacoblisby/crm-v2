@@ -88,7 +88,7 @@ export function Step3Costs() {
 
       {/* === VAND === */}
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">💧 Vand</h3>
+        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">Vand</h3>
         <ToggleRow
           label="Betales acontobeløb for vand til ejerforeningen?"
           value={state.waterPaidViaAssoc}
@@ -115,7 +115,7 @@ export function Step3Costs() {
 
       {/* === VARME === */}
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">🔥 Varme</h3>
+        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">Varme</h3>
         <ToggleRow
           label="Betales acontobeløb for varme til ejerforeningen?"
           value={state.heatPaidViaAssoc}
@@ -143,7 +143,7 @@ export function Step3Costs() {
       {/* === HÆFTELSE === */}
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          🏛️ Hæftelse til ejerforening
+          Hæftelse til ejerforening
         </h3>
         <p className="text-xs text-slate-600">
           {state.costFaelleslaan > 0
@@ -176,7 +176,7 @@ export function Step3Costs() {
                   onClick={() => update({ faelleslaanCanPrepay: opt })}
                   className={`px-4 py-2 rounded-lg text-sm font-medium border ${
                     state.faelleslaanCanPrepay === opt
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
+                      ? 'bg-slate-900 border-slate-900 text-white'
                       : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
                   }`}
                 >
@@ -193,17 +193,19 @@ export function Step3Costs() {
 
       {/* === TOTAL === */}
       <div
-        className={`rounded-xl p-4 space-y-2 border ${
+        className={`rounded-lg p-4 space-y-2 border ${
           baseDrift === 0
             ? 'bg-slate-50 border-slate-200'
-            : 'bg-emerald-50 border-emerald-200'
+            : 'bg-slate-900 border-slate-900'
         }`}
       >
         <div className="flex items-baseline justify-between">
-          <span className="text-slate-700 text-sm">Drift (uden vand/varme):</span>
+          <span className={`text-sm ${baseDrift === 0 ? 'text-slate-700' : 'text-slate-300'}`}>
+            Drift (uden vand/varme)
+          </span>
           <span
             className={`text-2xl font-bold ${
-              baseDrift === 0 ? 'text-slate-400' : 'text-emerald-700'
+              baseDrift === 0 ? 'text-slate-400' : 'text-white'
             }`}
           >
             {baseDrift === 0
@@ -212,28 +214,28 @@ export function Step3Costs() {
           </span>
         </div>
         {baseDrift > 0 && (
-          <div className="text-xs text-slate-500 text-right">
+          <div className="text-xs text-slate-300 text-right">
             ~{Math.round(baseDrift / 12).toLocaleString('da-DK')} kr/md
           </div>
         )}
         {(waterCost > 0 || heatCost > 0) && (
-          <div className="border-t border-emerald-200 pt-2 mt-2 space-y-1 text-xs text-slate-600">
+          <div className={`border-t pt-2 mt-2 space-y-1 text-xs ${baseDrift === 0 ? 'border-slate-200 text-slate-600' : 'border-slate-700 text-slate-300'}`}>
             <div className="flex justify-between">
-              <span>💧 Vand ({state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'}):</span>
+              <span>Vand ({state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'})</span>
               <span className="font-medium">{waterCost.toLocaleString('da-DK')} kr/år</span>
             </div>
             <div className="flex justify-between">
-              <span>🔥 Varme ({state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'}):</span>
+              <span>Varme ({state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})</span>
               <span className="font-medium">{heatCost.toLocaleString('da-DK')} kr/år</span>
             </div>
-            <div className="text-[11px] text-slate-500 italic pt-1">
-              Vand/varme indgår ikke i ROE-beregningen — viderefaktureres til lejer.
+            <div className={`text-[11px] italic pt-1 ${baseDrift === 0 ? 'text-slate-500' : 'text-slate-400'}`}>
+              Vand/varme indgår ikke i ROE-beregningen. Det viderefaktureres til lejer.
             </div>
           </div>
         )}
         {state.ejerforeningHaeftelseKr > 0 && (
-          <div className="border-t border-emerald-200 pt-2 mt-2 flex justify-between text-xs text-slate-600">
-            <span>+ Hæftelse til EF (engang):</span>
+          <div className={`border-t pt-2 mt-2 flex justify-between text-xs ${baseDrift === 0 ? 'border-slate-200 text-slate-600' : 'border-slate-700 text-slate-300'}`}>
+            <span>+ Hæftelse til EF (engang)</span>
             <span className="font-medium">
               {state.ejerforeningHaeftelseKr.toLocaleString('da-DK')} kr
             </span>
@@ -244,7 +246,7 @@ export function Step3Costs() {
       {/* === RELATEREDE DOKUMENTER === */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          📎 Vedhæft dokumentation (valgfri)
+          Vedhæft dokumentation (valgfri)
         </h3>
         <p className="text-xs text-slate-600">
           Vedhæft gerne salgsopstilling, ejerforeningens årsregnskab, vand/varme-regning eller
@@ -266,7 +268,7 @@ export function Step3Costs() {
         </button>
         <button
           onClick={next}
-          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium"
+          className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium"
         >
           Fortsæt →
         </button>
@@ -308,15 +310,15 @@ function CostInput({
           value={value || ''}
           onChange={(e) => onChange(Number(e.target.value) || 0)}
           placeholder={placeholder}
-          className="w-full px-3 py-2.5 pr-14 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full px-3 py-2.5 pr-14 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">
           {suffix}
         </span>
       </div>
       {showPreview && (
-        <div className="text-xs text-emerald-700 mt-1 font-medium">
-          = {formatted} {suffix} {perMonth}
+        <div className="text-xs text-slate-700 mt-1">
+          {formatted} {suffix} {perMonth}
         </div>
       )}
       {hint && !showPreview && <div className="text-xs text-slate-500 mt-1">{hint}</div>}
@@ -386,7 +388,7 @@ function DocumentUpload({
 
   return (
     <div className="space-y-2">
-      <label className="block w-full px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30">
+      <label className="block w-full px-4 py-3 border border-dashed border-slate-300 rounded-lg text-center cursor-pointer hover:border-slate-500 hover:bg-slate-50">
         <input
           type="file"
           multiple
@@ -395,7 +397,7 @@ function DocumentUpload({
           onChange={(e) => onSelect(e.target.files)}
         />
         <span className="text-sm text-slate-600">
-          📎 <strong>Tap for at vedhæfte filer</strong> (PDF, JPG, DOC)
+          <strong>Tap for at vedhæfte filer</strong> (PDF, JPG, DOC)
         </span>
       </label>
       {documents.length > 0 && (

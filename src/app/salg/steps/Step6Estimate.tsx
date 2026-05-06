@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import { Check, Phone } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { TOTAL_DRIFT } from '../types';
 import { submitFunnelAction } from '../submit-action';
@@ -47,19 +48,18 @@ export function Step6Estimate() {
   if (pending && !estimate) {
     return (
       <div className="text-center py-12 space-y-4">
-        <div className="text-4xl">📐</div>
-        <h2 className="text-xl font-semibold">Beregner dit estimat…</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Beregner dit estimat</h2>
         <p className="text-sm text-slate-500">
           Vi finder sammenlignelige handler og kører afkast-modellen
         </p>
         <div className="flex justify-center gap-1 mt-4">
-          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="w-2 h-2 bg-slate-900 rounded-full animate-pulse" />
           <span
-            className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"
+            className="w-2 h-2 bg-slate-900 rounded-full animate-pulse"
             style={{ animationDelay: '0.2s' }}
           />
           <span
-            className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"
+            className="w-2 h-2 bg-slate-900 rounded-full animate-pulse"
             style={{ animationDelay: '0.4s' }}
           />
         </div>
@@ -70,8 +70,7 @@ export function Step6Estimate() {
   if (error) {
     return (
       <div className="text-center py-8 space-y-3">
-        <div className="text-3xl">😕</div>
-        <h2 className="text-lg font-semibold">Noget gik galt</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Noget gik galt</h2>
         <p className="text-sm text-slate-600">{error}</p>
         <button
           onClick={prev}
@@ -105,10 +104,10 @@ export function Step6Estimate() {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-1">
-        <p className="text-xs uppercase tracking-wider text-emerald-600 font-medium">
-          ✓ Dit foreløbige tilbud
+        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-medium">
+          Dit foreløbige tilbud
         </p>
-        <h2 className="text-lg sm:text-2xl font-semibold leading-tight">
+        <h2 className="text-lg sm:text-2xl font-semibold leading-tight text-slate-900">
           {(() => {
             // På mobile: drop postnr+by (de er allerede i progress-bar)
             const parts = state.fullAddress.split(',');
@@ -124,12 +123,12 @@ export function Step6Estimate() {
       </div>
 
       {/* HOVEDTAL */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-2">
-        <p className="text-sm text-slate-600">Vores foreløbige tilbud</p>
-        <p className="text-5xl sm:text-6xl font-bold text-emerald-700 tracking-tight">
-          {netForkortet.finalOffer.toLocaleString('da-DK')} <span className="text-2xl">kr</span>
+      <div className="bg-slate-900 rounded-lg p-6 text-center space-y-2">
+        <p className="text-sm text-slate-400">Vores foreløbige tilbud</p>
+        <p className="text-5xl sm:text-6xl font-bold text-white tracking-tight">
+          {netForkortet.finalOffer.toLocaleString('da-DK')} <span className="text-2xl text-slate-300">kr</span>
         </p>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-400">
           Bindende tilbud gives efter gratis besigtigelse
         </p>
       </div>
@@ -142,7 +141,7 @@ export function Step6Estimate() {
           netForkortet.minusMarketDiscount +
           netForkortet.minusOwnershipCosts;
         return (
-          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
+          <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-3">
             <h3 className="text-sm font-semibold text-slate-900">
               Hvad du sparer ved at sælge til os
             </h3>
@@ -150,7 +149,7 @@ export function Step6Estimate() {
               <SaveItem
                 label="Mæglersalær"
                 value={netForkortet.minusBrokerSavings}
-                sub="Vi tager intet salær — du beholder ~70.000 kr."
+                sub="Vi tager intet salær. Du beholder ~70.000 kr."
               />
               <SaveItem
                 label="Markedsafslag"
@@ -164,22 +163,22 @@ export function Step6Estimate() {
               />
             </ul>
             <div className="pt-3 border-t border-slate-100 space-y-2">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-1">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-sm font-semibold text-blue-900">
+                  <span className="text-sm font-semibold text-slate-900">
                     Vores tilbud svarer til at sælge for
                   </span>
-                  <span className="text-lg font-bold text-blue-700 tabular-nums">
+                  <span className="text-lg font-bold text-slate-900 tabular-nums">
                     {equivalentBrokerPrice.toLocaleString('da-DK')} kr
                   </span>
                 </div>
-                <p className="text-xs text-blue-800">
-                  …hvis du var gået via mægler. Vores {netForkortet.finalOffer.toLocaleString('da-DK')} kr kontant +
-                  de tre poster du sparer ovenfor.
+                <p className="text-xs text-slate-600">
+                  …hvis du var gået via mægler. Vores {netForkortet.finalOffer.toLocaleString('da-DK')} kr kontant
+                  plus de tre poster du sparer ovenfor.
                 </p>
               </div>
               <p className="text-xs text-slate-500">
-                💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
+                Vi betaler kontant. Ingen ventetid, mæglersalær eller bank-forbehold.
               </p>
             </div>
           </div>
@@ -187,7 +186,7 @@ export function Step6Estimate() {
       })()}
 
       {/* CTA */}
-      <div className="bg-slate-900 rounded-xl p-5 text-white text-center space-y-3">
+      <div className="bg-slate-900 rounded-lg p-5 text-white text-center space-y-3">
         <p className="font-semibold text-lg">Næste skridt</p>
         <p className="text-sm text-slate-300">
           Vi ringer dig op indenfor 24 timer for at aftale en gratis, uforpligtende
@@ -195,9 +194,10 @@ export function Step6Estimate() {
         </p>
         <a
           href="tel:+4561789071"
-          className="inline-block bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg px-5 py-2.5 text-sm"
+          className="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-medium rounded-lg px-5 py-2.5 text-sm"
         >
-          📞 Ring direkte til os
+          <Phone className="w-4 h-4" strokeWidth={2} />
+          Ring direkte til os
         </a>
         <p className="text-xs text-slate-400">
           Eller email: <a href="mailto:administration@365ejendom.dk" className="underline">administration@365ejendom.dk</a>
@@ -206,12 +206,12 @@ export function Step6Estimate() {
 
       {/* COMPARABLES */}
       {comparables.length > 0 && (
-        <details className="bg-white border border-slate-200 rounded-xl p-4" open>
+        <details className="bg-white border border-slate-200 rounded-lg p-4" open>
           <summary className="cursor-pointer font-medium text-slate-900 flex items-center justify-between">
             <span>
-              📊 Bygger på {sampleSize} tinglyste handler
+              Bygger på {sampleSize} tinglyste handler
               {estimate.sameEfCount > 0 && (
-                <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
+                <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
                   {estimate.sameEfCount} i samme ejerforening
                 </span>
               )}
@@ -224,9 +224,9 @@ export function Step6Estimate() {
                 key={i}
                 className={`flex items-center justify-between gap-2 py-1.5 px-2 rounded text-xs sm:text-sm ${
                   c.weight >= 3
-                    ? 'bg-emerald-50 border border-emerald-200'
+                    ? 'bg-slate-50 border border-slate-200'
                     : c.isCurrentListing
-                      ? 'bg-amber-50/50'
+                      ? 'bg-slate-50/60'
                       : 'hover:bg-slate-50'
                 }`}
               >
@@ -236,17 +236,17 @@ export function Step6Estimate() {
                     {c.kvm}m²
                   </span>
                   {c.weight >= 4 && (
-                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-white">
                       Samme bygning
                     </span>
                   )}
                   {c.weight === 3 && (
-                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-emerald-500 text-white">
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-white">
                       Samme EF
                     </span>
                   )}
                   {c.isCurrentListing && (
-                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">
                       Til salg nu
                     </span>
                   )}
@@ -303,60 +303,16 @@ function SaveItem({
 }) {
   return (
     <li className="flex items-start gap-3">
-      <span className="text-emerald-600 text-lg leading-none mt-0.5">✓</span>
+      <Check className="w-4 h-4 text-slate-900 mt-1 shrink-0" strokeWidth={3} />
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline justify-between gap-2">
           <span className="font-medium text-slate-800">{label}</span>
-          <span className="font-semibold text-emerald-700 tabular-nums whitespace-nowrap">
+          <span className="font-semibold text-slate-900 tabular-nums whitespace-nowrap">
             {value.toLocaleString('da-DK')} kr
           </span>
         </div>
         <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
       </div>
     </li>
-  );
-}
-
-function BreakdownRow({
-  label,
-  value,
-  hint,
-  highlight,
-  positive,
-  total,
-}: {
-  label: string;
-  value: number;
-  hint?: string;
-  highlight?: boolean; // grøn — vores tilbud (start)
-  positive?: boolean;  // mid-rows: sparelser kunden får
-  total?: boolean;     // sum-row: hvad det svarer til på markedet
-}) {
-  const rowBg = highlight ? 'bg-emerald-50' : total ? 'bg-blue-50' : '';
-  const labelCls = highlight
-    ? 'font-semibold text-emerald-900'
-    : total
-      ? 'font-semibold text-blue-900'
-      : 'text-slate-700';
-  const valueCls = highlight
-    ? 'text-emerald-700 text-lg font-bold'
-    : total
-      ? 'text-blue-700 text-lg font-bold'
-      : positive
-        ? 'text-emerald-600'
-        : value < 0
-          ? 'text-red-600'
-          : 'text-slate-900';
-  return (
-    <div className={`px-4 py-3 flex items-baseline justify-between gap-3 ${rowBg}`}>
-      <div className="min-w-0">
-        <div className={`text-sm ${labelCls}`}>{label}</div>
-        {hint && <div className="text-xs text-slate-500">{hint}</div>}
-      </div>
-      <div className={`shrink-0 font-medium tabular-nums ${valueCls}`}>
-        {value < 0 ? '−' : ''}
-        {Math.abs(value).toLocaleString('da-DK')} kr
-      </div>
-    </div>
   );
 }

@@ -75,7 +75,7 @@ export function Step5Contact() {
         <button
           onClick={next}
           disabled={!valid}
-          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium"
+          className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
         >
           Vis mit estimat →
         </button>
@@ -113,7 +113,7 @@ function Input({
         className={`w-full px-3 py-3 text-base border rounded-xl focus:outline-none focus:ring-2 ${
           error
             ? 'border-red-300 focus:ring-red-500'
-            : 'border-slate-300 focus:ring-emerald-500'
+            : 'border-slate-300 focus:ring-slate-900'
         }`}
       />
       {error && <div className="text-xs text-red-600 mt-1">{error}</div>}
