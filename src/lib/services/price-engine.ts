@@ -82,8 +82,15 @@ export interface PriceEngineResult {
   afkast: ReturnType<typeof computeAfkast>;
 }
 
-const SAVED_BROKER_COMMISSION_PCT = 0.025;  // 2.5% af salgspris (typisk Sjælland-mægler)
-const SAVED_BROKER_FIXED = 25_000;           // grundgebyr / annoncering
+// Mæglersalær: fast 70.000 kr (Jacob's faste antagelse — typisk gennemsnit
+// for Sjælland-ejerlejligheder). Tidligere 2.5% × pris + 25.000 fast.
+const SAVED_BROKER_FIXED = 70_000;
+// Markedsafslag: fast 6% af markedsestimat. Tidligere brugte vi
+// comps.averageDiscountPct fra historiske handler (svingede 5-15%) — nu
+// stabil antagelse uafhængigt af data-støj.
+const FIXED_MARKET_DISCOUNT_PCT = 0.06;
+// Liggetid før salg: fast 3 mdr. Tidligere 5.
+const OWNERSHIP_MONTHS = 3;
 
 /**
  * Beregn fuldt prissat estimat.
@@ -169,13 +176,14 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
   // 4 fradrag + vores margin SUMMERER til delta. Brugeren skal kunne følge
   // tallene fra top til bund.
   const totalDelta = marketEstimate - finalOffer;
-  const ownershipMonths = 5; // typisk salgstid
 
-  // 6a. Beregn rå tal for hver "argumentation"
-  const rawMarketDiscount = Math.round(marketEstimate * (comps.averageDiscountPct / 100));
-  const rawBrokerSavings =
-    Math.round(marketEstimate * SAVED_BROKER_COMMISSION_PCT) + SAVED_BROKER_FIXED;
-  const rawOwnershipCosts = Math.round((input.driftTotalYearly * ownershipMonths) / 12);
+  // 6a. Beregn rå tal for hver "argumentation" — alle med faste antagelser:
+  //   • Mæglersalær: 70.000 kr fast
+  //   • Markedsafslag: 6% af markedsestimat
+  //   • Liggetid: 3 mdr × drift/12
+  const rawMarketDiscount = Math.round(marketEstimate * FIXED_MARKET_DISCOUNT_PCT);
+  const rawBrokerSavings = SAVED_BROKER_FIXED;
+  const rawOwnershipCosts = Math.round((input.driftTotalYearly * OWNERSHIP_MONTHS) / 12);
   const rawSum = rawMarketDiscount + rawBrokerSavings + rawOwnershipCosts;
 
   // 6b. Hvis cap er bindende (rawSum > delta), skaler ned proportionalt.

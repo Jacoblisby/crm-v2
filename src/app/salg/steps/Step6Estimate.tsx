@@ -137,19 +137,19 @@ export function Step6Estimate() {
             <BreakdownRow
               label="+ Mæglersalær du IKKE skal betale"
               value={netForkortet.minusBrokerSavings}
-              hint="2,5% af salgspris + grundgebyr"
+              hint="Vi går ud fra 70.000 kr fast for en typisk Sjælland-handel"
               positive
             />
             <BreakdownRow
-              label={`+ Markedsafslag du undgår (~${averageDiscountPct.toFixed(0)}%)`}
+              label="+ Markedsafslag du undgår (6%)"
               value={netForkortet.minusMarketDiscount}
-              hint="Slutprisen er typisk under listeprisen"
+              hint="Slutprisen er typisk 6% under listeprisen"
               positive
             />
             <BreakdownRow
               label="+ Ejertids-omkostninger du sparer"
               value={netForkortet.minusOwnershipCosts}
-              hint="Drift mens boligen står til salg (~5 mdr)"
+              hint="Drift mens boligen står til salg (3 mdr)"
               positive
             />
             <BreakdownRow
