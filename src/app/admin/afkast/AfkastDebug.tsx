@@ -204,9 +204,9 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
             <Row label="+ Tinglysning lån" value={fmt(t.tinglysningLaan)} formula={`hovedstol × ${(AFKAST_CONSTANTS.TINGLYSNING_LAAN * 100).toFixed(2)}%`} />
             <Row label="= Låneomk total" value={fmt(t.laanomkTotal)} formula="sum" highlight />
             {t.haeftelseFraLaaneprov > 0 && (
-              <Row label="− Hæftelse til ejerforening" value={`-${fmt(t.haeftelseFraLaaneprov)}`} formula="afregnes til EF ved overdragelse — du modtager mindre kontant" />
+              <Row label="− Hæftelse + andel af EF-gæld" value={`-${fmt(t.haeftelseFraLaaneprov)}`} formula="hæftelse jf. tinglysning + evt. andel af ejerforeningens restgæld — afregnes ved overdragelse" />
             )}
-            <Row label="Låneprovenu (kontant til dig)" value={fmt(t.laaneprov)} formula={t.haeftelseFraLaaneprov > 0 ? "hovedstol − låneomk − hæftelse" : "hovedstol − låneomk"} highlight />
+            <Row label="Låneprovenu (kontant til dig)" value={fmt(t.laaneprov)} formula={t.haeftelseFraLaaneprov > 0 ? "hovedstol − låneomk − hæftelse/EF-gæld" : "hovedstol − låneomk"} highlight />
 
             <SectionRow title="E. EGENKAPITAL" />
             <Row label="Kapitalbehov" value={fmt(result.kapitalbehov)} formula="fra A" />
