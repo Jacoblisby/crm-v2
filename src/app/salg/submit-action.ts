@@ -1,6 +1,6 @@
 'use server';
 
-import { eq } from 'drizzle-orm';
+import { eq, and, isNull, ne } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leads, leadCommunications, properties } from '@/lib/db/schema';
 import type { FunnelState } from './types';
@@ -156,6 +156,83 @@ export async function submitFunnelAction(
     .filter((l) => l !== '')
     .join('\n');
 
+  // Match mod eksisterende leads — hvis sælger allerede er i pipeline
+  // (fx via mægler-listen) skal vi opdatere det eksisterende lead, ikke
+  // oprette en ny duplikat. Match-strategi:
+  //   1. Same propertyId (BFE-match)
+  //   2. Ellers same normaliserede adresse + ikke i terminal stage
+  function normalizeAddr(s: string): string {
+    return s
+      .toLowerCase()
+      .replace(/[,.]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  const targetAddrKey = normalizeAddr(state.fullAddress);
+  const candidates = await db
+    .select({ lead: leads })
+    .from(leads)
+    .where(and(isNull(leads.deletedAt), ne(leads.stageSlug, 'koebt'), ne(leads.stageSlug, 'arkiveret'), ne(leads.stageSlug, 'tabt')));
+  const existingLead = candidates.find((c) => {
+    if (propertyId && c.lead.propertyId === propertyId) return true;
+    if (c.lead.address && normalizeAddr(c.lead.address) === targetAddrKey) return true;
+    return false;
+  })?.lead;
+
+  let leadId: string;
+  if (existingLead) {
+    // OPDATER eksisterende lead med sælgers nye data + fortsat boligberegner-source
+    await db
+      .update(leads)
+      .set({
+        fullName: state.fullName,
+        email: state.email,
+        phone: state.phone,
+        propertyId: propertyId ?? existingLead.propertyId,
+        address: state.fullAddress,
+        postalCode: state.postalCode,
+        city: state.city,
+        kvm: state.kvm,
+        rooms: state.rooms ? String(state.rooms) : null,
+        yearBuilt: state.yearBuilt,
+        stageSlug: 'interesse', // sælger har aktivt henvendt sig — bump til interesse
+        stageChangedAt: new Date(),
+        conditionRating: standToRating(state.stand as StandLevel),
+        valuationDkk: estimate.marketEstimate,
+        bidDkk: estimate.netForkortet.finalOffer,
+        bidStatus: 'afgivet',
+        priority: hasFullData ? 2 : 1,
+        source: 'boligberegner-merged', // marker at det er merged fra eksisterende
+        notes: `${existingLead.notes ?? ''}\n\n[merged from boligberegner ${new Date().toISOString().slice(0, 10)}]\n${notes}`.trim(),
+        afkastInputs: {
+          rentMd: estimate.estimatedRentMd,
+          driftTotal,
+          refurbTotal: estimate.refurbTotal,
+          haeftelseEf: num(state.ejerforeningHaeftelseKr),
+          listePris: estimate.marketEstimate,
+          medianPricePerSqm: estimate.medianPricePerSqm,
+          sampleSize: estimate.sampleSize,
+          sameEfCount: estimate.sameEfCount,
+          rentSource: estimate.rentSource,
+          rentSampleSize: estimate.rentSampleSize,
+          costFaellesudgifter: num(state.costFaellesudgifter),
+          costGrundvaerdi: num(state.costGrundvaerdi),
+          costFaelleslaan: num(state.costFaelleslaan),
+          costRenovation: num(state.costRenovation),
+          costForsikringer: num(state.costForsikringer),
+          costRottebekempelse: num(state.costRottebekempelse),
+          costAndreDrift: num(state.costAndreDrift),
+          waterCost,
+          waterPaidViaAssoc: state.waterPaidViaAssoc,
+          heatCost,
+          heatPaidViaAssoc: state.heatPaidViaAssoc,
+          faelleslaanCanPrepay: state.faelleslaanCanPrepay,
+        },
+        updatedAt: new Date(),
+      })
+      .where(eq(leads.id, existingLead.id));
+    leadId = existingLead.id;
+  } else {
   const [lead] = await db
     .insert(leads)
     .values({
@@ -207,10 +284,12 @@ export async function submitFunnelAction(
       },
     })
     .returning({ id: leads.id });
+    leadId = lead.id;
+  }
 
   // 5. Log estimat-udregningen som kommunikation
   await db.insert(leadCommunications).values({
-    leadId: lead.id,
+    leadId: leadId,
     type: 'note',
     direction: 'out',
     subject: 'Boligberegner-estimat genereret',
@@ -229,11 +308,11 @@ export async function submitFunnelAction(
   });
 
   // 6. Send email til Jacob (admin) + kunde
-  void sendNotificationEmails(lead.id, state, estimate, photoCount).catch((err) => {
+  void sendNotificationEmails(leadId, state, estimate, photoCount).catch((err) => {
     console.error('[boligberegner] email-fejl:', err);
   });
 
-  return { ok: true, leadId: lead.id, estimate };
+  return { ok: true, leadId, estimate };
 }
 
 function standToRating(stand: StandLevel): number {
