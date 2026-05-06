@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Sælg din ejerlejlighed på 60 sekunder · 365 Ejendomme',
+  title: 'Få et tilbud på din ejerlejlighed på 5 minutter · 365 Ejendomme',
   description:
-    'Få et foreløbigt tilbud på din ejerlejlighed på 60 sekunder. Vi køber kontant, uden mægler, du sparer 50.000+ kr i salær.',
+    'Få et foreløbigt tilbud på din ejerlejlighed på 5 minutter. Vi køber kontant, uden mægler, du sparer 50.000+ kr i salær.',
   openGraph: {
-    title: 'Sælg din ejerlejlighed på 60 sekunder',
+    title: 'Få et tilbud på din ejerlejlighed på 5 minutter',
     description:
       'Foreløbigt tilbud + booking af gratis besigtigelse. Vi handler kontant, uden mægler.',
     type: 'website',
