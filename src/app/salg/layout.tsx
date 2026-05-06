@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Få et tilbud på din ejerlejlighed på 5 minutter · 365 Ejendomme',
   description:
-    'Få et foreløbigt tilbud på din ejerlejlighed på 5 minutter. Vi køber kontant, uden mægler, du sparer 50.000+ kr i salær.',
+    'Få et foreløbigt tilbud på din ejerlejlighed på 5 minutter. Vi køber kontant, uden mægler, du sparer typisk 70.000 kr i salær.',
   openGraph: {
     title: 'Få et tilbud på din ejerlejlighed på 5 minutter',
     description:

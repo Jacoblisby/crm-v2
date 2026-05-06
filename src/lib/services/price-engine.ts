@@ -177,38 +177,18 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
       ? Math.min(mathBud, offMarketCap)
       : Math.round(marketEstimate * 0.85);
 
-  // 6. Breakdown — fra markedspris til vores bud, matematisk korrekt så de
-  // 4 fradrag + vores margin SUMMERER til delta. Brugeren skal kunne følge
-  // tallene fra top til bund.
+  // 6. Breakdown — vi viser sælger de faktiske besparelser de får ved at sælge
+  // til os, uanset hvor delta lander. De tre poster er reelle:
+  //   • Mæglersalær: 70.000 kr — sælger sparer det fuldt, uanset alt andet
+  //   • Markedsafslag: 6% af markedsestimat — typisk slut-vs-listepris-gap
+  //   • Liggetid: 3 mdr × drift/12 — sælger betaler ikke i den periode
+  // "Vores margin" er kun et CRM-tal og kan gå negativ hvis vores tilbud er højt
+  // ift. de besparelser. Det vises ikke til sælger.
   const totalDelta = marketEstimate - finalOffer;
-
-  // 6a. Beregn rå tal for hver "argumentation" — alle med faste antagelser:
-  //   • Mæglersalær: 70.000 kr fast
-  //   • Markedsafslag: 6% af markedsestimat
-  //   • Liggetid: 3 mdr × drift/12
-  const rawMarketDiscount = Math.round(marketEstimate * FIXED_MARKET_DISCOUNT_PCT);
-  const rawBrokerSavings = SAVED_BROKER_FIXED;
-  const rawOwnershipCosts = Math.round((input.driftTotalYearly * OWNERSHIP_MONTHS) / 12);
-  const rawSum = rawMarketDiscount + rawBrokerSavings + rawOwnershipCosts;
-
-  // 6b. Hvis cap er bindende (rawSum > delta), skaler ned proportionalt.
-  // Ellers brug rå tal og tildel resten til vores afkast-margin.
-  let marketDiscount: number;
-  let brokerSavings: number;
-  let ownershipCosts: number;
-  let ourMargin: number;
-  if (rawSum > totalDelta && totalDelta > 0) {
-    const scale = totalDelta / rawSum;
-    marketDiscount = Math.round(rawMarketDiscount * scale);
-    brokerSavings = Math.round(rawBrokerSavings * scale);
-    ownershipCosts = Math.round(rawOwnershipCosts * scale);
-    ourMargin = totalDelta - marketDiscount - brokerSavings - ownershipCosts;
-  } else {
-    marketDiscount = rawMarketDiscount;
-    brokerSavings = rawBrokerSavings;
-    ownershipCosts = rawOwnershipCosts;
-    ourMargin = Math.max(0, totalDelta - rawSum);
-  }
+  const marketDiscount = Math.round(marketEstimate * FIXED_MARKET_DISCOUNT_PCT);
+  const brokerSavings = SAVED_BROKER_FIXED;
+  const ownershipCosts = Math.round((input.driftTotalYearly * OWNERSHIP_MONTHS) / 12);
+  const ourMargin = totalDelta - marketDiscount - brokerSavings - ownershipCosts;
 
   return {
     marketEstimate,

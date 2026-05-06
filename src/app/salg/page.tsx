@@ -23,7 +23,7 @@ export default function SalgPage() {
             <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
               Få et foreløbigt tilbud baseret på sammenlignelige handler i dit område. Vi
               handler kontant uden mægler. Du sparer typisk{' '}
-              <strong className="text-slate-900">50.000+ kr i salær</strong>.
+              <strong className="text-slate-900">70.000 kr i salær</strong>.
             </p>
           </div>
           <Funnel />
