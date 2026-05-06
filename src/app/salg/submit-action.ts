@@ -442,10 +442,17 @@ function customerEmailHtml(
       <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Markedsafslag</strong> <span style="color:#10b981;float:right;font-weight:600;">${discount} kr</span><br><span style="color:#94a3b8;font-size:11px;">Slutprisen via mægler er typisk 6% under listeprisen.</span></td></tr>
       <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Drift i salgsperioden</strong> <span style="color:#10b981;float:right;font-weight:600;">${ownership} kr</span><br><span style="color:#94a3b8;font-size:11px;">Du betaler ikke ejerudgifter mens boligen står til salg (3 mdr).</span></td></tr>
     </table>
+    <div style="margin:12px 0 0;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="font-size:13px;color:#1e40af;font-weight:600;">Vores tilbud svarer til at sælge for</td><td style="text-align:right;font-size:16px;color:#1e3a8a;font-weight:bold;">${fmt(estimate.netForkortet.finalOffer + estimate.netForkortet.minusBrokerSavings + estimate.netForkortet.minusMarketDiscount + estimate.netForkortet.minusOwnershipCosts)} kr</td></tr>
+      </table>
+      <p style="margin:4px 0 0;font-size:11px;color:#1e40af;">
+        …hvis du var gået via mægler. Vores ${offer} kr kontant + de tre poster du sparer ovenfor.
+      </p>
+    </div>
     <p style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">
       💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
     </p>
-  </div>
   </div>
 
   ${compsHtml ? `

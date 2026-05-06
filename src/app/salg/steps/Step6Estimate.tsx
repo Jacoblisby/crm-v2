@@ -119,33 +119,57 @@ export function Step6Estimate() {
         </p>
       </div>
 
-      {/* HVAD DU SPARER — sælges-bullets, ikke matematik. Fokus: vores tilbud
-          er konkurrencedygtigt fordi du undgår omkostninger ved et almindeligt salg. */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-slate-900">
-          Hvad du sparer ved at sælge til os
-        </h3>
-        <ul className="space-y-2.5 text-sm">
-          <SaveItem
-            label="Mæglersalær"
-            value={netForkortet.minusBrokerSavings}
-            sub="Vi tager intet salær — du beholder ~70.000 kr."
-          />
-          <SaveItem
-            label="Markedsafslag"
-            value={netForkortet.minusMarketDiscount}
-            sub="Slutprisen via mægler er typisk 6% under listeprisen."
-          />
-          <SaveItem
-            label="Drift i salgsperioden"
-            value={netForkortet.minusOwnershipCosts}
-            sub="Du betaler ikke fællesudg., grundskyld m.m. mens boligen står til salg (3 mdr)."
-          />
-        </ul>
-        <p className="text-xs text-slate-500 pt-1 border-t border-slate-100">
-          💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
-        </p>
-      </div>
+      {/* HVAD DU SPARER + ÆKVIVALENT MÆGLER-PRIS */}
+      {(() => {
+        const equivalentBrokerPrice =
+          netForkortet.finalOffer +
+          netForkortet.minusBrokerSavings +
+          netForkortet.minusMarketDiscount +
+          netForkortet.minusOwnershipCosts;
+        return (
+          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Hvad du sparer ved at sælge til os
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              <SaveItem
+                label="Mæglersalær"
+                value={netForkortet.minusBrokerSavings}
+                sub="Vi tager intet salær — du beholder ~70.000 kr."
+              />
+              <SaveItem
+                label="Markedsafslag"
+                value={netForkortet.minusMarketDiscount}
+                sub="Slutprisen via mægler er typisk 6% under listeprisen."
+              />
+              <SaveItem
+                label="Drift i salgsperioden"
+                value={netForkortet.minusOwnershipCosts}
+                sub="Du betaler ikke fællesudg., grundskyld m.m. mens boligen står til salg (3 mdr)."
+              />
+            </ul>
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-sm font-semibold text-blue-900">
+                    Vores tilbud svarer til at sælge for
+                  </span>
+                  <span className="text-lg font-bold text-blue-700 tabular-nums">
+                    {equivalentBrokerPrice.toLocaleString('da-DK')} kr
+                  </span>
+                </div>
+                <p className="text-xs text-blue-800">
+                  …hvis du var gået via mægler. Vores {netForkortet.finalOffer.toLocaleString('da-DK')} kr kontant +
+                  de tre poster du sparer ovenfor.
+                </p>
+              </div>
+              <p className="text-xs text-slate-500">
+                💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* CTA */}
       <div className="bg-slate-900 rounded-xl p-5 text-white text-center space-y-3">
