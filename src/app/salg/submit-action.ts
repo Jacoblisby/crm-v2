@@ -625,7 +625,7 @@ function customerEmailHtml(
       Kontant betaling, ingen bank-forbehold<br>
       Vi har købt 87+ ejerlejligheder siden 2024<br>
       Du sparer typisk 70.000 kr i mæglersalær<br>
-      Du vælger selv overtagelsesdato (typisk 14 dage)
+      Du vælger selv overtagelsesdato (14 dage til 6 mdr — som det passer dig)
     </div>
   </div>
 

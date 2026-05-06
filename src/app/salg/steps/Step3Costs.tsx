@@ -7,6 +7,11 @@ export function Step3Costs() {
   const { state, update, next, prev } = useFunnel();
   const baseDrift = TOTAL_DRIFT(state);
 
+  // Faellesudgifter er obligatorisk — uden dem kan vi ikke beregne afkast.
+  // Andre felter er valgfri/0-default; bruger maa estimere selv hvis ikke kendt.
+  const faellesudgValid = state.costFaellesudgifter > 0;
+  const formValid = faellesudgValid;
+
   const waterCost = state.waterPaidViaAssoc
     ? state.waterAcontoYearly
     : state.waterUsageLastYearKr;
@@ -35,8 +40,8 @@ export function Step3Costs() {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CostInput
-            label="Fællesudgifter til ejerforeningen"
-            hint="Måneds-opkrævning × 12 (typisk 18-30k)"
+            label="Fællesudgifter til ejerforeningen *"
+            hint="Måneds-opkrævning × 12 (typisk 18-30k). Påkrævet."
             placeholder="24.000"
             value={state.costFaellesudgifter}
             onChange={(v) => update({ costFaellesudgifter: v })}
@@ -61,13 +66,6 @@ export function Step3Costs() {
             placeholder="0"
             value={state.costForsikringer}
             onChange={(v) => update({ costForsikringer: v })}
-          />
-          <CostInput
-            label="Rottebekæmpelse"
-            hint="Lille gebyr fra kommunen — typisk 100-200 kr"
-            placeholder="120"
-            value={state.costRottebekempelse}
-            onChange={(v) => update({ costRottebekempelse: v })}
           />
           <CostInput
             label="Andre driftsomkostninger"
@@ -308,12 +306,20 @@ export function Step3Costs() {
         >
           ← Tilbage
         </button>
-        <button
-          onClick={next}
-          className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium"
-        >
-          Fortsæt →
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          {!formValid && (
+            <span className="text-xs text-slate-600">
+              Fællesudgifter skal udfyldes for at fortsætte
+            </span>
+          )}
+          <button
+            onClick={next}
+            disabled={!formValid}
+            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
+          >
+            Fortsæt →
+          </button>
+        </div>
       </div>
     </div>
   );

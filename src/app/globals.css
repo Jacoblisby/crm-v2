@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Boost placeholder kontrast — browser default er ofte for svag pa iOS/Android */
+input::placeholder,
+textarea::placeholder {
+  color: #64748b; /* slate-500, ~AA-kontrast pa hvid */
+  opacity: 1;
+}

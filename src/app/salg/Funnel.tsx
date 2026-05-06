@@ -89,8 +89,8 @@ function SocialProof() {
         <div className="text-slate-600 mt-0.5">Boliger købt siden 2024</div>
       </div>
       <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div className="text-2xl font-bold text-slate-900 tabular-nums">14 dage</div>
-        <div className="text-slate-600 mt-0.5">Gns. til overtagelse</div>
+        <div className="text-2xl font-bold text-slate-900 tabular-nums">14 dage – 6 mdr</div>
+        <div className="text-slate-600 mt-0.5">Du vælger overtagelsesdato</div>
       </div>
       <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <div className="text-2xl font-bold text-slate-900 tabular-nums">2,5M+</div>

@@ -4,8 +4,6 @@ import { useFunnel } from '../FunnelContext';
 import type {
   SellTimeframe,
   SellReason,
-  OwnerCount,
-  LivedHere,
   AfterSale,
   YesNoUnsure,
 } from '../types';
@@ -25,19 +23,6 @@ const REASON_OPTIONS: { value: SellReason; label: string }[] = [
   { value: 'okonomi', label: 'Økonomi' },
   { value: 'investering', label: 'Investering' },
   { value: 'andet', label: 'Andet' },
-];
-
-const OWNER_OPTIONS: { value: OwnerCount; label: string }[] = [
-  { value: '1', label: '1 ejer' },
-  { value: '2', label: '2 ejere' },
-  { value: '3plus', label: '3 eller flere' },
-];
-
-const LIVED_OPTIONS: { value: LivedHere; label: string }[] = [
-  { value: 'under1', label: 'Under 1 år' },
-  { value: '1to3', label: '1–3 år' },
-  { value: '3to10', label: '3–10 år' },
-  { value: '10plus', label: '10+ år' },
 ];
 
 const AFTER_SALE_OPTIONS: { value: AfterSale; label: string; sub?: string }[] = [
@@ -93,22 +78,6 @@ export function Step5Profile() {
           options={REASON_OPTIONS}
           value={state.sellReason}
           onChange={(v) => update({ sellReason: v })}
-        />
-      </Question>
-
-      <Question label="Hvor mange ejer boligen?">
-        <ChipGroup
-          options={OWNER_OPTIONS}
-          value={state.ownerCount}
-          onChange={(v) => update({ ownerCount: v })}
-        />
-      </Question>
-
-      <Question label="Hvor længe har du boet her?">
-        <ChipGroup
-          options={LIVED_OPTIONS}
-          value={state.livedHere}
-          onChange={(v) => update({ livedHere: v })}
         />
       </Question>
 
