@@ -3,7 +3,24 @@
  */
 import type { StandLevel } from '@/lib/services/price-engine';
 
-export type Step = 1 | 2 | 3 | 4 | 5 | 6;
+export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export type SellTimeframe = 'under1' | '1to3' | '3to6' | '6plus' | 'unsure';
+export type SellReason =
+  | 'flytter'
+  | 'arv'
+  | 'skilsmisse'
+  | 'okonomi'
+  | 'investering'
+  | 'andet';
+export type OwnerCount = '1' | '2' | '3plus';
+export type LivedHere = 'under1' | '1to3' | '3to10' | '10plus';
+export type AfterSale =
+  | 'flytter_ud'
+  | 'lejer_andet'
+  | 'blive_boende_lejer'
+  | 'ved_ikke';
+export type YesNoUnsure = 'ja' | 'nej' | 'usikker';
 
 export interface FunnelState {
   step: Step;
@@ -82,7 +99,17 @@ export interface FunnelState {
   rentalUopsigeligMaaneder: number;
   rentalContract: { name: string; size: number } | null;
 
-  // Step 5: Kontakt
+  // Step 5: Lidt om dig (behovsafdaekning, alt valgfrit)
+  sellTimeframe: SellTimeframe | null;
+  sellReason: SellReason | null;
+  ownerCount: OwnerCount | null;
+  livedHere: LivedHere | null;
+  afterSale: AfterSale | null;
+  // Conditional kun hvis afterSale === 'lejer_andet' eller 'blive_boende_lejer'
+  isOver65: YesNoUnsure | null;        // "Vil ikke svare" mappes til 'usikker'
+  receivesBoligstotte: YesNoUnsure | null;
+
+  // Step 6: Kontakt
   fullName: string;
   email: string;
   phone: string;
@@ -155,6 +182,13 @@ export const initialState: FunnelState = {
   rentalUopsigelig: false,
   rentalUopsigeligMaaneder: 0,
   rentalContract: null,
+  sellTimeframe: null,
+  sellReason: null,
+  ownerCount: null,
+  livedHere: null,
+  afterSale: null,
+  isOver65: null,
+  receivesBoligstotte: null,
   fullName: '',
   email: '',
   phone: '',

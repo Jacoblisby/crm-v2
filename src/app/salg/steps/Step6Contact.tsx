@@ -2,7 +2,7 @@
 
 import { useFunnel } from '../FunnelContext';
 
-export function Step5Contact() {
+export function Step6Contact() {
   const { state, update, next, prev } = useFunnel();
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email);

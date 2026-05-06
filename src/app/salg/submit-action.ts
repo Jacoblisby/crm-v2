@@ -147,6 +147,18 @@ export async function submitFunnelAction(
       ? `⚠️ AKTUELT UDLEJET — leje ${(state.rentalMonthlyRent ?? 0).toLocaleString('da-DK')} kr/md, depositum ${(state.rentalDeposit ?? 0).toLocaleString('da-DK')} kr, indflytning ${state.rentalStartDate || '?'}${state.rentalUopsigelig ? ` (UOPSIGELIG ${state.rentalUopsigeligMaaneder ?? 0} mdr endnu)` : ''}${state.rentalContract ? ` — kontrakt vedhæftet: ${state.rentalContract.name}` : ''}`
       : '',
     ``,
+    `BEHOVSAFDÆKNING:`,
+    state.sellTimeframe ? `· Tidshorisont: ${labelTimeframe(state.sellTimeframe)}` : '',
+    state.sellReason ? `· Grund: ${labelReason(state.sellReason)}` : '',
+    state.ownerCount ? `· Antal ejere: ${labelOwners(state.ownerCount)}` : '',
+    state.livedHere ? `· Boet her: ${labelLived(state.livedHere)}` : '',
+    state.afterSale ? `· Efter salget: ${labelAfterSale(state.afterSale)}` : '',
+    state.afterSale === 'blive_boende_lejer' ? `· 🏠 SALE-LEASEBACK INTERESSE` : '',
+    state.isOver65 ? `· Fyldt 65: ${labelYesNo(state.isOver65)}` : '',
+    state.receivesBoligstotte
+      ? `· Folkepension/boligstøtte: ${labelYesNo(state.receivesBoligstotte)}`
+      : '',
+    ``,
     `MEDIA:`,
     `· Fotos: ${photoCount}`,
     state.documents.length > 0 ? `· Dokumenter: ${state.documents.map((d) => d.name).join(', ')}` : '',
@@ -361,7 +373,19 @@ async function sendNotificationEmails(
       `· Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
       `· Markedsestimat: ${market} kr · Tilbud@20% ROE: ${offer} kr`,
       `· ${estimate.sampleSize} comparables, ${estimate.sameEfCount} i samme EF`,
-    ].join('\n'),
+      ``,
+      `Behovsafdækning:`,
+      `· Tidshorisont: ${state.sellTimeframe ? labelTimeframe(state.sellTimeframe) : '—'}`,
+      `· Grund: ${state.sellReason ? labelReason(state.sellReason) : '—'}`,
+      `· Antal ejere: ${state.ownerCount ? labelOwners(state.ownerCount) : '—'}`,
+      `· Boet her: ${state.livedHere ? labelLived(state.livedHere) : '—'}`,
+      `· Efter salget: ${state.afterSale ? labelAfterSale(state.afterSale) : '—'}`,
+      state.afterSale === 'blive_boende_lejer' ? `· 🏠 SALE-LEASEBACK INTERESSE` : '',
+      state.isOver65 ? `· Fyldt 65: ${labelYesNo(state.isOver65)}` : '',
+      state.receivesBoligstotte
+        ? `· Folkepension/boligstøtte: ${labelYesNo(state.receivesBoligstotte)}`
+        : '',
+    ].filter((l) => l !== '').join('\n'),
   });
   await logEmailEvent(
     leadId,
@@ -610,4 +634,46 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function labelTimeframe(v: NonNullable<FunnelState['sellTimeframe']>): string {
+  return {
+    under1: 'Under 1 mdr',
+    '1to3': '1-3 mdr',
+    '3to6': '3-6 mdr',
+    '6plus': '6+ mdr',
+    unsure: 'Ved ikke endnu',
+  }[v];
+}
+function labelReason(v: NonNullable<FunnelState['sellReason']>): string {
+  return {
+    flytter: 'Flytter',
+    arv: 'Arv / dødsbo',
+    skilsmisse: 'Skilsmisse',
+    okonomi: 'Økonomi',
+    investering: 'Investering',
+    andet: 'Andet',
+  }[v];
+}
+function labelOwners(v: NonNullable<FunnelState['ownerCount']>): string {
+  return { '1': '1 ejer', '2': '2 ejere', '3plus': '3 eller flere' }[v];
+}
+function labelLived(v: NonNullable<FunnelState['livedHere']>): string {
+  return {
+    under1: 'Under 1 år',
+    '1to3': '1-3 år',
+    '3to10': '3-10 år',
+    '10plus': '10+ år',
+  }[v];
+}
+function labelAfterSale(v: NonNullable<FunnelState['afterSale']>): string {
+  return {
+    flytter_ud: 'Flytter ud helt',
+    lejer_andet: 'Vil leje noget andet',
+    blive_boende_lejer: 'Vil blive boende som lejer (sale-leaseback)',
+    ved_ikke: 'Ved ikke endnu',
+  }[v];
+}
+function labelYesNo(v: NonNullable<FunnelState['isOver65']>): string {
+  return { ja: 'Ja', nej: 'Nej', usikker: 'Vil ikke svare / usikker' }[v];
 }

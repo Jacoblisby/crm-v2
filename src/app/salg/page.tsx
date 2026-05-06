@@ -12,17 +12,15 @@ export default function SalgPage() {
   return (
     <Suspense fallback={<div className="text-center py-12">Indlæser…</div>}>
       <FunnelProvider>
-        <div className="space-y-6">
-          <div className="text-center space-y-3 mt-4 sm:mt-8">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-medium">
+        <div className="space-y-8">
+          <div className="text-center space-y-4 mt-4 sm:mt-10">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
               365 Ejendomme · Vi opkøber kontant
             </p>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900">
-              Få et tilbud
-              <br />
-              på 5 minutter
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-[1.05]">
+              Hvad er din bolig værd?
             </h1>
-            <p className="text-slate-600 max-w-xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
               Få et foreløbigt tilbud baseret på sammenlignelige handler i dit område. Vi
               handler kontant uden mægler. Du sparer typisk{' '}
               <strong className="text-slate-900">50.000+ kr i salær</strong>.

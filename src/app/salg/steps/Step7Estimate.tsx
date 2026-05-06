@@ -3,7 +3,6 @@
 import { useState, useTransition, useEffect } from 'react';
 import { Check, Phone } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
-import { TOTAL_DRIFT } from '../types';
 import { submitFunnelAction } from '../submit-action';
 import type { computeEstimate } from '@/lib/services/price-engine';
 
@@ -11,7 +10,7 @@ type Estimate = Awaited<ReturnType<typeof computeEstimate>>;
 
 const PHOTO_KEY = 'salg.photos.v1';
 
-export function Step6Estimate() {
+export function Step7Estimate() {
   const { state, prev, reset } = useFunnel();
   const [pending, startTransition] = useTransition();
   const [estimate, setEstimate] = useState<Estimate | null>(null);
