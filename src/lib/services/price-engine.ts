@@ -129,19 +129,24 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     postalCode: input.postalCode,
     roadName: input.roadName,
   });
-  let estimatedRentMd: number;
+  // Vi diskontérer den estimerede leje med 15% for at give os selv en
+  // sikkerhedsmargin i ROE-beregningen. Det reducerer bud@target og
+  // beskytter mod over-estimerede comparable-leje.
+  const RENT_SAFETY_DISCOUNT = 0.85;
+  let rawRentMd: number;
   let rentSource: PriceEngineResult['rentSource'];
   if (ourRentMatch.source === 'same-vej' && ourRentMatch.monthlyRent > 0) {
-    estimatedRentMd = ourRentMatch.monthlyRent;
+    rawRentMd = ourRentMatch.monthlyRent;
     rentSource = 'same-vej';
   } else if (ourRentMatch.source === 'same-postal' && ourRentMatch.monthlyRent > 0) {
-    estimatedRentMd = ourRentMatch.monthlyRent;
+    rawRentMd = ourRentMatch.monthlyRent;
     rentSource = 'same-postal';
   } else {
     const lejeRate = LEJE_PR_M2_PR_MD[input.postalCode] ?? DEFAULT_LEJE_RATE;
-    estimatedRentMd = Math.round(input.kvm * lejeRate);
+    rawRentMd = Math.round(input.kvm * lejeRate);
     rentSource = 'kvm-fallback';
   }
+  const estimatedRentMd = Math.round(rawRentMd * RENT_SAFETY_DISCOUNT);
 
   // 3. Refurbish baseret på stand
   const refurbPerM2 = REFURB_PER_M2[input.stand] ?? REFURB_PER_M2.middel;

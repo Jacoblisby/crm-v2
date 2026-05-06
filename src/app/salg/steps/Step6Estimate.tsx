@@ -119,51 +119,33 @@ export function Step6Estimate() {
         </p>
       </div>
 
-      {/* BREAKDOWN — vi starter med vores tilbud og lægger sparelse-elementer på,
-          så kunden kan se hvad det svarer til på det åbne marked. */}
-      {(() => {
-        const effectiveMarket =
-          netForkortet.finalOffer +
-          netForkortet.minusBrokerSavings +
-          netForkortet.minusMarketDiscount +
-          netForkortet.minusOwnershipCosts;
-        return (
-          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
-            <BreakdownRow
-              label="Vores kontante tilbud"
-              value={netForkortet.finalOffer}
-              highlight
-            />
-            <BreakdownRow
-              label="+ Mæglersalær du IKKE skal betale"
-              value={netForkortet.minusBrokerSavings}
-              hint="Vi går ud fra 70.000 kr fast for en typisk Sjælland-handel"
-              positive
-            />
-            <BreakdownRow
-              label="+ Markedsafslag du undgår (6%)"
-              value={netForkortet.minusMarketDiscount}
-              hint="Slutprisen er typisk 6% under listeprisen"
-              positive
-            />
-            <BreakdownRow
-              label="+ Ejertids-omkostninger du sparer"
-              value={netForkortet.minusOwnershipCosts}
-              hint="Drift mens boligen står til salg (3 mdr)"
-              positive
-            />
-            <BreakdownRow
-              label="= Det svarer til at sælge for"
-              value={effectiveMarket}
-              hint={`vs. typisk markedssalg ~${netForkortet.marketEstimate.toLocaleString('da-DK')} kr`}
-              total
-            />
-          </div>
-        );
-      })()}
-      <p className="text-xs text-slate-500 text-center">
-        Vi byder kontant uden ventetid, mæglersalær eller usikkerhed.
-      </p>
+      {/* HVAD DU SPARER — sælges-bullets, ikke matematik. Fokus: vores tilbud
+          er konkurrencedygtigt fordi du undgår omkostninger ved et almindeligt salg. */}
+      <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Hvad du sparer ved at sælge til os
+        </h3>
+        <ul className="space-y-2.5 text-sm">
+          <SaveItem
+            label="Mæglersalær"
+            value={netForkortet.minusBrokerSavings}
+            sub="Vi tager intet salær — du beholder ~70.000 kr."
+          />
+          <SaveItem
+            label="Markedsafslag"
+            value={netForkortet.minusMarketDiscount}
+            sub="Slutprisen via mægler er typisk 6% under listeprisen."
+          />
+          <SaveItem
+            label="Drift i salgsperioden"
+            value={netForkortet.minusOwnershipCosts}
+            sub="Du betaler ikke fællesudg., grundskyld m.m. mens boligen står til salg (3 mdr)."
+          />
+        </ul>
+        <p className="text-xs text-slate-500 pt-1 border-t border-slate-100">
+          💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
+        </p>
+      </div>
 
       {/* CTA */}
       <div className="bg-slate-900 rounded-xl p-5 text-white text-center space-y-3">
@@ -268,6 +250,31 @@ export function Step6Estimate() {
         </div>
       )}
     </div>
+  );
+}
+
+function SaveItem({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: number;
+  sub: string;
+}) {
+  return (
+    <li className="flex items-start gap-3">
+      <span className="text-emerald-600 text-lg leading-none mt-0.5">✓</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="font-medium text-slate-800">{label}</span>
+          <span className="font-semibold text-emerald-700 tabular-nums whitespace-nowrap">
+            {value.toLocaleString('da-DK')} kr
+          </span>
+        </div>
+        <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
+      </div>
+    </li>
   );
 }
 

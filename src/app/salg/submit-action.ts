@@ -432,21 +432,20 @@ function customerEmailHtml(
     <div style="color:#64748b;font-size:12px;margin-top:8px;font-style:italic;">Endeligt bindende tilbud efter gratis besigtigelse</div>
   </div>
 
-  <!-- Breakdown — vores tilbud + sparelser = effektiv markedspris -->
-  <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
-    <div style="background:#f8fafc;padding:12px 16px;font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;">
-      Hvad svarer vores tilbud til på markedet?
-    </div>
+  <!-- Hvad du sparer — sælges-bullets, ikke matematik -->
+  <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;padding:20px;">
+    <h3 style="margin:0 0 12px;font-size:14px;font-weight:600;color:#0f172a;">
+      Hvad du sparer ved at sælge til os
+    </h3>
     <table style="width:100%;border-collapse:collapse;">
-      <tr style="background:#ecfdf5;"><td style="padding:12px 16px;font-size:14px;font-weight:bold;color:#047857;">Vores kontante tilbud</td><td style="padding:12px 16px;text-align:right;font-size:16px;font-weight:bold;color:#047857;">${offer} kr</td></tr>
-      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">+ Mæglersalær du IKKE skal betale (70.000 kr fast)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#10b981;font-weight:600;">+${broker} kr</td></tr>
-      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">+ Markedsafslag du undgår (6%)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#10b981;font-weight:600;">+${discount} kr</td></tr>
-      <tr style="border-top:1px solid #f1f5f9;"><td style="padding:10px 16px;font-size:13px;color:#64748b;">+ Ejertids-omkostninger du sparer (3 mdr drift)</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:#10b981;font-weight:600;">+${ownership} kr</td></tr>
-      <tr style="border-top:2px solid #3b82f6;background:#eff6ff;"><td style="padding:12px 16px;font-size:14px;font-weight:bold;color:#1e40af;">= Det svarer til at sælge for</td><td style="padding:12px 16px;text-align:right;font-size:16px;font-weight:bold;color:#1e40af;">${fmt(estimate.netForkortet.finalOffer + estimate.netForkortet.minusBrokerSavings + estimate.netForkortet.minusMarketDiscount + estimate.netForkortet.minusOwnershipCosts)} kr</td></tr>
+      <tr><td style="padding:8px 0;vertical-align:top;width:24px;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Mæglersalær</strong> <span style="color:#10b981;float:right;font-weight:600;">${broker} kr</span><br><span style="color:#94a3b8;font-size:11px;">Vi tager intet salær — du beholder ~70.000 kr.</span></td></tr>
+      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Markedsafslag</strong> <span style="color:#10b981;float:right;font-weight:600;">${discount} kr</span><br><span style="color:#94a3b8;font-size:11px;">Slutprisen via mægler er typisk 6% under listeprisen.</span></td></tr>
+      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#10b981;font-size:18px;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Drift i salgsperioden</strong> <span style="color:#10b981;float:right;font-weight:600;">${ownership} kr</span><br><span style="color:#94a3b8;font-size:11px;">Du betaler ikke ejerudgifter mens boligen står til salg (3 mdr).</span></td></tr>
     </table>
-    <div style="padding:8px 16px;background:#f8fafc;font-size:11px;color:#94a3b8;text-align:center;">
-      …på det åbne marked, efter alle omkostninger. Vurderet markedsværdi: ${market} kr.
-    </div>
+    <p style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">
+      💚 Vi betaler kontant — ingen ventetid, mæglersalær eller bank-forbehold.
+    </p>
+  </div>
   </div>
 
   ${compsHtml ? `
