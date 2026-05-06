@@ -17,7 +17,11 @@
 
 export interface AfkastInputs {
   rentMd: number;
-  listePris: number;
+  /** Prisen vi tester ROE ved. For on-market er det listepris fra mægler;
+   *  for off-market er det marketEstimate (vores comparable-baserede vurdering).
+   *  Begge er bare "købesum vi simulerer". */
+  pris: number;
+  /** Hvis vi har en konkret forhandlet pris, bruger vi den i stedet for `pris`. */
   forhandletPris?: number | null;
   // Drift omkostninger (DKK/år, sum af 10 kategorier)
   driftTotal: number;
@@ -122,7 +126,7 @@ function deriveAt(price: number, inp: AfkastInputs) {
 }
 
 export function computeAfkast(inp: AfkastInputs): AfkastResult {
-  const price = inp.forhandletPris ?? inp.listePris;
+  const price = inp.forhandletPris ?? inp.pris;
   const revenue = inp.rentMd * 12 + (inp.andreLejeind ?? 0);
   const totalCosts = inp.driftTotal + (inp.revision ?? 0);
   const d = deriveAt(price, inp);
@@ -142,7 +146,7 @@ export function computeAfkast(inp: AfkastInputs): AfkastResult {
   // fra 50.000 til 30 mio så bud@target ikke afhænger af hvad man taster ind.
   // Find højeste pris hvor ROE EBT ≥ target. Returnerer den RENE matematiske
   // værdi — ingen cap. Cap er en business-regel der hører hjemme hos consumer
-  // (on-market: 95% af listePris, off-market: ingen). Det giver 100% logiske
+  // (on-market: 95% af listing-pris, off-market: ingen). Det giver 100% logiske
   // mellemregninger — bud@target er altid hvor ROE = target.
   const targetRoe = inp.targetRoe ?? TARGET_ROE;
   let budSolve: number | null = null;

@@ -43,7 +43,7 @@ export async function updateEstimaterAction(input: UpdateEstimaterInput) {
 
   const afk = computeAfkast({
     rentMd: input.estimeretLejeMd,
-    listePris: c.listPrice,
+    pris: c.listPrice,
     forhandletPris: c.forhandletPris ?? null,
     driftTotal,
     refurbTotal,

@@ -6,7 +6,7 @@
  *   2. PDF eller manuel → driftTotal (årlig)
  *   3. Stand-rating → refurbTotal (engangsomkostning)
  *   4. Postnr × m² → estimeret leje/md
- *   5. computeAfkast() med markedsestimat som listePris → bud@20% ROE
+ *   5. computeAfkast() med markedsestimat som pris → bud@20% ROE
  */
 import { computeAfkast } from '@/lib/afkast';
 import { findComparables } from './comparables';
@@ -140,10 +140,11 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
   const refurbPerM2 = REFURB_PER_M2[input.stand] ?? REFURB_PER_M2.middel;
   const refurbTotal = Math.round(input.kvm * refurbPerM2);
 
-  // 4. Afkast-beregning med markedsestimat som listePris-input
+  // 4. Afkast-beregning med markedsestimat som pris (off-market har ingen rigtig
+  // listepris — vi tester ROE ved vores eget marked-vurderede tal).
   const afk = computeAfkast({
     rentMd: estimatedRentMd,
-    listePris: marketEstimate,
+    pris: marketEstimate,
     forhandletPris: null,
     driftTotal: input.driftTotalYearly,
     refurbTotal,

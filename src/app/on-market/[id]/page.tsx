@@ -99,7 +99,7 @@ export default async function OnMarketDetailPage({
       ? estimate.afkast
       : computeAfkast({
           rentMd,
-          listePris: c.listPrice,
+          pris: c.listPrice,
           forhandletPris: c.forhandletPris ?? null,
           driftTotal,
           refurbTotal,
@@ -417,6 +417,7 @@ export default async function OnMarketDetailPage({
       <AfkastDebug
         initial={{
           pris: c.forhandletPris ?? c.listPrice,
+          prisLabel: 'listepris',
           lejeMd: rentMd,
           drift: driftTotal,
           refurb: refurbTotal,

@@ -5,6 +5,9 @@ import { computeAfkast, AFKAST_CONSTANTS } from '@/lib/afkast';
 
 export interface AfkastInitial {
   pris?: number;
+  /** Kontekst for prisen — styrer label ('Listepris' for on-market, 'Vurderet
+   *  markedsværdi' for off-market). Default 'pris' giver neutral label. */
+  prisLabel?: 'pris' | 'listepris' | 'markedsvaerdi';
   lejeMd?: number;
   drift?: number;
   refurb?: number;
@@ -42,7 +45,7 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
   const result = useMemo(() => {
     return computeAfkast({
       rentMd: lejeMd,
-      listePris: pris,
+      pris,
       driftTotal: drift,
       refurbTotal: refurb,
       haeftelseEf: haeftelse,
@@ -60,7 +63,18 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
       <section className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
         <h2 className="font-semibold">Inputs</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="Pris (forhandlet eller liste)" value={pris} onChange={setPris} suffix="kr" />
+          <Field
+            label={
+              initial?.prisLabel === 'listepris'
+                ? 'Listepris (fra mægler)'
+                : initial?.prisLabel === 'markedsvaerdi'
+                  ? 'Vurderet markedsværdi (vores estimat)'
+                  : 'Pris (forhandlet eller liste)'
+            }
+            value={pris}
+            onChange={setPris}
+            suffix="kr"
+          />
           <Field label="Leje pr. md" value={lejeMd} onChange={setLejeMd} suffix="kr/md" />
           <Field label="Drift (årlig sum)" value={drift} onChange={setDrift} suffix="kr/år" />
           <Field label="Refurbish (engang)" value={refurb} onChange={setRefurb} suffix="kr" />

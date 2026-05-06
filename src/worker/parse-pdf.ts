@@ -164,7 +164,7 @@ export async function runParsePdfJob(opts: {
         c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
       const afk = computeAfkast({
         rentMd: c.estimeretLejeMd ?? 0,
-        listePris: c.listPrice,
+        pris: c.listPrice,
         forhandletPris: c.forhandletPris ?? null,
         driftTotal,
         refurbTotal,

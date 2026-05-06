@@ -195,6 +195,9 @@ export const leads = pgTable(
       haeftelseEf?: number;
       betalingPrMio?: number;
       targetRoe?: number;
+      // 'listePris' er historisk navn — for off-market er det = marketEstimate
+      // (vores comparable-baserede vurdering, IKKE en rigtig listing-pris).
+      // Beholdt som-er for backwards-compat med eksisterende leads.
       listePris?: number;
       // Comparables snapshot
       medianPricePerSqm?: number;

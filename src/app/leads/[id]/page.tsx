@@ -228,6 +228,7 @@ function AfkastTab({ lead }: { lead: Lead }) {
       <AfkastDebug
         initial={{
           pris: inp.listePris ?? 0,
+          prisLabel: 'markedsvaerdi',
           lejeMd: inp.rentMd ?? 0,
           drift: inp.driftTotal ?? 0,
           refurb: inp.refurbTotal ?? 0,

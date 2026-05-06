@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     const afk = computeAfkast({
       rentMd,
-      listePris: c.listPrice,
+      pris: c.listPrice,
       forhandletPris: c.forhandletPris ?? null,
       driftTotal,
       refurbTotal: useRefurb,
