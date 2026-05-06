@@ -1,0 +1,578 @@
+[
+  {
+    "bfe": 278057,
+    "address": "Benløseparken 103, st. th, Benløse, 4100 Ringsted",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1977
+  },
+  {
+    "bfe": 278471,
+    "address": "Benløseparken 125, 1. th, Benløse, 4100 Ringsted",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1977
+  },
+  {
+    "bfe": 277098,
+    "address": "Benløseparken 15, 2. th, Benløse, 4100 Ringsted",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1973
+  },
+  {
+    "bfe": 275549,
+    "address": "Blegdammen 42, 1. th, 4400 Kalundborg",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 281249,
+    "address": "Bogensevej 11, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276036,
+    "address": "Byskov Alle 10, 1. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 274708,
+    "address": "Byskov Alle 40, 2. tv, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 280920,
+    "address": "Dania 8, 2. 3, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1958
+  },
+  {
+    "bfe": 283557,
+    "address": "Erantisvej 14, 2. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1966
+  },
+  {
+    "bfe": 282618,
+    "address": "Farimagsvej 19, 1. 1, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282629,
+    "address": "Farimagsvej 19, 2. 2, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282661,
+    "address": "Farimagsvej 19, st. 5, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282668,
+    "address": "Farimagsvej 19, st. 6, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282669,
+    "address": "Farimagsvej 19, st. 7, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282647,
+    "address": "Farimagsvej 21, 1. 1, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282648,
+    "address": "Farimagsvej 21, 1. 2, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282657,
+    "address": "Farimagsvej 21, 2. 1, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282637,
+    "address": "Farimagsvej 21, st. 1, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282641,
+    "address": "Farimagsvej 21, st. 4, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282645,
+    "address": "Farimagsvej 21, st. 9, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 272765,
+    "address": "Grønlandsvej 7, 2. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1961
+  },
+  {
+    "bfe": 286143,
+    "address": "H C Andersens Vej 55, 1. mf, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1968
+  },
+  {
+    "bfe": 2566263,
+    "address": "Helleristen 96, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1970
+  },
+  {
+    "bfe": 283572,
+    "address": "Hvedevænget 88, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1966
+  },
+  {
+    "bfe": 283590,
+    "address": "Hvedevænget 92, 2. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1966
+  },
+  {
+    "bfe": 283984,
+    "address": "Kildemarksvej 133, st. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 283979,
+    "address": "Kildemarksvej 133, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 283987,
+    "address": "Kildemarksvej 135, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 283982,
+    "address": "Kildemarksvej 137, 1. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 283981,
+    "address": "Kildemarksvej 137, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 283991,
+    "address": "Kildemarksvej 137, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 284014,
+    "address": "Kildemarksvej 145, st. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 284020,
+    "address": "Kildemarksvej 147, 1. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 282191,
+    "address": "Kählersvej 1B, st. mf, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 2566673,
+    "address": "Langdyssen 66, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1970
+  },
+  {
+    "bfe": 231946,
+    "address": "Lindebo 27, 2. 167, 2630 Taastrup",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1975
+  },
+  {
+    "bfe": 231998,
+    "address": "Lindebo 9, st. 51, 2630 Taastrup",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1972
+  },
+  {
+    "bfe": 283612,
+    "address": "Lupinvej 15, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1966
+  },
+  {
+    "bfe": 283960,
+    "address": "Lupinvej 17, 2. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1966
+  },
+  {
+    "bfe": 279767,
+    "address": "Marievej 3, 2. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1920
+  },
+  {
+    "bfe": 272988,
+    "address": "Nic Rumps Vej 6, 2. th, 4220 Korsør",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1942
+  },
+  {
+    "bfe": 284065,
+    "address": "Nordre Farimagsvej 13B, st. 14, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1972
+  },
+  {
+    "bfe": 284430,
+    "address": "Nordre Farimagsvej 13C, 2. 11, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1972
+  },
+  {
+    "bfe": 284454,
+    "address": "Nordre Farimagsvej 23, 1. 110, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1968
+  },
+  {
+    "bfe": 284461,
+    "address": "Nordre Farimagsvej 23, 1. 116, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1968
+  },
+  {
+    "bfe": 284438,
+    "address": "Nordre Farimagsvej 23, st. 1, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1968
+  },
+  {
+    "bfe": 275507,
+    "address": "Nørre Alle 44, 1. th, 4400 Kalundborg",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 275496,
+    "address": "Nørre Alle 48, 2. th, 4400 Kalundborg",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 272724,
+    "address": "Odensevej 120, st. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1967
+  },
+  {
+    "bfe": 280793,
+    "address": "Odensevej 50, 2. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 282103,
+    "address": "Parkvej 166, 1. 79, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1973
+  },
+  {
+    "bfe": 2566623,
+    "address": "Runddyssen 42, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1970
+  },
+  {
+    "bfe": 2566640,
+    "address": "Runddyssen 76, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1970
+  },
+  {
+    "bfe": 283941,
+    "address": "Sandholmsvej 15, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1925
+  },
+  {
+    "bfe": 281311,
+    "address": "Svendborgvej 13, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 283485,
+    "address": "Svendborgvej 177, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1974
+  },
+  {
+    "bfe": 281268,
+    "address": "Svendborgvej 23, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 283467,
+    "address": "Svendborgvej 237, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1975
+  },
+  {
+    "bfe": 283443,
+    "address": "Svendborgvej 253, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1975
+  },
+  {
+    "bfe": 283457,
+    "address": "Svendborgvej 277, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1975
+  },
+  {
+    "bfe": 283461,
+    "address": "Svendborgvej 283, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1975
+  },
+  {
+    "bfe": 281273,
+    "address": "Svendborgvej 33, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 281282,
+    "address": "Svendborgvej 49, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 281283,
+    "address": "Svendborgvej 51, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 276056,
+    "address": "Søndermarksvej 1, 3. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276046,
+    "address": "Søndermarksvej 1, st. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 275560,
+    "address": "Søndermarksvej 11, 1. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276481,
+    "address": "Søndermarksvej 25, 3. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276533,
+    "address": "Søndermarksvej 35, 3. tv, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276077,
+    "address": "Søndermarksvej 5, 1. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276078,
+    "address": "Søndermarksvej 5, 1. tv, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 276074,
+    "address": "Søndermarksvej 5, st. mf, 4200 Slagelse",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1971
+  },
+  {
+    "bfe": 233956,
+    "address": "Østerparken 3, 1. 2, 2630 Taastrup",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 284317,
+    "address": "Østervej 14D, 1. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhave ApS",
+    "yearBuilt": 1966
+  },
+  {
+    "bfe": 282550,
+    "address": "Bogensevej 61, 2. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1974
+  },
+  {
+    "bfe": 280919,
+    "address": "Dania 4, 2. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1958
+  },
+  {
+    "bfe": 5380296,
+    "address": "Indre Vordingborgvej 36A, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1880
+  },
+  {
+    "bfe": 283988,
+    "address": "Kildemarksvej 135, st. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 284015,
+    "address": "Kildemarksvej 145, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 284030,
+    "address": "Kildemarksvej 151, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 284036,
+    "address": "Kildemarksvej 155, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1963
+  },
+  {
+    "bfe": 272361,
+    "address": "Odensevej 114, st. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1967
+  },
+  {
+    "bfe": 272716,
+    "address": "Odensevej 116, 2. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1967
+  },
+  {
+    "bfe": 274181,
+    "address": "Odensevej 52, 2. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1969
+  },
+  {
+    "bfe": 273684,
+    "address": "Parkvej 28, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1964
+  },
+  {
+    "bfe": 273257,
+    "address": "Parkvej 8, 1. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1964
+  },
+  {
+    "bfe": 283939,
+    "address": "Sandholmsvej 13, 1. tv, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1925
+  },
+  {
+    "bfe": 283419,
+    "address": "Svendborgvej 141, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1972
+  },
+  {
+    "bfe": 281312,
+    "address": "Svendborgvej 15, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 283487,
+    "address": "Svendborgvej 211, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1974
+  },
+  {
+    "bfe": 283488,
+    "address": "Svendborgvej 213, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1974
+  },
+  {
+    "bfe": 281270,
+    "address": "Svendborgvej 27, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 281278,
+    "address": "Svendborgvej 41, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 281284,
+    "address": "Svendborgvej 53, 1., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 281300,
+    "address": "Svendborgvej 79, st., 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1976
+  },
+  {
+    "bfe": 284321,
+    "address": "Østervej 14A, st. th, 4700 Næstved",
+    "owner": "Boligselskabet Sommerhaven ApS",
+    "yearBuilt": 1966
+  }
+]
