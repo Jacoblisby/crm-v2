@@ -8,7 +8,7 @@
  * Auth: Bearer ${CRON_SECRET}
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, isNull, sql, and } from 'drizzle-orm';
+import { eq, isNull, isNotNull, and } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leads } from '@/lib/db/schema';
 import ownedData from '@/lib/data/owned-properties.json';
@@ -67,12 +67,7 @@ export async function POST(req: NextRequest) {
   const allLeads = await db
     .select()
     .from(leads)
-    .where(
-      and(
-        isNull(leads.deletedAt),
-        sql`${leads.address} IS NOT NULL`,
-      ),
-    );
+    .where(and(isNull(leads.deletedAt), isNotNull(leads.address)));
 
   const matches: Array<{ leadId: string; name: string | null; address: string; bfe: number; owner: string | null; alreadyPurchased: boolean }> = [];
   const noMatch: Array<{ leadId: string; address: string }> = [];
@@ -99,13 +94,25 @@ export async function POST(req: NextRequest) {
   let updated = 0;
   if (!dryRun) {
     const toUpdate = matches.filter((m) => !m.alreadyPurchased);
+    const now = new Date().toISOString().slice(0, 10);
     for (const m of toUpdate) {
+      // Hent eksisterende notes for at appende — undgår SQL-template-quirks
+      const existingRows = await db
+        .select({ notes: leads.notes })
+        .from(leads)
+        .where(eq(leads.id, m.leadId))
+        .limit(1);
+      const existingNotes = existingRows[0]?.notes ?? '';
+      const newNote = `[auto-marked-as-purchased ${now}: BFE ${m.bfe} matchede vores portfolio-eksport]`;
+      const combinedNotes = existingNotes
+        ? `${existingNotes}\n\n${newNote}`
+        : newNote;
       await db
         .update(leads)
         .set({
           stageSlug: 'koebt',
           stageChangedAt: new Date(),
-          notes: sql`COALESCE(${leads.notes}, '') || E'\\n\\n[auto-marked-as-purchased ${new Date().toISOString().slice(0, 10)}: BFE ${m.bfe} matchede vores portfolio-eksport]'`,
+          notes: combinedNotes,
           updatedAt: new Date(),
         })
         .where(eq(leads.id, m.leadId));
