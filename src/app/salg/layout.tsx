@@ -33,7 +33,7 @@ export default function SalgLayout({ children }: { children: React.ReactNode }) 
       <main className="max-w-3xl mx-auto px-4 py-6 sm:py-10">{children}</main>
       <footer className="border-t border-slate-100 mt-12 py-6 text-xs text-slate-500">
         <div className="max-w-3xl mx-auto px-4 flex flex-wrap gap-4 justify-between">
-          <div>© 365 Ejendomme · CVR 41 99 09 56</div>
+          <div>© 365 Ejendomme · CVR 42 80 04 22</div>
           <div className="flex gap-4">
             <Link href="https://365ejendom.dk/privatlivspolitik">Privatliv</Link>
             <Link href="https://365ejendom.dk">Tilbage til 365ejendom.dk</Link>
