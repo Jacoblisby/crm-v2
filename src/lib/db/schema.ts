@@ -221,6 +221,11 @@ export const leads = pgTable(
       heatPaidViaAssoc?: boolean;
       // Fælleslån-detaljer
       faelleslaanCanPrepay?: 'ja' | 'nej' | 'vedikke' | null;
+      // Hæftelse + gæld i ejerforening (begge engangsbeløb der trækkes
+      // fra låneprovenu — haeftelseEf ovenfor er summen af de to)
+      ejerforeningHaeftelseKr?: number;       // tinglyst sikkerhed (separat)
+      ejerforeningGaeldRestgaeld?: number;    // andel af EF's restgæld
+      hasEjerforeningGaeld?: boolean;
     }>(),
 
     // Kampagne-tracking

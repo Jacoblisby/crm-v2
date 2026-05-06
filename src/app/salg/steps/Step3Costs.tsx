@@ -49,13 +49,6 @@ export function Step3Costs() {
             onChange={(v) => update({ costGrundvaerdi: v })}
           />
           <CostInput
-            label="Ydelse på fælleslån"
-            hint="Din andel/år hvis ejerforeningen har lån"
-            placeholder="6.800"
-            value={state.costFaelleslaan}
-            onChange={(v) => update({ costFaelleslaan: v })}
-          />
-          <CostInput
             label="Renovation"
             hint="Skraldegebyr — ofte inkl. i fællesudg., skip ellers"
             placeholder="1.800"
@@ -140,55 +133,96 @@ export function Step3Costs() {
         )}
       </section>
 
+      {/* === GÆLD I EJERFORENING === */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          Gæld i ejerforeningen
+        </h3>
+        <p className="text-xs text-slate-600">
+          Har ejerforeningen taget et lån (fx vinduer, tag, energiforbedring) hvor ejerne hæfter
+          solidarisk eller pro rata? Hvis ja, har vi brug for både den årlige ydelse og din
+          andel af restgælden.
+        </p>
+        <ToggleRow
+          label="Er der gæld i ejerforeningen?"
+          value={state.hasEjerforeningGaeld}
+          onChange={(v) => {
+            if (!v) {
+              // Reset felter når toggle slukkes så de ikke spøger i submit
+              update({
+                hasEjerforeningGaeld: false,
+                costFaelleslaan: 0,
+                ejerforeningGaeldRestgaeld: 0,
+                faelleslaanCanPrepay: null,
+              });
+            } else {
+              update({ hasEjerforeningGaeld: true });
+            }
+          }}
+        />
+        {state.hasEjerforeningGaeld && (
+          <div className="space-y-3 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <CostInput
+              label="Din årlige ydelse på lånet"
+              hint="Din andel pr. år af ejerforeningens samlede ydelse"
+              placeholder="6.800"
+              value={state.costFaelleslaan}
+              onChange={(v) => update({ costFaelleslaan: v })}
+            />
+            <CostInput
+              label="Din andel af restgælden"
+              hint="Engangsbeløb — trækkes fra låneprovenuet ved overdragelse"
+              placeholder="0"
+              value={state.ejerforeningGaeldRestgaeld}
+              onChange={(v) => update({ ejerforeningGaeldRestgaeld: v })}
+              suffix="kr"
+            />
+            <div>
+              <div className="text-sm font-medium text-slate-700 mb-1">
+                Kan lånet indfries før tid?
+              </div>
+              <div className="flex gap-2">
+                {(['ja', 'nej', 'vedikke'] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => update({ faelleslaanCanPrepay: opt })}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+                      state.faelleslaanCanPrepay === opt
+                        ? 'bg-slate-900 border-slate-900 text-white'
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
+                    }`}
+                  >
+                    {opt === 'ja' ? 'Ja' : opt === 'nej' ? 'Nej' : 'Ved ikke'}
+                  </button>
+                ))}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">
+                Står typisk i ejerforeningens årsregnskab eller hos administrator
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* === HÆFTELSE === */}
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
           Hæftelse til ejerforening
         </h3>
         <p className="text-xs text-slate-600">
-          {state.costFaelleslaan > 0
-            ? 'Du afdrager på et fælleslån — så er der også en restgæld du hæfter for. Vi har brug for at vide hvor stor din andel er, og om lånet kan indfries før tid.'
-            : 'Hvis ejerforeningen har gæld (fx fra renovering, energiforbedring), hæfter du for din andel. Det fremgår typisk af tinglysningsattesten eller årsregnskabet. Lader du feltet være 0 antager vi at der ingen hæftelse er.'}
+          Hæftelsen er en sikkerhed ejerforeningen tinglyser foran realkreditlånet. Den dækker
+          dine fremtidige indbetalinger og afregnes ved overdragelse — derfor trækkes den fra
+          låneprovenuet. Den fremgår af tinglysningsattesten.
         </p>
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700">
-          <strong>Eksempel:</strong> ejerforeningen har et fælleslån på 50 mio kr fordelt på 100
-          lejligheder → din andel er ca. <strong>500.000 kr</strong>. Tjek tinglysningsattest eller
-          spørg administrator hvis du er i tvivl.
-        </div>
         <CostInput
-          label={state.costFaelleslaan > 0 ? 'Din andel af foreningens restgæld' : 'Din andel af ejerforeningens gæld'}
-          hint="Engangsgæld — IKKE den månedlige fælleslån-ydelse (den indtastede du ovenover)"
+          label="Hæftelse jf. tinglysning"
+          hint="Engangsbeløb — separat fra eventuel gæld i foreningen"
           placeholder="0"
           value={state.ejerforeningHaeftelseKr}
           onChange={(v) => update({ ejerforeningHaeftelseKr: v })}
           suffix="kr"
         />
-        {state.costFaelleslaan > 0 && (
-          <div>
-            <div className="text-sm font-medium text-slate-700 mb-1">
-              Kan lånet indfries før tid?
-            </div>
-            <div className="flex gap-2">
-              {(['ja', 'nej', 'vedikke'] as const).map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => update({ faelleslaanCanPrepay: opt })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium border ${
-                    state.faelleslaanCanPrepay === opt
-                      ? 'bg-slate-900 border-slate-900 text-white'
-                      : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
-                  }`}
-                >
-                  {opt === 'ja' ? 'Ja' : opt === 'nej' ? 'Nej' : 'Ved ikke'}
-                </button>
-              ))}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              Står typisk i ejerforeningens årsregnskab eller hos administrator
-            </div>
-          </div>
-        )}
       </section>
 
       {/* === TOTAL === */}
@@ -238,6 +272,14 @@ export function Step3Costs() {
             <span>+ Hæftelse til EF (engang)</span>
             <span className="font-medium">
               {state.ejerforeningHaeftelseKr.toLocaleString('da-DK')} kr
+            </span>
+          </div>
+        )}
+        {state.ejerforeningGaeldRestgaeld > 0 && (
+          <div className={`flex justify-between text-xs ${baseDrift === 0 ? 'text-slate-600' : 'text-slate-300'}`}>
+            <span>+ Andel af restgæld i EF (engang)</span>
+            <span className="font-medium">
+              {state.ejerforeningGaeldRestgaeld.toLocaleString('da-DK')} kr
             </span>
           </div>
         )}

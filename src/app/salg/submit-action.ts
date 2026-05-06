@@ -51,6 +51,11 @@ export async function submitFunnelAction(
     num(state.costFaelleslaan) +
     num(state.costAndreDrift);
 
+  // Haeftelse + andel af EF-restgaeld traekkes begge fra laaneprovenuet ved
+  // overdragelse — saa engine'n behandler dem som ét samlet "haeft"-beloeb.
+  const totalHaeft =
+    num(state.ejerforeningHaeftelseKr) + num(state.ejerforeningGaeldRestgaeld);
+
   const estimate = await computeEstimate({
     postalCode: state.postalCode,
     kvm: state.kvm,
@@ -61,7 +66,7 @@ export async function submitFunnelAction(
     stand: state.stand as StandLevel,
     driftTotalYearly: driftTotal,
     currentListingPrice: state.currentListingPrice,
-    haeftelseEf: num(state.ejerforeningHaeftelseKr),
+    haeftelseEf: totalHaeft,
   });
 
   // 2. Find eksisterende property hvis bfe matcher
@@ -133,11 +138,14 @@ export async function submitFunnelAction(
     `· Vand: ${waterCost.toLocaleString('da-DK')} (${state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
     `· Varme: ${heatCost.toLocaleString('da-DK')} (${state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
     `· TOTAL: ${driftTotal.toLocaleString('da-DK')} kr/år`,
-    num(state.ejerforeningHaeftelseKr) > 0
-      ? `· HÆFTELSE EF / andel af restgæld (engang): ${num(state.ejerforeningHaeftelseKr).toLocaleString('da-DK')} kr`
+    state.hasEjerforeningGaeld
+      ? `· EF-GÆLD: ydelse ${num(state.costFaelleslaan).toLocaleString('da-DK')} kr/år, andel af restgæld ${num(state.ejerforeningGaeldRestgaeld).toLocaleString('da-DK')} kr (engang)${state.faelleslaanCanPrepay ? `, kan indfries før tid: ${state.faelleslaanCanPrepay === 'ja' ? 'JA' : state.faelleslaanCanPrepay === 'nej' ? 'NEJ' : 'Ved ikke'}` : ''}`
       : '',
-    num(state.costFaelleslaan) > 0 && state.faelleslaanCanPrepay
-      ? `· Kan fælleslån indfries før tid? ${state.faelleslaanCanPrepay === 'ja' ? 'JA' : state.faelleslaanCanPrepay === 'nej' ? 'NEJ' : 'Ved ikke'}`
+    num(state.ejerforeningHaeftelseKr) > 0
+      ? `· HÆFTELSE EF jf. tinglysning (engang, separat fra gæld): ${num(state.ejerforeningHaeftelseKr).toLocaleString('da-DK')} kr`
+      : '',
+    totalHaeft > 0
+      ? `· SUM trukket fra låneprovenu (hæftelse + restgæld): ${totalHaeft.toLocaleString('da-DK')} kr`
       : '',
     ``,
     `SÆRLIGE FORHOLD:`,
@@ -220,7 +228,10 @@ export async function submitFunnelAction(
           rentMd: estimate.estimatedRentMd,
           driftTotal,
           refurbTotal: estimate.refurbTotal,
-          haeftelseEf: num(state.ejerforeningHaeftelseKr),
+          haeftelseEf: totalHaeft,
+          ejerforeningHaeftelseKr: num(state.ejerforeningHaeftelseKr),
+          ejerforeningGaeldRestgaeld: num(state.ejerforeningGaeldRestgaeld),
+          hasEjerforeningGaeld: state.hasEjerforeningGaeld,
           listePris: estimate.marketEstimate,
           medianPricePerSqm: estimate.medianPricePerSqm,
           sampleSize: estimate.sampleSize,
@@ -373,6 +384,12 @@ async function sendNotificationEmails(
       `· Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
       `· Markedsestimat: ${market} kr · Tilbud@20% ROE: ${offer} kr`,
       `· ${estimate.sampleSize} comparables, ${estimate.sameEfCount} i samme EF`,
+      state.hasEjerforeningGaeld
+        ? `· EF-gæld: ${(state.costFaelleslaan ?? 0).toLocaleString('da-DK')} kr/år · andel ${(state.ejerforeningGaeldRestgaeld ?? 0).toLocaleString('da-DK')} kr`
+        : '',
+      (state.ejerforeningHaeftelseKr ?? 0) > 0
+        ? `· EF-hæftelse jf. tinglysning: ${(state.ejerforeningHaeftelseKr ?? 0).toLocaleString('da-DK')} kr`
+        : '',
       ``,
       `Behovsafdækning:`,
       `· Tidshorisont: ${state.sellTimeframe ? labelTimeframe(state.sellTimeframe) : '—'}`,

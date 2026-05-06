@@ -118,7 +118,9 @@ export interface FunnelState {
   hasAltan: boolean;
   hasElevator: boolean;
   isRented: boolean;
-  hasEjerforeningHaeftelse: boolean;
+  // Gaeld i ejerforening (toggle styrer om felter vises i Step 3)
+  hasEjerforeningGaeld: boolean;
+  ejerforeningGaeldRestgaeld: number; // engang — andel af restgaeld, traekkes fra laaneprovenu
 
   // UTM tracking
   utmSource: string | null;
@@ -195,7 +197,8 @@ export const initialState: FunnelState = {
   hasAltan: false,
   hasElevator: false,
   isRented: false,
-  hasEjerforeningHaeftelse: false,
+  hasEjerforeningGaeld: false,
+  ejerforeningGaeldRestgaeld: 0,
   utmSource: null,
   utmMedium: null,
   utmCampaign: null,
