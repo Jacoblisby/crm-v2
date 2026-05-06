@@ -265,9 +265,8 @@ export function Step6Estimate() {
       )}
 
       <div className="text-xs text-slate-500 text-center bg-slate-50 rounded-lg p-3">
-        Tilbuddet er foreløbigt og bygger på offentlig data + dine oplysninger. Endeligt tilbud
-        gives efter gratis besigtigelse. Du får en bekræftelse på email på{' '}
-        <strong>{state.email}</strong>.
+        Tilbuddet er foreløbigt og bygger på offentlig data + dine oplysninger. Bindende tilbud
+        gives efter gratis besigtigelse. Du modtager en bekræftelse på email.
       </div>
 
       {leadId && (
