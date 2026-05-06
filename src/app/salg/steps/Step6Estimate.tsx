@@ -85,7 +85,22 @@ export function Step6Estimate() {
 
   if (!estimate) return null;
 
-  const { netForkortet, comparables, sampleSize, averageDiscountPct } = estimate;
+  const { netForkortet, comparables: allComparables, averageDiscountPct } = estimate;
+
+  // Filter comparables til kun dem der ligger inden for ±8% af vores
+  // ækvivalente mægler-pris (= det vores tilbud svarer til på markedet).
+  // Det giver sælger et meningsfuldt sammenligningsgrundlag — vi viser kun
+  // boliger der er solgt for et beløb tæt på det vi tilbyder netto.
+  const equivalentBrokerPrice =
+    netForkortet.finalOffer +
+    netForkortet.minusBrokerSavings +
+    netForkortet.minusMarketDiscount +
+    netForkortet.minusOwnershipCosts;
+  const comparables = allComparables.filter((c) => {
+    const ratio = c.price / equivalentBrokerPrice;
+    return ratio >= 0.92 && ratio <= 1.08; // ±8%
+  });
+  const sampleSize = comparables.length;
 
   return (
     <div className="space-y-6">
@@ -175,17 +190,17 @@ export function Step6Estimate() {
       <div className="bg-slate-900 rounded-xl p-5 text-white text-center space-y-3">
         <p className="font-semibold text-lg">Næste skridt</p>
         <p className="text-sm text-slate-300">
-          Jacob ringer dig op indenfor 24 timer for at aftale en gratis, uforpligtende
+          Vi ringer dig op indenfor 24 timer for at aftale en gratis, uforpligtende
           besigtigelse. Efter besigtigelsen giver vi et endeligt bindende tilbud.
         </p>
         <a
           href="tel:+4561789071"
           className="inline-block bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-lg px-5 py-2.5 text-sm"
         >
-          📞 Ring direkte til Jacob
+          📞 Ring direkte til os
         </a>
         <p className="text-xs text-slate-400">
-          Eller email: <a href="mailto:jacob@faurholt.com" className="underline">jacob@faurholt.com</a>
+          Eller email: <a href="mailto:administration@365ejendom.dk" className="underline">administration@365ejendom.dk</a>
         </p>
       </div>
 

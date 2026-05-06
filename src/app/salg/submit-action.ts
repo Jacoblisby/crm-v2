@@ -298,7 +298,7 @@ async function sendNotificationEmails(
   const customerResult = await sendResendEmail(apiKey, {
     from,
     to: state.email,
-    reply_to: 'jacob@faurholt.com',
+    reply_to: 'administration@365ejendom.dk',
     subject: customerSubject,
     html,
   });
@@ -381,8 +381,19 @@ function customerEmailHtml(
   const broker = fmt(estimate.netForkortet.minusBrokerSavings);
   const ownership = fmt(estimate.netForkortet.minusOwnershipCosts);
   const ourMargin = estimate.netForkortet.minusOurMargin;
+  // Filter comparables til ±8% af ækvivalent mægler-pris — kun dem der reelt
+  // er sammenlignelige med vores tilbud netto.
+  const equivalentBrokerPrice =
+    estimate.netForkortet.finalOffer +
+    estimate.netForkortet.minusBrokerSavings +
+    estimate.netForkortet.minusMarketDiscount +
+    estimate.netForkortet.minusOwnershipCosts;
   const compsHtml = estimate.comparables
     .filter((c) => !c.isCurrentListing)
+    .filter((c) => {
+      const ratio = c.price / equivalentBrokerPrice;
+      return ratio >= 0.92 && ratio <= 1.08;
+    })
     .slice(0, 5)
     .map(
       (c) => `
@@ -478,7 +489,7 @@ function customerEmailHtml(
     </p>
     <p style="margin:0;font-size:13px;color:#cbd5e1;">
       📞 Eller ring direkte: <a href="tel:+4561789071" style="color:#34d399;text-decoration:none;font-weight:600;">+45 61 78 90 71</a><br>
-      ✉️ Eller skriv: <a href="mailto:jacob@faurholt.com" style="color:#34d399;text-decoration:none;font-weight:600;">jacob@faurholt.com</a>
+      ✉️ Eller skriv: <a href="mailto:administration@365ejendom.dk" style="color:#34d399;text-decoration:none;font-weight:600;">administration@365ejendom.dk</a>
     </p>
   </div>
 
@@ -499,7 +510,7 @@ function customerEmailHtml(
   <div style="padding:24px;text-align:center;border-top:1px solid #e2e8f0;">
     <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
       Bedste hilsner,<br>
-      <strong style="color:#475569;">Jacob Faurholt</strong> · 365 Ejendomme
+      <strong style="color:#475569;">Jacob Lisby</strong> · 365 Ejendomme
     </p>
     <p style="margin:12px 0 0;font-size:11px;color:#cbd5e1;">
       Du modtog denne email fordi du brugte vores boligberegner. Vi gemmer ikke dine data uden samtykke — skriv til
