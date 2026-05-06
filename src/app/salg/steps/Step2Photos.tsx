@@ -115,7 +115,11 @@ export function Step2Photos() {
         </button>
         <button
           onClick={next}
-          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium"
+          className={`px-6 py-3 rounded-xl font-medium ${
+            count === 0
+              ? 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+          }`}
         >
           {count === 0 ? 'Spring over →' : 'Fortsæt →'}
         </button>

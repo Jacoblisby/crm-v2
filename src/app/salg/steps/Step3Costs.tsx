@@ -104,8 +104,8 @@ export function Step3Costs() {
           />
         ) : (
           <CostInput
-            label="Vandforbrug sidste år (faktisk regning)"
-            hint="Det du betalte direkte til vandværket sidste år"
+            label="Samlet vandregning sidste år"
+            hint="Sum af 4 kvartalsregninger eller årsopgørelse fra forsyningen"
             placeholder="3.500"
             value={state.waterUsageLastYearKr}
             onChange={(v) => update({ waterUsageLastYearKr: v })}
@@ -131,8 +131,8 @@ export function Step3Costs() {
           />
         ) : (
           <CostInput
-            label="Varmeforbrug sidste år (faktisk regning)"
-            hint="Det du betalte direkte til varmeværket sidste år"
+            label="Samlet varmeregning sidste år"
+            hint="Årsopgørelse fra fjernvarme/varmeværket"
             placeholder="11.500"
             value={state.heatUsageLastYearKr}
             onChange={(v) => update({ heatUsageLastYearKr: v })}
@@ -150,6 +150,11 @@ export function Step3Costs() {
             ? 'Du afdrager på et fælleslån — så er der også en restgæld du hæfter for. Vi har brug for at vide hvor stor din andel er, og om lånet kan indfries før tid.'
             : 'Hvis ejerforeningen har gæld (fx fra renovering, energiforbedring), hæfter du for din andel. Det fremgår typisk af tinglysningsattesten eller årsregnskabet. Lader du feltet være 0 antager vi at der ingen hæftelse er.'}
         </p>
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700">
+          <strong>Eksempel:</strong> ejerforeningen har et fælleslån på 50 mio kr fordelt på 100
+          lejligheder → din andel er ca. <strong>500.000 kr</strong>. Tjek tinglysningsattest eller
+          spørg administrator hvis du er i tvivl.
+        </div>
         <CostInput
           label={state.costFaelleslaan > 0 ? 'Din andel af foreningens restgæld' : 'Din andel af ejerforeningens gæld'}
           hint="Engangsgæld — IKKE den månedlige fælleslån-ydelse (den indtastede du ovenover)"

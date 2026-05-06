@@ -18,9 +18,9 @@ export default function SalgPage() {
               365 Ejendomme · Vi opkøber kontant
             </p>
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
-              Sælg din ejerlejlighed
+              Få et tilbud
               <br />
-              <span className="text-emerald-600">på 60 sekunder</span>
+              <span className="text-emerald-600">på 5 minutter</span>
             </h1>
             <p className="text-slate-600 max-w-xl mx-auto">
               Få et foreløbigt tilbud baseret på sammenlignelige handler i dit område. Vi handler

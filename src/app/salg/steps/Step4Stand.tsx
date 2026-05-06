@@ -162,9 +162,9 @@ export function Step4Stand() {
                 <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
                   🔌 Hvidevarer der følger med
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <ApplianceToggle
-                    label="Vaskemaskine"
+                    label="Vask"
                     value={state.applVaskemaskine}
                     onChange={(v) => update({ applVaskemaskine: v })}
                   />
@@ -174,12 +174,12 @@ export function Step4Stand() {
                     onChange={(v) => update({ applTorretumbler: v })}
                   />
                   <ApplianceToggle
-                    label="Opvaskemaskine"
+                    label="Opvask"
                     value={state.applOpvaskemaskine}
                     onChange={(v) => update({ applOpvaskemaskine: v })}
                   />
                   <ApplianceToggle
-                    label="Køle-/fryseskab"
+                    label="Køl/frys"
                     value={state.applKoeleFryseskab}
                     onChange={(v) => update({ applKoeleFryseskab: v })}
                   />
@@ -194,7 +194,7 @@ export function Step4Stand() {
                     onChange={(v) => update({ applKomfur: v })}
                   />
                   <ApplianceToggle
-                    label="Mikroovn"
+                    label="Mikro"
                     value={state.applMikroovn}
                     onChange={(v) => update({ applMikroovn: v })}
                   />
@@ -228,13 +228,13 @@ export function Step4Stand() {
               {/* NOTE */}
               <section className="space-y-2">
                 <label className="block text-sm font-medium text-slate-700">
-                  Note til mægler (valgfri)
+                  Andre ting vi bør vide (valgfri)
                 </label>
                 <textarea
                   value={state.standNote}
                   onChange={(e) => update({ standNote: e.target.value })}
                   rows={3}
-                  placeholder='Fx "Køkken fra 2015, opvasker fra 2008" eller "Nyrenoveret bad 2023"'
+                  placeholder='Fx "Fælles tagterrasse i bygningen", "Husdyr accepteret af EF", "Kommende ombygning af bad i 2026"'
                   className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </section>

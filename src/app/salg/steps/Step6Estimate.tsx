@@ -93,17 +93,29 @@ export function Step6Estimate() {
         <p className="text-xs uppercase tracking-wider text-emerald-600 font-medium">
           ✓ Dit foreløbige tilbud
         </p>
-        <h2 className="text-2xl font-semibold">{state.fullAddress}</h2>
+        <h2 className="text-lg sm:text-2xl font-semibold leading-tight">
+          {(() => {
+            // På mobile: drop postnr+by (de er allerede i progress-bar)
+            const parts = state.fullAddress.split(',');
+            const short = parts.slice(0, 2).join(',').trim();
+            return (
+              <>
+                <span className="sm:hidden">{short || state.fullAddress}</span>
+                <span className="hidden sm:inline">{state.fullAddress}</span>
+              </>
+            );
+          })()}
+        </h2>
       </div>
 
       {/* HOVEDTAL */}
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-2">
-        <p className="text-sm text-slate-600">Vi byder</p>
+        <p className="text-sm text-slate-600">Vores foreløbige tilbud</p>
         <p className="text-5xl sm:text-6xl font-bold text-emerald-700 tracking-tight">
           {netForkortet.finalOffer.toLocaleString('da-DK')} <span className="text-2xl">kr</span>
         </p>
         <p className="text-xs text-slate-500">
-          Endeligt bindende tilbud efter gratis besigtigelse
+          Bindende tilbud gives efter gratis besigtigelse
         </p>
       </div>
 
@@ -143,15 +155,14 @@ export function Step6Estimate() {
             <BreakdownRow
               label="= Det svarer til at sælge for"
               value={effectiveMarket}
-              hint="…på det åbne marked, efter alle omkostninger"
+              hint={`vs. typisk markedssalg ~${netForkortet.marketEstimate.toLocaleString('da-DK')} kr`}
               total
             />
           </div>
         );
       })()}
       <p className="text-xs text-slate-500 text-center">
-        Vurderet markedsværdi: <strong>{netForkortet.marketEstimate.toLocaleString('da-DK')} kr</strong>
-        {' '}— vi byder kontant uden ventetid eller omkostninger.
+        Vi byder kontant uden ventetid, mæglersalær eller usikkerhed.
       </p>
 
       {/* CTA */}

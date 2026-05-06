@@ -17,9 +17,33 @@ export function Step1Address() {
   const [error, setError] = useState<string | null>(null);
   const [outOfArea, setOutOfArea] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const justSelectedRef = useRef(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Sync input-state med funnel-state når lokalstorage loader (fx ved reload)
+  useEffect(() => {
+    if (state.fullAddress && !query) setQuery(state.fullAddress);
+  }, [state.fullAddress]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Click-outside lukker dropdown — så bruger ikke ser den hænge over OOA-form
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // Debounced search ved hver tastetryk
   useEffect(() => {
+    // Skip search hvis brugeren lige har valgt — query == s.tekst men det er
+    // ikke en ny søgning de vil have
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false;
+      return;
+    }
     if (!query || query.trim().length < 3) {
       setResults([]);
       setShowResults(false);
@@ -38,7 +62,9 @@ export function Step1Address() {
   }, [query]);
 
   function selectAddress(s: DawaSuggestion) {
+    justSelectedRef.current = true; // forhindrer useEffect i at re-åbne dropdown
     setQuery(s.tekst);
+    setResults([]);
     setShowResults(false);
     setOutOfArea(false);
     setError(null);
@@ -93,11 +119,14 @@ export function Step1Address() {
       <div className="space-y-1">
         <h2 className="text-xl font-semibold">Hvor ligger din lejlighed?</h2>
         <p className="text-sm text-slate-500">
-          Skriv adressen — vi henter automatisk størrelse, byggeår og BFE-nummer.
+          Skriv adressen — vi henter automatisk størrelse, byggeår og ejendomsdata.
+        </p>
+        <p className="text-xs text-slate-400 flex items-center gap-1">
+          🔒 Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
         </p>
       </div>
 
-      <div className="relative">
+      <div ref={wrapperRef} className="relative">
         <input
           type="text"
           value={query}
@@ -303,7 +332,7 @@ function OutOfAreaForm() {
       <button
         onClick={submit}
         disabled={pending}
-        className="w-full px-5 py-2.5 bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white rounded-lg text-sm font-medium"
+        className="w-full px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-lg text-sm font-medium"
       >
         {pending ? 'Sender…' : 'Send min sag til vurdering'}
       </button>
