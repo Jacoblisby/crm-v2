@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     let yearBuilt = lead.yearBuilt;
     let streetName: string | null = null;
     let houseNumber: string | null = null;
-    let bfeNumber: number | null = lead.bfeNumber ? Number(lead.bfeNumber) : null;
+    let bfeNumber: number | null = null;
     let propertyId: string | null = lead.propertyId;
     let didEnrich = false;
 
@@ -191,7 +191,6 @@ export async function POST(req: NextRequest) {
             city: city ?? lead.city,
             kvm: kvm,
             yearBuilt: yearBuilt ?? lead.yearBuilt,
-            bfeNumber: bfeNumber ? String(bfeNumber) : lead.bfeNumber,
             propertyId: propertyId ?? lead.propertyId,
             stageSlug: 'ny-lead',
             stageChangedAt: new Date(),
