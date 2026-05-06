@@ -151,11 +151,19 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     haeftelseEf: input.haeftelseEf ?? 0,
   });
 
-  // 5. Bud@target ROE er præcis hvad computeAfkast siger — ingen cap for off-market.
-  // Sælger ringer til OS, så der er ingen 'listing' at forhandle ned fra.
-  // Bidet er det matematiske svar; resten af markeds-omkostningerne lægger vi
-  // ovenpå i breakdown-visningen som "hvad det svarer til på markedet".
-  const finalOffer = afk.budAt20PctRoe ?? Math.round(marketEstimate * 0.85);
+  // 5. Bud@target ROE er det matematiske svar; vi capper dog ved 95% af
+  // marketEstimate, så vi aldrig betaler mere end vores markedsvurdering.
+  // - Hvis ROE @ marketEstimate > 20% (mathBud > marketEstimate) → cap binder, vi tilbyder 95% af marked
+  // - Ellers tager vi mathBud direkte (det er allerede ≤ marketEstimate)
+  // Mellemregninger viser stadig den rene matematik — cap'en er en business-
+  // regel oven på, ikke en del af afkast-engine'n.
+  const OFF_MARKET_BID_CAP_PCT = 0.95;
+  const offMarketCap = Math.round((marketEstimate * OFF_MARKET_BID_CAP_PCT) / 1000) * 1000;
+  const mathBud = afk.budAt20PctRoe;
+  const finalOffer =
+    mathBud != null
+      ? Math.min(mathBud, offMarketCap)
+      : Math.round(marketEstimate * 0.85);
 
   // 6. Breakdown — fra markedspris til vores bud, matematisk korrekt så de
   // 4 fradrag + vores margin SUMMERER til delta. Brugeren skal kunne følge
