@@ -85,12 +85,15 @@ export function Step7Estimate() {
 
   const { netForkortet, comparables: allComparables, averageDiscountPct } = estimate;
 
+  // Closing-date adjustment: base case = 3 mdr (matcher OWNERSHIP_MONTHS i engine).
+  // 14 dage giver fast-track-bonus, 6 mdr giver lille rabat.
+  const adjustment = closingAdjustment(state.chosenOvertagelseMaaneder);
+  const adjustedOffer = netForkortet.finalOffer + adjustment;
+
   // Filter comparables til kun dem der ligger inden for ±8% af vores
   // ækvivalente mægler-pris (= det vores tilbud svarer til på markedet).
-  // Det giver sælger et meningsfuldt sammenligningsgrundlag — vi viser kun
-  // boliger der er solgt for et beløb tæt på det vi tilbyder netto.
   const equivalentBrokerPrice =
-    netForkortet.finalOffer +
+    adjustedOffer +
     netForkortet.minusBrokerSavings +
     netForkortet.minusMarketDiscount +
     netForkortet.minusOwnershipCosts;
@@ -125,17 +128,21 @@ export function Step7Estimate() {
       <div className="bg-slate-900 rounded-lg p-6 text-center space-y-2">
         <p className="text-sm text-slate-400">Vores foreløbige tilbud</p>
         <p className="text-5xl sm:text-6xl font-bold text-white tracking-tight">
-          {netForkortet.finalOffer.toLocaleString('da-DK')} <span className="text-2xl text-slate-300">kr</span>
+          {adjustedOffer.toLocaleString('da-DK')} <span className="text-2xl text-slate-300">kr</span>
         </p>
         <p className="text-xs text-slate-400">
           Bindende tilbud gives efter gratis besigtigelse
         </p>
       </div>
 
+      {/* CLOSING-DATE SLIDER (Offerpad-style) */}
+      <ClosingDateChips />
+
+
       {/* HVAD DU SPARER + ÆKVIVALENT MÆGLER-PRIS */}
       {(() => {
         const equivalentBrokerPrice =
-          netForkortet.finalOffer +
+          adjustedOffer +
           netForkortet.minusBrokerSavings +
           netForkortet.minusMarketDiscount +
           netForkortet.minusOwnershipCosts;
@@ -172,7 +179,7 @@ export function Step7Estimate() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-600">
-                  …hvis du var gået via mægler. Vores {netForkortet.finalOffer.toLocaleString('da-DK')} kr kontant
+                  …hvis du var gået via mægler. Vores {adjustedOffer.toLocaleString('da-DK')} kr kontant
                   plus de tre poster du sparer ovenfor.
                 </p>
               </div>
@@ -202,6 +209,57 @@ export function Step7Estimate() {
           Eller email: <a href="mailto:administration@365ejendom.dk" className="underline">administration@365ejendom.dk</a>
         </p>
       </div>
+
+      {/* EF SOCIAL-PROOF — vis prominent hvis vi har handler i samme bygning/EF */}
+      {(() => {
+        const sameEfHandler = comparables
+          .filter((c) => c.weight >= 3 && !c.isCurrentListing)
+          .slice(0, 3);
+        if (sameEfHandler.length === 0) return null;
+        return (
+          <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-3">
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-500 font-medium">
+                Hvad andre i din ejerforening fik
+              </p>
+              <h3 className="text-sm font-semibold text-slate-900">
+                {sameEfHandler.length} {sameEfHandler.length === 1 ? 'tinglyst handel' : 'tinglyste handler'} fra din bygning eller forening
+              </h3>
+            </div>
+            <ul className="space-y-2">
+              {sameEfHandler.map((c, i) => (
+                <li
+                  key={i}
+                  className="flex items-baseline justify-between gap-3 py-2 border-b border-slate-100 last:border-b-0"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-slate-900 truncate">
+                      {c.address}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {c.kvm}m²
+                      {c.date && <span> · {c.date.slice(0, 7)}</span>}
+                      {c.weight >= 4 && <span className="ml-2 font-medium text-slate-700">samme bygning</span>}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-semibold text-slate-900 tabular-nums">
+                      {c.price.toLocaleString('da-DK')} kr
+                    </div>
+                    <div className="text-xs text-slate-500 tabular-nums">
+                      {c.pricePerSqm.toLocaleString('da-DK')}/m²
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-slate-500">
+              Anonymiserede tinglyste handler (kilde: Vurderingsstyrelsen). Vi bruger dem
+              direkte i vores prisberegning — du betaler ikke salær på toppen.
+            </p>
+          </div>
+        );
+      })()}
 
       {/* COMPARABLES */}
       {comparables.length > 0 && (
@@ -287,6 +345,72 @@ export function Step7Estimate() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Closing-date adjustment til vores tilbud.
+ * Base case = 3 mdr (matcher OWNERSHIP_MONTHS=3 i engine).
+ *   14 dage: +15.000 fast-track-bonus (vi prioriterer hurtige sager)
+ *   1 mdr:   +0
+ *   3 mdr:   +0 (base)
+ *   6 mdr:   -10.000 (vi venter laengere paa at faa lejeindtaegt)
+ * Justeringen er flat og skifter dyre-tal nemt at kommunikere.
+ */
+function closingAdjustment(months: 0.5 | 1 | 3 | 6): number {
+  if (months === 0.5) return 15_000;
+  if (months === 1) return 0;
+  if (months === 3) return 0;
+  return -10_000;
+}
+
+function ClosingDateChips() {
+  const { state, update } = useFunnel();
+  const options: { value: 0.5 | 1 | 3 | 6; label: string; sub: string }[] = [
+    { value: 0.5, label: '14 dage', sub: '+15.000 kr' },
+    { value: 1, label: '1 mdr', sub: 'standard' },
+    { value: 3, label: '3 mdr', sub: 'standard' },
+    { value: 6, label: '6 mdr', sub: '−10.000 kr' },
+  ];
+  return (
+    <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Hvornår vil du overtage?
+        </h3>
+        <span className="text-xs text-slate-500">Du kan altid ændre i besigtigelsen</span>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {options.map((opt) => {
+          const active = state.chosenOvertagelseMaaneder === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => update({ chosenOvertagelseMaaneder: opt.value })}
+              className={`flex flex-col items-center justify-center p-2.5 rounded-lg border transition-colors ${
+                active
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 bg-white hover:border-slate-400 text-slate-800'
+              }`}
+            >
+              <span className="font-semibold text-sm">{opt.label}</span>
+              <span
+                className={`text-[11px] mt-0.5 ${
+                  active ? 'text-slate-300' : 'text-slate-500'
+                }`}
+              >
+                {opt.sub}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-xs text-slate-500">
+        Hurtigere overtagelse giver dig en bonus. Længere overtagelse gør tilbuddet en smule
+        lavere — vi venter længere på at få lejeindtægt.
+      </p>
     </div>
   );
 }

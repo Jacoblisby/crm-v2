@@ -17,6 +17,7 @@ export function Step1Address() {
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [outOfArea, setOutOfArea] = useState(false);
+  const [noDawaMatch, setNoDawaMatch] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const justSelectedRef = useRef(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -57,6 +58,10 @@ export function Step1Address() {
         if (r.ok) {
           setResults(r.results);
           setShowResults(true);
+          // Hvis DAWA returnerer 0 resultater og brugeren har indtastet noget
+          // substantielt, sa antager vi adressen er problematisk og tilbyder
+          // manuel fallback (#9 — graceful degradation).
+          setNoDawaMatch(r.results.length === 0 && query.trim().length >= 8);
         }
       });
     }, 250);
@@ -68,6 +73,7 @@ export function Step1Address() {
     setResults([]);
     setShowResults(false);
     setOutOfArea(false);
+    setNoDawaMatch(false);
     setError(null);
 
     startLookup(async () => {
@@ -95,6 +101,8 @@ export function Step1Address() {
         floor: address.floor,
         door: address.door,
         bfeNumber: address.bfeNumber ?? property?.bfeNumber ?? null,
+        latitude: address.coordinates?.lat ?? null,
+        longitude: address.coordinates?.lon ?? null,
         kvm: property?.kvm ?? null,
         rooms: property?.rooms ?? null,
         yearBuilt: property?.yearBuilt ?? null,
@@ -175,6 +183,13 @@ export function Step1Address() {
 
       {outOfArea && <OutOfAreaForm />}
 
+      {noDawaMatch && !outOfArea && !showAutoFilled && (
+        <NoDawaMatchForm
+          query={query}
+          onSubmitted={() => setNoDawaMatch(false)}
+        />
+      )}
+
       {showAutoFilled && !outOfArea && (
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
@@ -214,6 +229,27 @@ export function Step1Address() {
               med i beregningen.
             </div>
           )}
+
+          {/* #6 Tidlig email-opsamling — valgfri opt-in saa vi kan recovery-maile
+              hvis sælger drop'er midt i funnel'en. Telefon spørger vi forst pa Step 6. */}
+          <div className="border-t border-slate-200 pt-3 space-y-1.5">
+            <label className="block">
+              <div className="text-xs text-slate-600 mb-1">
+                Email <span className="text-slate-400">(valgfri)</span>
+              </div>
+              <input
+                type="email"
+                value={state.email}
+                onChange={(e) => update({ email: e.target.value })}
+                placeholder="din@email.dk"
+                autoComplete="email"
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 bg-white"
+              />
+            </label>
+            <p className="text-xs text-slate-500">
+              Vi sender dig dit estimat på email — også selvom du dropper undervejs.
+            </p>
+          </div>
         </div>
       )}
 
@@ -253,6 +289,101 @@ function Field({
         className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded font-medium"
       />
     </label>
+  );
+}
+
+function NoDawaMatchForm({
+  query,
+  onSubmitted,
+}: {
+  query: string;
+  onSubmitted: () => void;
+}) {
+  const { state, update } = useFunnel();
+  const [pending, startTransition] = useTransition();
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function submit() {
+    if (!state.fullName || !state.email || !state.phone) {
+      setError('Udfyld navn, email og telefon');
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const r = await submitOutOfAreaLeadAction({
+        fullName: state.fullName,
+        email: state.email,
+        phone: state.phone,
+        fullAddress: query, // brug rå tekst da DAWA ikke kunne matche
+        postalCode: '',
+        city: '',
+      });
+      if (r.ok) {
+        setSubmitted(true);
+        onSubmitted();
+      } else setError(r.error || 'Noget gik galt');
+    });
+  }
+
+  if (submitted) {
+    return (
+      <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 space-y-2">
+        <div className="flex items-center gap-2 text-base font-semibold text-emerald-700">
+          <Check className="w-5 h-5" strokeWidth={3} />
+          Tak — vi vender tilbage
+        </div>
+        <p className="text-sm text-slate-700">
+          Vi har modtaget din adresse og kontaktoplysninger. Vi regner manuelt på din sag og
+          vender tilbage indenfor 1-2 hverdage.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
+      <div>
+        <div className="text-sm font-semibold text-slate-900">
+          Vi kunne ikke finde adressen automatisk
+        </div>
+        <p className="text-sm text-slate-700 mt-1">
+          Det er måske en ny adresse eller en stavefejl. Læg dine kontaktoplysninger her, så
+          regner vi på sagen manuelt og vender tilbage indenfor 1-2 hverdage.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <input
+          type="text"
+          placeholder="Fulde navn"
+          value={state.fullName}
+          onChange={(e) => update({ fullName: e.target.value })}
+          className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={state.email}
+          onChange={(e) => update({ email: e.target.value })}
+          className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+        />
+        <input
+          type="tel"
+          placeholder="Telefon"
+          value={state.phone}
+          onChange={(e) => update({ phone: e.target.value })}
+          className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+        />
+      </div>
+      {error && <div className="text-sm text-red-700">{error}</div>}
+      <button
+        onClick={submit}
+        disabled={pending}
+        className="w-full px-5 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-lg text-sm font-medium"
+      >
+        {pending ? 'Sender…' : 'Send min sag til manuel vurdering'}
+      </button>
+    </div>
   );
 }
 

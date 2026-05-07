@@ -49,6 +49,9 @@ export interface PriceEngineInput {
   roadName?: string | null;
   /** Husnr — bruges til same-bygning vægt */
   houseNumber?: string | null;
+  /** Koordinater — bruges til afstands-baseret EF-detection (bedre end vejnavn) */
+  latitude?: number | null;
+  longitude?: number | null;
   /** Hvis kunden har en aktuel listing/listepris fra mægler — bruges som sanity check */
   currentListingPrice?: number | null;
   /** Hæftelse til ejerforening (engangs gæld kunden hæfter for, fra tinglysning) */
@@ -101,6 +104,8 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     postalCode: input.postalCode,
     roadName: input.roadName,
     houseNumber: input.houseNumber,
+    latitude: input.latitude,
+    longitude: input.longitude,
     kvm: input.kvm,
     yearBuilt: input.yearBuilt,
     rooms: input.rooms,

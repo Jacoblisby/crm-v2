@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Phone } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Få et tilbud på din ejerlejlighed på 5 minutter · 365 Ejendomme',
@@ -25,7 +26,7 @@ export default function SalgLayout({ children }: { children: React.ReactNode }) 
             href="tel:+4589876634"
             className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1.5"
           >
-            <span aria-hidden>📞</span>
+            <Phone className="w-3.5 h-3.5" strokeWidth={2} />
             <span className="hidden sm:inline">+45 89 87 66 34</span>
           </a>
         </div>

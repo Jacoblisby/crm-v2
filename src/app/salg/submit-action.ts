@@ -56,6 +56,14 @@ export async function submitFunnelAction(
   const totalHaeft =
     num(state.ejerforeningHaeftelseKr) + num(state.ejerforeningGaeldRestgaeld);
 
+  // Closing-date adjustment (matcher logikken i Step7Estimate.tsx)
+  const closingAdjustment =
+    state.chosenOvertagelseMaaneder === 0.5
+      ? 15_000
+      : state.chosenOvertagelseMaaneder === 6
+        ? -10_000
+        : 0;
+
   const estimate = await computeEstimate({
     postalCode: state.postalCode,
     kvm: state.kvm,
@@ -63,6 +71,8 @@ export async function submitFunnelAction(
     rooms: state.rooms,
     roadName: state.streetName,
     houseNumber: state.houseNumber,
+    latitude: state.latitude,
+    longitude: state.longitude,
     stand: state.stand as StandLevel,
     driftTotalYearly: driftTotal,
     currentListingPrice: state.currentListingPrice,
@@ -120,9 +130,20 @@ export async function submitFunnelAction(
     state.applEmhaette && 'Emhætte',
   ].filter(Boolean) as string[];
 
+  const adjustedFinalOffer = estimate.netForkortet.finalOffer + closingAdjustment;
+  const overtagelseLabel =
+    state.chosenOvertagelseMaaneder === 0.5
+      ? '14 dage (fast-track)'
+      : state.chosenOvertagelseMaaneder === 1
+        ? '1 mdr'
+        : state.chosenOvertagelseMaaneder === 3
+          ? '3 mdr (standard)'
+          : '6 mdr (lang)';
+
   const notes = [
     `📐 BOLIGBEREGNER LEAD`,
-    `Foreløbigt estimat: ${estimate.netForkortet.finalOffer.toLocaleString('da-DK')} kr (markedsestimat: ${estimate.marketEstimate.toLocaleString('da-DK')} kr)`,
+    `Tilbud til sælger: ${adjustedFinalOffer.toLocaleString('da-DK')} kr (model-base: ${estimate.netForkortet.finalOffer.toLocaleString('da-DK')} kr ${closingAdjustment >= 0 ? '+' : ''}${closingAdjustment.toLocaleString('da-DK')} kr overtagelse-justering)`,
+    `Markedsestimat: ${estimate.marketEstimate.toLocaleString('da-DK')} kr · Overtagelse: ${overtagelseLabel}`,
     ``,
     `STAND: ${state.stand}`,
     state.kitchenYear ? `Køkken: ${state.kitchenYear}${state.kitchenBrand ? ' (' + state.kitchenBrand + ')' : ''}` : '',
@@ -158,8 +179,6 @@ export async function submitFunnelAction(
     `BEHOVSAFDÆKNING:`,
     state.sellTimeframe ? `· Tidshorisont: ${labelTimeframe(state.sellTimeframe)}` : '',
     state.sellReason ? `· Grund: ${labelReason(state.sellReason)}` : '',
-    state.ownerCount ? `· Antal ejere: ${labelOwners(state.ownerCount)}` : '',
-    state.livedHere ? `· Boet her: ${labelLived(state.livedHere)}` : '',
     state.afterSale ? `· Efter salget: ${labelAfterSale(state.afterSale)}` : '',
     state.afterSale === 'blive_boende_lejer' ? `· 🏠 SALE-LEASEBACK INTERESSE` : '',
     state.isOver65 ? `· Fyldt 65: ${labelYesNo(state.isOver65)}` : '',
@@ -219,7 +238,7 @@ export async function submitFunnelAction(
         stageChangedAt: new Date(),
         conditionRating: standToRating(state.stand as StandLevel),
         valuationDkk: estimate.marketEstimate,
-        bidDkk: estimate.netForkortet.finalOffer,
+        bidDkk: adjustedFinalOffer,
         bidStatus: 'afgivet',
         priority: hasFullData ? 2 : 1,
         source: 'boligberegner-merged', // marker at det er merged fra eksisterende
@@ -274,7 +293,7 @@ export async function submitFunnelAction(
       stageChangedAt: new Date(),
       conditionRating: standToRating(state.stand as StandLevel),
       valuationDkk: estimate.marketEstimate,
-      bidDkk: estimate.netForkortet.finalOffer,
+      bidDkk: adjustedFinalOffer,
       bidStatus: 'afgivet',
       priority: hasFullData ? 2 : 1,
       source: state.utmSource ?? 'boligberegner',
@@ -397,8 +416,6 @@ async function sendNotificationEmails(
       `Behovsafdækning:`,
       `· Tidshorisont: ${state.sellTimeframe ? labelTimeframe(state.sellTimeframe) : '—'}`,
       `· Grund: ${state.sellReason ? labelReason(state.sellReason) : '—'}`,
-      `· Antal ejere: ${state.ownerCount ? labelOwners(state.ownerCount) : '—'}`,
-      `· Boet her: ${state.livedHere ? labelLived(state.livedHere) : '—'}`,
       `· Efter salget: ${state.afterSale ? labelAfterSale(state.afterSale) : '—'}`,
       state.afterSale === 'blive_boende_lejer' ? `· 🏠 SALE-LEASEBACK INTERESSE` : '',
       state.isOver65 ? `· Fyldt 65: ${labelYesNo(state.isOver65)}` : '',
@@ -673,17 +690,6 @@ function labelReason(v: NonNullable<FunnelState['sellReason']>): string {
     okonomi: 'Økonomi',
     investering: 'Investering',
     andet: 'Andet',
-  }[v];
-}
-function labelOwners(v: NonNullable<FunnelState['ownerCount']>): string {
-  return { '1': '1 ejer', '2': '2 ejere', '3plus': '3 eller flere' }[v];
-}
-function labelLived(v: NonNullable<FunnelState['livedHere']>): string {
-  return {
-    under1: 'Under 1 år',
-    '1to3': '1-3 år',
-    '3to10': '3-10 år',
-    '10plus': '10+ år',
   }[v];
 }
 function labelAfterSale(v: NonNullable<FunnelState['afterSale']>): string {

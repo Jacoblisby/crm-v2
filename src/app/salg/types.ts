@@ -35,6 +35,9 @@ export interface FunnelState {
   floor: string | null;
   door: string | null;
   bfeNumber: number | null;
+  /** Koordinater fra DAWA — bruges til same-building-detection i comparables */
+  latitude: number | null;
+  longitude: number | null;
   // Auto-udfyldte felter (kan rettes af bruger)
   kvm: number | null;
   rooms: number | null;
@@ -122,6 +125,10 @@ export interface FunnelState {
   hasEjerforeningGaeld: boolean;
   ejerforeningGaeldRestgaeld: number; // engang — andel af restgaeld, traekkes fra laaneprovenu
 
+  // Step 7: Valg af overtagelse (default 3 mdr — base case)
+  // Kortere = bonus til saelger, laengere = lavere tilbud (vi venter pa lejeindtaegt)
+  chosenOvertagelseMaaneder: 0.5 | 1 | 3 | 6;
+
   // UTM tracking
   utmSource: string | null;
   utmMedium: string | null;
@@ -139,6 +146,8 @@ export const initialState: FunnelState = {
   floor: null,
   door: null,
   bfeNumber: null,
+  latitude: null,
+  longitude: null,
   kvm: null,
   rooms: null,
   yearBuilt: null,
@@ -191,6 +200,7 @@ export const initialState: FunnelState = {
   afterSale: null,
   isOver65: null,
   receivesBoligstotte: null,
+  chosenOvertagelseMaaneder: 3, // base case
   fullName: '',
   email: '',
   phone: '',

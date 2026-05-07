@@ -58,6 +58,9 @@ interface SubjectProperty {
   postalCode: string;
   roadName?: string | null;
   houseNumber?: string | null;
+  /** Koordinater — bedre EF-detection end vejnavn alene */
+  latitude?: number | null;
+  longitude?: number | null;
   kvm: number;
   yearBuilt: number | null;
   rooms?: number | null;
@@ -71,6 +74,8 @@ export async function findComparables(
     postalCode: subject.postalCode,
     roadName: subject.roadName,
     houseNumber: subject.houseNumber,
+    subjectLat: subject.latitude,
+    subjectLon: subject.longitude,
     kvm: subject.kvm,
   });
 

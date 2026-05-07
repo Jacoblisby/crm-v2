@@ -2,10 +2,12 @@
  * Historiske transaktioner — 145 tinglyste handler i Næstved/Kalundborg-området.
  * Bruges som primær comparables-data i pris-engine.
  *
- * VÆGTNING:
- *   Samme vejnavn (proxy for ejerforening): 3.0
+ * VÆGTNING (#7 forbedret 2026-05):
+ *   Samme bygning (afstand <= 50m): 4.0 — meget høj sandsynlighed for samme EF
+ *   Samme vejnavn + samme husnr: 4.0 — fallback hvis koordinater mangler
+ *   Samme vejnavn + afstand 50-200m: 2.0 — samme vej men sandsynligvis anden EF
+ *   Samme vejnavn uden koordinater: 3.0 — gammel proxy-vægt
  *   Samme postnr: 1.0
- *   Samme husnr (samme bygning): 4.0 (sjældent men sker)
  *
  * Data hentet fra Vurderingsstyrelsens transaktions-eksport, april 2026.
  */
@@ -34,10 +36,33 @@ interface FindOpts {
   roadName?: string | null;
   /** Samme husnr (samme bygning) — vægtes 4x */
   houseNumber?: string | null;
+  /** Subject's koordinater — bruges til afstands-baseret EF-detection */
+  subjectLat?: number | null;
+  subjectLon?: number | null;
   /** Subject's m², bruges til at filtrere lignende størrelse */
   kvm: number;
   /** ±20% kvm-tolerance som default */
   kvmTolerancePct?: number;
+}
+
+/**
+ * Haversine-distance i meter mellem to lat/lon-punkter.
+ * Bruges til same-building/same-EF detection.
+ */
+function distanceMeters(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const R = 6_371_000; // Jordens radius i meter
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 export interface WeightedTransaction extends HistoricalTransaction {
@@ -60,11 +85,39 @@ export function findHistoricalComparables(opts: FindOpts): WeightedTransaction[]
     if (!t.pricePerSqm || t.pricePerSqm <= 0) continue;
 
     let weight = 1.0; // base: same postnr
-    if (opts.roadName && t.roadName === opts.roadName) {
-      weight = 3.0; // same street/EF
-      if (opts.houseNumber && t.houseNumber === opts.houseNumber) {
-        weight = 4.0; // same building
+    const sameRoad = !!(opts.roadName && t.roadName === opts.roadName);
+    const sameHusnr = !!(opts.houseNumber && t.houseNumber === opts.houseNumber);
+
+    // Coordinate-baseret EF-detection: hvis vi har koordinater pa baade subject
+    // og handel, bruger vi afstand som primaer signal. Det reducerer
+    // false-positives hvor to ejerforeninger deler samme vej.
+    const hasCoords =
+      opts.subjectLat != null &&
+      opts.subjectLon != null &&
+      t.coordinates &&
+      typeof t.coordinates.lat === 'number' &&
+      typeof t.coordinates.lon === 'number';
+
+    if (hasCoords) {
+      const d = distanceMeters(
+        opts.subjectLat as number,
+        opts.subjectLon as number,
+        t.coordinates!.lat,
+        t.coordinates!.lon,
+      );
+      if (d <= 50) {
+        weight = 4.0; // samme bygning
+      } else if (d <= 200 && sameRoad) {
+        weight = 2.0; // samme vej, sandsynligvis anden EF
+      } else if (sameRoad && sameHusnr) {
+        weight = 4.0; // samme husnr trods afstand (data-uoverensstemmelse)
+      } else if (sameRoad) {
+        weight = 1.5; // samme vej, langt vaek
       }
+      // ellers: weight forbliver 1.0 (kun samme postnr)
+    } else if (sameRoad) {
+      // Fallback uden koordinater: brug vejnavn som proxy (gammel logik)
+      weight = sameHusnr ? 4.0 : 3.0;
     }
 
     // Recency boost: handel <12 mdr × 1.2, <6 mdr × 1.5

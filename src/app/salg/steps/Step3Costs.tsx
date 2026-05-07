@@ -1,5 +1,6 @@
 'use client';
 
+import { FileText, X } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { TOTAL_DRIFT } from '../types';
 
@@ -392,7 +393,7 @@ function ToggleRow({
           onClick={() => onChange(true)}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${
             value
-              ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
+              ? 'bg-slate-900 border-slate-900 text-white'
               : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
           }`}
         >
@@ -403,7 +404,7 @@ function ToggleRow({
           onClick={() => onChange(false)}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${
             !value
-              ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
+              ? 'bg-slate-900 border-slate-900 text-white'
               : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
           }`}
         >
@@ -455,7 +456,7 @@ function DocumentUpload({
               key={i}
               className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg text-sm"
             >
-              <span className="text-slate-400">📄</span>
+              <FileText className="w-4 h-4 text-slate-400" strokeWidth={1.5} />
               <span className="flex-1 truncate">{doc.name}</span>
               <span className="text-xs text-slate-500">
                 {(doc.size / 1024).toFixed(0)} kB
@@ -464,8 +465,9 @@ function DocumentUpload({
                 type="button"
                 onClick={() => onRemove(i)}
                 className="text-slate-400 hover:text-red-600"
+                aria-label="Fjern fil"
               >
-                ✕
+                <X className="w-4 h-4" strokeWidth={2} />
               </button>
             </li>
           ))}
