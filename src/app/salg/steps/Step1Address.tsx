@@ -115,13 +115,27 @@ export function Step1Address() {
   }
 
   function continueIfReady() {
-    if (state.fullAddress && state.postalCode) {
+    if (state.fullAddress && state.postalCode && contactValid) {
       next();
     }
   }
 
   const hasAddress = !!state.fullAddress && !!state.postalCode;
   const showAutoFilled = hasAddress && state.kvm != null;
+
+  // Kontakt-validering (paakraevet for at gaa videre)
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email);
+  const phoneValid = state.phone.replace(/\D/g, '').length >= 8;
+  const nameValid = state.fullName.trim().length >= 2;
+  const contactValid = emailValid && phoneValid && nameValid;
+  const contactHint =
+    !nameValid
+      ? 'Indtast dit fulde navn'
+      : !emailValid
+        ? 'Indtast en gyldig email'
+        : !phoneValid
+          ? 'Indtast et gyldigt telefonnummer (mindst 8 cifre)'
+          : null;
 
   return (
     <div className="space-y-5">
@@ -230,24 +244,41 @@ export function Step1Address() {
             </div>
           )}
 
-          {/* #6 Tidlig email-opsamling — valgfri opt-in saa vi kan recovery-maile
-              hvis sælger drop'er midt i funnel'en. Telefon spørger vi forst pa Step 6. */}
-          <div className="border-t border-slate-200 pt-3 space-y-1.5">
-            <label className="block">
-              <div className="text-xs text-slate-600 mb-1">
-                Email <span className="text-slate-400">(valgfri)</span>
-              </div>
-              <input
-                type="email"
-                value={state.email}
-                onChange={(e) => update({ email: e.target.value })}
-                placeholder="din@email.dk"
-                autoComplete="email"
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 bg-white"
+          {/* Kontaktoplysninger — paakraevet for at gaa videre. Vi flyttede det fra
+              et separat slut-trin saa vi har dem fra start (recovery-mail mulig). */}
+          <div className="border-t border-slate-200 pt-4 space-y-3">
+            <p className="text-sm font-medium text-slate-900">
+              Hvor sender vi dit estimat?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <ContactInput
+                label="Fulde navn"
+                type="text"
+                autoComplete="name"
+                value={state.fullName}
+                onChange={(v) => update({ fullName: v })}
+                placeholder="Jens Hansen"
               />
-            </label>
+              <ContactInput
+                label="Email"
+                type="email"
+                autoComplete="email"
+                value={state.email}
+                onChange={(v) => update({ email: v })}
+                placeholder="din@email.dk"
+              />
+              <ContactInput
+                label="Telefon"
+                type="tel"
+                autoComplete="tel"
+                value={state.phone}
+                onChange={(v) => update({ phone: v })}
+                placeholder="20 12 34 56"
+              />
+            </div>
             <p className="text-xs text-slate-500">
-              Vi sender dig dit estimat på email — også selvom du dropper undervejs.
+              Du modtager dit foreløbige tilbud på email + SMS. Vi ringer indenfor 24 timer
+              for at aftale en gratis besigtigelse.
             </p>
           </div>
         </div>
@@ -255,13 +286,18 @@ export function Step1Address() {
 
       {!outOfArea && (
         <div className="flex justify-end">
-          <button
-            onClick={continueIfReady}
-            disabled={!hasAddress || lookupPending}
-            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
-          >
-            Fortsæt →
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            {showAutoFilled && contactHint && (
+              <span className="text-xs text-slate-600">{contactHint}</span>
+            )}
+            <button
+              onClick={continueIfReady}
+              disabled={!hasAddress || lookupPending || !contactValid}
+              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
+            >
+              Fortsæt →
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -287,6 +323,36 @@ function Field({
         value={value ?? ''}
         onChange={(e) => onChange(Number(e.target.value) || 0)}
         className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded font-medium"
+      />
+    </label>
+  );
+}
+
+function ContactInput({
+  label,
+  value,
+  onChange,
+  type,
+  placeholder,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type: string;
+  placeholder?: string;
+  autoComplete?: string;
+}) {
+  return (
+    <label className="block">
+      <div className="text-xs text-slate-600 mb-1">{label}</div>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 bg-white"
       />
     </label>
   );

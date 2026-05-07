@@ -3,7 +3,7 @@
  */
 import type { StandLevel } from '@/lib/services/price-engine';
 
-export type Step = 1 | 2 | 3 | 4 | 5 | 6;
+export type Step = 1 | 2 | 3 | 4 | 5;
 
 export type SellTimeframe = 'under1' | '1to3' | '3to6' | '6plus' | 'unsure';
 export type SellReason =
@@ -76,9 +76,15 @@ export interface FunnelState {
   // Relaterede dokumenter (valgfri)
   documents: { name: string; size: number; kind: string }[];
 
-  // Step 4: Stand
+  // Step 2: Bolig — overordnet og per-rum stand
+  // overall stand udledes af per-rum-vurderinger (worst rated room).
   stand: StandLevel | null;
   standNote: string;
+  // Per-rum stand (Opendoor-style)
+  kitchenStand: StandLevel | null;
+  bathroomStand: StandLevel | null;
+  livingRoomStand: StandLevel | null;
+  bedroomStand: StandLevel | null;
   // Køkken
   kitchenYear: number | null;
   kitchenBrand: string;
@@ -111,6 +117,9 @@ export interface FunnelState {
   // Conditional kun hvis afterSale === 'lejer_andet' eller 'blive_boende_lejer'
   isOver65: YesNoUnsure | null;        // "Vil ikke svare" mappes til 'usikker'
   receivesBoligstotte: YesNoUnsure | null;
+  // Conditional kun hvis afterSale === 'lejer_andet' — saa kan vi tilbyde lejebolig
+  rentalSearchCity: string;
+  rentalSearchType: string;            // "1v lejlighed", "2v lejlighed", "Hus", etc
 
   // Step 6: Kontakt
   fullName: string;
@@ -175,6 +184,10 @@ export const initialState: FunnelState = {
   documents: [],
   stand: null,
   standNote: '',
+  kitchenStand: null,
+  bathroomStand: null,
+  livingRoomStand: null,
+  bedroomStand: null,
   kitchenYear: null,
   kitchenBrand: '',
   bathroomYear: null,
@@ -200,6 +213,8 @@ export const initialState: FunnelState = {
   afterSale: null,
   isOver65: null,
   receivesBoligstotte: null,
+  rentalSearchCity: '',
+  rentalSearchType: '',
   chosenOvertagelseMaaneder: 3, // base case
   fullName: '',
   email: '',

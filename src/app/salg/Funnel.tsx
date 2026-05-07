@@ -5,16 +5,14 @@ import { Step1Address } from './steps/Step1Address';
 import { Step2Bolig } from './steps/Step2Bolig';
 import { Step3Costs } from './steps/Step3Costs';
 import { Step4Profile } from './steps/Step4Profile';
-import { Step5Contact } from './steps/Step5Contact';
-import { Step6Estimate } from './steps/Step6Estimate';
+import { Step5Estimate } from './steps/Step5Estimate';
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 const STEP_LABELS = [
   'Adresse',
   'Boligen',
   'Udgifter',
   'Lidt om dig',
-  'Kontakt',
   'Estimat',
 ];
 
@@ -28,8 +26,7 @@ export function Funnel() {
         {state.step === 2 && <Step2Bolig />}
         {state.step === 3 && <Step3Costs />}
         {state.step === 4 && <Step4Profile />}
-        {state.step === 5 && <Step5Contact />}
-        {state.step === 6 && <Step6Estimate />}
+        {state.step === 5 && <Step5Estimate />}
       </div>
     </div>
   );
@@ -76,4 +73,3 @@ function ProgressBar({ step }: { step: number }) {
     </div>
   );
 }
-

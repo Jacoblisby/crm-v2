@@ -89,6 +89,46 @@ export function Step4Profile() {
         />
       </Question>
 
+      {state.afterSale === 'lejer_andet' && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.14em] text-slate-500 font-medium">
+              Vi har selv lejeboliger
+            </p>
+            <p className="text-sm text-slate-700">
+              Vi udlejer ~218 lejligheder i Næstved og omegn. Hvis vi har noget der matcher,
+              kan vi tilbyde det direkte.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="block">
+              <div className="text-sm font-medium text-slate-800 mb-1">
+                Hvor leder du efter? (by/postnr)
+              </div>
+              <input
+                type="text"
+                value={state.rentalSearchCity}
+                onChange={(e) => update({ rentalSearchCity: e.target.value })}
+                placeholder="Næstved, Slagelse, 4700…"
+                className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 bg-white"
+              />
+            </label>
+            <label className="block">
+              <div className="text-sm font-medium text-slate-800 mb-1">
+                Hvilken type bolig?
+              </div>
+              <input
+                type="text"
+                value={state.rentalSearchType}
+                onChange={(e) => update({ rentalSearchType: e.target.value })}
+                placeholder="2v lejlighed, hus, rækkehus…"
+                className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 bg-white"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+
       {showAgeFollowUp && (
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
           <p className="text-xs uppercase tracking-[0.14em] text-slate-500 font-medium">

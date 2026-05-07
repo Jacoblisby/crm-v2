@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Check,
   ChefHat,
@@ -11,31 +11,32 @@ import {
   Ruler,
   DoorOpen,
   Plus,
+  Camera,
   type LucideIcon,
 } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import type { StandLevel } from '@/lib/services/price-engine';
+import type { FunnelState } from '../types';
 
 /**
  * Step 2 — Sadan ser din bolig ud (Opendoor-style sub-screens).
  *
- * Funnel'en er pa 6 trin men Step 2 har internt 6 sub-screens:
- *   1. Stand (paakraevet)
- *   2. Køkken (foto + alder, foto eller alder paakraevet)
- *   3. Bad (foto + alder, foto eller alder paakraevet)
- *   4. Stue (foto, valgfri)
- *   5. Soveværelse (foto, valgfri)
- *   6. Resten (andre rum + hvidevarer + saerlige forhold + udlejet)
+ * Hvert rum har sin egen stand-vurdering med rum-specifikke beskrivelser.
+ * Foto er sekundaert — det er stand der driver pris-modellen. Vi gemmer
+ * per-rum-stand i state og udleder overall state.stand som det vaerste rum
+ * (slidt > traenger > middel > god > nyrenoveret).
  *
- * Et felt ad gangen virker nemt for saelger og oeger completion.
+ * Sub-flow:
+ *   1/5  Køkken (stand + aargang + maerke + valgfri foto)
+ *   2/5  Bad (stand + aargang + valgfri foto)
+ *   3/5  Stue (stand + valgfri foto)
+ *   4/5  Soveværelse (stand + valgfri foto)
+ *   5/5  Resten (andre fotos + hvidevarer + saerlige forhold + udlejet)
  */
 
-type SubScreen = 'stand' | 'kokken' | 'bad' | 'stue' | 'sov' | 'resten';
-
-const SUB_FLOW: SubScreen[] = ['stand', 'kokken', 'bad', 'stue', 'sov', 'resten'];
-
+type SubScreen = 'kokken' | 'bad' | 'stue' | 'sov' | 'resten';
+const SUB_FLOW: SubScreen[] = ['kokken', 'bad', 'stue', 'sov', 'resten'];
 const SUB_LABELS: Record<SubScreen, string> = {
-  stand: 'Stand',
   kokken: 'Køkken',
   bad: 'Bad',
   stue: 'Stue',
@@ -43,31 +44,93 @@ const SUB_LABELS: Record<SubScreen, string> = {
   resten: 'Resten',
 };
 
-const STAND_OPTIONS: { level: StandLevel; title: string; desc: string }[] = [
+interface StandOption {
+  level: StandLevel;
+  title: string;
+  desc: string;
+}
+
+const KITCHEN_OPTIONS: StandOption[] = [
   {
     level: 'nyrenoveret',
     title: 'Nyrenoveret',
-    desc: 'Alt opdateret de seneste 2-3 år (køkken, bad, gulve, maling).',
+    desc: 'Stenlook-bordplade, integrerede hvidevarer, indbygget belysning. Renoveret de seneste 2-3 år.',
   },
   {
     level: 'god',
     title: 'God stand',
-    desc: 'Velholdt. Moderate opdateringer indenfor 5-10 år.',
+    desc: 'Velholdt. Laminat-bordplade i fin stand, hvidevarer fra de sidste ~10 år.',
   },
   {
     level: 'middel',
     title: 'Middel',
-    desc: 'Funktionel, men ældre overflader. Kan flytte ind, men trænger en omgang.',
+    desc: 'Funktionelt. Ældre overflader, hvidevarer kører stadig men begynder at se brugte ud.',
   },
   {
     level: 'trænger',
     title: 'Trænger til kærlighed',
-    desc: 'Køkken og bad er ældre. Gulve, maling og evt. bad skal renoveres.',
+    desc: 'Slidte overflader, ældre hvidevarer. Bør renoveres indenfor de næste år.',
   },
   {
     level: 'slidt',
-    title: 'Slidt / til renovering',
-    desc: 'Original eller meget slidt. Fuld istandsættelse er nødvendig.',
+    title: 'Skal renoveres',
+    desc: 'Originalt eller meget slidt køkken. Hvidevarer er nedslidte. Total udskiftning er nødvendig.',
+  },
+];
+
+const BATHROOM_OPTIONS: StandOption[] = [
+  {
+    level: 'nyrenoveret',
+    title: 'Nyrenoveret',
+    desc: 'Nye fliser/klinker, brusekabine eller frit-stående bad, ny vandhaner. Fra de sidste 2-3 år.',
+  },
+  {
+    level: 'god',
+    title: 'God stand',
+    desc: 'Pæne fliser uden synlige skader. Vandhaner og afløb fungerer fint.',
+  },
+  {
+    level: 'middel',
+    title: 'Middel',
+    desc: 'Funktionelt bad. Fliser kan have små afslag, vandhaner er ældre men virker.',
+  },
+  {
+    level: 'trænger',
+    title: 'Trænger til kærlighed',
+    desc: 'Slidte fliser, ældre VVS, mulighed for fugt-skader. Bør renoveres.',
+  },
+  {
+    level: 'slidt',
+    title: 'Skal renoveres',
+    desc: 'Originalt bad. Gulv- og vægfliser er gamle, fugtproblemer kan forekomme. Total renovering nødvendig.',
+  },
+];
+
+const ROOM_OPTIONS: StandOption[] = [
+  {
+    level: 'nyrenoveret',
+    title: 'Nyrenoveret',
+    desc: 'Friske vægge, nye gulve eller velplejede parket, moderne lyskilder.',
+  },
+  {
+    level: 'god',
+    title: 'God stand',
+    desc: 'Velholdt. Lyse vægge i god stand, gulve er pæne uden synlige skader.',
+  },
+  {
+    level: 'middel',
+    title: 'Middel',
+    desc: 'Funktionelt. Pæne vægge med enkelte mærker, gulve har let slid men er pæne.',
+  },
+  {
+    level: 'trænger',
+    title: 'Trænger til kærlighed',
+    desc: 'Vægge skal males, gulve har slid, evt. småskader på lister og dørkarme.',
+  },
+  {
+    level: 'slidt',
+    title: 'Skal renoveres',
+    desc: 'Vægge er beskidte eller hullede, gulve er meget slidte, generel istandsættelse nødvendig.',
   },
 ];
 
@@ -85,12 +148,34 @@ const OTHER_PHOTO_SLOTS: OtherSlot[] = [
 ];
 
 type PhotoMap = Record<string, { dataUrl: string; name: string; size: number }>;
-
 const STORAGE_KEY = 'salg.photos.v1';
+
+// Vaerste-stand vinder for overall — det er det der driver refurb-prisen
+const STAND_PRIORITY: Record<StandLevel, number> = {
+  slidt: 5,
+  trænger: 4,
+  middel: 3,
+  god: 2,
+  nyrenoveret: 1,
+};
+
+function deriveOverallStand(state: FunnelState): StandLevel | null {
+  const rooms = [
+    state.kitchenStand,
+    state.bathroomStand,
+    state.livingRoomStand,
+    state.bedroomStand,
+  ].filter((s): s is StandLevel => s != null);
+  if (rooms.length === 0) return null;
+  return rooms.reduce<StandLevel>(
+    (worst, cur) => (STAND_PRIORITY[cur] > STAND_PRIORITY[worst] ? cur : worst),
+    rooms[0],
+  );
+}
 
 export function Step2Bolig() {
   const { state, update, next: funnelNext, prev: funnelPrev } = useFunnel();
-  const [subStep, setSubStep] = useState<SubScreen>('stand');
+  const [subStep, setSubStep] = useState<SubScreen>('kokken');
   const [photos, setPhotos] = useState<PhotoMap>(() => {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -98,6 +183,15 @@ export function Step2Bolig() {
     } catch {}
     return {};
   });
+
+  // Hold overall stand i sync med per-rum-vurderinger
+  useEffect(() => {
+    const overall = deriveOverallStand(state);
+    if (overall !== state.stand) {
+      update({ stand: overall });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.kitchenStand, state.bathroomStand, state.livingRoomStand, state.bedroomStand]);
 
   function persist(p: PhotoMap) {
     setPhotos(p);
@@ -151,66 +245,51 @@ export function Step2Bolig() {
     }
   }
 
-  // Validering pr sub-screen
-  const standValid = !!state.stand;
-  const kitchenHasPhoto = !!photos['kokken'];
-  const bathHasPhoto = !!photos['bad'];
-  const kitchenValid = kitchenHasPhoto || (state.kitchenYear ?? 0) > 0;
-  const bathValid = bathHasPhoto || (state.bathroomYear ?? 0) > 0;
-
+  // Validering pr screen — kun stand er paakraevet (foto er valgfri overalt)
   const canAdvance =
-    subStep === 'stand'
-      ? standValid
-      : subStep === 'kokken'
-        ? kitchenValid
-        : subStep === 'bad'
-          ? bathValid
-          : true; // stue/sov/resten er valgfri
+    subStep === 'kokken'
+      ? !!state.kitchenStand
+      : subStep === 'bad'
+        ? !!state.bathroomStand
+        : subStep === 'stue'
+          ? !!state.livingRoomStand
+          : subStep === 'sov'
+            ? !!state.bedroomStand
+            : true;
 
   const validationHint =
-    subStep === 'stand' && !standValid
-      ? 'Vælg en stand for at fortsætte'
-      : subStep === 'kokken' && !kitchenValid
-        ? 'Upload foto eller indtast alder'
-        : subStep === 'bad' && !bathValid
-          ? 'Upload foto eller indtast alder'
-          : null;
+    subStep === 'kokken' && !state.kitchenStand
+      ? 'Vælg en stand for køkkenet'
+      : subStep === 'bad' && !state.bathroomStand
+        ? 'Vælg en stand for badet'
+        : subStep === 'stue' && !state.livingRoomStand
+          ? 'Vælg en stand for stuen'
+          : subStep === 'sov' && !state.bedroomStand
+            ? 'Vælg en stand for soveværelset'
+            : null;
 
   return (
     <div className="space-y-5">
       <SubProgress current={subIndex} total={SUB_FLOW.length} label={SUB_LABELS[subStep]} />
-
-      {subStep === 'stand' && (
-        <StandScreen
-          selected={state.stand}
-          onSelect={(level) => update({ stand: level })}
-        />
-      )}
 
       {subStep === 'kokken' && (
         <RoomScreen
           slotKey="kokken"
           title="Køkken"
           Icon={ChefHat}
+          options={KITCHEN_OPTIONS}
+          selectedStand={state.kitchenStand}
+          onStandSelect={(s) => update({ kitchenStand: s })}
           photo={photos['kokken']}
           onPhotoSelect={(f) => onPhotoSelect('kokken', f)}
           onPhotoRemove={() => onPhotoRemove('kokken')}
-          whyText="Renovering af et standard-køkken koster typisk 80-150.000 kr. Et 5-10 år gammelt køkken er stort set det samme som et nyt for vores prismodel."
+          whyText="Renovering af et standard-køkken koster typisk 80-150.000 kr. Standen styrer hvor meget vi regner med at istandsætte for."
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <NumberField
-              label={
-                <>
-                  Køkkenets alder{' '}
-                  {!kitchenHasPhoto && <span className="text-slate-500">*</span>}
-                </>
-              }
+              label="Køkken-årgang"
               placeholder="2015"
-              helperText={
-                kitchenHasPhoto
-                  ? 'Året køkkenet sidst blev udskiftet (valgfri når foto er uploadet)'
-                  : 'Året køkkenet sidst blev udskiftet'
-              }
+              helperText="Året køkkenet sidst blev udskiftet (valgfri)"
               value={state.kitchenYear}
               onChange={(v) => update({ kitchenYear: v })}
               min={1900}
@@ -231,24 +310,18 @@ export function Step2Bolig() {
           slotKey="bad"
           title="Badeværelse"
           Icon={ShowerHead}
+          options={BATHROOM_OPTIONS}
+          selectedStand={state.bathroomStand}
+          onStandSelect={(s) => update({ bathroomStand: s })}
           photo={photos['bad']}
           onPhotoSelect={(f) => onPhotoSelect('bad', f)}
           onPhotoRemove={() => onPhotoRemove('bad')}
           whyText="Bade er det dyreste rum at renovere (150-250.000 kr for total). Standen her flytter mest på vores tilbud."
         >
           <NumberField
-            label={
-              <>
-                Badets alder{' '}
-                {!bathHasPhoto && <span className="text-slate-500">*</span>}
-              </>
-            }
+            label="Bad-årgang"
             placeholder="2020"
-            helperText={
-              bathHasPhoto
-                ? 'Året badet sidst blev renoveret (valgfri når foto er uploadet)'
-                : 'Året badet sidst blev renoveret'
-            }
+            helperText="Året badet sidst blev renoveret (valgfri)"
             value={state.bathroomYear}
             onChange={(v) => update({ bathroomYear: v })}
             min={1900}
@@ -262,10 +335,12 @@ export function Step2Bolig() {
           slotKey="stue"
           title="Stue"
           Icon={Sofa}
+          options={ROOM_OPTIONS}
+          selectedStand={state.livingRoomStand}
+          onStandSelect={(s) => update({ livingRoomStand: s })}
           photo={photos['stue']}
           onPhotoSelect={(f) => onPhotoSelect('stue', f)}
           onPhotoRemove={() => onPhotoRemove('stue')}
-          subtitle="Valgfri — hjælper os se den faktiske stand på gulve og overflader."
         />
       )}
 
@@ -274,10 +349,12 @@ export function Step2Bolig() {
           slotKey="sovevaerelse"
           title="Soveværelse"
           Icon={Bed}
+          options={ROOM_OPTIONS}
+          selectedStand={state.bedroomStand}
+          onStandSelect={(s) => update({ bedroomStand: s })}
           photo={photos['sovevaerelse']}
           onPhotoSelect={(f) => onPhotoSelect('sovevaerelse', f)}
           onPhotoRemove={() => onPhotoRemove('sovevaerelse')}
-          subtitle="Valgfri — viser stand på gulve, vinduer og generelt rummet."
         />
       )}
 
@@ -343,96 +420,43 @@ function SubProgress({
   );
 }
 
-function StandScreen({
-  selected,
-  onSelect,
-}: {
-  selected: StandLevel | null;
-  onSelect: (l: StandLevel) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-slate-900">
-          Hvordan er den overordnede stand?
-        </h2>
-        <p className="text-sm text-slate-600">
-          Vælg det niveau der passer bedst. Det styrer hvor meget vi regner med at
-          istandsætte for.
-        </p>
-      </div>
-      <div className="space-y-2">
-        {STAND_OPTIONS.map((opt) => {
-          const active = selected === opt.level;
-          return (
-            <button
-              key={opt.level}
-              type="button"
-              onClick={() => onSelect(opt.level)}
-              className={`w-full text-left p-4 rounded-lg border transition-all ${
-                active
-                  ? 'border-slate-900 bg-slate-900 text-white'
-                  : 'border-slate-200 hover:border-slate-400 bg-white'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={`font-semibold ${
-                      active ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {opt.title}
-                  </div>
-                  <div
-                    className={`text-sm ${active ? 'text-slate-300' : 'text-slate-600'}`}
-                  >
-                    {opt.desc}
-                  </div>
-                </div>
-                {active && (
-                  <Check className="w-4 h-4 text-white shrink-0" strokeWidth={3} />
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function RoomScreen({
   slotKey,
   title,
   Icon,
+  options,
+  selectedStand,
+  onStandSelect,
   photo,
   onPhotoSelect,
   onPhotoRemove,
   whyText,
-  subtitle,
   children,
 }: {
   slotKey: string;
   title: string;
   Icon: LucideIcon;
+  options: StandOption[];
+  selectedStand: StandLevel | null;
+  onStandSelect: (s: StandLevel) => void;
   photo: { dataUrl: string; name: string; size: number } | undefined;
   onPhotoSelect: (f: File) => void;
   onPhotoRemove: () => void;
   whyText?: string;
-  subtitle?: string;
   children?: React.ReactNode;
 }) {
   const [showWhy, setShowWhy] = useState(false);
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Icon className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
             <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
           </div>
-          {subtitle && <p className="text-sm text-slate-600">{subtitle}</p>}
+          <p className="text-sm text-slate-600">
+            Vælg det niveau der bedst beskriver {title.toLowerCase()}.
+          </p>
         </div>
         {whyText && (
           <button
@@ -451,16 +475,71 @@ function RoomScreen({
         </div>
       )}
 
-      <PhotoSlot
-        slotKey={slotKey}
-        label={title}
-        Icon={Icon}
-        photo={photo}
-        onSelect={onPhotoSelect}
-        onRemove={onPhotoRemove}
-      />
+      {/* PRIMARY: stand cards */}
+      <div className="space-y-2">
+        {options.map((opt) => {
+          const active = selectedStand === opt.level;
+          return (
+            <button
+              key={opt.level}
+              type="button"
+              onClick={() => onStandSelect(opt.level)}
+              className={`w-full text-left p-4 rounded-lg border transition-all ${
+                active
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 hover:border-slate-400 bg-white'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={`font-semibold ${
+                      active ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
+                    {opt.title}
+                  </div>
+                  <div
+                    className={`text-sm leading-relaxed ${
+                      active ? 'text-slate-300' : 'text-slate-600'
+                    }`}
+                  >
+                    {opt.desc}
+                  </div>
+                </div>
+                {active && (
+                  <Check className="w-4 h-4 text-white shrink-0" strokeWidth={3} />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
+      {/* Optional fields (årgang etc) */}
       {children}
+
+      {/* SECONDARY: photo upload — at bottom, less prominent */}
+      <div className="border-t border-slate-200 pt-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <Camera className="w-4 h-4 text-slate-500" strokeWidth={1.5} />
+          <p className="text-sm text-slate-700">
+            Tilføj foto (valgfri)
+          </p>
+        </div>
+        <p className="text-xs text-slate-500">
+          Med billeder kan vi give dig et endnu mere præcist tilbud — men din vurdering
+          ovenfor er nok.
+        </p>
+        <PhotoSlot
+          slotKey={slotKey}
+          label={title}
+          Icon={Icon}
+          photo={photo}
+          onSelect={onPhotoSelect}
+          onRemove={onPhotoRemove}
+        />
+      </div>
     </div>
   );
 }
@@ -483,30 +562,10 @@ function RestenScreen({
       <div className="space-y-1">
         <h2 className="text-xl font-semibold text-slate-900">Sidste detaljer</h2>
         <p className="text-sm text-slate-600">
-          Andre fotos, hvidevarer og særlige forhold. Alt er valgfrit — du kan også springe
-          videre.
+          Hvidevarer, særlige forhold og evt. udlejning. Alt er valgfrit — du kan også
+          springe videre.
         </p>
       </div>
-
-      {/* ANDRE FOTOS */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          Andre fotos (valgfri)
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {OTHER_PHOTO_SLOTS.map((slot) => (
-            <PhotoSlotCompact
-              key={slot.key}
-              slotKey={slot.key}
-              label={slot.label}
-              Icon={slot.Icon}
-              photo={photos[slot.key]}
-              onSelect={(f) => onPhotoSelect(slot.key, f)}
-              onRemove={() => onPhotoRemove(slot.key)}
-            />
-          ))}
-        </div>
-      </section>
 
       {/* HVIDEVARER */}
       <section className="space-y-3">
@@ -573,6 +632,29 @@ function RestenScreen({
             value={state.hasElevator}
             onChange={(v) => update({ hasElevator: v })}
           />
+        </div>
+      </section>
+
+      {/* ANDRE FOTOS */}
+      <section className="space-y-3 border-t border-slate-200 pt-4">
+        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          Andre fotos (valgfri)
+        </h3>
+        <p className="text-xs text-slate-500">
+          Med billeder kan vi give et endnu mere præcist tilbud.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {OTHER_PHOTO_SLOTS.map((slot) => (
+            <PhotoSlotCompact
+              key={slot.key}
+              slotKey={slot.key}
+              label={slot.label}
+              Icon={slot.Icon}
+              photo={photos[slot.key]}
+              onSelect={(f) => onPhotoSelect(slot.key, f)}
+              onRemove={() => onPhotoRemove(slot.key)}
+            />
+          ))}
         </div>
       </section>
 
@@ -729,9 +811,8 @@ function PhotoSlot({
       htmlFor={`photo-${slotKey}`}
       className="block w-full aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 hover:border-slate-500 hover:bg-slate-50 cursor-pointer flex flex-col items-center justify-center gap-2 transition-colors"
     >
-      <Icon className="w-10 h-10 text-slate-400" strokeWidth={1.5} />
-      <span className="text-sm font-medium text-slate-700">Tap for at uploade {label.toLowerCase()}</span>
-      <span className="text-xs text-slate-500">Eller kør videre uden foto</span>
+      <Icon className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
+      <span className="text-sm font-medium text-slate-700">Tap for at uploade foto</span>
       <input
         id={`photo-${slotKey}`}
         type="file"

@@ -145,9 +145,11 @@ export async function submitFunnelAction(
     `Tilbud til sælger: ${adjustedFinalOffer.toLocaleString('da-DK')} kr (model-base: ${estimate.netForkortet.finalOffer.toLocaleString('da-DK')} kr ${closingAdjustment >= 0 ? '+' : ''}${closingAdjustment.toLocaleString('da-DK')} kr overtagelse-justering)`,
     `Markedsestimat: ${estimate.marketEstimate.toLocaleString('da-DK')} kr · Overtagelse: ${overtagelseLabel}`,
     ``,
-    `STAND: ${state.stand}`,
-    state.kitchenYear ? `Køkken: ${state.kitchenYear}${state.kitchenBrand ? ' (' + state.kitchenBrand + ')' : ''}` : '',
-    state.bathroomYear ? `Bad: ${state.bathroomYear}` : '',
+    `STAND (overall, udledt som vaerste rum): ${state.stand}`,
+    `· Køkken: ${state.kitchenStand ?? '?'}${state.kitchenYear ? ` (årgang ${state.kitchenYear})` : ''}${state.kitchenBrand ? ` ${state.kitchenBrand}` : ''}`,
+    `· Bad: ${state.bathroomStand ?? '?'}${state.bathroomYear ? ` (årgang ${state.bathroomYear})` : ''}`,
+    `· Stue: ${state.livingRoomStand ?? '?'}`,
+    `· Soveværelse: ${state.bedroomStand ?? '?'}`,
     appliances.length > 0 ? `Hvidevarer: ${appliances.join(', ')}` : '',
     state.standNote ? `Note: ${state.standNote}` : '',
     ``,
@@ -181,6 +183,9 @@ export async function submitFunnelAction(
     state.sellReason ? `· Grund: ${labelReason(state.sellReason)}` : '',
     state.afterSale ? `· Efter salget: ${labelAfterSale(state.afterSale)}` : '',
     state.afterSale === 'blive_boende_lejer' ? `· 🏠 SALE-LEASEBACK INTERESSE` : '',
+    state.afterSale === 'lejer_andet' && (state.rentalSearchCity || state.rentalSearchType)
+      ? `· 🏘️ SØGER LEJEBOLIG: ${state.rentalSearchType || '?'} i ${state.rentalSearchCity || '?'}`
+      : '',
     state.isOver65 ? `· Fyldt 65: ${labelYesNo(state.isOver65)}` : '',
     state.receivesBoligstotte
       ? `· Folkepension/boligstøtte: ${labelYesNo(state.receivesBoligstotte)}`
