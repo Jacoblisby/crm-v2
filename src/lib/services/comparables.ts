@@ -82,29 +82,41 @@ export async function findComparables(
   const sameEfCount = historical.filter((h) => h.weight >= 3.0).length;
 
   // 2. ON-MARKET LISTINGS (secondary — viser den aktuelle marked-snapshot)
+  // Hvis db ikke er konfigureret (lokal dev uden DATABASE_URL) springer vi
+  // on-market over. Historiske handler er stadig nok til at give et estimat.
   const kvmMin = Math.floor(subject.kvm * 0.8);
   const kvmMax = Math.ceil(subject.kvm * 1.2);
-  const onMarketResult = await db
-    .select({
-      address: onMarketCandidates.address,
-      postalCode: onMarketCandidates.postalCode,
-      kvm: onMarketCandidates.kvm,
-      rooms: onMarketCandidates.rooms,
-      yearBuilt: onMarketCandidates.yearBuilt,
-      listPrice: onMarketCandidates.listPrice,
-      firstSeenAt: onMarketCandidates.firstSeenAt,
-    })
-    .from(onMarketCandidates)
-    .where(
-      and(
-        eq(onMarketCandidates.postalCode, subject.postalCode),
-        eq(onMarketCandidates.status, 'active'),
-        isNotNull(onMarketCandidates.kvm),
-        gte(onMarketCandidates.kvm, kvmMin),
-        lte(onMarketCandidates.kvm, kvmMax),
-      ),
-    )
-    .limit(15);
+  const onMarketResult: Array<{
+    address: string;
+    postalCode: string | null;
+    kvm: number | null;
+    rooms: string | null;
+    yearBuilt: number | null;
+    listPrice: number;
+    firstSeenAt: Date | null;
+  }> = db
+    ? await db
+        .select({
+          address: onMarketCandidates.address,
+          postalCode: onMarketCandidates.postalCode,
+          kvm: onMarketCandidates.kvm,
+          rooms: onMarketCandidates.rooms,
+          yearBuilt: onMarketCandidates.yearBuilt,
+          listPrice: onMarketCandidates.listPrice,
+          firstSeenAt: onMarketCandidates.firstSeenAt,
+        })
+        .from(onMarketCandidates)
+        .where(
+          and(
+            eq(onMarketCandidates.postalCode, subject.postalCode),
+            eq(onMarketCandidates.status, 'active'),
+            isNotNull(onMarketCandidates.kvm),
+            gte(onMarketCandidates.kvm, kvmMin),
+            lte(onMarketCandidates.kvm, kvmMax),
+          ),
+        )
+        .limit(15)
+    : [];
 
   // 3. KOMBINER TIL VISNING
   const allComps: Comparable[] = [];
@@ -132,7 +144,7 @@ export async function findComparables(
     allComps.push({
       source: 'on-market',
       address: r.address,
-      postalCode: r.postalCode,
+      postalCode: r.postalCode || '',
       roadName: null,
       houseNumber: null,
       kvm: r.kvm,

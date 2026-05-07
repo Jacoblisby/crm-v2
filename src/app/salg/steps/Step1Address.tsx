@@ -156,7 +156,7 @@ export function Step1Address() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
-          placeholder="Eks. Bogensevej 53, 2. tv, 4700 Næstved"
+          placeholder="Vejnavn + nr, postnr"
           className="w-full px-4 py-3.5 text-base border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
           autoComplete="off"
         />

@@ -49,7 +49,11 @@ function TrustStrip() {
         <div className="text-slate-600 mt-0.5">Boliger købt siden 2024</div>
       </div>
       <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div className="text-2xl font-bold text-slate-900 tabular-nums">14 dage – 6 mdr</div>
+        {/* Mobile bruger forkortet form sa kortet ikke vokser i hojden */}
+        <div className="text-2xl font-bold text-slate-900 tabular-nums whitespace-nowrap">
+          <span className="sm:hidden">≤ 6 mdr</span>
+          <span className="hidden sm:inline">14 dage – 6 mdr</span>
+        </div>
         <div className="text-slate-600 mt-0.5">Du vælger overtagelse</div>
       </div>
       <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
