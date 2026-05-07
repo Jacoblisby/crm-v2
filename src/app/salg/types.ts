@@ -3,7 +3,7 @@
  */
 import type { StandLevel } from '@/lib/services/price-engine';
 
-export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type SellTimeframe = 'under1' | '1to3' | '3to6' | '6plus' | 'unsure';
 export type SellReason =

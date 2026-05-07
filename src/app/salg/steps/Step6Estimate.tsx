@@ -10,7 +10,7 @@ type Estimate = Awaited<ReturnType<typeof computeEstimate>>;
 
 const PHOTO_KEY = 'salg.photos.v1';
 
-export function Step7Estimate() {
+export function Step6Estimate() {
   const { state, prev, reset } = useFunnel();
   const [pending, startTransition] = useTransition();
   const [estimate, setEstimate] = useState<Estimate | null>(null);

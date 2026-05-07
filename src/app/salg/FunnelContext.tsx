@@ -49,7 +49,7 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
   const update = (patch: Partial<FunnelState>) => {
     setState((s) => ({ ...s, ...patch }));
   };
-  const next = () => setState((s) => ({ ...s, step: Math.min(7, s.step + 1) as Step }));
+  const next = () => setState((s) => ({ ...s, step: Math.min(6, s.step + 1) as Step }));
   const prev = () => setState((s) => ({ ...s, step: Math.max(1, s.step - 1) as Step }));
   const goto = (step: Step) => setState((s) => ({ ...s, step }));
   const reset = () => {

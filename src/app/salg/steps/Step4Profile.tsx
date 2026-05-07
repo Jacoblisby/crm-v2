@@ -48,7 +48,7 @@ const BOLIGSTOTTE_OPTIONS: { value: YesNoUnsure; label: string }[] = [
   { value: 'usikker', label: 'Usikker' },
 ];
 
-export function Step5Profile() {
+export function Step4Profile() {
   const { state, update, next, prev } = useFunnel();
 
   const showAgeFollowUp =
