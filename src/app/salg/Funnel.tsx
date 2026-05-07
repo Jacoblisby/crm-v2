@@ -31,7 +31,6 @@ export function Funnel() {
         {state.step === 5 && <Step5Contact />}
         {state.step === 6 && <Step6Estimate />}
       </div>
-      {state.step < TOTAL_STEPS && <SocialProof />}
     </div>
   );
 }
@@ -78,21 +77,3 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
-function SocialProof() {
-  return (
-    <div className="grid grid-cols-3 gap-3 text-center text-xs">
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div className="text-2xl font-bold text-slate-900 tabular-nums">87+</div>
-        <div className="text-slate-600 mt-0.5">Boliger købt siden 2024</div>
-      </div>
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div className="text-2xl font-bold text-slate-900 tabular-nums">14 dage – 6 mdr</div>
-        <div className="text-slate-600 mt-0.5">Du vælger overtagelsesdato</div>
-      </div>
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div className="text-2xl font-bold text-slate-900 tabular-nums">2,5M+</div>
-        <div className="text-slate-600 mt-0.5">Sparet i salær</div>
-      </div>
-    </div>
-  );
-}

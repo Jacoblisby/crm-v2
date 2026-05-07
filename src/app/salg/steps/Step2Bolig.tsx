@@ -17,12 +17,31 @@ import { useFunnel } from '../FunnelContext';
 import type { StandLevel } from '@/lib/services/price-engine';
 
 /**
- * Step 2 — Sadan ser din bolig ud.
+ * Step 2 — Sadan ser din bolig ud (Opendoor-style sub-screens).
  *
- * Merger gamle Step2Photos + Step4Stand i en samlet boligbeskrivelse.
- * Inspireret af Opendoor: per-rum spm med "hvorfor spørger vi?"-forklaringer
- * for koekken og bad (de to dyreste rum at renovere).
+ * Funnel'en er pa 6 trin men Step 2 har internt 6 sub-screens:
+ *   1. Stand (paakraevet)
+ *   2. Køkken (foto + alder, foto eller alder paakraevet)
+ *   3. Bad (foto + alder, foto eller alder paakraevet)
+ *   4. Stue (foto, valgfri)
+ *   5. Soveværelse (foto, valgfri)
+ *   6. Resten (andre rum + hvidevarer + saerlige forhold + udlejet)
+ *
+ * Et felt ad gangen virker nemt for saelger og oeger completion.
  */
+
+type SubScreen = 'stand' | 'kokken' | 'bad' | 'stue' | 'sov' | 'resten';
+
+const SUB_FLOW: SubScreen[] = ['stand', 'kokken', 'bad', 'stue', 'sov', 'resten'];
+
+const SUB_LABELS: Record<SubScreen, string> = {
+  stand: 'Stand',
+  kokken: 'Køkken',
+  bad: 'Bad',
+  stue: 'Stue',
+  sov: 'Soveværelse',
+  resten: 'Resten',
+};
 
 const STAND_OPTIONS: { level: StandLevel; title: string; desc: string }[] = [
   {
@@ -59,8 +78,6 @@ interface OtherSlot {
 }
 
 const OTHER_PHOTO_SLOTS: OtherSlot[] = [
-  { key: 'stue', label: 'Stue', Icon: Sofa },
-  { key: 'sovevaerelse', label: 'Soveværelse', Icon: Bed },
   { key: 'altan', label: 'Altan/udsigt', Icon: Mountain },
   { key: 'plantegning', label: 'Plantegning', Icon: Ruler },
   { key: 'gang', label: 'Gang/entré', Icon: DoorOpen },
@@ -72,7 +89,8 @@ type PhotoMap = Record<string, { dataUrl: string; name: string; size: number }>;
 const STORAGE_KEY = 'salg.photos.v1';
 
 export function Step2Bolig() {
-  const { state, update, next, prev } = useFunnel();
+  const { state, update, next: funnelNext, prev: funnelPrev } = useFunnel();
+  const [subStep, setSubStep] = useState<SubScreen>('stand');
   const [photos, setPhotos] = useState<PhotoMap>(() => {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -111,142 +129,377 @@ export function Step2Bolig() {
     persist(next);
   }
 
-  // For koekken og bad: hvis der ikke er foto, gør alder paakraevet (giver
-  // os fallback-data uden gaetvaerk fra prismodellen).
+  const subIndex = SUB_FLOW.indexOf(subStep);
+  const isFirstSub = subIndex === 0;
+  const isLastSub = subIndex === SUB_FLOW.length - 1;
+
+  function goPrev() {
+    if (isFirstSub) {
+      funnelPrev();
+    } else {
+      setSubStep(SUB_FLOW[subIndex - 1]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  function goNext() {
+    if (isLastSub) {
+      funnelNext();
+    } else {
+      setSubStep(SUB_FLOW[subIndex + 1]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  // Validering pr sub-screen
+  const standValid = !!state.stand;
   const kitchenHasPhoto = !!photos['kokken'];
   const bathHasPhoto = !!photos['bad'];
-  const kitchenAgeRequired = !kitchenHasPhoto;
-  const bathAgeRequired = !bathHasPhoto;
   const kitchenValid = kitchenHasPhoto || (state.kitchenYear ?? 0) > 0;
   const bathValid = bathHasPhoto || (state.bathroomYear ?? 0) > 0;
 
-  const formValid = !!state.stand && kitchenValid && bathValid;
+  const canAdvance =
+    subStep === 'stand'
+      ? standValid
+      : subStep === 'kokken'
+        ? kitchenValid
+        : subStep === 'bad'
+          ? bathValid
+          : true; // stue/sov/resten er valgfri
+
+  const validationHint =
+    subStep === 'stand' && !standValid
+      ? 'Vælg en stand for at fortsætte'
+      : subStep === 'kokken' && !kitchenValid
+        ? 'Upload foto eller indtast alder'
+        : subStep === 'bad' && !bathValid
+          ? 'Upload foto eller indtast alder'
+          : null;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-slate-900">Sådan ser din bolig ud</h2>
-        <p className="text-sm text-slate-600">
-          Vælg den overordnede stand, og giv os lidt detaljer om køkken og bad. Det giver et
-          mere præcist tilbud uden gætværk.
-        </p>
-      </div>
+    <div className="space-y-5">
+      <SubProgress current={subIndex} total={SUB_FLOW.length} label={SUB_LABELS[subStep]} />
 
-      {/* OVERALL STAND */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          Boligens overordnede stand
-        </h3>
-        <div className="space-y-2">
-          {STAND_OPTIONS.map((opt) => {
-            const active = state.stand === opt.level;
-            return (
-              <button
-                key={opt.level}
-                type="button"
-                onClick={() => update({ stand: opt.level })}
-                className={`w-full text-left p-4 rounded-lg border transition-all ${
-                  active
-                    ? 'border-slate-900 bg-slate-900 text-white'
-                    : 'border-slate-200 hover:border-slate-400 bg-white'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div
-                      className={`font-semibold ${
-                        active ? 'text-white' : 'text-slate-900'
-                      }`}
-                    >
-                      {opt.title}
-                    </div>
-                    <div
-                      className={`text-sm ${active ? 'text-slate-300' : 'text-slate-600'}`}
-                    >
-                      {opt.desc}
-                    </div>
-                  </div>
-                  {active && (
-                    <Check className="w-4 h-4 text-white shrink-0" strokeWidth={3} />
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {subStep === 'stand' && (
+        <StandScreen
+          selected={state.stand}
+          onSelect={(level) => update({ stand: level })}
+        />
+      )}
 
-      {/* KØKKEN */}
-      <RoomSection
-        slotKey="kokken"
-        title="Køkken"
-        Icon={ChefHat}
-        photo={photos['kokken']}
-        onSelect={(f) => onPhotoSelect('kokken', f)}
-        onRemove={() => onPhotoRemove('kokken')}
-        whyText="Renovering af et standard-køkken koster typisk 80-150.000 kr. Et 5-10 år gammelt køkken er stort set det samme som et nyt for vores prismodel."
-      >
-        <div className="grid grid-cols-2 gap-3">
+      {subStep === 'kokken' && (
+        <RoomScreen
+          slotKey="kokken"
+          title="Køkken"
+          Icon={ChefHat}
+          photo={photos['kokken']}
+          onPhotoSelect={(f) => onPhotoSelect('kokken', f)}
+          onPhotoRemove={() => onPhotoRemove('kokken')}
+          whyText="Renovering af et standard-køkken koster typisk 80-150.000 kr. Et 5-10 år gammelt køkken er stort set det samme som et nyt for vores prismodel."
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <NumberField
+              label={
+                <>
+                  Køkkenets alder{' '}
+                  {!kitchenHasPhoto && <span className="text-slate-500">*</span>}
+                </>
+              }
+              placeholder="2015"
+              helperText={
+                kitchenHasPhoto
+                  ? 'Året køkkenet sidst blev udskiftet (valgfri når foto er uploadet)'
+                  : 'Året køkkenet sidst blev udskiftet'
+              }
+              value={state.kitchenYear}
+              onChange={(v) => update({ kitchenYear: v })}
+              min={1900}
+              max={2030}
+            />
+            <TextField
+              label="Mærke (valgfri)"
+              placeholder="HTH, Svane, IKEA…"
+              value={state.kitchenBrand}
+              onChange={(v) => update({ kitchenBrand: v })}
+            />
+          </div>
+        </RoomScreen>
+      )}
+
+      {subStep === 'bad' && (
+        <RoomScreen
+          slotKey="bad"
+          title="Badeværelse"
+          Icon={ShowerHead}
+          photo={photos['bad']}
+          onPhotoSelect={(f) => onPhotoSelect('bad', f)}
+          onPhotoRemove={() => onPhotoRemove('bad')}
+          whyText="Bade er det dyreste rum at renovere (150-250.000 kr for total). Standen her flytter mest på vores tilbud."
+        >
           <NumberField
             label={
               <>
-                Køkkenets alder {kitchenAgeRequired && <span className="text-slate-500">*</span>}
+                Badets alder{' '}
+                {!bathHasPhoto && <span className="text-slate-500">*</span>}
               </>
             }
-            placeholder="2015"
-            helperText={kitchenAgeRequired ? 'Året køkkenet sidst blev udskiftet' : 'Året køkkenet sidst blev udskiftet (valgfri når foto er uploadet)'}
-            value={state.kitchenYear}
-            onChange={(v) => update({ kitchenYear: v })}
+            placeholder="2020"
+            helperText={
+              bathHasPhoto
+                ? 'Året badet sidst blev renoveret (valgfri når foto er uploadet)'
+                : 'Året badet sidst blev renoveret'
+            }
+            value={state.bathroomYear}
+            onChange={(v) => update({ bathroomYear: v })}
             min={1900}
             max={2030}
           />
-          <TextField
-            label="Mærke (valgfri)"
-            placeholder="HTH, Svane, IKEA…"
-            value={state.kitchenBrand}
-            onChange={(v) => update({ kitchenBrand: v })}
-          />
-        </div>
-      </RoomSection>
+        </RoomScreen>
+      )}
 
-      {/* BAD */}
-      <RoomSection
-        slotKey="bad"
-        title="Badeværelse"
-        Icon={ShowerHead}
-        photo={photos['bad']}
-        onSelect={(f) => onPhotoSelect('bad', f)}
-        onRemove={() => onPhotoRemove('bad')}
-        whyText="Bade er det dyreste rum at renovere (150-250.000 kr for total). Standen her flytter mest på vores tilbud."
-      >
-        <NumberField
-          label={
-            <>
-              Badets alder {bathAgeRequired && <span className="text-slate-500">*</span>}
-            </>
-          }
-          placeholder="2020"
-          helperText={bathAgeRequired ? 'Året badet sidst blev renoveret' : 'Året badet sidst blev renoveret (valgfri når foto er uploadet)'}
-          value={state.bathroomYear}
-          onChange={(v) => update({ bathroomYear: v })}
-          min={1900}
-          max={2030}
+      {subStep === 'stue' && (
+        <RoomScreen
+          slotKey="stue"
+          title="Stue"
+          Icon={Sofa}
+          photo={photos['stue']}
+          onPhotoSelect={(f) => onPhotoSelect('stue', f)}
+          onPhotoRemove={() => onPhotoRemove('stue')}
+          subtitle="Valgfri — hjælper os se den faktiske stand på gulve og overflader."
         />
-      </RoomSection>
+      )}
+
+      {subStep === 'sov' && (
+        <RoomScreen
+          slotKey="sovevaerelse"
+          title="Soveværelse"
+          Icon={Bed}
+          photo={photos['sovevaerelse']}
+          onPhotoSelect={(f) => onPhotoSelect('sovevaerelse', f)}
+          onPhotoRemove={() => onPhotoRemove('sovevaerelse')}
+          subtitle="Valgfri — viser stand på gulve, vinduer og generelt rummet."
+        />
+      )}
+
+      {subStep === 'resten' && (
+        <RestenScreen
+          state={state}
+          update={update}
+          photos={photos}
+          onPhotoSelect={onPhotoSelect}
+          onPhotoRemove={onPhotoRemove}
+        />
+      )}
+
+      <div className="flex justify-between gap-3 pt-2">
+        <button
+          onClick={goPrev}
+          className="px-5 py-3 text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
+        >
+          ← {isFirstSub ? 'Forrige trin' : 'Tilbage'}
+        </button>
+        <div className="flex flex-col items-end gap-1">
+          {validationHint && (
+            <span className="text-xs text-slate-600">{validationHint}</span>
+          )}
+          <button
+            onClick={goNext}
+            disabled={!canAdvance}
+            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
+          >
+            {isLastSub ? 'Til udgifter' : 'Næste'} →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SubProgress({
+  current,
+  total,
+  label,
+}: {
+  current: number;
+  total: number;
+  label: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`flex-1 h-1 rounded-full transition-colors ${
+              i <= current ? 'bg-slate-900' : 'bg-slate-200'
+            }`}
+          />
+        ))}
+      </div>
+      <div className="text-xs text-slate-500">
+        {label} ({current + 1}/{total})
+      </div>
+    </div>
+  );
+}
+
+function StandScreen({
+  selected,
+  onSelect,
+}: {
+  selected: StandLevel | null;
+  onSelect: (l: StandLevel) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <h2 className="text-xl font-semibold text-slate-900">
+          Hvordan er den overordnede stand?
+        </h2>
+        <p className="text-sm text-slate-600">
+          Vælg det niveau der passer bedst. Det styrer hvor meget vi regner med at
+          istandsætte for.
+        </p>
+      </div>
+      <div className="space-y-2">
+        {STAND_OPTIONS.map((opt) => {
+          const active = selected === opt.level;
+          return (
+            <button
+              key={opt.level}
+              type="button"
+              onClick={() => onSelect(opt.level)}
+              className={`w-full text-left p-4 rounded-lg border transition-all ${
+                active
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 hover:border-slate-400 bg-white'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={`font-semibold ${
+                      active ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
+                    {opt.title}
+                  </div>
+                  <div
+                    className={`text-sm ${active ? 'text-slate-300' : 'text-slate-600'}`}
+                  >
+                    {opt.desc}
+                  </div>
+                </div>
+                {active && (
+                  <Check className="w-4 h-4 text-white shrink-0" strokeWidth={3} />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function RoomScreen({
+  slotKey,
+  title,
+  Icon,
+  photo,
+  onPhotoSelect,
+  onPhotoRemove,
+  whyText,
+  subtitle,
+  children,
+}: {
+  slotKey: string;
+  title: string;
+  Icon: LucideIcon;
+  photo: { dataUrl: string; name: string; size: number } | undefined;
+  onPhotoSelect: (f: File) => void;
+  onPhotoRemove: () => void;
+  whyText?: string;
+  subtitle?: string;
+  children?: React.ReactNode;
+}) {
+  const [showWhy, setShowWhy] = useState(false);
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Icon className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+            <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+          </div>
+          {subtitle && <p className="text-sm text-slate-600">{subtitle}</p>}
+        </div>
+        {whyText && (
+          <button
+            type="button"
+            onClick={() => setShowWhy(!showWhy)}
+            className="text-xs text-slate-500 underline hover:text-slate-700 shrink-0 mt-1"
+          >
+            {showWhy ? 'Skjul' : 'Hvorfor spørger vi?'}
+          </button>
+        )}
+      </div>
+
+      {showWhy && whyText && (
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-700">
+          {whyText}
+        </div>
+      )}
+
+      <PhotoSlot
+        slotKey={slotKey}
+        label={title}
+        Icon={Icon}
+        photo={photo}
+        onSelect={onPhotoSelect}
+        onRemove={onPhotoRemove}
+      />
+
+      {children}
+    </div>
+  );
+}
+
+function RestenScreen({
+  state,
+  update,
+  photos,
+  onPhotoSelect,
+  onPhotoRemove,
+}: {
+  state: ReturnType<typeof useFunnel>['state'];
+  update: ReturnType<typeof useFunnel>['update'];
+  photos: PhotoMap;
+  onPhotoSelect: (slotKey: string, file: File) => void;
+  onPhotoRemove: (slotKey: string) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-xl font-semibold text-slate-900">Sidste detaljer</h2>
+        <p className="text-sm text-slate-600">
+          Andre fotos, hvidevarer og særlige forhold. Alt er valgfrit — du kan også springe
+          videre.
+        </p>
+      </div>
 
       {/* ANDRE FOTOS */}
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
           Andre fotos (valgfri)
         </h3>
-        <p className="text-xs text-slate-600">
-          Stue, soveværelse, altan og plantegning hjælper os se den faktiske stand.
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {OTHER_PHOTO_SLOTS.map((slot) => (
-            <PhotoTile
+            <PhotoSlotCompact
               key={slot.key}
-              slot={slot}
+              slotKey={slot.key}
+              label={slot.label}
+              Icon={slot.Icon}
               photo={photos[slot.key]}
               onSelect={(f) => onPhotoSelect(slot.key, f)}
               onRemove={() => onPhotoRemove(slot.key)}
@@ -434,95 +687,77 @@ export function Step2Bolig() {
           </div>
         )}
       </section>
-
-      <div className="flex justify-between gap-3 pt-2">
-        <button
-          onClick={prev}
-          className="px-5 py-3 text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
-        >
-          ← Tilbage
-        </button>
-        <div className="flex flex-col items-end gap-1">
-          {!formValid && (
-            <span className="text-xs text-slate-600">
-              {!state.stand
-                ? 'Vælg overordnet stand'
-                : 'Upload foto eller indtast alder for køkken og bad'}
-            </span>
-          )}
-          <button
-            onClick={next}
-            disabled={!formValid}
-            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
-          >
-            Fortsæt →
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
 
-function RoomSection({
+function PhotoSlot({
   slotKey,
-  title,
+  label,
   Icon,
   photo,
   onSelect,
   onRemove,
-  whyText,
-  children,
 }: {
   slotKey: string;
-  title: string;
+  label: string;
   Icon: LucideIcon;
   photo: { dataUrl: string; name: string; size: number } | undefined;
   onSelect: (f: File) => void;
   onRemove: () => void;
-  whyText: string;
-  children: React.ReactNode;
 }) {
-  const [showWhy, setShowWhy] = useState(false);
-  return (
-    <section className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="w-5 h-5 text-slate-600" strokeWidth={1.5} />
-          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+  if (photo) {
+    return (
+      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photo.dataUrl} alt={label} className="w-full h-full object-cover" />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white text-sm p-3 font-medium">
+          {label}
         </div>
         <button
           type="button"
-          onClick={() => setShowWhy(!showWhy)}
-          className="text-xs text-slate-500 underline hover:text-slate-700"
+          onClick={onRemove}
+          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white text-sm flex items-center justify-center hover:bg-red-600"
         >
-          {showWhy ? 'Skjul' : 'Hvorfor spørger vi?'}
+          ✕
         </button>
       </div>
-      {showWhy && (
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700">
-          {whyText}
-        </div>
-      )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <PhotoTile
-          slot={{ key: slotKey, label: title, Icon }}
-          photo={photo}
-          onSelect={onSelect}
-          onRemove={onRemove}
-        />
-        <div className="space-y-3">{children}</div>
-      </div>
-    </section>
+    );
+  }
+  return (
+    <label
+      htmlFor={`photo-${slotKey}`}
+      className="block w-full aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 hover:border-slate-500 hover:bg-slate-50 cursor-pointer flex flex-col items-center justify-center gap-2 transition-colors"
+    >
+      <Icon className="w-10 h-10 text-slate-400" strokeWidth={1.5} />
+      <span className="text-sm font-medium text-slate-700">Tap for at uploade {label.toLowerCase()}</span>
+      <span className="text-xs text-slate-500">Eller kør videre uden foto</span>
+      <input
+        id={`photo-${slotKey}`}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onSelect(f);
+        }}
+      />
+    </label>
   );
 }
 
-function PhotoTile({
-  slot,
+function PhotoSlotCompact({
+  slotKey,
+  label,
+  Icon,
   photo,
   onSelect,
   onRemove,
 }: {
-  slot: { key: string; label: string; Icon: LucideIcon };
+  slotKey: string;
+  label: string;
+  Icon: LucideIcon;
   photo: { dataUrl: string; name: string; size: number } | undefined;
   onSelect: (f: File) => void;
   onRemove: () => void;
@@ -531,13 +766,9 @@ function PhotoTile({
     return (
       <div className="relative aspect-square rounded-lg overflow-hidden bg-slate-100 group">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photo.dataUrl}
-          alt={slot.label}
-          className="w-full h-full object-cover"
-        />
+        <img src={photo.dataUrl} alt={label} className="w-full h-full object-cover" />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white text-xs p-2">
-          {slot.label}
+          {label}
         </div>
         <button
           type="button"
@@ -549,13 +780,15 @@ function PhotoTile({
       </div>
     );
   }
-  const Icon = slot.Icon;
   return (
-    <label className="aspect-square rounded-lg border border-dashed border-slate-300 hover:border-slate-500 hover:bg-slate-50 cursor-pointer flex flex-col items-center justify-center gap-1.5 transition-colors">
-      <Icon className="w-7 h-7 text-slate-400" strokeWidth={1.5} />
-      <span className="text-xs font-medium text-slate-700">{slot.label}</span>
-      <span className="text-[10px] text-slate-400">Tap for at uploade</span>
+    <label
+      htmlFor={`photo-${slotKey}`}
+      className="aspect-square rounded-lg border border-dashed border-slate-300 hover:border-slate-500 hover:bg-slate-50 cursor-pointer flex flex-col items-center justify-center gap-1 transition-colors"
+    >
+      <Icon className="w-6 h-6 text-slate-400" strokeWidth={1.5} />
+      <span className="text-xs font-medium text-slate-700">{label}</span>
       <input
+        id={`photo-${slotKey}`}
         type="file"
         accept="image/*"
         capture="environment"
@@ -691,7 +924,7 @@ function ApplianceToggle({
   );
 }
 
-// === Image-resizing util (kopieret fra gamle Step2Photos) ===
+// === Image-resizing util ===
 const MAX_DIMENSION = 1280;
 const JPEG_QUALITY = 0.82;
 
