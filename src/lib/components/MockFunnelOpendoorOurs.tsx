@@ -4,21 +4,23 @@
  * MockFunnelOpendoorOurs — Opendoor's faktiske flow-STRUKTUR med vores
  * slate-900 design. Isolerer "er flow'et bedre?" fra "er stylingen bedre?".
  *
- * Struktur (8 trin):
- *   1. Adresse
- *   2. Verify auto-facts
- *   3. Home features (checkbox grid)
- *   4-6. Condition: koekken, bad, andre rum
- *   7. Kontakt
- *   8. Instant offer med transparent service-fee breakdown
+ * Struktur (9 trin — matcher Opendoor's faktiske rækkefølge):
+ *   1. Hvornår vil du sælge? (timing FORST)
+ *   2. Adresse
+ *   3. Verify auto-facts
+ *   4. Home features (checkbox grid)
+ *   5-7. Condition: koekken, bad, andre rum
+ *   8. Kontakt
+ *   9. Instant offer med transparent service-fee breakdown
  */
 import { useState } from 'react';
 
-const STEP_LABELS = ['Adresse', 'Boligen', 'Features', 'Køkken', 'Bad', 'Andre rum', 'Kontakt', 'Tilbud'];
+const STEP_LABELS = ['Hvornår', 'Adresse', 'Boligen', 'Features', 'Køkken', 'Bad', 'Andre rum', 'Kontakt', 'Tilbud'];
+const TOTAL = STEP_LABELS.length;
 
 export function MockFunnelOpendoorOurs() {
   const [step, setStep] = useState(1);
-  const next = () => setStep((s) => Math.min(8, s + 1));
+  const next = () => setStep((s) => Math.min(TOTAL, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   return (
@@ -27,14 +29,15 @@ export function MockFunnelOpendoorOurs() {
         <Progress step={step} />
 
         <div className="mt-5 bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-8 space-y-6">
-          {step === 1 && <StepAddress />}
-          {step === 2 && <StepVerify />}
-          {step === 3 && <StepFeatures />}
-          {step === 4 && <StepCondition title="Køkken" sub="Hvordan er dit køkken?" />}
-          {step === 5 && <StepCondition title="Bad" sub="Hvordan er dit bad?" />}
-          {step === 6 && <StepOtherRooms />}
-          {step === 7 && <StepContact />}
-          {step === 8 && <StepOffer />}
+          {step === 1 && <StepWhen />}
+          {step === 2 && <StepAddress />}
+          {step === 3 && <StepVerify />}
+          {step === 4 && <StepFeatures />}
+          {step === 5 && <StepCondition title="Køkken" sub="Hvordan er dit køkken?" />}
+          {step === 6 && <StepCondition title="Bad" sub="Hvordan er dit bad?" />}
+          {step === 7 && <StepOtherRooms />}
+          {step === 8 && <StepContact />}
+          {step === 9 && <StepOffer />}
 
           <Nav step={step} prev={prev} next={next} />
         </div>
@@ -61,7 +64,7 @@ function Progress({ step }: { step: number }) {
         })}
       </div>
       <div className="text-xs text-slate-500">
-        Trin {step}/8 · {STEP_LABELS[step - 1]}
+        Trin {step}/{TOTAL} · {STEP_LABELS[step - 1]}
       </div>
     </div>
   );
@@ -81,12 +84,53 @@ function Nav({ step, prev, next }: { step: number; prev: () => void; next: () =>
       <button
         type="button"
         onClick={next}
-        disabled={step === 8}
+        disabled={step === TOTAL}
         className="px-6 py-3 text-sm font-medium bg-slate-900 hover:bg-slate-800 disabled:opacity-30 text-white rounded-lg"
       >
-        {step === 7 ? 'Vis mit tilbud' : step === 8 ? 'Færdig' : 'Næste'} →
+        {step === TOTAL - 1 ? 'Vis mit tilbud' : step === TOTAL ? 'Færdig' : 'Næste'} →
       </button>
     </div>
+  );
+}
+
+// === STEP 1: When ===
+function StepWhen() {
+  const [selected, setSelected] = useState('1to3');
+  const options = [
+    { value: 'asap', label: 'Hurtigst muligt', desc: 'Indenfor 30 dage' },
+    { value: '1to3', label: '1-3 måneder', desc: 'Du er parat snart' },
+    { value: '3to6', label: '3-6 måneder', desc: 'Du planlægger fremad' },
+    { value: '6to12', label: '6-12 måneder', desc: 'Du orienterer dig' },
+    { value: 'exploring', label: 'Bare nysgerrig', desc: 'Ingen konkret plan' },
+  ];
+  return (
+    <>
+      <Heading title="Hvornår vil du sælge?" sub="Det hjælper os med at prioritere din sag. Du forpligter dig ikke til noget." />
+      <div className="space-y-2">
+        {options.map((opt) => {
+          const active = selected === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setSelected(opt.value)}
+              className={`w-full text-left p-4 rounded-lg border transition-all ${
+                active
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 hover:border-slate-400 bg-white'
+              }`}
+            >
+              <div className={`font-semibold ${active ? 'text-white' : 'text-slate-900'}`}>
+                {opt.label}
+              </div>
+              <div className={`text-sm mt-0.5 ${active ? 'text-slate-300' : 'text-slate-600'}`}>
+                {opt.desc}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
