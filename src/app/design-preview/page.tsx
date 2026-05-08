@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 interface Variant {
   href: string;
   name: string;
-  category: 'current' | 'design' | 'flow-and-design' | 'flow-only';
+  category: 'current' | 'design' | 'flow-and-design' | 'flow-only' | 'flow-experiments';
   desc: string;
   palette: string[];
   flow: string[];
@@ -127,13 +127,60 @@ const VARIANTS: Variant[] = [
       '6. Tilbud — vores dark hero + breakdown',
     ],
   },
+  // ===== STRUKTURELLE EKSPERIMENTER (alternative flow-paradigmer) =====
+  {
+    href: '/salg-onepage',
+    name: 'G — Single-page scroll-flow (Stripe checkout-stil)',
+    category: 'flow-experiments',
+    desc: 'Alt på én scrollbar side. Ingen "næste-knap"-stress. Sticky live-summary på højre side på desktop.',
+    palette: ['#0f172a', '#f8fafc', '#64748b'],
+    flow: [
+      'Sektion 01: Adresse + kontakt (autocomplete, auto-facts, navn/email/tlf)',
+      'Sektion 02: Boligen overall stand (5 chips på én række)',
+      'Sektion 03: Faste udgifter (4 number-inputs i grid)',
+      'Sektion 04: Lidt om dig (3 chip-rows: tidshorisont, grund, efter salget)',
+      'Sektion 05: Estimat med dark hero + email-CTA',
+      'Sticky summary på højre: live tilbud + adresse + kvm + stand + drift',
+    ],
+  },
+  {
+    href: '/salg-map',
+    name: 'H — Map-led flow (Compass / Redfin-stil)',
+    category: 'flow-experiments',
+    desc: 'Kortet er anker hele vejen. Property-pin viser din bolig, comparables som pins, EF-grænse som polygon. Sidebar-form til højre på desktop, bottom-sheet på mobile.',
+    palette: ['#0f172a', '#f8fafc', '#64748b'],
+    flow: [
+      '1. Adresse + kort med pins (din bolig + comparables + EF-grænse)',
+      '2. Boligen — overall stand i sidebar',
+      '3. Udgifter — 3 number-inputs',
+      '4. Tilbud — dark hero + EF-comparables-tabel',
+      'Kortet persisterer hele vejen — sælger ser sig selv på kortet',
+    ],
+  },
+  {
+    href: '/salg-hybrid',
+    name: 'I — Hybrid: vores flow + Opendoor transparent breakdown',
+    category: 'flow-experiments',
+    desc: 'Vores 5-trins flow uændret, men estimat-siden tilføjer Opendoor-style fee-breakdown OVENPÅ vores eksisterende "hvad du sparer"-blok. Sælger ser både hvordan vi får til prisen + hvorfor det stadig er en god deal.',
+    palette: ['#0f172a', '#f8fafc', '#64748b'],
+    flow: [
+      '1-4. Som vores nuværende flow (Adresse+kontakt, Boligen, Udgifter, Om dig)',
+      '5. Tilbud:',
+      '   • Dark hero med 1.245.000 kr',
+      '   • Opendoor-breakdown: Markedspris −5% gebyr −66k reparation = tilbud',
+      '   • Vores eksisterende savings-blok: mæglersalær, markedsafslag, drift',
+      '   • "Svarer til at sælge for X" sammenligning',
+      '   • Inspections-garanti',
+    ],
+  },
 ];
 
 const CATEGORY_LABELS = {
   current: 'Reference',
   design: 'Design-eksperimenter (vores flow + andre stilarter)',
-  'flow-and-design': 'Komplette ipdates fra konkurrenter (deres flow + deres styling)',
+  'flow-and-design': 'Komplette kopier fra konkurrenter (deres flow + deres styling)',
   'flow-only': 'Flow-eksperimenter (deres flow + vores styling)',
+  'flow-experiments': 'Strukturelle eksperimenter (alternative flow-paradigmer)',
 };
 
 export default function DesignPreviewPage() {
@@ -160,7 +207,7 @@ export default function DesignPreviewPage() {
           </p>
         </div>
 
-        {(['current', 'design', 'flow-and-design', 'flow-only'] as const).map((cat) => (
+        {(['current', 'design', 'flow-and-design', 'flow-only', 'flow-experiments'] as const).map((cat) => (
           <section key={cat} className="space-y-3">
             <h2 className="text-xs uppercase tracking-[0.18em] text-slate-500 font-semibold">
               {CATEGORY_LABELS[cat]}
@@ -211,8 +258,11 @@ export default function DesignPreviewPage() {
           </p>
           <ul className="space-y-1.5 text-sm text-slate-700">
             <li>• <strong>Current vs A/B</strong>: Er en anden visuel stil bedre? (samme flow, bare ny styling)</li>
-            <li>• <strong>Current vs E (Opendoor-flow)</strong>: Skal vi adoptere Opendoor's 8-trins flow med separate room-condition-screens?</li>
+            <li>• <strong>Current vs E (Opendoor-flow)</strong>: Skal vi adoptere 8-trins flow med separate room-condition-screens?</li>
             <li>• <strong>Current vs F (Zillow-flow)</strong>: Skal vi vise estimat FØR vi spørger om alt? (info-first vs form-first)</li>
+            <li>• <strong>Current vs G (one-page)</strong>: Skal alt være på én side? (lavere navigations-friktion vs længere visuelt løb)</li>
+            <li>• <strong>Current vs H (map-led)</strong>: Er kort-anker hele vejen mere overbevisende? (territorium-følelse vs form-fokus)</li>
+            <li>• <strong>Current vs I (hybrid)</strong>: Skal vi vise transparent fee-breakdown på toppen af savings-blokken?</li>
             <li>• <strong>C vs E</strong>: Er forskellen mellem Opendoor-stil og vores stil meningsfuld (begge bruger Opendoor-flow)?</li>
             <li>• <strong>D vs F</strong>: Samme spørgsmål for Zillow.</li>
           </ul>
