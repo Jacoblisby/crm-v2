@@ -8,6 +8,7 @@ export function MainHeader() {
   // Auto-skjul CRM-nav på public funnel-routes + design-prototyper
   if (pathname?.startsWith('/salg')) return null;
   if (pathname?.startsWith('/design-preview')) return null;
+  if (pathname?.startsWith('/design-vote')) return null;
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-10">

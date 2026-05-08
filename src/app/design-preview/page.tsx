@@ -202,9 +202,20 @@ export default function DesignPreviewPage() {
             Salgsside — design + flow-eksperimenter
           </h1>
           <p className="text-sm text-slate-600 max-w-xl leading-relaxed">
-            Sammenlign current implementering med 6 alternativer. Production /salg og CRM er
+            Sammenlign current implementering med 9 alternativer. Production /salg og CRM er
             uændret. Hver variant har klikbar full flow — gennemgå dem på din telefon.
           </p>
+          <div className="pt-2">
+            <Link
+              href="/design-vote"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg"
+            >
+              📋 Stem på din favorit →
+            </Link>
+            <p className="text-xs text-slate-500 mt-2">
+              Klikbar afstemnings-side — godt til at dele med UX-designer eller team.
+            </p>
+          </div>
         </div>
 
         {(['current', 'design', 'flow-and-design', 'flow-only', 'flow-experiments'] as const).map((cat) => (
