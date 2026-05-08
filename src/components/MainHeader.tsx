@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation';
 
 export function MainHeader() {
   const pathname = usePathname();
-  // Auto-skjul CRM-nav på public funnel-routes
+  // Auto-skjul CRM-nav på public funnel-routes + design-prototyper
   if (pathname?.startsWith('/salg')) return null;
+  if (pathname?.startsWith('/design-preview')) return null;
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
