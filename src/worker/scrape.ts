@@ -16,6 +16,7 @@ import { eq, and, lt, sql, inArray, notInArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { onMarketCandidates, scrapeJobs } from '@/lib/db/schema';
 import type { ScrapeJob } from '@/lib/db/schema';
+import { recomputeAllOnMarketAfkast } from '@/lib/services/recompute-on-market';
 
 export const POSTAL_CODES = ['4700', '2630', '4000', '4100', '4400'];
 
@@ -216,6 +217,8 @@ export interface ScrapeRunResult {
   updated: number;
   markedSold: number;
   durationSeconds: number;
+  recomputeUpdated: number;
+  recomputeSkipped: number;
 }
 
 export async function runScrapeJob(opts: {
@@ -323,7 +326,21 @@ export async function runScrapeJob(opts: {
       markedSold = soldRows.length;
     }
 
-    // 4. Mark job success
+    // 4. Recompute afkast for all on-market candidates med ny scrape-data
+    // Saa nye listings far afkast straks + eksisterende fanger rate-aendringer.
+    // Fejl her crasher ikke scrape-jobbet — vi har stadig nyttige scrape-resultater.
+    let recomputeUpdated = 0;
+    let recomputeSkipped = 0;
+    try {
+      const recompute = await recomputeAllOnMarketAfkast();
+      recomputeUpdated = recompute.updated;
+      recomputeSkipped = recompute.skipped;
+    } catch (recomputeErr) {
+      const m = recomputeErr instanceof Error ? recomputeErr.message : String(recomputeErr);
+      errors.push(`recompute: ${m.slice(0, 200)}`);
+    }
+
+    // 5. Mark job success
     const durationSeconds = Math.round((Date.now() - start) / 1000);
     await db.update(scrapeJobs)
       .set({
@@ -337,7 +354,16 @@ export async function runScrapeJob(opts: {
       })
       .where(eq(scrapeJobs.id, job.id));
 
-    return { jobId: job.id, scraped, newListings, updated, markedSold, durationSeconds };
+    return {
+      jobId: job.id,
+      scraped,
+      newListings,
+      updated,
+      markedSold,
+      durationSeconds,
+      recomputeUpdated,
+      recomputeSkipped,
+    };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     await db.update(scrapeJobs)
