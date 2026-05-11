@@ -18,7 +18,7 @@ import { onMarketCandidates, scrapeJobs } from '@/lib/db/schema';
 import type { ScrapeJob } from '@/lib/db/schema';
 import { recomputeAllOnMarketAfkast } from '@/lib/services/recompute-on-market';
 
-export const POSTAL_CODES = ['4700', '2630', '4000', '4100', '4400'];
+export const POSTAL_CODES = ['4700', '2630', '4000', '4100', '4400', '4200'];
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 

@@ -18,6 +18,7 @@ const LEJE_PR_M2_PR_MD: Record<string, number> = {
   '2630': 120, // Taastrup
   '4000': 115, // Roskilde
   '4100': 90,  // Ringsted
+  '4200': 85,  // Slagelse
   '4400': 80,  // Kalundborg
   '4700': 90,  // Næstved
 };

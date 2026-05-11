@@ -12,14 +12,45 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { onMarketCandidates } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
+import { estimateMonthlyRent } from '@/lib/services/our-rentals';
 
 const MONTHLY_EXPENSE_BUFFER = 1.3;
 const REFURB_DEFAULT_PER_SQM = 450; // middel-stand fallback
+
+// Postnr-baseret leje-fallback hvis vi ikke har lejedata for nærområdet.
+// Matcher LEJE_PR_M2_PR_MD i price-engine.ts. Bruges KUN naar
+// estimateMonthlyRent returnerer no-match.
+const LEJE_PR_M2_PR_MD: Record<string, number> = {
+  '2630': 120, // Taastrup
+  '4000': 115, // Roskilde
+  '4100': 90,  // Ringsted
+  '4200': 85,  // Slagelse
+  '4400': 80,  // Kalundborg
+  '4700': 90,  // Næstved
+};
+const DEFAULT_LEJE_RATE = 90;
+const RENT_SAFETY_DISCOUNT = 0.85;
 
 export interface RecomputeResult {
   total: number;
   updated: number;
   skipped: number;
+}
+
+/**
+ * Beregner et leje-estimat for en listing baseret pa:
+ *   1. Faktisk leje fra our-rentals.json (samme vej eller postnr)
+ *   2. Postnr-rate × kvm fallback
+ * Returnerer 0 hvis hverken kvm eller postnr giver et estimat.
+ */
+function deriveLejeMd(postalCode: string | null, kvm: number | null, roadName?: string | null): number {
+  if (!postalCode || !kvm || kvm <= 0) return 0;
+  const match = estimateMonthlyRent({ postalCode, roadName });
+  if (match.monthlyRent > 0) {
+    return Math.round(match.monthlyRent * RENT_SAFETY_DISCOUNT);
+  }
+  const rate = LEJE_PR_M2_PR_MD[postalCode] ?? DEFAULT_LEJE_RATE;
+  return Math.round(kvm * rate * RENT_SAFETY_DISCOUNT);
 }
 
 export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
@@ -52,8 +83,20 @@ export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
       c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
     const useRefurb = refurbTotal > 0 ? refurbTotal : Math.round(c.kvm * REFURB_DEFAULT_PER_SQM);
 
-    const rentMd = c.estimeretLejeMd ?? 0;
+    // Hvis ingen manuel leje sat, derive fra our-rentals + postnr-fallback.
+    // Tidligere sprang vi listings over uden leje — nu beregner vi en saa
+    // alle on-market faar et bidDkk.
+    let rentMd = c.estimeretLejeMd ?? 0;
+    let derivedRent = false;
     if (rentMd === 0) {
+      // Extract roadName fra address (alt før første tal): "Byskov Alle 18..." → "Byskov Alle"
+      const roadName = c.address?.split(/\s+\d/)[0]?.trim() || null;
+      rentMd = deriveLejeMd(c.postalCode, c.kvm, roadName);
+      derivedRent = rentMd > 0;
+    }
+
+    if (rentMd === 0) {
+      // Stadig 0 — postnr eller kvm mangler. Spring over.
       skipped++;
       continue;
     }
@@ -72,6 +115,8 @@ export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
     await db
       .update(onMarketCandidates)
       .set({
+        // Persistér derived leje saa den vises i UI + spares ved naeste recompute.
+        ...(derivedRent ? { estimeretLejeMd: rentMd } : {}),
         bidDkk: finalBid,
         marginPct: afk.roeNettoPct.toString(),
         afkastCalculatedAt: new Date(),
