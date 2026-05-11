@@ -443,7 +443,7 @@ async function sendNotificationEmails(
   const customerResult = await sendResendEmail(apiKey, {
     from,
     to: state.email,
-    reply_to: 'administration@365ejendom.dk',
+    reply_to: process.env.INBOUND_REPLY_TO || 'administration@365ejendom.dk',
     subject: customerSubject,
     html,
   });

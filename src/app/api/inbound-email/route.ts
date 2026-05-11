@@ -1,9 +1,12 @@
 /**
  * POST /api/inbound-email
  *
- * Webhook for indkomne emails. Tager imod fra Postmark, Resend inbound,
- * eller en hvilken som helst service der POST'er en JSON-payload med
- * standard email-felter.
+ * Webhook for indkomne emails. Primaert fra Resend (email.received event),
+ * men accepterer ogsaa Postmark format eller en generisk JSON-payload.
+ *
+ * Auth (en af to):
+ *   1. Resend svix-signature header (verificeret mod RESEND_WEBHOOK_SECRET)
+ *   2. Bearer ${INBOUND_EMAIL_SECRET} (til manuel test fra curl)
  *
  * Matching-strategi:
  *   1. In-Reply-To / References → find tidligere udsendt
@@ -12,11 +15,10 @@
  *
  * Gemmer som lead_communications med direction='in', type='email'.
  * Lead detail page viser den automatisk.
- *
- * Auth: Bearer ${INBOUND_EMAIL_SECRET}
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, sql } from 'drizzle-orm';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from '@/lib/db/client';
 import { leadCommunications, leads } from '@/lib/db/schema';
 
@@ -36,18 +38,40 @@ interface NormalizedEmail {
 }
 
 export async function POST(req: NextRequest) {
-  // Auth — accepterer enten INBOUND_EMAIL_SECRET eller CRON_SECRET som fallback
-  const secret = process.env.INBOUND_EMAIL_SECRET || process.env.CRON_SECRET;
-  if (!secret) {
-    return NextResponse.json({ error: 'INBOUND_EMAIL_SECRET not configured' }, { status: 500 });
+  // Vi laeser rawBody en gang — bruges baade til signatur-verifikation og JSON-parse
+  const rawBody = await req.text();
+
+  // Auth — to muligheder:
+  //   1. Resend svix-signature (verificeret mod RESEND_WEBHOOK_SECRET)
+  //   2. Bearer-token fallback (til manuel test fra curl)
+  const resendSecret = process.env.RESEND_WEBHOOK_SECRET;
+  const bearerSecret = process.env.INBOUND_EMAIL_SECRET || process.env.CRON_SECRET;
+
+  const hasSvixHeaders =
+    !!req.headers.get('svix-id') &&
+    !!req.headers.get('svix-timestamp') &&
+    !!req.headers.get('svix-signature');
+
+  let authed = false;
+  if (hasSvixHeaders && resendSecret) {
+    authed = verifySvixSignature(req, rawBody, resendSecret);
+    if (!authed) {
+      return NextResponse.json({ error: 'invalid svix signature' }, { status: 401 });
+    }
+  } else if (bearerSecret && req.headers.get('authorization') === `Bearer ${bearerSecret}`) {
+    authed = true;
   }
-  if (req.headers.get('authorization') !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
+  if (!authed) {
+    return NextResponse.json(
+      { error: 'unauthorized — need svix signature or Bearer token' },
+      { status: 401 },
+    );
   }
 
   let payload: unknown;
   try {
-    payload = await req.json();
+    payload = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
@@ -99,6 +123,39 @@ export async function POST(req: NextRequest) {
 }
 
 // ============================
+// Svix signature verification (Resend webhooks)
+// ============================
+function verifySvixSignature(req: NextRequest, rawBody: string, secret: string): boolean {
+  const svixId = req.headers.get('svix-id');
+  const svixTimestamp = req.headers.get('svix-timestamp');
+  const svixSignature = req.headers.get('svix-signature');
+  if (!svixId || !svixTimestamp || !svixSignature) return false;
+
+  // Secret format: "whsec_<base64>"
+  const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+
+  // Sign string: "{svixId}.{svixTimestamp}.{rawBody}"
+  const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
+  const computed = createHmac('sha256', secretBytes).update(signedContent).digest('base64');
+
+  // svix-signature header format: "v1,<base64> v1,<base64>" (may include multiple, space-separated)
+  const signatures = svixSignature.split(' ').map((s) => s.replace(/^v\d+,/, ''));
+
+  for (const sig of signatures) {
+    try {
+      const sigBytes = Buffer.from(sig, 'base64');
+      const computedBytes = Buffer.from(computed, 'base64');
+      if (sigBytes.length === computedBytes.length && timingSafeEqual(sigBytes, computedBytes)) {
+        return true;
+      }
+    } catch {
+      // ignore malformed signature parts
+    }
+  }
+  return false;
+}
+
+// ============================
 // Payload normalization
 // ============================
 function normalizePayload(payload: unknown): NormalizedEmail {
@@ -107,16 +164,49 @@ function normalizePayload(payload: unknown): NormalizedEmail {
   }
   const p = payload as Record<string, unknown>;
 
-  // Try Postmark format first
+  // Resend webhook event format
+  const resendEvent = tryResendEvent(p);
+  if (resendEvent) return resendEvent;
+
+  // Try Postmark format
   const postmark = tryPostmark(p);
   if (postmark) return postmark;
 
-  // Try Resend inbound format
+  // Try Resend inbound (legacy data envelope)
   const resend = tryResend(p);
   if (resend) return resend;
 
   // Generic fallback — accept any reasonable shape
   return tryGeneric(p);
+}
+
+function tryResendEvent(p: Record<string, unknown>): NormalizedEmail | null {
+  // Resend webhook event: { type: "email.received", data: { from, subject, text, html, headers? } }
+  if (p.type !== 'email.received') return null;
+  const data = (p.data || {}) as Record<string, unknown>;
+  const fromRaw = (data.from || '') as unknown;
+  let fromEmail = '';
+  let fromName = '';
+  if (typeof fromRaw === 'string') {
+    fromEmail = extractEmail(fromRaw);
+    fromName = extractName(fromRaw);
+  } else if (typeof fromRaw === 'object' && fromRaw !== null) {
+    const f = fromRaw as Record<string, unknown>;
+    fromEmail = String(f.email || '').toLowerCase().trim();
+    fromName = String(f.name || '').trim();
+  }
+  const headers = (data.headers || {}) as Record<string, string>;
+  return {
+    fromEmail,
+    fromName,
+    subject: typeof data.subject === 'string' ? data.subject : '',
+    text: typeof data.text === 'string' ? data.text : '',
+    html: typeof data.html === 'string' ? data.html : null,
+    inReplyTo: headers['in-reply-to'] || headers['In-Reply-To'] || null,
+    references: headers['references'] || headers['References'] || null,
+    messageId: headers['message-id'] || headers['Message-ID'] || null,
+    rawPayload: p,
+  };
 }
 
 function tryPostmark(p: Record<string, unknown>): NormalizedEmail | null {
