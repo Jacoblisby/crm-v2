@@ -64,6 +64,13 @@ export async function submitFunnelAction(
         ? -10_000
         : 0;
 
+  // Hvis lejligheden er udlejet pt og sælger har angivet kontraktleje, bruger
+  // vi den direkte i ROE-modellen (stærkere end vores estimater).
+  const actualMonthlyRent =
+    state.isRented && state.rentalMonthlyRent && state.rentalMonthlyRent > 0
+      ? state.rentalMonthlyRent
+      : null;
+
   const estimate = await computeEstimate({
     postalCode: state.postalCode,
     kvm: state.kvm,
@@ -77,6 +84,7 @@ export async function submitFunnelAction(
     driftTotalYearly: driftTotal,
     currentListingPrice: state.currentListingPrice,
     haeftelseEf: totalHaeft,
+    actualMonthlyRent,
   });
 
   // 2. Find eksisterende property hvis bfe matcher

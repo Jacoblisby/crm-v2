@@ -117,6 +117,7 @@ function AfkastTab({ lead }: { lead: Lead }) {
   ];
   const hasCostBreakdown = costRows.some(([, v]) => (v ?? 0) > 0);
   const rentSourceLabel: Record<string, string> = {
+    'actual-tenant': 'Kontraktleje (aktuel udlejning)',
     'same-vej': 'Same vej (samme EF)',
     'same-postal': 'Same postnr',
     'kvm-fallback': 'Postnr × m² fallback',
@@ -206,11 +207,13 @@ function AfkastTab({ lead }: { lead: Lead }) {
             🏠 <strong>Leje-kilde:</strong>{' '}
             <span
               className={
-                inp.rentSource === 'same-vej'
-                  ? 'text-emerald-700 font-semibold'
-                  : inp.rentSource === 'same-postal'
-                    ? 'text-amber-700 font-semibold'
-                    : 'text-slate-500'
+                inp.rentSource === 'actual-tenant'
+                  ? 'text-blue-700 font-semibold'
+                  : inp.rentSource === 'same-vej'
+                    ? 'text-emerald-700 font-semibold'
+                    : inp.rentSource === 'same-postal'
+                      ? 'text-amber-700 font-semibold'
+                      : 'text-slate-500'
               }
             >
               {rentSourceLabel[inp.rentSource]}

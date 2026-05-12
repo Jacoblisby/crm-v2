@@ -204,7 +204,7 @@ export const leads = pgTable(
       sampleSize?: number;
       sameEfCount?: number;
       // Leje-kilde (vores faktiske data eller postnr-fallback)
-      rentSource?: 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
+      rentSource?: 'actual-tenant' | 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
       rentSampleSize?: number;
       // Udspecificerede driftsomkostninger (kr/år) — så vi kan se hvad der gik ind
       costFaellesudgifter?: number;

@@ -57,6 +57,13 @@ export interface PriceEngineInput {
   currentListingPrice?: number | null;
   /** Hæftelse til ejerforening (engangs gæld kunden hæfter for, fra tinglysning) */
   haeftelseEf?: number;
+  /**
+   * Faktisk månedlig kontraktleje hvis lejligheden ER udlejet pt.
+   * Stærkeste leje-signal vi har — slår både our-rentals og postnr-fallback.
+   * Bruges as-is uden RENT_SAFETY_DISCOUNT, da det er en eksisterende kontrakt
+   * (ingen re-let gap-risiko).
+   */
+  actualMonthlyRent?: number | null;
 }
 
 export interface PriceEngineResult {
@@ -69,7 +76,7 @@ export interface PriceEngineResult {
   sameEfCount: number;
   // Beregning
   estimatedRentMd: number;
-  rentSource: 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
+  rentSource: 'actual-tenant' | 'same-vej' | 'same-postal' | 'no-match' | 'kvm-fallback';
   rentSampleSize: number;
   refurbTotal: number;
   // Endeligt tilbud — alle 4 fradrag + ourMargin summerer til (marketEstimate - finalOffer)
@@ -128,31 +135,41 @@ export async function computeEstimate(input: PriceEngineInput): Promise<PriceEng
     }
   }
 
-  // 2. Estimeret leje — vores faktiske udlejnings-data slår altid en hardcoded rate.
-  //    Hvis vi har lejemål på samme vej (proxy for samme EF), bruger vi median-lejen.
-  //    Falder ellers tilbage til postnr-rate × m².
+  // 2. Estimeret leje — prioritet:
+  //    1. Sælgers faktiske kontraktleje hvis lejligheden er udlejet pt
+  //       (stærkeste signal — bruges as-is, ingen sikkerhedsmargin)
+  //    2. Vores egne udlejninger på samme vej (proxy for samme EF)
+  //    3. Vores egne udlejninger i samme postnr
+  //    4. Hardcoded postnr-rate × m² fallback
+  //    For 2-4 anvender vi 15% sikkerhedsmargin pga. data-støj.
   const ourRentMatch = estimateMonthlyRent({
     postalCode: input.postalCode,
     roadName: input.roadName,
   });
-  // Vi diskontérer den estimerede leje med 15% for at give os selv en
-  // sikkerhedsmargin i ROE-beregningen. Det reducerer bud@target og
-  // beskytter mod over-estimerede comparable-leje.
   const RENT_SAFETY_DISCOUNT = 0.85;
-  let rawRentMd: number;
+  let estimatedRentMd: number;
   let rentSource: PriceEngineResult['rentSource'];
-  if (ourRentMatch.source === 'same-vej' && ourRentMatch.monthlyRent > 0) {
-    rawRentMd = ourRentMatch.monthlyRent;
-    rentSource = 'same-vej';
-  } else if (ourRentMatch.source === 'same-postal' && ourRentMatch.monthlyRent > 0) {
-    rawRentMd = ourRentMatch.monthlyRent;
-    rentSource = 'same-postal';
+  if (input.actualMonthlyRent && input.actualMonthlyRent > 0) {
+    // Sælger har angivet en faktisk kontraktleje — det er det stærkeste
+    // signal. Ingen discount: kontrakten er allerede underskrevet, ingen
+    // re-let gap-risiko at korrigere for.
+    estimatedRentMd = input.actualMonthlyRent;
+    rentSource = 'actual-tenant';
   } else {
-    const lejeRate = LEJE_PR_M2_PR_MD[input.postalCode] ?? DEFAULT_LEJE_RATE;
-    rawRentMd = Math.round(input.kvm * lejeRate);
-    rentSource = 'kvm-fallback';
+    let rawRentMd: number;
+    if (ourRentMatch.source === 'same-vej' && ourRentMatch.monthlyRent > 0) {
+      rawRentMd = ourRentMatch.monthlyRent;
+      rentSource = 'same-vej';
+    } else if (ourRentMatch.source === 'same-postal' && ourRentMatch.monthlyRent > 0) {
+      rawRentMd = ourRentMatch.monthlyRent;
+      rentSource = 'same-postal';
+    } else {
+      const lejeRate = LEJE_PR_M2_PR_MD[input.postalCode] ?? DEFAULT_LEJE_RATE;
+      rawRentMd = Math.round(input.kvm * lejeRate);
+      rentSource = 'kvm-fallback';
+    }
+    estimatedRentMd = Math.round(rawRentMd * RENT_SAFETY_DISCOUNT);
   }
-  const estimatedRentMd = Math.round(rawRentMd * RENT_SAFETY_DISCOUNT);
 
   // 3. Refurbish baseret på stand
   const refurbPerM2 = REFURB_PER_M2[input.stand] ?? REFURB_PER_M2.middel;
