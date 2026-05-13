@@ -6,6 +6,7 @@ import { Step2Bolig } from './steps/Step2Bolig';
 import { Step3Costs } from './steps/Step3Costs';
 import { Step4Profile } from './steps/Step4Profile';
 import { Step5Estimate } from './steps/Step5Estimate';
+import { FAQ } from './components/FAQ';
 
 const TOTAL_STEPS = 5;
 const STEP_LABELS = [
@@ -28,7 +29,12 @@ export function Funnel() {
         {state.step === 4 && <Step4Profile />}
         {state.step === 5 && <Step5Estimate />}
       </div>
-      {state.step === 1 && <HowItWorks />}
+      {state.step === 1 && (
+        <>
+          <HowItWorks />
+          <FAQ />
+        </>
+      )}
     </div>
   );
 }
