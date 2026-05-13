@@ -10,7 +10,7 @@
  */
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { onMarketCandidates, properties } from '@/lib/db/schema';
+import { onMarketCandidates } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
 import { estimateMonthlyRent } from '@/lib/services/our-rentals';
 
@@ -53,21 +53,11 @@ function deriveLejeMd(postalCode: string | null, kvm: number | null, roadName?: 
 }
 
 export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
-  // LEFT JOIN properties for at få grundskyld-data (kun hvis BFE-match)
-  const all = await db
-    .select({
-      candidate: onMarketCandidates,
-      grundskyld: properties.grundskyldKr,
-    })
-    .from(onMarketCandidates)
-    .leftJoin(properties, eq(onMarketCandidates.propertyId, properties.id));
+  const all = await db.select().from(onMarketCandidates);
   let updated = 0;
   let skipped = 0;
 
-  for (const row of all) {
-    const c = row.candidate;
-    const grundskyld = row.grundskyld ?? 0;
-
+  for (const c of all) {
     const driftFromBreakdown =
       c.costGrundvaerdi +
       c.costFaellesudgifter +
@@ -80,18 +70,18 @@ export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
       c.costVedligeholdelse +
       c.costAndreDrift;
 
-    // Drift-hierarki (skiftet 2026-05-13: droppét 1.3x buffer der inflatede
-    // tallet ift. mægler-annoncen):
-    //   1. PDF cost-breakdown sum hvis > 0 (mest præcis)
-    //   2. Ellers monthlyExpense × 12 + grundskyld (matcher mægler × 12 +
-    //      ejendomsskat fra OIS hvis vi har BFE-match)
-    //   3. Ellers 0 (skip)
+    // Drift-hierarki:
+    //   1. PDF cost-breakdown sum hvis > 0 (mest præcis — fra prospektet)
+    //   2. monthlyExpense × 12 (matcher mægler-annoncen 1:1; mæglers
+    //      "Mdl ejerudgifter" inkluderer ALLEREDE grundskyld + ejendomsskat
+    //      + EF-bidrag — vi skal ikke tilføje noget på top)
+    //   3. 0 (skip)
     const driftTotal =
       driftFromBreakdown > 0
         ? driftFromBreakdown
         : c.monthlyExpense
-          ? c.monthlyExpense * 12 + grundskyld
-          : grundskyld; // mindst grundskyld hvis vi har det
+          ? c.monthlyExpense * 12
+          : 0;
 
     const refurbTotal =
       c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
