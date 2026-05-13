@@ -126,9 +126,13 @@ export interface FunnelState {
   email: string;
   phone: string;
 
-  // Special forhold
+  // Special forhold (samlet i PropertyFlags-komponent, Zillow-mønster)
   hasAltan: boolean;
   hasElevator: boolean;
+  hasSolarPanels: boolean;             // Solceller/solfanger installeret
+  hasTinglysteServitutter: boolean;    // Tinglyste servitutter
+  hasRenovationPlans: boolean;         // Planlagte EF-renoveringer (tag/facade/vinduer)
+  renovationPlansNote: string;         // Fri-tekst om planlagte renoveringer
   isRented: boolean;
   // Gaeld i ejerforening (toggle styrer om felter vises i Step 3)
   hasEjerforeningGaeld: boolean;
@@ -221,6 +225,10 @@ export const initialState: FunnelState = {
   phone: '',
   hasAltan: false,
   hasElevator: false,
+  hasSolarPanels: false,
+  hasTinglysteServitutter: false,
+  hasRenovationPlans: false,
+  renovationPlansNote: '',
   isRented: false,
   hasEjerforeningGaeld: false,
   ejerforeningGaeldRestgaeld: 0,

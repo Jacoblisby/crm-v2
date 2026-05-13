@@ -180,8 +180,13 @@ export async function submitFunnelAction(
       : '',
     ``,
     `SÆRLIGE FORHOLD:`,
-    state.hasAltan ? '✓ Altan' : '',
+    state.hasAltan ? '✓ Altan/terrasse' : '',
     state.hasElevator ? '✓ Elevator' : '',
+    state.hasSolarPanels ? '✓ Solceller/solfanger' : '',
+    state.hasTinglysteServitutter ? '⚠️ Tinglyste servitutter' : '',
+    state.hasRenovationPlans
+      ? `⚠️ EF har renoveringsplaner${state.renovationPlansNote ? `: ${state.renovationPlansNote}` : ''}`
+      : '',
     state.isRented
       ? `⚠️ AKTUELT UDLEJET — leje ${(state.rentalMonthlyRent ?? 0).toLocaleString('da-DK')} kr/md, depositum ${(state.rentalDeposit ?? 0).toLocaleString('da-DK')} kr, indflytning ${state.rentalStartDate || '?'}${state.rentalUopsigelig ? ` (UOPSIGELIG ${state.rentalUopsigeligMaaneder ?? 0} mdr endnu)` : ''}${state.rentalContract ? ` — kontrakt vedhæftet: ${state.rentalContract.name}` : ''}`
       : '',

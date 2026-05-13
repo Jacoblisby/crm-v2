@@ -18,6 +18,7 @@ import { useFunnel } from '../FunnelContext';
 import type { StandLevel } from '@/lib/services/price-engine';
 import type { FunnelState } from '../types';
 import { PhotoCardStand, type RoomType } from '../components/PhotoCardStand';
+import { PropertyFlags } from '../components/PropertyFlags';
 
 /**
  * Step 2 — Sadan ser din bolig ud (Opendoor-style sub-screens).
@@ -593,25 +594,6 @@ function RestenScreen({
         </div>
       </section>
 
-      {/* SÆRLIGE FORHOLD */}
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          Særlige forhold
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          <ApplianceToggle
-            label="Altan/terrasse"
-            value={state.hasAltan}
-            onChange={(v) => update({ hasAltan: v })}
-          />
-          <ApplianceToggle
-            label="Elevator i bygning"
-            value={state.hasElevator}
-            onChange={(v) => update({ hasElevator: v })}
-          />
-        </div>
-      </section>
-
       {/* ANDRE FOTOS */}
       <section className="space-y-3 border-t border-slate-200 pt-4">
         <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
@@ -649,102 +631,12 @@ function RestenScreen({
         />
       </section>
 
-      {/* AKTUELT UDLEJET */}
-      <section className="border-t border-slate-200 pt-5 space-y-3">
-        <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-          Er lejligheden udlejet i dag?
-        </h3>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => update({ isRented: false })}
-            className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium ${
-              !state.isRented
-                ? 'border-slate-900 bg-slate-900 text-white'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'
-            }`}
-          >
-            Nej, jeg bor selv eller står tom
-          </button>
-          <button
-            type="button"
-            onClick={() => update({ isRented: true })}
-            className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium ${
-              state.isRented
-                ? 'border-slate-900 bg-slate-900 text-white'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'
-            }`}
-          >
-            Ja, har en lejer
-          </button>
-        </div>
-
-        {state.isRented && (
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
-            <p className="text-xs text-slate-700">
-              Vi køber gerne udlejede lejligheder. Detaljerne her hjælper os med at vurdere
-              kontrakten.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <NumberField
-                label="Månedlig leje"
-                suffix="kr/md"
-                placeholder="8.500"
-                value={state.rentalMonthlyRent}
-                onChange={(v) => update({ rentalMonthlyRent: v })}
-              />
-              <NumberField
-                label="Depositum"
-                suffix="kr"
-                placeholder="25.500"
-                value={state.rentalDeposit}
-                onChange={(v) => update({ rentalDeposit: v })}
-              />
-              <NumberField
-                label="Forudbetalt leje"
-                suffix="kr"
-                placeholder="0"
-                value={state.rentalPrepaidRent}
-                onChange={(v) => update({ rentalPrepaidRent: v })}
-              />
-            </div>
-            <DateField
-              label="Indflytningsdato"
-              value={state.rentalStartDate}
-              onChange={(v) => update({ rentalStartDate: v })}
-            />
-            <ApplianceToggle
-              label="Lejekontrakten er uopsigelig"
-              value={state.rentalUopsigelig}
-              onChange={(v) => update({ rentalUopsigelig: v })}
-            />
-            {state.rentalUopsigelig && (
-              <NumberField
-                label="Antal måneder uopsigelighed tilbage"
-                suffix="mdr"
-                placeholder="6"
-                value={state.rentalUopsigeligMaaneder}
-                onChange={(v) => update({ rentalUopsigeligMaaneder: v })}
-              />
-            )}
-            <label className="block w-full px-4 py-3 border border-dashed border-slate-300 rounded-lg text-center cursor-pointer hover:border-slate-500 hover:bg-white">
-              <input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) update({ rentalContract: { name: f.name, size: f.size } });
-                }}
-              />
-              <span className="text-sm text-slate-700">
-                {state.rentalContract
-                  ? `${state.rentalContract.name} (${(state.rentalContract.size / 1024).toFixed(0)} kB)`
-                  : 'Vedhæft lejekontrakt. Gør tingene 10x hurtigere.'}
-              </span>
-            </label>
-          </div>
-        )}
+      {/* PROPERTY FLAGS — konsolideret Zillow-style checkbox-grid.
+          Erstatter de tidligere spredte sektioner 'Særlige forhold' +
+          'Aktuelt udlejet'. Også indeholder nye flags: solceller,
+          renoveringsplaner, tinglyste servitutter, samt EF-fælleslån-toggle. */}
+      <section className="border-t border-slate-200 pt-5">
+        <PropertyFlags />
       </section>
     </div>
   );
