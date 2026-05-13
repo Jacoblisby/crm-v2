@@ -7,9 +7,28 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Link from 'next/link';
-import { listOnMarketCandidates } from '@/lib/db/queries';
+import { listOnMarketCandidates, type OnMarketSort } from '@/lib/db/queries';
 
 export const dynamic = 'force-dynamic';
+
+// Postnr → by-navn for filter-chips. Holdes synkroniseret med scraper-coverage.
+const CITY_FILTERS: { postalCode: string; label: string }[] = [
+  { postalCode: '4700', label: 'Næstved' },
+  { postalCode: '4200', label: 'Slagelse' },
+  { postalCode: '4400', label: 'Kalundborg' },
+  { postalCode: '4100', label: 'Ringsted' },
+  { postalCode: '4000', label: 'Roskilde' },
+  { postalCode: '2630', label: 'Taastrup' },
+];
+
+const SORT_OPTIONS: { value: OnMarketSort; label: string }[] = [
+  { value: 'roe-desc', label: 'ROE Netto (højest)' },
+  { value: 'bid-desc', label: 'Vores bud (højest)' },
+  { value: 'price-asc', label: 'Pris (lavest)' },
+  { value: 'price-desc', label: 'Pris (højest)' },
+  { value: 'days-asc', label: 'Nyeste først' },
+  { value: 'days-desc', label: 'Længst på markedet' },
+];
 
 interface ManifestListing {
   address: string;
@@ -52,7 +71,7 @@ interface OnMarketRow {
 export default async function OnMarketPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; review?: string }>;
+  searchParams: Promise<{ status?: string; review?: string; by?: string; sort?: string }>;
 }) {
   const sp = await searchParams;
   const filterStatus = (sp.status === 'sold' || sp.status === 'all') ? sp.status : 'active';
@@ -61,6 +80,28 @@ export default async function OnMarketPage({
       ? sp.review
       : 'all'
   ) as 'all' | 'ny' | 'interesseret' | 'passet' | 'købt';
+  const filterCity = CITY_FILTERS.find((c) => c.postalCode === sp.by)?.postalCode ?? null;
+  const validSorts: OnMarketSort[] = [
+    'roe-desc', 'bid-desc', 'price-asc', 'price-desc', 'days-asc', 'days-desc',
+  ];
+  const sortBy: OnMarketSort = validSorts.includes(sp.sort as OnMarketSort)
+    ? (sp.sort as OnMarketSort)
+    : 'roe-desc';
+
+  // URL-helper: byg querystring der bevarer alle andre params
+  function buildHref(overrides: Partial<{ status: string; review: string; by: string | null; sort: OnMarketSort }>) {
+    const params = new URLSearchParams();
+    const status = overrides.status ?? filterStatus;
+    const review = overrides.review ?? (filterReview === 'all' ? '' : filterReview);
+    const by = overrides.by !== undefined ? overrides.by : filterCity;
+    const sort = overrides.sort ?? sortBy;
+    if (status !== 'active') params.set('status', status);
+    if (review) params.set('review', review);
+    if (by) params.set('by', by);
+    if (sort !== 'roe-desc') params.set('sort', sort);
+    const s = params.toString();
+    return s ? `/on-market?${s}` : '/on-market';
+  }
 
   // Først: forsøg at læse fra DB. Hvis det fejler eller er tomt, fald tilbage til POC.
   let dbRows: OnMarketRow[] = [];
@@ -69,6 +110,8 @@ export default async function OnMarketPage({
     const candidates = await listOnMarketCandidates({
       status: filterStatus,
       reviewStatus: filterReview,
+      postalCode: filterCity ?? undefined,
+      sort: sortBy,
     });
     dbRows = candidates.map((c) => ({
       key: c.id,
@@ -118,15 +161,15 @@ export default async function OnMarketPage({
     }
   }
 
-  const unsortedRows = dbRows.length > 0 ? dbRows : pocRows;
-  const isPocFallback = dbRows.length === 0 && pocRows.length > 0;
-  const downloaded = unsortedRows.filter((r) => r.pdfStatus === 'downloaded').length;
-  // Sortér efter ROE Netto faldende (rows uden ROE i bunden)
-  const rows = [...unsortedRows].sort((a, b) => {
+  // Server-side sortering håndterer dbRows (via listOnMarketCandidates).
+  // POC-fallback bevarer ROE-sort lokalt da det er midlertidigt.
+  const rows = dbRows.length > 0 ? dbRows : [...pocRows].sort((a, b) => {
     const ar = a.marginPct ?? -Infinity;
     const br = b.marginPct ?? -Infinity;
     return br - ar;
   });
+  const isPocFallback = dbRows.length === 0 && pocRows.length > 0;
+  const downloaded = rows.filter((r) => r.pdfStatus === 'downloaded').length;
 
   return (
     <div>
@@ -140,19 +183,48 @@ export default async function OnMarketPage({
           {(['active', 'sold', 'all'] as const).map((s) => (
             <Link
               key={s}
-              href={`/on-market?status=${s}${filterReview !== 'all' ? `&review=${filterReview}` : ''}`}
+              href={buildHref({ status: s })}
               className={`px-3 py-1 rounded ${filterStatus === s ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
             >
               {s === 'active' ? 'Aktive' : s === 'sold' ? 'Solgte' : 'Alle'}
             </Link>
           ))}
         </nav>
-        <nav className="flex gap-2 text-sm">
+
+        {/* By-filter chips */}
+        <nav className="flex flex-wrap gap-2 text-sm">
+          <span className="text-xs text-slate-500 self-center pr-1">By:</span>
+          <Link
+            href={buildHref({ by: null })}
+            className={`px-3 py-1 rounded text-xs ${
+              filterCity === null
+                ? 'bg-slate-900 text-white'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            Alle
+          </Link>
+          {CITY_FILTERS.map((c) => (
+            <Link
+              key={c.postalCode}
+              href={buildHref({ by: c.postalCode })}
+              className={`px-3 py-1 rounded text-xs ${
+                filterCity === c.postalCode
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {c.label} ({c.postalCode})
+            </Link>
+          ))}
+        </nav>
+
+        <nav className="flex flex-wrap gap-2 text-sm">
           <span className="text-xs text-slate-500 self-center pr-1">Min review:</span>
           {(['all', 'ny', 'interesseret', 'passet', 'købt'] as const).map((r) => (
             <Link
               key={r}
-              href={`/on-market?status=${filterStatus}${r !== 'all' ? `&review=${r}` : ''}`}
+              href={buildHref({ review: r === 'all' ? '' : r })}
               className={`px-3 py-1 rounded text-xs ${
                 filterReview === r
                   ? r === 'interesseret'
@@ -166,6 +238,24 @@ export default async function OnMarketPage({
               }`}
             >
               {r === 'all' ? 'Alle' : r === 'ny' ? '🆕 Ny' : r === 'interesseret' ? '👀 Interesseret' : r === 'passet' ? '👋 Passet' : '🎉 Købt'}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Sortering */}
+        <nav className="flex flex-wrap gap-2 text-sm items-center">
+          <span className="text-xs text-slate-500 pr-1">Sortér efter:</span>
+          {SORT_OPTIONS.map((opt) => (
+            <Link
+              key={opt.value}
+              href={buildHref({ sort: opt.value })}
+              className={`px-3 py-1 rounded text-xs ${
+                sortBy === opt.value
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300 font-medium'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {opt.label}
             </Link>
           ))}
         </nav>

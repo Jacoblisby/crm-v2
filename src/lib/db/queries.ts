@@ -212,23 +212,66 @@ export async function listActiveOnMarketCandidates() {
     .orderBy(desc(onMarketCandidates.scrapedAt));
 }
 
+export type OnMarketSort =
+  | 'roe-desc'
+  | 'price-asc'
+  | 'price-desc'
+  | 'bid-desc'
+  | 'days-asc'
+  | 'days-desc';
+
 export async function listOnMarketCandidates(opts: {
   status?: 'active' | 'sold' | 'all';
   reviewStatus?: 'all' | 'ny' | 'interesseret' | 'passet' | 'købt';
+  postalCode?: string; // fx '4700' for Næstved kun
+  sort?: OnMarketSort;
 } = {}) {
   const status = opts.status ?? 'active';
   const reviewStatus = opts.reviewStatus ?? 'all';
+  const sort = opts.sort ?? 'roe-desc';
 
-  // Sortér efter ROE-margin desc (bedste deals øverst), null/0 i bunden.
-  // Recency tie-break når marginer er ens.
-  const orderBy = [
-    sql`${onMarketCandidates.marginPct} DESC NULLS LAST`,
-    desc(onMarketCandidates.scrapedAt),
-  ];
+  // Default-sort: ROE-margin desc (bedste deals øverst), recency tie-break
+  let orderBy: ReturnType<typeof desc>[] | ReturnType<typeof sql>[];
+  switch (sort) {
+    case 'price-asc':
+      orderBy = [
+        sql`${onMarketCandidates.listPrice} ASC NULLS LAST`,
+        desc(onMarketCandidates.scrapedAt),
+      ];
+      break;
+    case 'price-desc':
+      orderBy = [
+        sql`${onMarketCandidates.listPrice} DESC NULLS LAST`,
+        desc(onMarketCandidates.scrapedAt),
+      ];
+      break;
+    case 'bid-desc':
+      orderBy = [
+        sql`${onMarketCandidates.bidDkk} DESC NULLS LAST`,
+        desc(onMarketCandidates.scrapedAt),
+      ];
+      break;
+    case 'days-asc':
+      // Nyeste først (kortest tid på markedet)
+      orderBy = [desc(onMarketCandidates.firstSeenAt)];
+      break;
+    case 'days-desc':
+      // Længst tid på markedet først
+      orderBy = [sql`${onMarketCandidates.firstSeenAt} ASC NULLS LAST`];
+      break;
+    case 'roe-desc':
+    default:
+      orderBy = [
+        sql`${onMarketCandidates.marginPct} DESC NULLS LAST`,
+        desc(onMarketCandidates.scrapedAt),
+      ];
+      break;
+  }
 
   const conditions = [];
   if (status !== 'all') conditions.push(eq(onMarketCandidates.status, status));
   if (reviewStatus !== 'all') conditions.push(eq(onMarketCandidates.reviewStatus, reviewStatus));
+  if (opts.postalCode) conditions.push(eq(onMarketCandidates.postalCode, opts.postalCode));
 
   let query = db.select().from(onMarketCandidates).$dynamic();
   if (conditions.length > 0) query = query.where(and(...conditions));
