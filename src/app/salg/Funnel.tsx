@@ -1,6 +1,5 @@
 'use client';
 
-import { Pencil, Sparkles, Home, Handshake } from 'lucide-react';
 import { useFunnel } from './FunnelContext';
 import { Step1Address } from './steps/Step1Address';
 import { Step2Bolig } from './steps/Step2Bolig';
@@ -34,54 +33,72 @@ export function Funnel() {
   );
 }
 
+/**
+ * HowItWorks — hand-drawn proces-overblik inspireret af Offerpad's
+ * illustrated flowchart-mønster. Bryder den polerede SaaS-look og giver
+ * et menneskeligt, varmt indtryk. AI-genererede watercolor-illustrationer
+ * i konsistent dansk skandinavisk stil.
+ */
 function HowItWorks() {
   const steps = [
     {
-      Icon: Pencil,
+      img: '/salg-photos/flow/01-beskriv.png',
       title: 'Beskriv din bolig',
       time: '5 minutter',
-      body: 'Adresse, fotos og udgifter. Vi henter offentlig data automatisk.',
+      body: 'Adresse, fotos og udgifter. Vi henter offentlig data fra OIS automatisk.',
     },
     {
-      Icon: Sparkles,
+      img: '/salg-photos/flow/02-estimat.png',
       title: 'Få et foreløbigt tilbud',
       time: 'Med det samme',
       body: 'Bygget på sammenlignelige tinglyste handler i din ejerforening og område.',
     },
     {
-      Icon: Home,
+      img: '/salg-photos/flow/03-besigtigelse.png',
       title: 'Gratis besigtigelse',
       time: 'Indenfor 24 timer',
-      body: 'Vi kommer forbi, ser boligen, snakker om dine ønsker.',
+      body: 'Vi kommer forbi, ser boligen, snakker om dine ønsker og overtagelsesdato.',
     },
     {
-      Icon: Handshake,
+      img: '/salg-photos/flow/04-handel.png',
       title: 'Bindende tilbud + handel',
       time: '14 dage – 6 mdr',
-      body: 'Du vælger overtagelsesdato. Kontant betaling, ingen mægler.',
+      body: 'Du vælger overtagelsesdato. Kontant betaling, ingen mægler, ingen forbehold.',
     },
   ];
   return (
-    <div className="space-y-5 pt-6">
-      <div className="text-center">
+    <div className="space-y-6 pt-8 border-t border-dashed border-slate-300">
+      <div className="text-center space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
           Sådan foregår det
         </p>
+        <h2 className="text-2xl font-semibold text-slate-900">
+          Fra adresse til handel på fire skridt
+        </h2>
       </div>
-      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {steps.map((s, i) => (
           <li
             key={s.title}
-            className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3"
+            className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col gap-3 relative"
           >
-            <div className="flex items-center justify-between">
-              <span className="w-8 h-8 rounded-full bg-slate-900 text-white text-sm font-semibold flex items-center justify-center">
-                {i + 1}
-              </span>
-              <s.Icon className="w-5 h-5 text-slate-400" strokeWidth={1.5} />
+            {/* Step number badge — overlapper øverst */}
+            <div className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-slate-900 text-white text-base font-bold flex items-center justify-center shadow-md ring-4 ring-white">
+              {i + 1}
             </div>
+
+            {/* Hand-drawn illustration */}
+            <div className="aspect-square rounded-2xl bg-gradient-to-br from-slate-50 to-amber-50/30 overflow-hidden">
+              <img
+                src={s.img}
+                alt={s.title}
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            </div>
+
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-wider text-slate-500 font-medium">
+              <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">
                 {s.time}
               </p>
               <h3 className="text-base font-semibold text-slate-900 leading-snug">
@@ -92,10 +109,12 @@ function HowItWorks() {
           </li>
         ))}
       </ol>
-      <p className="text-xs text-slate-500 text-center">
-        Inspections-garanti: hvis vores endelige tilbud efter besigtigelse afviger mere end 5%,
-        kan du trække dig uden konsekvens.
-      </p>
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 max-w-3xl mx-auto">
+        <p className="text-sm text-emerald-900 text-center">
+          <strong>Inspections-garanti:</strong> hvis vores endelige tilbud efter besigtigelse
+          afviger mere end 5%, kan du trække dig uden konsekvens.
+        </p>
+      </div>
     </div>
   );
 }
