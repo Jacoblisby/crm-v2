@@ -10,11 +10,10 @@
  */
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { onMarketCandidates } from '@/lib/db/schema';
+import { onMarketCandidates, properties } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
 import { estimateMonthlyRent } from '@/lib/services/our-rentals';
 
-const MONTHLY_EXPENSE_BUFFER = 1.3;
 const REFURB_DEFAULT_PER_SQM = 450; // middel-stand fallback
 
 // Postnr-baseret leje-fallback hvis vi ikke har lejedata for nærområdet.
@@ -54,11 +53,21 @@ function deriveLejeMd(postalCode: string | null, kvm: number | null, roadName?: 
 }
 
 export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
-  const all = await db.select().from(onMarketCandidates);
+  // LEFT JOIN properties for at få grundskyld-data (kun hvis BFE-match)
+  const all = await db
+    .select({
+      candidate: onMarketCandidates,
+      grundskyld: properties.grundskyldKr,
+    })
+    .from(onMarketCandidates)
+    .leftJoin(properties, eq(onMarketCandidates.propertyId, properties.id));
   let updated = 0;
   let skipped = 0;
 
-  for (const c of all) {
+  for (const row of all) {
+    const c = row.candidate;
+    const grundskyld = row.grundskyld ?? 0;
+
     const driftFromBreakdown =
       c.costGrundvaerdi +
       c.costFaellesudgifter +
@@ -71,13 +80,18 @@ export async function recomputeAllOnMarketAfkast(): Promise<RecomputeResult> {
       c.costVedligeholdelse +
       c.costAndreDrift;
 
-    // Hvis salgsopstilling ikke parsed: fallback til monthlyExpense × 12 × buffer
+    // Drift-hierarki (skiftet 2026-05-13: droppét 1.3x buffer der inflatede
+    // tallet ift. mægler-annoncen):
+    //   1. PDF cost-breakdown sum hvis > 0 (mest præcis)
+    //   2. Ellers monthlyExpense × 12 + grundskyld (matcher mægler × 12 +
+    //      ejendomsskat fra OIS hvis vi har BFE-match)
+    //   3. Ellers 0 (skip)
     const driftTotal =
       driftFromBreakdown > 0
         ? driftFromBreakdown
         : c.monthlyExpense
-          ? Math.round(c.monthlyExpense * 12 * MONTHLY_EXPENSE_BUFFER)
-          : 0;
+          ? c.monthlyExpense * 12 + grundskyld
+          : grundskyld; // mindst grundskyld hvis vi har det
 
     const refurbTotal =
       c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;

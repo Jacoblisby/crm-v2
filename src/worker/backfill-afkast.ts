@@ -14,7 +14,7 @@
  */
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { onMarketCandidates } from '@/lib/db/schema';
+import { onMarketCandidates, properties } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
 
 // Konservative leje-satser pr. postnr (kr/m²/md, ejerlejlighed udlejning)
@@ -49,20 +49,28 @@ export async function runBackfillAfkastJob(opts: {
   let attempted = 0, updated = 0, skipped = 0;
   const errors: string[] = [];
 
-  const candidates = opts.listingId
-    ? await db
-        .select()
-        .from(onMarketCandidates)
-        .where(eq(onMarketCandidates.id, opts.listingId))
-    : await db
-        .select()
-        .from(onMarketCandidates)
-        .where(eq(onMarketCandidates.status, 'active'));
+  const baseQuery = db
+    .select({
+      candidate: onMarketCandidates,
+      grundskyld: properties.grundskyldKr,
+    })
+    .from(onMarketCandidates)
+    .leftJoin(properties, eq(onMarketCandidates.propertyId, properties.id));
 
-  for (const c of candidates) {
+  const candidates = opts.listingId
+    ? await baseQuery.where(eq(onMarketCandidates.id, opts.listingId))
+    : await baseQuery.where(eq(onMarketCandidates.status, 'active'));
+
+  for (const row of candidates) {
+    const c = row.candidate;
+    const grundskyld = row.grundskyld ?? 0;
     attempted++;
     try {
-      // Drift hierarki: PDF cost breakdown (sum) → monthlyExpense*12 → 0
+      // Drift-hierarki (samme som recompute-on-market):
+      //   1. PDF cost-breakdown sum hvis > 0
+      //   2. monthlyExpense × 12 + grundskyld (matcher mægler-annonce + OIS)
+      //   3. Grundskyld alene hvis vi har det
+      //   4. 0
       const costBreakdownSum =
         c.costGrundvaerdi +
         c.costFaellesudgifter +
@@ -76,8 +84,10 @@ export async function runBackfillAfkastJob(opts: {
         c.costAndreDrift;
 
       let driftTotal = costBreakdownSum;
-      if (driftTotal === 0 && c.monthlyExpense) {
-        driftTotal = c.monthlyExpense * 12;
+      if (driftTotal === 0) {
+        driftTotal = c.monthlyExpense
+          ? c.monthlyExpense * 12 + grundskyld
+          : grundskyld;
       }
 
       const refurbTotal =
