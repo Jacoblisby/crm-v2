@@ -17,6 +17,7 @@ import {
 import { useFunnel } from '../FunnelContext';
 import type { StandLevel } from '@/lib/services/price-engine';
 import type { FunnelState } from '../types';
+import { PhotoCardStand, type RoomType } from '../components/PhotoCardStand';
 
 /**
  * Step 2 — Sadan ser din bolig ud (Opendoor-style sub-screens).
@@ -445,6 +446,15 @@ function RoomScreen({
   whyText?: string;
   children?: React.ReactNode;
 }) {
+  // Map slotKey to RoomType for PhotoCardStand
+  const roomType: RoomType =
+    slotKey === 'kokken'
+      ? 'kokken'
+      : slotKey === 'bad'
+        ? 'bad'
+        : slotKey === 'stue'
+          ? 'stue'
+          : 'sov';
   const [showWhy, setShowWhy] = useState(false);
   return (
     <div className="space-y-5">
@@ -475,46 +485,13 @@ function RoomScreen({
         </div>
       )}
 
-      {/* PRIMARY: stand cards */}
-      <div className="space-y-2">
-        {options.map((opt) => {
-          const active = selectedStand === opt.level;
-          return (
-            <button
-              key={opt.level}
-              type="button"
-              onClick={() => onStandSelect(opt.level)}
-              className={`w-full text-left p-4 rounded-lg border transition-all ${
-                active
-                  ? 'border-slate-900 bg-slate-900 text-white'
-                  : 'border-slate-200 hover:border-slate-400 bg-white'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={`font-semibold ${
-                      active ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {opt.title}
-                  </div>
-                  <div
-                    className={`text-sm leading-relaxed ${
-                      active ? 'text-slate-300' : 'text-slate-600'
-                    }`}
-                  >
-                    {opt.desc}
-                  </div>
-                </div>
-                {active && (
-                  <Check className="w-4 h-4 text-white shrink-0" strokeWidth={3} />
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      {/* PRIMARY: photo cards — inspireret af Opendoor + Zillow.
+          Visuel kalibrering > tekst-radios (genkendelse vs hukommelse). */}
+      <PhotoCardStand
+        room={roomType}
+        value={selectedStand}
+        onChange={onStandSelect}
+      />
 
       {/* Optional fields (årgang etc) */}
       {children}
