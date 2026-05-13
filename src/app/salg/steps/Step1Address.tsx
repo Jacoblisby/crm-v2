@@ -5,6 +5,7 @@ import { Lock, Check } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { searchAddressAction, lookupAddressAction, submitOutOfAreaLeadAction } from '../actions';
 import type { DawaSuggestion } from '@/lib/services/dawa';
+import { Counter, CounterWithInput } from '../components/Counter';
 
 const SUPPORTED_POSTAL_CODES = ['2630', '4000', '4100', '4400', '4700'];
 
@@ -183,6 +184,20 @@ export function Step1Address() {
         )}
       </div>
 
+      {/* Maegler-filter inspireret af Zillow's first-step agent-filtrering — vi
+          luger researching brokers/agents ud INDEN de bruger 3 min af flowet */}
+      {!hasAddress && (
+        <p className="text-xs text-slate-500">
+          Er du mægler eller laver research?{' '}
+          <a
+            href="mailto:jacob@faurholt.com?subject=Mægler-forespørgsel"
+            className="text-slate-700 underline hover:text-slate-900"
+          >
+            Skriv direkte til Jacob →
+          </a>
+        </p>
+      )}
+
       {lookupPending && (
         <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-600">
           Henter bolig-data fra OIS…
@@ -211,27 +226,34 @@ export function Step1Address() {
             <span>Vi har fundet din lejlighed</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            <Field
+            <CounterWithInput
               label="m²"
               value={state.kvm}
               onChange={(v) => update({ kvm: v })}
-              type="number"
+              min={10}
+              max={500}
+              step={5}
+              suffix="m²"
             />
-            <Field
+            <Counter
               label="Værelser"
               value={state.rooms}
               onChange={(v) => update({ rooms: v })}
-              type="number"
+              min={1}
+              max={12}
+              step={1}
             />
-            <Field
+            <CounterWithInput
               label="Byggeår"
               value={state.yearBuilt}
               onChange={(v) => update({ yearBuilt: v })}
-              type="number"
+              min={1800}
+              max={new Date().getFullYear()}
+              step={1}
             />
             <div>
-              <div className="text-xs text-slate-500 mb-1">BFE-nr</div>
-              <div className="text-sm font-medium text-slate-700">
+              <div className="text-xs text-slate-500 mb-1.5">BFE-nr</div>
+              <div className="px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg h-10 flex items-center">
                 {state.bfeNumber ?? '–'}
               </div>
             </div>

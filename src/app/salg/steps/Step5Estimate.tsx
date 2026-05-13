@@ -45,22 +45,51 @@ export function Step5Estimate() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (pending && !estimate) {
+    // Blurred estimat-teaser inspireret af Casavo's contact-gate-reveal —
+    // visuel commitment device: brugeren ser at noget kommer, bygger anticipation
+    // under den korte ventetid hvor vi kører comparables + ROE-modellen.
     return (
-      <div className="text-center py-12 space-y-4">
-        <h2 className="text-xl font-semibold text-slate-900">Beregner dit estimat</h2>
-        <p className="text-sm text-slate-500">
-          Vi finder sammenlignelige handler og kører afkast-modellen
-        </p>
-        <div className="flex justify-center gap-1 mt-4">
-          <span className="w-2 h-2 bg-slate-900 rounded-full animate-pulse" />
-          <span
-            className="w-2 h-2 bg-slate-900 rounded-full animate-pulse"
-            style={{ animationDelay: '0.2s' }}
-          />
-          <span
-            className="w-2 h-2 bg-slate-900 rounded-full animate-pulse"
-            style={{ animationDelay: '0.4s' }}
-          />
+      <div className="space-y-6 py-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-xl font-semibold text-slate-900">Beregner dit estimat</h2>
+          <p className="text-sm text-slate-500">
+            Vi finder sammenlignelige handler i {state.postalCode} {state.city} og kører
+            afkast-modellen
+          </p>
+        </div>
+
+        {/* Blurred preview card — Casavo-style */}
+        <div className="relative max-w-md mx-auto">
+          <div className="bg-slate-900 rounded-2xl p-8 text-center shadow-xl">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-400 font-medium mb-2">
+              Dit foreløbige tilbud
+            </div>
+            <div className="text-5xl font-bold text-white blur-md select-none tabular-nums">
+              1.857.000 kr
+            </div>
+            <div className="text-xs text-slate-400 mt-3 blur-sm">
+              {state.fullAddress || 'Din adresse'}
+            </div>
+          </div>
+          {/* Loading dots overlay */}
+          <div className="absolute inset-x-0 -bottom-3 flex justify-center">
+            <div className="bg-white border border-slate-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-md">
+              <span className="w-1.5 h-1.5 bg-slate-900 rounded-full animate-pulse" />
+              <span
+                className="w-1.5 h-1.5 bg-slate-900 rounded-full animate-pulse"
+                style={{ animationDelay: '0.2s' }}
+              />
+              <span
+                className="w-1.5 h-1.5 bg-slate-900 rounded-full animate-pulse"
+                style={{ animationDelay: '0.4s' }}
+              />
+              <span className="text-xs text-slate-600 ml-1">Beregner</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center text-xs text-slate-400 pt-4">
+          Bygger på tinglyste handler og vores egne 218 udlejede ejerlejligheder
         </div>
       </div>
     );
