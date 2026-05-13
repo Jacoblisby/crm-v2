@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { Check, Phone, Video } from 'lucide-react';
+import { Check, Phone, Video, Sparkles } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { submitFunnelAction } from '../submit-action';
 import type { computeEstimate } from '@/lib/services/price-engine';
@@ -17,10 +17,15 @@ export function Step5Estimate() {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [leadId, setLeadId] = useState<string | null>(null);
+  // Reveal-gate (inspireret af Casavo): bruger SER blurred tilbud INDEN submit
+  // og klikker eksplicit for at afsløre. Skaber commitment + anticipation.
+  // Contact-data har vi allerede fra Step1 (lead-recovery), så det er
+  // ren UX-magi uden at flytte data-indsamling.
+  const [revealClicked, setRevealClicked] = useState(false);
 
-  // Submit automatisk når step 6 åbnes
-  useEffect(() => {
-    if (submitted || pending || estimate) return;
+  function triggerReveal() {
+    if (revealClicked || submitted || pending || estimate) return;
+    setRevealClicked(true);
 
     startTransition(async () => {
       // Hent fotos fra sessionStorage
@@ -42,7 +47,93 @@ export function Step5Estimate() {
         setError(r.error || 'Kunne ikke beregne estimat');
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }
+
+  // Pre-reveal gate: vis blurred tilbud + eksplicit "Afslør" CTA.
+  // Inspireret af Casavo's blurred preview-skærm der hooker brugeren.
+  if (!revealClicked && !estimate) {
+    return (
+      <div className="space-y-8 py-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs font-medium text-amber-900">
+            <Sparkles className="w-3 h-3" strokeWidth={2.5} />
+            Klar til at se dit tilbud
+          </div>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            Dit foreløbige tilbud er klart
+          </h2>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
+            Vi har analyseret tinglyste handler i {state.postalCode} {state.city || 'dit område'}
+            {' '}og kørt afkast-modellen på dine data
+          </p>
+        </div>
+
+        <div className="relative max-w-md mx-auto">
+          <div className="bg-slate-900 rounded-2xl p-8 text-center shadow-xl">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-400 font-medium mb-3">
+              365 Ejendomme byder
+            </div>
+            <div className="text-5xl font-bold text-white blur-md select-none tabular-nums">
+              1.857.000 kr
+            </div>
+            <div className="text-xs text-slate-400 mt-3 blur-sm">
+              {state.fullAddress || 'Din adresse'} · {state.kvm ?? '—'} m²
+            </div>
+            <div className="mt-5 pt-5 border-t border-slate-700 flex items-center justify-center gap-4 text-xs text-slate-400">
+              <div>
+                <div className="font-semibold text-white blur-sm">12+</div>
+                <div className="mt-0.5">Comparables</div>
+              </div>
+              <div className="w-px h-8 bg-slate-700" />
+              <div>
+                <div className="font-semibold text-white blur-sm">3</div>
+                <div className="mt-0.5">i samme EF</div>
+              </div>
+              <div className="w-px h-8 bg-slate-700" />
+              <div>
+                <div className="font-semibold text-white blur-sm">22.4k</div>
+                <div className="mt-0.5">kr/m²</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-3">
+          <button
+            onClick={triggerReveal}
+            className="px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-semibold text-base shadow-lg transition-all hover:scale-[1.02] inline-flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+            Afslør mit tilbud
+          </button>
+          <p className="text-xs text-slate-500">
+            Bindende tilbud gives først efter en gratis besigtigelse — du er ikke forpligtet
+          </p>
+        </div>
+
+        <div className="flex items-center justify-center gap-6 pt-4 text-xs text-slate-500">
+          <span className="flex items-center gap-1">
+            <Check className="w-3 h-3 text-emerald-600" strokeWidth={3} /> Ingen mæglersalær
+          </span>
+          <span className="flex items-center gap-1">
+            <Check className="w-3 h-3 text-emerald-600" strokeWidth={3} /> Kontant betaling
+          </span>
+          <span className="flex items-center gap-1">
+            <Check className="w-3 h-3 text-emerald-600" strokeWidth={3} /> 5%-garanti
+          </span>
+        </div>
+
+        <div className="text-center pt-2">
+          <button
+            onClick={prev}
+            className="text-xs text-slate-500 hover:text-slate-700 underline"
+          >
+            ← Tilbage og ret data
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (pending && !estimate) {
     // Blurred estimat-teaser inspireret af Casavo's contact-gate-reveal —
