@@ -17,7 +17,7 @@ export default function SalgPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
               365 Ejendomme · Vi opkøber kontant
             </p>
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-[1.05]">
+            <h1 className="font-display text-5xl sm:text-7xl font-semibold text-slate-900 leading-[1.02] text-balance">
               Hvad er din bolig værd?
             </h1>
             <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">

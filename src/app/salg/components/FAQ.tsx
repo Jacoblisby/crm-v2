@@ -173,7 +173,7 @@ export function FAQ() {
         <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
           Spørgsmål sælgere ofte stiller
         </p>
-        <h2 className="text-2xl font-semibold text-slate-900">
+        <h2 className="font-display text-3xl font-semibold text-slate-900 leading-tight">
           Det skal du vide først
         </h2>
       </div>

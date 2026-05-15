@@ -78,7 +78,7 @@ function HowItWorks() {
         <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
           Sådan foregår det
         </p>
-        <h2 className="text-2xl font-semibold text-slate-900">
+        <h2 className="font-display text-3xl font-semibold text-slate-900 leading-tight">
           Fra adresse til handel på fire skridt
         </h2>
       </div>
