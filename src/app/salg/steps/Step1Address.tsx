@@ -139,84 +139,93 @@ export function Step1Address() {
           : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Adresse-bekraeftelse — vi har allerede adressen fra hero-input.
+          Her viser vi en compact confirmation + edit-link. */}
+      {hasAddress && (
+        <div className="flex items-start justify-between gap-4 bg-brand-50/50 rounded-2xl p-4 border border-brand-100">
+          <div className="flex items-start gap-3 min-w-0">
+            <div
+              aria-hidden="true"
+              className="w-9 h-9 rounded-full bg-brand-700 text-white flex items-center justify-center shrink-0"
+            >
+              <Check className="w-4 h-4" strokeWidth={3} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] uppercase tracking-wider text-brand-700 font-semibold">
+                Adresse fundet
+              </div>
+              <div className="text-[15px] font-semibold text-ink truncate">
+                {state.fullAddress}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              update({
+                addressId: '',
+                fullAddress: '',
+                postalCode: '',
+                city: '',
+                streetName: '',
+                houseNumber: '',
+                floor: '',
+                door: '',
+                bfeNumber: null,
+                latitude: null,
+                longitude: null,
+                kvm: null,
+                rooms: null,
+                yearBuilt: null,
+                energyClass: null,
+                currentListingPrice: null,
+                caseUrl: null,
+                isOnMarket: false,
+              });
+            }}
+            className="text-xs font-semibold text-brand-700 hover:text-brand-900 shrink-0 px-2 py-1"
+          >
+            Skift
+          </button>
+        </div>
+      )}
+
       <div className="space-y-2">
-        <p className="section-overline">Trin 1 · Adresse</p>
         <h2
           id="step1-heading"
           className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight"
         >
-          Hvor ligger din lejlighed?
+          Lidt info om dig
         </h2>
         <p id="step1-helper" className="text-[15px] text-muted text-pretty leading-relaxed">
-          Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
-        </p>
-        <p className="text-xs text-muted flex items-center gap-1.5 pt-1">
-          <Lock className="w-3 h-3" strokeWidth={2} />
-          Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
+          Vi sender dit foreløbige tilbud på email + SMS, og ringer indenfor 24 timer
+          for at aftale gratis besigtigelse.
         </p>
       </div>
 
-      <div ref={wrapperRef} className="relative">
-        <label htmlFor="address-input" className="sr-only">
-          Boligens adresse
-        </label>
-        {/* Opendoor-style pill input med inline search-icon */}
-        <div className="relative flex items-center bg-brand-50/30 rounded-full border border-brand-200 focus-within:border-brand-700 focus-within:bg-white transition-colors">
-          <Search
-            className="absolute left-5 w-5 h-5 text-brand-500 pointer-events-none"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          <input
-            id="address-input"
-            name="address"
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => results.length > 0 && setShowResults(true)}
-            placeholder="Indtast din adresse"
-            className="w-full pl-14 pr-4 py-4 sm:py-5 text-base bg-transparent placeholder:text-brand-300 focus:outline-none text-ink"
-            autoComplete="street-address"
-            aria-labelledby="step1-heading"
-            aria-describedby="step1-helper"
-          />
-        </div>
-        {pending && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-            Søger…
-          </div>
-        )}
-
-        {showResults && results.length > 0 && (
-          <ul className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-30 max-h-72 overflow-y-auto">
-            {results.map((s) => (
-              <li key={s.adresse.id}>
-                <button
-                  type="button"
-                  onClick={() => selectAddress(s)}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 border-b border-slate-100 last:border-b-0"
-                >
-                  {s.tekst}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      {/* Skjult input-wrapper — bevarer eksisterende DAWA-state hvis brugeren
+          klikker Skift (vi bruger HeroAddressInput's selectAddress derefter,
+          men holder local query-state). */}
+      <div ref={wrapperRef} className="hidden" aria-hidden="true">
+        <input
+          id="address-input"
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-hidden="true"
+        />
       </div>
-
-      {/* Maegler-filter inspireret af Zillow's first-step agent-filtrering — vi
-          luger researching brokers/agents ud INDEN de bruger 3 min af flowet */}
-      {!hasAddress && (
-        <p className="text-xs text-slate-500">
-          Er du mægler eller laver research?{' '}
-          <a
-            href="mailto:jacob@faurholt.com?subject=Mægler-forespørgsel"
-            className="text-slate-700 underline hover:text-slate-900"
-          >
-            Skriv direkte til Jacob →
-          </a>
-        </p>
+      {showResults && results.length > 0 && (
+        <ul className="hidden">
+          {results.map((s) => (
+            <li key={s.adresse.id}>
+              <button type="button" onClick={() => selectAddress(s)}>
+                {s.tekst}
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
 
       {lookupPending && (
