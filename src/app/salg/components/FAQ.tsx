@@ -168,12 +168,18 @@ export function FAQ() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
-    <section className="space-y-5 pt-8 border-t border-dashed border-slate-300">
+    <section
+      aria-labelledby="faq-title"
+      className="space-y-5 pt-8 border-t border-dashed border-slate-300"
+    >
       <div className="text-center space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
           Spørgsmål sælgere ofte stiller
         </p>
-        <h2 className="font-display text-3xl font-semibold text-slate-900 leading-tight">
+        <h2
+          id="faq-title"
+          className="font-display text-3xl font-semibold text-slate-900 leading-tight"
+        >
           Det skal du vide først
         </h2>
       </div>
