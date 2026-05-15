@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useFunnel } from './FunnelContext';
 import { Step1Address } from './steps/Step1Address';
 import { Step2Bolig } from './steps/Step2Bolig';
@@ -73,12 +74,18 @@ function HowItWorks() {
     },
   ];
   return (
-    <div className="space-y-6 pt-8 border-t border-dashed border-slate-300">
+    <section
+      aria-labelledby="how-it-works-title"
+      className="space-y-6 pt-8 border-t border-dashed border-slate-300"
+    >
       <div className="text-center space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
           Sådan foregår det
         </p>
-        <h2 className="font-display text-3xl font-semibold text-slate-900 leading-tight">
+        <h2
+          id="how-it-works-title"
+          className="font-display text-3xl font-semibold text-slate-900 leading-tight"
+        >
           Fra adresse til handel på fire skridt
         </h2>
       </div>
@@ -89,28 +96,34 @@ function HowItWorks() {
             className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col gap-3 relative"
           >
             {/* Step number badge — overlapper øverst */}
-            <div className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-slate-900 text-white text-base font-bold flex items-center justify-center shadow-md ring-4 ring-white">
+            <div
+              aria-hidden="true"
+              className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-slate-900 text-white text-base font-bold flex items-center justify-center shadow-md ring-4 ring-white"
+            >
               {i + 1}
             </div>
 
-            {/* Hand-drawn illustration */}
+            {/* Hand-drawn illustration — eksplicit width/height undgaar CLS */}
             <div className="aspect-square rounded-2xl bg-gradient-to-br from-slate-50 to-amber-50/30 overflow-hidden">
-              <img
+              <Image
                 src={s.img}
                 alt={s.title}
+                width={600}
+                height={600}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 className="w-full h-full object-contain"
-                loading="lazy"
               />
             </div>
 
             <div className="space-y-1">
               <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">
+                <span className="sr-only">Trin {i + 1}, </span>
                 {s.time}
               </p>
               <h3 className="text-base font-semibold text-slate-900 leading-snug">
                 {s.title}
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{s.body}</p>
+              <p className="text-sm text-slate-600 leading-relaxed text-pretty">{s.body}</p>
             </div>
           </li>
         ))}
@@ -121,7 +134,7 @@ function HowItWorks() {
           afviger mere end 5%, kan du trække dig uden konsekvens.
         </p>
       </div>
-    </div>
+    </section>
   );
 }
 
