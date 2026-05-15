@@ -181,6 +181,8 @@ export function FAQ() {
       <div className="max-w-3xl mx-auto space-y-2">
         {ITEMS.map((item, idx) => {
           const isOpen = openIdx === idx;
+          const triggerId = `faq-trigger-${idx}`;
+          const panelId = `faq-panel-${idx}`;
           return (
             <div
               key={item.q}
@@ -189,10 +191,12 @@ export function FAQ() {
               }`}
             >
               <button
+                id={triggerId}
                 type="button"
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
                 className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
                 aria-expanded={isOpen}
+                aria-controls={panelId}
               >
                 <span
                   className={`text-base font-semibold ${
@@ -207,15 +211,20 @@ export function FAQ() {
                       ? 'bg-amber-100 text-amber-700 rotate-45'
                       : 'bg-slate-100 text-slate-600'
                   }`}
+                  aria-hidden="true"
                 >
                   <Plus className="w-5 h-5" strokeWidth={2.5} />
                 </span>
               </button>
-              {isOpen && (
-                <div className="px-5 pb-5 pt-1 border-t border-slate-100">
-                  <div className="pt-4">{item.a}</div>
-                </div>
-              )}
+              <div
+                id={panelId}
+                role="region"
+                aria-labelledby={triggerId}
+                hidden={!isOpen}
+                className="px-5 pb-5 pt-1 border-t border-slate-100"
+              >
+                <div className="pt-4">{item.a}</div>
+              </div>
             </div>
           );
         })}
