@@ -75,25 +75,23 @@ function HeroSection() {
       aria-labelledby="hero-title"
       className="relative w-full min-h-[680px] sm:min-h-[760px] bg-brand-800 overflow-hidden flex items-center"
     >
-      {/* Brand-gradient baggrund */}
+      {/* Lifestyle-foto: dansk lejlighed interior, varmt lys */}
+      <Image
+        src="/salg-photos/hero/danish-apartment-1.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
+      {/* Teal overlay-gradient — sikrer hvid tekst-laesbarhed paa foto */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 70% 30%, var(--teal-500) 0%, var(--teal-700) 35%, var(--teal-800) 75%, var(--teal-900) 100%)',
+            'linear-gradient(105deg, rgba(26,54,54,0.92) 0%, rgba(44,92,93,0.85) 45%, rgba(44,92,93,0.55) 75%, rgba(44,92,93,0.35) 100%)',
         }}
-      />
-      {/* Warm-tone orbs */}
-      <div
-        aria-hidden="true"
-        className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-25 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #d4a574 0%, transparent 60%)' }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -bottom-40 -left-20 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #e8c89a 0%, transparent 60%)' }}
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full pt-24 pb-16 sm:pb-20">

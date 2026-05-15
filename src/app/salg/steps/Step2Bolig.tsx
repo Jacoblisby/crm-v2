@@ -458,14 +458,19 @@ function RoomScreen({
           : 'sov';
   const [showWhy, setShowWhy] = useState(false);
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
+        <div className="space-y-2 flex-1">
           <div className="flex items-center gap-2">
-            <Icon className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
-            <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+            <Icon className="w-5 h-5 text-brand-700" strokeWidth={2} />
+            <p className="text-[11px] uppercase tracking-wider text-brand-700 font-semibold">
+              Boligens stand
+            </p>
           </div>
-          <p className="text-sm text-slate-600">
+          <h2 className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight">
+            {title}
+          </h2>
+          <p className="text-[15px] text-muted leading-relaxed text-pretty">
             Vælg det niveau der bedst beskriver {title.toLowerCase()}.
           </p>
         </div>
@@ -473,7 +478,7 @@ function RoomScreen({
           <button
             type="button"
             onClick={() => setShowWhy(!showWhy)}
-            className="text-xs text-slate-500 underline hover:text-slate-700 shrink-0 mt-1"
+            className="text-xs text-muted underline hover:text-brand-700 shrink-0 mt-1"
           >
             {showWhy ? 'Skjul' : 'Hvorfor spørger vi?'}
           </button>
@@ -536,12 +541,17 @@ function RestenScreen({
   onPhotoRemove: (slotKey: string) => void;
 }) {
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-slate-900">Sidste detaljer</h2>
-        <p className="text-sm text-slate-600">
-          Hvidevarer, særlige forhold og evt. udlejning. Alt er valgfrit — du kan også
-          springe videre.
+    <div className="space-y-7">
+      <div className="space-y-2">
+        <p className="text-[11px] uppercase tracking-wider text-brand-700 font-semibold">
+          Detaljer om boligen
+        </p>
+        <h2 className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight">
+          Sidste detaljer
+        </h2>
+        <p className="text-[15px] text-muted leading-relaxed text-pretty">
+          Hvidevarer, særlige forhold og evt. udlejning. Alt er valgfrit — du kan
+          også springe videre.
         </p>
       </div>
 

@@ -56,10 +56,15 @@ export function Step4Profile() {
   const showBoligstotte = showAgeFollowUp && state.isOver65 === 'ja';
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-slate-900">Lidt om dig</h2>
-        <p className="text-sm text-slate-500">
+    <div className="space-y-7">
+      <div className="space-y-2">
+        <p className="text-[11px] uppercase tracking-wider text-brand-700 font-semibold">
+          Din situation
+        </p>
+        <h2 className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight">
+          Lidt om dig
+        </h2>
+        <p className="text-[15px] text-muted leading-relaxed text-pretty">
           Vi bruger det her til at finde den løsning der passer dig — fx kontant salg,
           sale-leaseback eller noget tredje. Alt er valgfrit.
         </p>

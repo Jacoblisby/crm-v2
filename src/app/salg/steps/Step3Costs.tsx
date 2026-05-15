@@ -21,12 +21,17 @@ export function Step3Costs() {
     : state.heatUsageLastYearKr;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold">Faste udgifter</h2>
-        <p className="text-sm text-slate-500">
-          <strong>Alle beløb er årlige (kr/år)</strong>. Vi bruger dem til at beregne afkastet —
-          jo præcisere data, jo bedre tilbud.
+    <div className="space-y-7">
+      <div className="space-y-2">
+        <p className="text-[11px] uppercase tracking-wider text-brand-700 font-semibold">
+          Udgifter
+        </p>
+        <h2 className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight">
+          Faste udgifter
+        </h2>
+        <p className="text-[15px] text-muted leading-relaxed text-pretty">
+          <strong className="text-ink">Alle beløb er årlige (kr/år).</strong> Vi bruger
+          dem til at beregne afkastet — jo præcisere data, jo bedre tilbud.
         </p>
       </div>
 
