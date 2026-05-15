@@ -168,20 +168,18 @@ export function FAQ() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
-    <section
-      aria-labelledby="faq-title"
-      className="space-y-8 pt-12 border-t border-slate-200"
-    >
-      <div className="text-center space-y-3 max-w-xl mx-auto">
+    <section aria-labelledby="faq-title" className="max-w-5xl mx-auto space-y-8">
+      <div className="space-y-2 max-w-2xl">
+        <p className="text-sm text-stone-600">Spørgsmål sælgere ofte stiller</p>
         <h2
           id="faq-title"
-          className="font-black tracking-tight text-3xl sm:text-4xl text-slate-900 leading-tight text-balance"
+          className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight"
         >
           Ofte stillede spørgsmål
         </h2>
       </div>
 
-      <div className="max-w-3xl mx-auto divide-y divide-slate-200 border-y border-slate-200">
+      <div className="max-w-3xl bg-white rounded-2xl divide-y divide-stone-200/70 overflow-hidden">
         {ITEMS.map((item, idx) => {
           const isOpen = openIdx === idx;
           const triggerId = `faq-trigger-${idx}`;
@@ -192,7 +190,7 @@ export function FAQ() {
                 id={triggerId}
                 type="button"
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
-                className="w-full flex items-center justify-between gap-4 py-5 text-left hover:bg-slate-50/60 transition-colors px-1"
+                className="w-full flex items-center justify-between gap-4 px-5 sm:px-7 py-5 sm:py-6 text-left hover:bg-stone-50/70 transition-colors"
                 aria-expanded={isOpen}
                 aria-controls={panelId}
               >
@@ -200,7 +198,7 @@ export function FAQ() {
                   {item.q}
                 </span>
                 <span
-                  className={`shrink-0 text-slate-500 transition-transform duration-200 ${
+                  className={`shrink-0 text-stone-500 transition-transform duration-200 ${
                     isOpen ? 'rotate-45 text-slate-900' : ''
                   }`}
                   aria-hidden="true"
@@ -213,7 +211,7 @@ export function FAQ() {
                 role="region"
                 aria-labelledby={triggerId}
                 hidden={!isOpen}
-                className="pb-5 pr-8 -mt-1"
+                className="px-5 sm:px-7 pb-6 -mt-1"
               >
                 {item.a}
               </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef } from 'react';
-import { Lock, Check } from 'lucide-react';
+import { Lock, Check, Search } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { searchAddressAction, lookupAddressAction, submitOutOfAreaLeadAction } from '../actions';
 import type { DawaSuggestion } from '@/lib/services/dawa';
@@ -139,15 +139,15 @@ export function Step1Address() {
           : null;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="space-y-2">
-        <h2 id="step1-heading" className="font-bold tracking-tight text-2xl sm:text-[28px] text-slate-900 tracking-tight">
+        <h2 id="step1-heading" className="text-2xl sm:text-[28px] font-semibold text-slate-900 tracking-tight">
           Hvor ligger din lejlighed?
         </h2>
-        <p id="step1-helper" className="text-[15px] text-slate-600 text-pretty leading-relaxed">
+        <p id="step1-helper" className="text-[15px] text-stone-600 text-pretty leading-relaxed">
           Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
         </p>
-        <p className="text-xs text-slate-500 flex items-center gap-1.5 pt-1">
+        <p className="text-xs text-stone-500 flex items-center gap-1.5 pt-1">
           <Lock className="w-3 h-3" strokeWidth={2} />
           Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
         </p>
@@ -157,19 +157,27 @@ export function Step1Address() {
         <label htmlFor="address-input" className="sr-only">
           Boligens adresse
         </label>
-        <input
-          id="address-input"
-          name="address"
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => results.length > 0 && setShowResults(true)}
-          placeholder="Vejnavn + nr, postnr"
-          className="w-full px-5 py-4 text-base border-2 border-slate-200 rounded-xl bg-white placeholder:text-slate-400 focus:outline-none focus:border-slate-900 transition-colors"
-          autoComplete="street-address"
-          aria-labelledby="step1-heading"
-          aria-describedby="step1-helper"
-        />
+        {/* Opendoor-style pill input med inline search-icon button */}
+        <div className="relative flex items-center bg-stone-50 rounded-full border border-stone-200 focus-within:border-slate-900 focus-within:bg-white transition-colors shadow-sm">
+          <Search
+            className="absolute left-5 w-5 h-5 text-stone-400 pointer-events-none"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          <input
+            id="address-input"
+            name="address"
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => results.length > 0 && setShowResults(true)}
+            placeholder="Indtast din adresse"
+            className="w-full pl-14 pr-4 py-4 sm:py-5 text-base bg-transparent placeholder:text-stone-400 focus:outline-none"
+            autoComplete="street-address"
+            aria-labelledby="step1-heading"
+            aria-describedby="step1-helper"
+          />
+        </div>
         {pending && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
             Søger…
@@ -318,12 +326,12 @@ export function Step1Address() {
       {!outOfArea && (
         <div className="flex flex-col items-stretch sm:items-end gap-2 pt-2">
           {showAutoFilled && contactHint && (
-            <span className="text-xs text-slate-600 text-right">{contactHint}</span>
+            <span className="text-xs text-stone-600 text-right">{contactHint}</span>
           )}
           <button
             onClick={continueIfReady}
             disabled={!hasAddress || lookupPending || !contactValid}
-            className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 hover:bg-slate-800 active:bg-black disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors shadow-sm"
+            className="w-full sm:w-auto px-10 py-4 bg-slate-900 hover:bg-slate-800 active:bg-black disabled:bg-stone-300 disabled:text-white disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors"
           >
             Fortsæt
           </button>

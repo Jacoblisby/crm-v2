@@ -21,9 +21,9 @@ const STEP_LABELS = [
 export function Funnel() {
   const { state } = useFunnel();
   return (
-    <div className="space-y-8 max-w-3xl mx-auto">
+    <div className="space-y-10 max-w-3xl mx-auto">
       <ProgressBar step={state.step} />
-      <div className="bg-white border border-slate-200 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04),0_4px_12px_rgba(15,23,42,0.04)] p-5 sm:p-8">
+      <div className="bg-white rounded-3xl shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-4px_rgba(15,23,42,0.06)] p-6 sm:p-10">
         {state.step === 1 && <Step1Address />}
         {state.step === 2 && <Step2Bolig />}
         {state.step === 3 && <Step3Costs />}
@@ -76,16 +76,17 @@ function HowItWorks() {
   return (
     <section
       aria-labelledby="how-it-works-title"
-      className="space-y-8 pt-12 border-t border-slate-200"
+      className="max-w-5xl mx-auto space-y-8"
     >
-      <div className="text-center space-y-3 max-w-xl mx-auto">
+      <div className="space-y-2 max-w-2xl">
+        <p className="text-sm text-stone-600">Sådan foregår det</p>
         <h2
           id="how-it-works-title"
-          className="font-black tracking-tight text-3xl sm:text-4xl text-slate-900 leading-tight text-balance"
+          className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight"
         >
           Fra adresse til handel på fire skridt
         </h2>
-        <p className="text-base text-slate-600 leading-relaxed">
+        <p className="text-base text-stone-600 leading-relaxed">
           Vi gør salget enkelt — fra du udfylder formularen til vi underskriver handlen.
         </p>
       </div>
@@ -93,10 +94,10 @@ function HowItWorks() {
         {steps.map((s, i) => (
           <li
             key={s.title}
-            className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-4 transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
+            className="bg-stone-100/60 rounded-2xl p-5 sm:p-6 flex flex-col gap-4"
           >
-            {/* Hand-drawn illustration — eksplicit width/height undgaar CLS */}
-            <div className="aspect-square rounded-lg bg-slate-50 overflow-hidden">
+            {/* Hand-drawn illustration — bg-white card paa cream container giver layered look */}
+            <div className="aspect-square rounded-xl bg-white overflow-hidden">
               <Image
                 src={s.img}
                 alt={s.title}
@@ -111,25 +112,28 @@ function HowItWorks() {
               <div className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-bold tabular-nums"
+                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-semibold tabular-nums"
                 >
                   {i + 1}
                 </span>
-                <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
+                <p className="text-[11px] uppercase tracking-wider text-stone-600 font-semibold">
                   <span className="sr-only">Trin {i + 1}, </span>
                   {s.time}
                 </p>
               </div>
-              <h3 className="text-base font-bold text-slate-900 leading-snug">{s.title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed text-pretty">{s.body}</p>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 leading-snug">
+                {s.title}
+              </h3>
+              <p className="text-sm text-stone-700 leading-relaxed text-pretty">{s.body}</p>
             </div>
           </li>
         ))}
       </ol>
-      <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-w-3xl mx-auto">
-        <p className="text-sm text-slate-700 text-center leading-relaxed">
-          <strong className="text-slate-900">Inspections-garanti:</strong> hvis vores endelige
-          tilbud efter besigtigelse afviger mere end 5%, kan du trække dig uden konsekvens.
+      <div className="rounded-2xl bg-white p-5 sm:p-6 max-w-3xl">
+        <p className="text-sm text-stone-700 leading-relaxed">
+          <span className="font-semibold text-slate-900">Inspections-garanti:</span> hvis vores
+          endelige tilbud efter besigtigelse afviger mere end 5%, kan du trække dig uden
+          konsekvens.
         </p>
       </div>
     </section>

@@ -1,20 +1,26 @@
 @import "tailwindcss";
 
+/* Opendoor-inspired palette: warm stone-cream baggrund, white cards.
+   Cream gor at hvide cards og bilder "popper" — den klassiske Opendoor-look. */
 :root {
-  --background: #ffffff;
+  --background: #faf7f2; /* warm cream, samme tonale niveau som opendoor.com */
   --foreground: #0f172a; /* slate-900 */
+  --accent: #1e40af; /* Opendoor-style brand blue, til icon-CTA paa form */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-cream: #faf7f2;
+  --color-cream-50: #fdfcfa;
+  --color-cream-100: #f5f0e9;
   --font-sans: "Hanken Grotesk", "Hanken Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff; /* tving lys mode paa /salg public flow */
+    --background: #faf7f2; /* tving lys mode paa public /salg flow */
     --foreground: #0f172a;
   }
 }
@@ -25,7 +31,7 @@ body {
   font-family: "Hanken Grotesk", "Hanken Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Boost placeholder kontrast — browser default er ofte for svag pa iOS/Android */
+/* Boost placeholder kontrast */
 input::placeholder,
 textarea::placeholder {
   color: #94a3b8; /* slate-400 */
