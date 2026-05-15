@@ -1,27 +1,51 @@
 @import "tailwindcss";
 
-/* Opendoor-inspired palette: warm stone-cream baggrund, white cards.
-   Cream gor at hvide cards og bilder "popper" — den klassiske Opendoor-look. */
+/* 365 Ejendomme brand palette — fra 365ejendom.dk/hjem/vores-boliger/
+   Deep teal accent, light cool green neutral, warm gray body.
+   Opendoor's layout-monster + 365's farver. */
 :root {
-  --background: #faf7f2; /* warm cream, samme tonale niveau som opendoor.com */
-  --foreground: #0f172a; /* slate-900 */
-  --accent: #1e40af; /* Opendoor-style brand blue, til icon-CTA paa form */
+  --background: #f3f6f3; /* 365's light cool green neutral */
+  --foreground: #1a2829; /* slightly mere kontrast end 365 default for laesbarhed */
+  --muted: #4f5655; /* 365's warm gray body */
+
+  --teal-50: #ecf2f1;
+  --teal-100: #d5e2e1;
+  --teal-200: #aac6c4;
+  --teal-300: #7fa9a7;
+  --teal-500: #427a7b;
+  --teal-600: #335f60;
+  --teal-700: #2c5c5d; /* 365's brand teal — primary accent */
+  --teal-800: #234848;
+  --teal-900: #1a3636;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-cream: #faf7f2;
-  --color-cream-50: #fdfcfa;
-  --color-cream-100: #f5f0e9;
+
+  /* Brand teal exposed som Tailwind utilities (bg-brand, text-brand etc.) */
+  --color-brand-50: var(--teal-50);
+  --color-brand-100: var(--teal-100);
+  --color-brand-200: var(--teal-200);
+  --color-brand-300: var(--teal-300);
+  --color-brand-500: var(--teal-500);
+  --color-brand-600: var(--teal-600);
+  --color-brand-700: var(--teal-700);
+  --color-brand-800: var(--teal-800);
+  --color-brand-900: var(--teal-900);
+
+  --color-paper: var(--background);
+  --color-ink: var(--foreground);
+  --color-muted: var(--muted);
+
   --font-sans: "Hanken Grotesk", "Hanken Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #faf7f2; /* tving lys mode paa public /salg flow */
-    --foreground: #0f172a;
+    --background: #f3f6f3;
+    --foreground: #1a2829;
   }
 }
 
@@ -31,9 +55,17 @@ body {
   font-family: "Hanken Grotesk", "Hanken Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Boost placeholder kontrast */
 input::placeholder,
 textarea::placeholder {
-  color: #94a3b8; /* slate-400 */
+  color: #94a3b8;
   opacity: 1;
+}
+
+/* Konsistent section-overline (saa hver section foler ens) */
+.section-overline {
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--teal-700);
 }

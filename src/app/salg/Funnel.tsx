@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useFunnel } from './FunnelContext';
 import { Step1Address } from './steps/Step1Address';
 import { Step2Bolig } from './steps/Step2Bolig';
@@ -21,122 +20,18 @@ const STEP_LABELS = [
 export function Funnel() {
   const { state } = useFunnel();
   return (
-    <div className="space-y-10 max-w-3xl mx-auto">
-      <ProgressBar step={state.step} />
-      <div className="bg-white rounded-3xl shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-4px_rgba(15,23,42,0.06)] p-6 sm:p-10">
+    <div className="space-y-10 max-w-3xl">
+      {/* Funnel-card "loftet" oppe paa hero via negative margin paa parent */}
+      <div className="bg-white rounded-3xl shadow-[0_4px_12px_-2px_rgba(26,40,41,0.08),0_24px_48px_-12px_rgba(26,40,41,0.14)] p-6 sm:p-10 space-y-8 ring-1 ring-brand-100/50">
+        <ProgressBar step={state.step} />
         {state.step === 1 && <Step1Address />}
         {state.step === 2 && <Step2Bolig />}
         {state.step === 3 && <Step3Costs />}
         {state.step === 4 && <Step4Profile />}
         {state.step === 5 && <Step5Estimate />}
       </div>
-      {state.step === 1 && (
-        <>
-          <HowItWorks />
-          <FAQ />
-        </>
-      )}
+      {state.step === 1 && <FAQ />}
     </div>
-  );
-}
-
-/**
- * HowItWorks — hand-drawn proces-overblik inspireret af Offerpad's
- * illustrated flowchart-mønster. Bryder den polerede SaaS-look og giver
- * et menneskeligt, varmt indtryk. AI-genererede watercolor-illustrationer
- * i konsistent dansk skandinavisk stil.
- */
-function HowItWorks() {
-  const steps = [
-    {
-      img: '/salg-photos/flow/01-beskriv.png',
-      title: 'Beskriv din bolig',
-      time: '5 minutter',
-      body: 'Adresse, fotos og udgifter. Vi henter offentlig data fra OIS automatisk.',
-    },
-    {
-      img: '/salg-photos/flow/02-estimat.png',
-      title: 'Få et foreløbigt tilbud',
-      time: 'Med det samme',
-      body: 'Bygget på sammenlignelige tinglyste handler i din ejerforening og område.',
-    },
-    {
-      img: '/salg-photos/flow/03-besigtigelse.png',
-      title: 'Gratis besigtigelse',
-      time: 'Indenfor 24 timer',
-      body: 'Vi kommer forbi, ser boligen, snakker om dine ønsker og overtagelsesdato.',
-    },
-    {
-      img: '/salg-photos/flow/04-handel.png',
-      title: 'Bindende tilbud + handel',
-      time: '14 dage – 6 mdr',
-      body: 'Du vælger overtagelsesdato. Kontant betaling, ingen mægler, ingen forbehold.',
-    },
-  ];
-  return (
-    <section
-      aria-labelledby="how-it-works-title"
-      className="max-w-5xl mx-auto space-y-8"
-    >
-      <div className="space-y-2 max-w-2xl">
-        <p className="text-sm text-stone-600">Sådan foregår det</p>
-        <h2
-          id="how-it-works-title"
-          className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight"
-        >
-          Fra adresse til handel på fire skridt
-        </h2>
-        <p className="text-base text-stone-600 leading-relaxed">
-          Vi gør salget enkelt — fra du udfylder formularen til vi underskriver handlen.
-        </p>
-      </div>
-      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {steps.map((s, i) => (
-          <li
-            key={s.title}
-            className="bg-stone-100/60 rounded-2xl p-5 sm:p-6 flex flex-col gap-4"
-          >
-            {/* Hand-drawn illustration — bg-white card paa cream container giver layered look */}
-            <div className="aspect-square rounded-xl bg-white overflow-hidden">
-              <Image
-                src={s.img}
-                alt={s.title}
-                width={600}
-                height={600}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className="w-full h-full object-contain"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span
-                  aria-hidden="true"
-                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-semibold tabular-nums"
-                >
-                  {i + 1}
-                </span>
-                <p className="text-[11px] uppercase tracking-wider text-stone-600 font-semibold">
-                  <span className="sr-only">Trin {i + 1}, </span>
-                  {s.time}
-                </p>
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold text-slate-900 leading-snug">
-                {s.title}
-              </h3>
-              <p className="text-sm text-stone-700 leading-relaxed text-pretty">{s.body}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <div className="rounded-2xl bg-white p-5 sm:p-6 max-w-3xl">
-        <p className="text-sm text-stone-700 leading-relaxed">
-          <span className="font-semibold text-slate-900">Inspections-garanti:</span> hvis vores
-          endelige tilbud efter besigtigelse afviger mere end 5%, kan du trække dig uden
-          konsekvens.
-        </p>
-      </div>
-    </section>
   );
 }
 
@@ -150,7 +45,6 @@ function ProgressBar({ step }: { step: number }) {
       aria-valuemax={TOTAL_STEPS}
       aria-label={`Trin ${step} af ${TOTAL_STEPS}`}
     >
-      {/* Single continuous bar (Zillow-style) — segmenter via flex */}
       <div className="flex items-center gap-1.5">
         {STEP_LABELS.map((label, i) => {
           const num = i + 1;
@@ -160,13 +54,13 @@ function ProgressBar({ step }: { step: number }) {
             <div
               key={label}
               className={`flex-1 h-1 rounded-full transition-colors duration-300 ${
-                isDone ? 'bg-slate-900' : isActive ? 'bg-slate-900' : 'bg-slate-200'
+                isDone || isActive ? 'bg-brand-700' : 'bg-brand-100'
               }`}
             />
           );
         })}
       </div>
-      <div className="flex justify-between text-xs text-slate-500">
+      <div className="flex justify-between text-xs text-muted">
         {STEP_LABELS.map((label, i) => {
           const num = i + 1;
           const isActive = num === step;
@@ -174,14 +68,14 @@ function ProgressBar({ step }: { step: number }) {
             <span
               key={label}
               className={`hidden sm:inline transition-colors ${
-                isActive ? 'text-slate-900 font-semibold' : ''
+                isActive ? 'text-brand-700 font-semibold' : ''
               }`}
             >
               {label}
             </span>
           );
         })}
-        <span className="sm:hidden font-semibold text-slate-900">
+        <span className="sm:hidden font-semibold text-brand-700">
           Trin {step}/{TOTAL_STEPS} · {STEP_LABELS[step - 1]}
         </span>
       </div>

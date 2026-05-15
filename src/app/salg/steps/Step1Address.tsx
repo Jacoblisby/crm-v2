@@ -141,13 +141,17 @@ export function Step1Address() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h2 id="step1-heading" className="text-2xl sm:text-[28px] font-semibold text-slate-900 tracking-tight">
+        <p className="section-overline">Trin 1 · Adresse</p>
+        <h2
+          id="step1-heading"
+          className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight"
+        >
           Hvor ligger din lejlighed?
         </h2>
-        <p id="step1-helper" className="text-[15px] text-stone-600 text-pretty leading-relaxed">
+        <p id="step1-helper" className="text-[15px] text-muted text-pretty leading-relaxed">
           Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
         </p>
-        <p className="text-xs text-stone-500 flex items-center gap-1.5 pt-1">
+        <p className="text-xs text-muted flex items-center gap-1.5 pt-1">
           <Lock className="w-3 h-3" strokeWidth={2} />
           Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
         </p>
@@ -157,10 +161,10 @@ export function Step1Address() {
         <label htmlFor="address-input" className="sr-only">
           Boligens adresse
         </label>
-        {/* Opendoor-style pill input med inline search-icon button */}
-        <div className="relative flex items-center bg-stone-50 rounded-full border border-stone-200 focus-within:border-slate-900 focus-within:bg-white transition-colors shadow-sm">
+        {/* Opendoor-style pill input med inline search-icon */}
+        <div className="relative flex items-center bg-brand-50/30 rounded-full border border-brand-200 focus-within:border-brand-700 focus-within:bg-white transition-colors">
           <Search
-            className="absolute left-5 w-5 h-5 text-stone-400 pointer-events-none"
+            className="absolute left-5 w-5 h-5 text-brand-500 pointer-events-none"
             strokeWidth={2}
             aria-hidden="true"
           />
@@ -172,7 +176,7 @@ export function Step1Address() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => results.length > 0 && setShowResults(true)}
             placeholder="Indtast din adresse"
-            className="w-full pl-14 pr-4 py-4 sm:py-5 text-base bg-transparent placeholder:text-stone-400 focus:outline-none"
+            className="w-full pl-14 pr-4 py-4 sm:py-5 text-base bg-transparent placeholder:text-brand-300 focus:outline-none text-ink"
             autoComplete="street-address"
             aria-labelledby="step1-heading"
             aria-describedby="step1-helper"
@@ -326,12 +330,12 @@ export function Step1Address() {
       {!outOfArea && (
         <div className="flex flex-col items-stretch sm:items-end gap-2 pt-2">
           {showAutoFilled && contactHint && (
-            <span className="text-xs text-stone-600 text-right">{contactHint}</span>
+            <span className="text-xs text-muted text-right">{contactHint}</span>
           )}
           <button
             onClick={continueIfReady}
             disabled={!hasAddress || lookupPending || !contactValid}
-            className="w-full sm:w-auto px-10 py-4 bg-slate-900 hover:bg-slate-800 active:bg-black disabled:bg-stone-300 disabled:text-white disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors"
+            className="w-full sm:w-auto px-10 py-4 bg-brand-700 hover:bg-brand-800 active:bg-brand-900 disabled:bg-brand-200 disabled:text-white disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors"
           >
             Fortsæt
           </button>

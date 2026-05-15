@@ -168,18 +168,18 @@ export function FAQ() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
-    <section aria-labelledby="faq-title" className="max-w-5xl mx-auto space-y-8">
-      <div className="space-y-2 max-w-2xl">
-        <p className="text-sm text-stone-600">Spørgsmål sælgere ofte stiller</p>
+    <section aria-labelledby="faq-title" className="space-y-8">
+      <div className="space-y-3 max-w-2xl">
+        <p className="section-overline">Spørgsmål sælgere ofte stiller</p>
         <h2
           id="faq-title"
-          className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight"
+          className="text-3xl sm:text-4xl lg:text-[44px] font-semibold text-ink leading-[1.1] tracking-tight text-balance"
         >
-          Ofte stillede spørgsmål
+          Ofte stillede spørgsmål.
         </h2>
       </div>
 
-      <div className="max-w-3xl bg-white rounded-2xl divide-y divide-stone-200/70 overflow-hidden">
+      <div className="max-w-3xl bg-white rounded-3xl divide-y divide-brand-100/70 overflow-hidden border border-brand-100/60">
         {ITEMS.map((item, idx) => {
           const isOpen = openIdx === idx;
           const triggerId = `faq-trigger-${idx}`;
@@ -190,16 +190,16 @@ export function FAQ() {
                 id={triggerId}
                 type="button"
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
-                className="w-full flex items-center justify-between gap-4 px-5 sm:px-7 py-5 sm:py-6 text-left hover:bg-stone-50/70 transition-colors"
+                className="w-full flex items-center justify-between gap-4 px-6 sm:px-8 py-5 sm:py-6 text-left hover:bg-brand-50/40 transition-colors"
                 aria-expanded={isOpen}
                 aria-controls={panelId}
               >
-                <span className="text-base sm:text-lg font-semibold text-slate-900">
+                <span className="text-base sm:text-lg font-semibold text-ink">
                   {item.q}
                 </span>
                 <span
-                  className={`shrink-0 text-stone-500 transition-transform duration-200 ${
-                    isOpen ? 'rotate-45 text-slate-900' : ''
+                  className={`shrink-0 text-brand-500 transition-transform duration-200 ${
+                    isOpen ? 'rotate-45 text-brand-700' : ''
                   }`}
                   aria-hidden="true"
                 >
@@ -211,7 +211,7 @@ export function FAQ() {
                 role="region"
                 aria-labelledby={triggerId}
                 hidden={!isOpen}
-                className="px-5 sm:px-7 pb-6 -mt-1"
+                className="px-6 sm:px-8 pb-6 -mt-1"
               >
                 {item.a}
               </div>
