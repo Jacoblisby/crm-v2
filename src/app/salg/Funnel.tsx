@@ -21,9 +21,9 @@ const STEP_LABELS = [
 export function Funnel() {
   const { state } = useFunnel();
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-3xl mx-auto">
       <ProgressBar step={state.step} />
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-8">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-[0_1px_3px_rgba(15,23,42,0.04),0_4px_12px_rgba(15,23,42,0.04)] p-5 sm:p-8">
         {state.step === 1 && <Step1Address />}
         {state.step === 2 && <Step2Bolig />}
         {state.step === 3 && <Step3Costs />}
@@ -76,35 +76,27 @@ function HowItWorks() {
   return (
     <section
       aria-labelledby="how-it-works-title"
-      className="space-y-6 pt-8 border-t border-dashed border-slate-300"
+      className="space-y-8 pt-12 border-t border-slate-200"
     >
-      <div className="text-center space-y-2">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
-          Sådan foregår det
-        </p>
+      <div className="text-center space-y-3 max-w-xl mx-auto">
         <h2
           id="how-it-works-title"
-          className="font-display text-3xl font-semibold text-slate-900 leading-tight"
+          className="font-black tracking-tight text-3xl sm:text-4xl text-slate-900 leading-tight text-balance"
         >
           Fra adresse til handel på fire skridt
         </h2>
+        <p className="text-base text-slate-600 leading-relaxed">
+          Vi gør salget enkelt — fra du udfylder formularen til vi underskriver handlen.
+        </p>
       </div>
-      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {steps.map((s, i) => (
           <li
             key={s.title}
-            className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col gap-3 relative"
+            className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-4 transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
           >
-            {/* Step number badge — overlapper øverst */}
-            <div
-              aria-hidden="true"
-              className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-slate-900 text-white text-base font-bold flex items-center justify-center shadow-md ring-4 ring-white"
-            >
-              {i + 1}
-            </div>
-
             {/* Hand-drawn illustration — eksplicit width/height undgaar CLS */}
-            <div className="aspect-square rounded-2xl bg-gradient-to-br from-slate-50 to-amber-50/30 overflow-hidden">
+            <div className="aspect-square rounded-lg bg-slate-50 overflow-hidden">
               <Image
                 src={s.img}
                 alt={s.title}
@@ -115,23 +107,29 @@ function HowItWorks() {
               />
             </div>
 
-            <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">
-                <span className="sr-only">Trin {i + 1}, </span>
-                {s.time}
-              </p>
-              <h3 className="text-base font-semibold text-slate-900 leading-snug">
-                {s.title}
-              </h3>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-[11px] font-bold tabular-nums"
+                >
+                  {i + 1}
+                </span>
+                <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
+                  <span className="sr-only">Trin {i + 1}, </span>
+                  {s.time}
+                </p>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 leading-snug">{s.title}</h3>
               <p className="text-sm text-slate-600 leading-relaxed text-pretty">{s.body}</p>
             </div>
           </li>
         ))}
       </ol>
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 max-w-3xl mx-auto">
-        <p className="text-sm text-emerald-900 text-center">
-          <strong>Inspections-garanti:</strong> hvis vores endelige tilbud efter besigtigelse
-          afviger mere end 5%, kan du trække dig uden konsekvens.
+      <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 max-w-3xl mx-auto">
+        <p className="text-sm text-slate-700 text-center leading-relaxed">
+          <strong className="text-slate-900">Inspections-garanti:</strong> hvis vores endelige
+          tilbud efter besigtigelse afviger mere end 5%, kan du trække dig uden konsekvens.
         </p>
       </div>
     </section>
@@ -140,20 +138,27 @@ function HowItWorks() {
 
 function ProgressBar({ step }: { step: number }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1">
+    <div
+      className="space-y-2.5"
+      role="progressbar"
+      aria-valuenow={step}
+      aria-valuemin={1}
+      aria-valuemax={TOTAL_STEPS}
+      aria-label={`Trin ${step} af ${TOTAL_STEPS}`}
+    >
+      {/* Single continuous bar (Zillow-style) — segmenter via flex */}
+      <div className="flex items-center gap-1.5">
         {STEP_LABELS.map((label, i) => {
           const num = i + 1;
           const isActive = num === step;
           const isDone = num < step;
           return (
-            <div key={label} className="flex-1 flex items-center gap-1">
-              <div
-                className={`flex-1 h-1.5 rounded-full transition-colors ${
-                  isDone || isActive ? 'bg-slate-900' : 'bg-slate-200'
-                }`}
-              />
-            </div>
+            <div
+              key={label}
+              className={`flex-1 h-1 rounded-full transition-colors duration-300 ${
+                isDone ? 'bg-slate-900' : isActive ? 'bg-slate-900' : 'bg-slate-200'
+              }`}
+            />
           );
         })}
       </div>
@@ -164,15 +169,15 @@ function ProgressBar({ step }: { step: number }) {
           return (
             <span
               key={label}
-              className={`hidden sm:inline ${
-                isActive ? 'text-slate-900 font-medium' : ''
+              className={`hidden sm:inline transition-colors ${
+                isActive ? 'text-slate-900 font-semibold' : ''
               }`}
             >
               {label}
             </span>
           );
         })}
-        <span className="sm:hidden font-medium text-slate-900">
+        <span className="sm:hidden font-semibold text-slate-900">
           Trin {step}/{TOTAL_STEPS} · {STEP_LABELS[step - 1]}
         </span>
       </div>

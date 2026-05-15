@@ -170,56 +170,42 @@ export function FAQ() {
   return (
     <section
       aria-labelledby="faq-title"
-      className="space-y-5 pt-8 border-t border-dashed border-slate-300"
+      className="space-y-8 pt-12 border-t border-slate-200"
     >
-      <div className="text-center space-y-2">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-medium">
-          Spørgsmål sælgere ofte stiller
-        </p>
+      <div className="text-center space-y-3 max-w-xl mx-auto">
         <h2
           id="faq-title"
-          className="font-display text-3xl font-semibold text-slate-900 leading-tight"
+          className="font-black tracking-tight text-3xl sm:text-4xl text-slate-900 leading-tight text-balance"
         >
-          Det skal du vide først
+          Ofte stillede spørgsmål
         </h2>
       </div>
 
-      <div className="max-w-3xl mx-auto space-y-2">
+      <div className="max-w-3xl mx-auto divide-y divide-slate-200 border-y border-slate-200">
         {ITEMS.map((item, idx) => {
           const isOpen = openIdx === idx;
           const triggerId = `faq-trigger-${idx}`;
           const panelId = `faq-panel-${idx}`;
           return (
-            <div
-              key={item.q}
-              className={`bg-white border rounded-2xl transition-colors ${
-                isOpen ? 'border-amber-300 shadow-sm' : 'border-slate-200'
-              }`}
-            >
+            <div key={item.q}>
               <button
                 id={triggerId}
                 type="button"
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
-                className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+                className="w-full flex items-center justify-between gap-4 py-5 text-left hover:bg-slate-50/60 transition-colors px-1"
                 aria-expanded={isOpen}
                 aria-controls={panelId}
               >
-                <span
-                  className={`text-base font-semibold ${
-                    isOpen ? 'text-slate-900' : 'text-slate-800'
-                  }`}
-                >
+                <span className="text-base sm:text-lg font-semibold text-slate-900">
                   {item.q}
                 </span>
                 <span
-                  className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    isOpen
-                      ? 'bg-amber-100 text-amber-700 rotate-45'
-                      : 'bg-slate-100 text-slate-600'
+                  className={`shrink-0 text-slate-500 transition-transform duration-200 ${
+                    isOpen ? 'rotate-45 text-slate-900' : ''
                   }`}
                   aria-hidden="true"
                 >
-                  <Plus className="w-5 h-5" strokeWidth={2.5} />
+                  <Plus className="w-5 h-5" strokeWidth={2.25} />
                 </span>
               </button>
               <div
@@ -227,9 +213,9 @@ export function FAQ() {
                 role="region"
                 aria-labelledby={triggerId}
                 hidden={!isOpen}
-                className="px-5 pb-5 pt-1 border-t border-slate-100"
+                className="pb-5 pr-8 -mt-1"
               >
-                <div className="pt-4">{item.a}</div>
+                {item.a}
               </div>
             </div>
           );

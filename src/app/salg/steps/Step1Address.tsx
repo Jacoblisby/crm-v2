@@ -140,15 +140,15 @@ export function Step1Address() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-1.5">
-        <h2 id="step1-heading" className="text-2xl font-semibold text-slate-900 tracking-tight">
+      <div className="space-y-2">
+        <h2 id="step1-heading" className="font-bold tracking-tight text-2xl sm:text-[28px] text-slate-900 tracking-tight">
           Hvor ligger din lejlighed?
         </h2>
-        <p id="step1-helper" className="text-sm text-slate-600 text-pretty">
+        <p id="step1-helper" className="text-[15px] text-slate-600 text-pretty leading-relaxed">
           Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
         </p>
-        <p className="text-xs text-slate-500 flex items-center gap-1.5">
-          <Lock className="w-3 h-3" />
+        <p className="text-xs text-slate-500 flex items-center gap-1.5 pt-1">
+          <Lock className="w-3 h-3" strokeWidth={2} />
           Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
         </p>
       </div>
@@ -165,7 +165,7 @@ export function Step1Address() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
           placeholder="Vejnavn + nr, postnr"
-          className="w-full px-4 py-3.5 text-base border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
+          className="w-full px-5 py-4 text-base border-2 border-slate-200 rounded-xl bg-white placeholder:text-slate-400 focus:outline-none focus:border-slate-900 transition-colors"
           autoComplete="street-address"
           aria-labelledby="step1-heading"
           aria-describedby="step1-helper"
@@ -316,19 +316,17 @@ export function Step1Address() {
       )}
 
       {!outOfArea && (
-        <div className="flex justify-end">
-          <div className="flex flex-col items-end gap-1">
-            {showAutoFilled && contactHint && (
-              <span className="text-xs text-slate-600">{contactHint}</span>
-            )}
-            <button
-              onClick={continueIfReady}
-              disabled={!hasAddress || lookupPending || !contactValid}
-              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium"
-            >
-              Fortsæt →
-            </button>
-          </div>
+        <div className="flex flex-col items-stretch sm:items-end gap-2 pt-2">
+          {showAutoFilled && contactHint && (
+            <span className="text-xs text-slate-600 text-right">{contactHint}</span>
+          )}
+          <button
+            onClick={continueIfReady}
+            disabled={!hasAddress || lookupPending || !contactValid}
+            className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 hover:bg-slate-800 active:bg-black disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors shadow-sm"
+          >
+            Fortsæt
+          </button>
         </div>
       )}
     </div>
