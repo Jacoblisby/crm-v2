@@ -140,14 +140,14 @@ export function Step1Address() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-1">
-        <h2 id="step1-heading" className="text-xl font-semibold text-slate-900">
+      <div className="space-y-1.5">
+        <h2 id="step1-heading" className="text-2xl font-semibold text-slate-900 tracking-tight">
           Hvor ligger din lejlighed?
         </h2>
-        <p id="step1-helper" className="text-sm text-slate-500">
+        <p id="step1-helper" className="text-sm text-slate-600 text-pretty">
           Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
         </p>
-        <p className="text-xs text-slate-400 flex items-center gap-1.5">
+        <p className="text-xs text-slate-500 flex items-center gap-1.5">
           <Lock className="w-3 h-3" />
           Vi sender intet før du klikker &quot;Vis mit estimat&quot; i sidste trin.
         </p>
