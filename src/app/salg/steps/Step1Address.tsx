@@ -141,8 +141,10 @@ export function Step1Address() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-slate-900">Hvor ligger din lejlighed?</h2>
-        <p className="text-sm text-slate-500">
+        <h2 id="step1-heading" className="text-xl font-semibold text-slate-900">
+          Hvor ligger din lejlighed?
+        </h2>
+        <p id="step1-helper" className="text-sm text-slate-500">
           Skriv adressen. Vi henter automatisk størrelse, byggeår og ejendomsdata.
         </p>
         <p className="text-xs text-slate-400 flex items-center gap-1.5">
@@ -152,14 +154,21 @@ export function Step1Address() {
       </div>
 
       <div ref={wrapperRef} className="relative">
+        <label htmlFor="address-input" className="sr-only">
+          Boligens adresse
+        </label>
         <input
+          id="address-input"
+          name="address"
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
           placeholder="Vejnavn + nr, postnr"
           className="w-full px-4 py-3.5 text-base border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
-          autoComplete="off"
+          autoComplete="street-address"
+          aria-labelledby="step1-heading"
+          aria-describedby="step1-helper"
         />
         {pending && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
