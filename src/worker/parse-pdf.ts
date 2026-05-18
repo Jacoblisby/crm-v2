@@ -207,25 +207,31 @@ export function parseEjerudgiftTotal(text: string): number {
 }
 
 /**
- * Parse "Sikkerhed til e/f: Ja, med kr. 50.000,00" — engangsbeløb.
- *
- * Linjen kan have format:
- *   "Sikkerhed til e/f: Ja, med kr. 50.000,00 I form af ..."
- *   "Sikkerhed til ejerforening: 50.000"
- *   "Sikkerhedsstillelse: 50.000 kr"
- *
- * NB: salgsopstilling indeholder ofte ogsaa "tinglyst sikkerhed til ejerforeningen"
- * i en helt anden context (laaneprovenu-note) — vi skal iterere alle matches
- * og returnere det foerste der har et beloeb i window'en.
+ * Parse engangsbeløb der følger med købet — typisk kaldet:
+ *   - "Sikkerhed til e/f: Ja, med kr. 50.000,00" (danbolig format)
+ *   - "Eksisterende sikkerhed: Kr. 49.000 i form af Ejerpantebrev" (realequity format)
+ *   - "Sikkerhed til ejerforening: 50.000"
+ *   - "Sikkerhedsstillelse: 50.000 kr"
+ *   - "Tinglyst sikkerhed: 50.000"
  *
  * Returns 0 hvis ikke fundet ELLER hvis svaret er "nej/ingen".
+ * NB: salgsopstilling indeholder ofte ogsaa boilerplate-tekst om "sikkerhed til
+ * ejerforeningen" uden konkret beloeb — vi itererer alle matches og returnerer
+ * foerste der har gyldigt beloeb i window'en.
  */
 export function parseEjerforeningSikkerhed(text: string): number {
-  // Pattern variations — proev mest specifikke foerst
+  // Pattern-rangordning: mest specifikke foerst (med beloeb i naerheden)
+  // Naar bruger har 2 forskellige PDFs vil de to formater begge fanges.
   const labelPatterns = [
-    /Sikkerhed\s+til\s+e\/f/gi,
-    /Sikkerhed\s+til\s+ejerforening(?:en)?/gi,
-    /Sikkerhedsstillelse\s+til\s+e\/f/gi,
+    // realequity-format: "Eksisterende sikkerhed: Kr. 49.000"
+    /Eksisterende\s+sikkerhed[:\s]/gi,
+    // danbolig-format: "Sikkerhed til e/f: Ja, med kr. 50.000"
+    /Sikkerhed\s+til\s+e\/f[:\s]/gi,
+    /Sikkerhed\s+til\s+ejerforening(?:en)?[:\s]/gi,
+    // generic sikkerhedsstillelse
+    /Sikkerhedsstillelse(?:\s+til\s+(?:e\/f|ejerforening(?:en)?))?[:\s]/gi,
+    // tinglyst sikkerhed
+    /Tinglyst\s+sikkerhed[:\s]/gi,
   ];
 
   for (const labelRe of labelPatterns) {
