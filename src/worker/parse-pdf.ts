@@ -25,6 +25,9 @@ interface CostBreakdown {
   costRenovation: number;
   costForsikringer: number;
   costFaelleslaan: number;
+  costGrundfond: number;
+  costVicevaert: number;
+  costVedligeholdelse: number;
   costAndreDrift: number;
 }
 
@@ -40,41 +43,83 @@ function findInt(text: string, ...patterns: RegExp[]): number {
   return 0;
 }
 
+// "kr" prefix er optional og kan staa for/efter tallet, eller mangle helt.
+// Tal-format: dansk format "1.234,56" eller "1.234" eller "1234".
+// MELLEMRUM mellem keyword og number kan vaere op til 80 chars (label kan
+// inkludere "(skoen) jf. seneste regnskab")
+const NUM = '([\\d.,]+(?:[\\d]{3})*)';
+const KR_OPT = '(?:kr\\.?\\s*)?';
+const GAP = '[\\s\\S]{0,80}?';
+
 export function parseSalgsopstilling(text: string): CostBreakdown {
+  // Grundskyld / ejendomsskat — flere mulige labels
   const grundv = findInt(text,
-    /Grundskyld[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
-    /Grundskyld\s+([\d.,]+)/,
+    new RegExp(`Grundskyld(?:\\s*\\(ejendomsskat\\))?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Ejendomsskat${GAP}${KR_OPT}${NUM}`, 'i'),
   );
+
+  // Faellesudgifter — naesten alle danske salgsopstillinger har dette
   const faellesu = findInt(text,
-    /Fællesudgifter?,?\s*(?:anslået|inkl\.?\s*acontovand)?[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
-    /Fællesudgifter?\s+([\d.,]+)/,
+    new RegExp(`F[æa]llesudgifter?(?:,?\\s*(?:anslået|jf\\.|inkl\\.?\\s*acontovand|i alt))?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Boligens? andel af f[æa]llesudgifter?${GAP}${KR_OPT}${NUM}`, 'i'),
+    // Ejerforeningens fælles
+    new RegExp(`Ejerforeningens? f[æa]llesudgifter?${GAP}${KR_OPT}${NUM}`, 'i'),
   );
+
   const rotte = findInt(text,
-    /Rottebekæmpelse(?:sgebyr)?,?\s*(?:anslået)?[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
-    /Rottegebyr[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
+    new RegExp(`Rottebek[æa]mpelse(?:sgebyr)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Rottegebyr${GAP}${KR_OPT}${NUM}`, 'i'),
   );
+
   const renov = findInt(text,
-    /(?:Særskilt\s+)?[Rr]enovation,?\s*(?:anslået)?[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
-    /Renovation\s+([\d.,]+)/,
+    new RegExp(`(?:S[æa]rskilt\\s+)?[Rr]enovation(?:sgebyr)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Affaldsgebyr${GAP}${KR_OPT}${NUM}`, 'i'),
   );
+
   // Forsikring kun hvis IKKE inkl. i fællesudgifter
   let forsikr = 0;
   const lower = text.toLowerCase();
   if (
     !lower.includes('inkl. i fællesudgifter') &&
     !lower.includes('medholdt fællesudgifterne') &&
-    !lower.includes('inkl. acontovand')
+    !lower.includes('inkl. acontovand') &&
+    !lower.includes('inkluderet i fællesudgifter')
   ) {
     forsikr = findInt(text,
-      /(?:Husforsikring|Bygningsforsikring)[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
+      new RegExp(`(?:Hus|Bygnings|Ejendoms)forsikring${GAP}${KR_OPT}${NUM}`, 'i'),
     );
   }
+
   const faellsl = findInt(text,
-    /(?:Ydelse\s+)?[Ff]ælleslån(?:\s*\+\s*gebyr)?[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
-    /Andelsboligforeningens\s+lån[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
+    new RegExp(`(?:Ydelse\\s+(?:p[åa]\\s+)?)?[Ff][æa]llesl[åa]n(?:\\s*\\+\\s*gebyr)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Andelsboligforeningens\\s+l[åa]n${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Ejerforeningens?\\s+(?:fælles)?l[åa]n${GAP}${KR_OPT}${NUM}`, 'i'),
   );
+
+  // NY: Grundfond / opsparing
+  const grundfond = findInt(text,
+    new RegExp(`Grundfond${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Henl[æa]ggelse(?:r)?(?:\\s+til\\s+grundfond)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Bidrag\\s+til\\s+grundfond${GAP}${KR_OPT}${NUM}`, 'i'),
+  );
+
+  // NY: Vicevaert / serviceaftaler
+  const vice = findInt(text,
+    new RegExp(`Viceværts?(?:bidrag|udgift)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Ejendomsservice${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Trappevask${GAP}${KR_OPT}${NUM}`, 'i'),
+  );
+
+  // NY: Vedligeholdelse / drift
+  const vedlig = findInt(text,
+    new RegExp(`Vedligeholdelse(?:sbidrag)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Henl[æa]ggelse(?:r)?\\s+til\\s+vedligeholdelse${GAP}${KR_OPT}${NUM}`, 'i'),
+  );
+
   const andreD = findInt(text,
-    /Arbejdsdag[^\n]{0,30}?kr\.?\s*([\d.,]+)/,
+    new RegExp(`Arbejdsdag${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Antenne(?:bidrag|forening)?${GAP}${KR_OPT}${NUM}`, 'i'),
+    new RegExp(`Internet${GAP}${KR_OPT}${NUM}`, 'i'),
   );
 
   return {
@@ -84,6 +129,9 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
     costRenovation: renov,
     costForsikringer: forsikr,
     costFaelleslaan: faellsl,
+    costGrundfond: grundfond,
+    costVicevaert: vice,
+    costVedligeholdelse: vedlig,
     costAndreDrift: andreD,
   };
 }
@@ -151,7 +199,7 @@ export async function runParsePdfJob(opts: {
       const fullText = Array.isArray(text) ? text.join('\n') : text;
       const breakdown = parseSalgsopstilling(fullText);
 
-      // Recompute afkast med ny breakdown
+      // Recompute afkast med ny breakdown (alle 10 cost-felter)
       const driftTotal =
         breakdown.costGrundvaerdi +
         breakdown.costFaellesudgifter +
@@ -159,6 +207,9 @@ export async function runParsePdfJob(opts: {
         breakdown.costRenovation +
         breakdown.costForsikringer +
         breakdown.costFaelleslaan +
+        breakdown.costGrundfond +
+        breakdown.costVicevaert +
+        breakdown.costVedligeholdelse +
         breakdown.costAndreDrift;
       const refurbTotal =
         c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;

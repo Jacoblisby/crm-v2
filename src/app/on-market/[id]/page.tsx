@@ -14,7 +14,8 @@ import { COST_LABELS, REFURB_LABELS, computeAfkast } from '@/lib/afkast';
 import { computeEstimate } from '@/lib/services/price-engine';
 import { AfkastDebug } from '@/app/admin/afkast/AfkastDebug';
 import { EditEstimaterForm } from './EditEstimaterForm';
-import { PdfUrlForm } from './PdfUrlForm';
+import { PdfSourceForm } from './PdfSourceForm';
+import { CostBreakdownForm } from './CostBreakdownForm';
 import { ReviewStatusForm } from './ReviewStatusForm';
 import type { ReviewStatus } from './actions';
 
@@ -416,15 +417,33 @@ export default async function OnMarketDetailPage({
         }}
       />
 
-      {/* PDF URL form */}
-      <PdfUrlForm
+      {/* PDF source — URL + drag-and-drop */}
+      <PdfSourceForm
         id={c.id}
         currentUrl={c.pdfUrl}
         caseUrl={c.caseUrl}
         brokerKind={c.brokerKind}
+        pdfStatus={c.pdfStatus}
       />
 
-      {/* Editable form */}
+      {/* Manual cost breakdown override — bruges naar PDF-parsing fejler */}
+      <CostBreakdownForm
+        id={c.id}
+        current={{
+          costGrundvaerdi: c.costGrundvaerdi,
+          costFaellesudgifter: c.costFaellesudgifter,
+          costRottebekempelse: c.costRottebekempelse,
+          costRenovation: c.costRenovation,
+          costForsikringer: c.costForsikringer,
+          costFaelleslaan: c.costFaelleslaan,
+          costGrundfond: c.costGrundfond,
+          costVicevaert: c.costVicevaert,
+          costVedligeholdelse: c.costVedligeholdelse,
+          costAndreDrift: c.costAndreDrift,
+        }}
+      />
+
+      {/* Editable estimater (leje + refurb) */}
       <EditEstimaterForm
         id={c.id}
         currentLeje={c.estimeretLejeMd ?? estimate.estimatedRentMd}
