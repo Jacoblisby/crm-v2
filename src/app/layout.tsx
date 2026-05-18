@@ -1,22 +1,19 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MainHeader, MainWrapper } from "@/components/MainHeader";
 
-// DM Serif Display — Variant C "Sommerhave Luxe" display headlines.
-// Italic er en separat instance fordi DM Serif kun har vaegte 400.
-const dmSerif = DM_Serif_Display({
+// Geist Sans — Vercel's typeface. Geometric grotesque med fremragende numeral-rendering.
+// Bruges som primary sans throughout — Variant D cinematic tech-product aesthetic.
+const geist = Geist({
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-dm-serif",
+  variable: "--font-geist",
   display: "swap",
 });
 
-// Inter — body + UI. cv11/ss01 OpenType features via globals.css.
-const inter = Inter({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -33,9 +30,9 @@ export default function RootLayout({
   return (
     <html
       lang="da"
-      className={`h-full antialiased ${dmSerif.variable} ${inter.variable}`}
+      className={`h-full antialiased ${geist.variable} ${geistMono.variable}`}
     >
-      <body className="bg-paper min-h-screen text-ink">
+      <body className="bg-background min-h-screen text-ink">
         <MainHeader />
         <MainWrapper>{children}</MainWrapper>
       </body>

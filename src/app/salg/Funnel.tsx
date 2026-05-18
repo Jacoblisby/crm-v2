@@ -21,7 +21,7 @@ export function Funnel() {
   const { state } = useFunnel();
   return (
     <div className="space-y-10 max-w-3xl mx-auto">
-      <div className="bg-paper-50 rounded-3xl shadow-[0_4px_12px_-2px_rgba(31,38,36,0.06),0_24px_48px_-12px_rgba(31,38,36,0.10)] p-6 sm:p-10 space-y-8 border border-sage-300/40">
+      <div className="bg-surface-1 rounded-2xl ring-1 ring-hairline shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] p-6 sm:p-10 space-y-8">
         <ProgressBar step={state.step} />
         {state.step === 1 && <Step1Address />}
         {state.step === 2 && <Step2Bolig />}
@@ -53,13 +53,13 @@ function ProgressBar({ step }: { step: number }) {
             <div
               key={label}
               className={`flex-1 h-1 rounded-full transition-colors duration-300 ${
-                isDone || isActive ? 'bg-brass-500' : 'bg-sage-300/50'
+                isDone || isActive ? 'bg-brand-400' : 'bg-white/10'
               }`}
             />
           );
         })}
       </div>
-      <div className="flex justify-between text-[11px] tracking-wider uppercase font-semibold text-muted">
+      <div className="flex justify-between text-[11px] tracking-widest uppercase font-semibold text-muted">
         {STEP_LABELS.map((label, i) => {
           const num = i + 1;
           const isActive = num === step;
@@ -67,14 +67,14 @@ function ProgressBar({ step }: { step: number }) {
             <span
               key={label}
               className={`hidden sm:inline transition-colors ${
-                isActive ? 'text-brass-600' : ''
+                isActive ? 'text-brand-300' : ''
               }`}
             >
               {label}
             </span>
           );
         })}
-        <span className="sm:hidden text-brass-600">
+        <span className="sm:hidden text-brand-300">
           Trin {step}/{TOTAL_STEPS} · {STEP_LABELS[step - 1]}
         </span>
       </div>

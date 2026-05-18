@@ -1,17 +1,11 @@
 'use client';
 
 /**
- * HeroAddressInput — den Opendoor-style address-pill der sidder INDEN I hero-billedet.
- *
- * Identisk DAWA-autocomplete logik som Step1Address, men styling matcher Opendoor's
- * hero-embedded search: stor pill paa hvid bg paa moerk hero-overlay, blue circle
- * search-icon CTA, dropdown med suggestions.
- *
- * Naar bruger vaelger en adresse, opdaterer FunnelContext og siden re-renderer
- * i Mode B (funnel-mode), hvor marketing-sektioner forsvinder.
+ * HeroAddressInput — dark-mode cinematic pill med teal CTA.
+ * Variant D: glas-paneliseret med blur-back + ring + teal inner-glow paa focus.
  */
 import { useState, useTransition, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { useFunnel } from '../FunnelContext';
 import { searchAddressAction, lookupAddressAction } from '../actions';
 import type { DawaSuggestion } from '@/lib/services/dawa';
@@ -94,7 +88,6 @@ export function HeroAddressInput() {
         caseUrl: property?.caseUrl ?? null,
         isOnMarket: property?.isOnMarket ?? false,
       });
-      // Mode B aktiveres automatisk fordi state.fullAddress nu er sat
     });
   }
 
@@ -103,9 +96,9 @@ export function HeroAddressInput() {
       <label htmlFor="hero-address-input" className="sr-only">
         Boligens adresse
       </label>
-      <div className="relative flex items-center bg-paper-50 rounded-full border-2 border-brass-400/60 focus-within:border-brass-600 focus-within:bg-white transition-all">
+      <div className="relative flex items-center bg-surface-3/60 backdrop-blur-sm rounded-2xl ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-brand-400 focus-within:bg-surface-3/80 transition-all">
         <Search
-          className="absolute left-5 w-5 h-5 text-brass-600 pointer-events-none"
+          className="absolute left-5 w-5 h-5 text-ink-soft pointer-events-none"
           strokeWidth={2}
           aria-hidden="true"
         />
@@ -116,11 +109,10 @@ export function HeroAddressInput() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
-          placeholder="Hvor ligger din bolig?"
-          className="w-full pl-14 pr-32 sm:pr-40 py-4 sm:py-5 text-base sm:text-[17px] bg-transparent placeholder:text-muted placeholder:font-serif-display-italic focus:outline-none text-ink rounded-full"
+          placeholder="Indtast din adresse"
+          className="w-full pl-14 pr-36 sm:pr-44 py-4 sm:py-5 text-base sm:text-[17px] bg-transparent text-ink focus:outline-none rounded-2xl tracking-tight"
           autoComplete="street-address"
           aria-label="Boligens adresse"
-          style={{ fontFamily: 'inherit' }}
         />
         <button
           type="button"
@@ -128,26 +120,31 @@ export function HeroAddressInput() {
             if (results[0]) selectAddress(results[0]);
           }}
           disabled={results.length === 0 || lookupPending}
-          className="absolute right-1.5 sm:right-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-ink hover:bg-ink-soft disabled:bg-sage-300 disabled:cursor-not-allowed text-paper-50 rounded-full font-semibold text-sm transition-colors tracking-tight"
+          className="absolute right-1.5 sm:right-2 inline-flex items-center gap-1.5 px-5 sm:px-6 py-2.5 sm:py-3 bg-brand-500 hover:bg-brand-400 disabled:bg-surface-3 disabled:text-ink-soft disabled:cursor-not-allowed text-ink rounded-xl font-semibold text-sm transition-colors tracking-tight"
         >
-          {lookupPending ? 'Henter…' : pending ? 'Søger…' : 'Få tilbud'}
+          {lookupPending ? 'Henter…' : pending ? 'Søger…' : (
+            <>
+              Få tilbud
+              <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+            </>
+          )}
         </button>
       </div>
 
-      <p className="mt-3 text-xs text-muted tracking-wide">
+      <p className="mt-3 text-xs text-muted tracking-widest uppercase font-medium">
         Ingen forpligtelse · 5 minutter · Vi sender intet før sidste trin
       </p>
 
       {showResults && results.length > 0 && (
-        <ul className="absolute left-0 right-0 top-[68px] sm:top-[76px] mt-2 bg-paper-50 border border-sage-300/50 rounded-2xl shadow-[0_12px_32px_-8px_rgba(31,38,36,0.15)] overflow-hidden z-40 max-h-80 overflow-y-auto">
+        <ul className="absolute left-0 right-0 top-full mt-2 bg-surface-2 backdrop-blur-md ring-1 ring-white/10 rounded-2xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] overflow-hidden z-40 max-h-80 overflow-y-auto">
           {results.map((s) => (
             <li key={s.adresse.id}>
               <button
                 type="button"
                 onClick={() => selectAddress(s)}
-                className="w-full text-left px-5 py-3.5 text-[15px] text-ink hover:bg-sage-50 border-b border-sage-100 last:border-b-0 flex items-center gap-3"
+                className="w-full text-left px-5 py-3.5 text-[15px] text-ink-dim hover:text-ink hover:bg-white/5 border-b border-hairline last:border-b-0 flex items-center gap-3 transition-colors"
               >
-                <Search className="w-4 h-4 text-brass-500 shrink-0" strokeWidth={2} />
+                <Search className="w-4 h-4 text-brand-300 shrink-0" strokeWidth={2} />
                 <span>{s.tekst}</span>
               </button>
             </li>
@@ -156,7 +153,7 @@ export function HeroAddressInput() {
       )}
 
       {error && (
-        <div className="mt-3 bg-red-50 border border-red-200 rounded-2xl p-3 text-sm text-red-800">
+        <div className="mt-3 bg-red-950/40 border border-red-900/50 rounded-2xl p-3 text-sm text-red-300">
           {error}
         </div>
       )}

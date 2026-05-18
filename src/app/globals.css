@@ -1,107 +1,95 @@
 @import "tailwindcss";
 
-/* "Sommerhave Luxe" — Variant C palette
-   Premium Scandinavian boutique agency: dusty sage + warm cream + charcoal + brass.
-   Bryder bevidst 365's teal-brand for at ramme luxe-aesthetic. */
+/* "Levende Reportage" — Variant D palette
+   Cinematic dark mode like Apple/Linear/Vercel.
+   Pure black + white + brand teal accent. */
 :root {
-  --background: #ede9dd; /* warm cream paper */
-  --foreground: #1f2624; /* charcoal */
-  --muted: #5a5f5a; /* warm gray */
+  --background: #0a0c0d; /* near-black, slight blue tint */
+  --foreground: #f7f8f8; /* off-white, ikke pure for at undgaa overskinhed */
+  --muted: #9ba3a5; /* mid gray */
+  --muted-dark: #5a6164;
 
-  --paper-50: #f4f0e5;
-  --paper-100: #ede9dd;
-  --paper-200: #e3ddc9;
+  --teal-300: #6fb1b0;
+  --teal-400: #4c9695;
+  --teal-500: #2c5c5d; /* 365 brand teal */
+  --teal-600: #234848;
+  --teal-700: #1a3636;
 
-  --sage-50: #f0f2ee;
-  --sage-100: #d8dfd5;
-  --sage-300: #b1bfaf;
-  --sage-500: #9ca89c;
-  --sage-700: #6b7a6b;
-  --sage-900: #3d4a3d;
+  --ink: #f7f8f8;
+  --ink-dim: #c8cdcf;
+  --ink-soft: #9ba3a5;
 
-  --brass-50: #f5ecd9;
-  --brass-100: #ead7b3;
-  --brass-400: #c9a87a;
-  --brass-500: #b8946a;
-  --brass-600: #9c7c52;
-  --brass-700: #7d6440;
-
-  --ink: #1f2624;
-  --ink-soft: #2f3835;
+  --surface-0: #0a0c0d;
+  --surface-1: #15191b; /* card */
+  --surface-2: #1f2426; /* elevated card */
+  --surface-3: #2a3033; /* input */
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.14);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --color-paper: var(--paper-100);
-  --color-paper-50: var(--paper-50);
-  --color-paper-200: var(--paper-200);
-
-  --color-sage-50: var(--sage-50);
-  --color-sage-100: var(--sage-100);
-  --color-sage-300: var(--sage-300);
-  --color-sage-500: var(--sage-500);
-  --color-sage-700: var(--sage-700);
-  --color-sage-900: var(--sage-900);
-
-  --color-brass-50: var(--brass-50);
-  --color-brass-100: var(--brass-100);
-  --color-brass-400: var(--brass-400);
-  --color-brass-500: var(--brass-500);
-  --color-brass-600: var(--brass-600);
-  --color-brass-700: var(--brass-700);
-
   --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
   --color-ink-soft: var(--ink-soft);
   --color-muted: var(--muted);
 
-  /* DM Serif Display = display, Inter = body */
-  --font-display: "DM Serif Display", Georgia, "Times New Roman", serif;
-  --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
-}
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ede9dd;
-    --foreground: #1f2624;
-  }
+  --color-brand-300: var(--teal-300);
+  --color-brand-400: var(--teal-400);
+  --color-brand-500: var(--teal-500);
+  --color-brand-600: var(--teal-600);
+  --color-brand-700: var(--teal-700);
+
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv11"; /* Inter open digits + cleaner a */
-}
-
-/* DM Serif Display utility for display H1/H2 */
-.font-serif-display {
-  font-family: "DM Serif Display", Georgia, "Times New Roman", serif;
-  font-weight: 400; /* DM Serif kommer kun i 400, men er meget heavy by default */
-  letter-spacing: -0.015em;
-  font-style: normal;
-}
-
-.font-serif-display-italic {
-  font-family: "DM Serif Display", Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: -0.005em;
+  font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "ss03", "cv11";
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #8a8f8a;
+  color: var(--muted-dark);
   opacity: 1;
 }
 
-/* Luxe overline — tracking-widest small caps i brass */
-.luxe-overline {
-  font-size: 0.6875rem; /* 11px */
-  letter-spacing: 0.3em;
+/* Cinematic kicker — small caps brass-ish teal */
+.cine-kicker {
+  font-size: 0.6875rem;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   font-weight: 600;
-  color: var(--brass-600);
+  color: var(--teal-300);
+}
+
+/* Mono numeric — for stat reveals */
+.mono-num {
+  font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Subtle grain texture overlay (CSS only) — virker som "film stock" */
+.grain-overlay {
+  position: relative;
+}
+.grain-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
 }
