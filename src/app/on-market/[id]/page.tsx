@@ -402,6 +402,9 @@ export default async function OnMarketDetailPage({
           lejeMd: rentMd,
           drift: driftTotal,
           refurb: refurbTotal,
+          // "Sikkerhed til e/f" fra salgsopstillingen er det beloeb der
+          // skal trækkes fra laaneprovenuet — det samme som "Hæftelse EF"
+          haeftelse: c.ejerforeningSikkerhed,
           driftBreakdown: {
             fællesudgifter: c.costFaellesudgifter,
             grundskyld: c.costGrundvaerdi,
