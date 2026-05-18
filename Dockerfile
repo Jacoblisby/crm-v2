@@ -41,4 +41,8 @@ COPY --from=builder /app/node_modules/postgres ./node_modules/postgres
 
 USER nextjs
 EXPOSE 3000
-CMD ["node", "server.js"]
+
+# Migrate-on-start: koer drizzle-kit migrate foer server starter.
+# Idempotent — drizzle tracker state i __drizzle_migrations table, saa
+# re-runs er no-ops. Hvis migrate fejler, starter server ikke (fail-fast).
+CMD ["sh", "-c", "node ./node_modules/drizzle-kit/bin.cjs migrate && node server.js"]
