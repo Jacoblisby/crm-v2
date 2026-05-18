@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sælg din bolig kontant — 365 Ejendomme</title>
+<meta name="description" content="Få et foreløbigt kontant tilbud på din ejerlejlighed. 87+ boliger købt siden 2024. Ingen mæglersalær. Fleksibel overtagelse." />
+<meta property="og:title" content="Sælg din bolig kontant — 365 Ejendomme" />
+<meta property="og:description" content="Foreløbigt kontant tilbud på 5 minutter. Ingen forpligtelse." />
+<meta property="og:image" content="https://crm.365ejendom.dk/salg-photos/hero/danish-apartment-1.png" />
+<meta property="og:url" content="https://crm.365ejendom.dk/salg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://api.dataforsyningen.dk" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // 365 Ejendomme palette + helpers — matcher live /salg
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        },
+        colors: {
+          cream: '#F5EFE6',
+          'cream-dark': '#E8DECF',
+          ink: '#14181A',
+          muted: '#5A6166',
+          brand: {
+            50:  '#EEF4F4',
+            100: '#D6E4E4',
+            200: '#A9C5C6',
+            300: '#7CA6A7',
+            400: '#508788',
+            500: '#367172',
+            600: '#2C5C5D',
+            700: '#244949',  // 365 teal — primary
+            800: '#1B3637',
+            900: '#122323',
+          },
+          stone: {
+            50:  '#FAFAF8',
+            100: '#F2F0EB',
+            200: '#E5E2DA',
+            300: '#C9C5BA',
+            400: '#9C988C',
+            500: '#6E6B62',
+          },
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background:#fff; color:#14181A; -webkit-font-smoothing: antialiased; }
+  .text-balance { text-wrap: balance; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .plus-icon { transform: rotate(45deg); }
+  .plus-icon { transition: transform 0.2s ease; }
+</style>
+</head>
+<body class="bg-white text-ink">
+
+<!-- ─── HERO ──────────────────────────────────────────────────────────── -->
+<section aria-labelledby="hero-title" class="relative w-full h-[680px] sm:h-[760px] overflow-hidden">
+  <img
+    src="https://crm.365ejendom.dk/salg-photos/hero/danish-apartment-1.png"
+    alt=""
+    class="absolute inset-0 w-full h-full object-cover"
+    fetchpriority="high"
+  />
+  <div aria-hidden="true" class="absolute inset-0"
+       style="background: linear-gradient(90deg, rgba(20,24,26,0.75) 0%, rgba(20,24,26,0.55) 35%, rgba(20,24,26,0.2) 70%, transparent 100%);"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-full flex items-center pt-20">
+    <div class="max-w-xl space-y-6">
+      <h1 id="hero-title" class="text-white text-[44px] sm:text-[58px] lg:text-[64px] font-medium leading-[1.05] tracking-[-0.02em] text-balance">
+        Sælg din bolig kontant.
+      </h1>
+      <p class="text-base sm:text-lg text-white/90 leading-relaxed max-w-md">
+        Få et foreløbigt tilbud og se hvordan vi hjælper dig med at sælge din ejerlejlighed.
+      </p>
+
+      <!-- Address pill -->
+      <div class="pt-2 relative w-full max-w-md" id="address-wrapper">
+        <label for="hero-address-input" class="sr-only">Boligens adresse</label>
+        <div class="relative flex items-center bg-white rounded-full shadow-[0_4px_16px_-2px_rgba(0,0,0,0.15)]">
+          <input
+            id="hero-address-input"
+            name="address"
+            type="text"
+            placeholder="Indtast din adresse"
+            autocomplete="street-address"
+            class="w-full pl-6 pr-16 py-3.5 sm:py-4 text-base text-ink placeholder:text-stone-400 focus:outline-none rounded-full bg-transparent"
+          />
+          <button
+            type="button"
+            id="address-go-btn"
+            aria-label="Få tilbud"
+            disabled
+            class="absolute right-1.5 w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center bg-brand-700 hover:bg-brand-800 disabled:bg-stone-300 disabled:cursor-not-allowed text-white rounded-full transition-colors"
+          >
+            <svg id="search-icon" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+            </svg>
+            <span id="search-spinner" class="hidden w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+          </button>
+        </div>
+        <!-- Suggestions dropdown -->
+        <ul id="suggestions" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-[0_12px_32px_-8px_rgba(0,0,0,0.25)] overflow-hidden z-40 max-h-80 overflow-y-auto"></ul>
+      </div>
+
+      <p class="text-xs text-white/70 tracking-tight">
+        Ingen forpligtelse. Tager 5 minutter. Vi sender intet før sidste trin.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ────────────────────────────────────────────────── -->
+<section aria-labelledby="testimonials-title" class="bg-white py-20 sm:py-28">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+    <div class="space-y-3 max-w-3xl">
+      <p class="text-sm font-medium text-brand-700">Hvorfor sælgere vælger 365</p>
+      <h2 id="testimonials-title" class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight">
+        87+ boliger købt siden 2024.
+      </h2>
+      <p class="text-base text-muted max-w-xl pt-1">
+        Rigtige sælgere. Rigtige historier. Sådan har vi gjort det enkelt for andre på Sjælland.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+      <!-- Testimonial 1 -->
+      <figure class="bg-cream rounded-3xl p-7 sm:p-8 flex flex-col gap-5">
+        <div aria-hidden="true" class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-800 font-semibold text-sm tracking-tight">MK</div>
+        <blockquote class="text-[15px] sm:text-base text-ink leading-relaxed flex-1">
+          "Vi havde brug for at sælge hurtigt efter min mors bortgang. 365 kom forbi, gav et tilbud, og 3 uger senere var handlen lukket."
+        </blockquote>
+        <figcaption class="pt-2">
+          <div class="text-sm font-semibold text-ink">Mette K.</div>
+          <div class="text-xs text-muted mt-0.5">Solgt i Næstved</div>
+        </figcaption>
+      </figure>
+      <!-- Testimonial 2 -->
+      <figure class="bg-cream rounded-3xl p-7 sm:p-8 flex flex-col gap-5">
+        <div aria-hidden="true" class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-800 font-semibold text-sm tracking-tight">LP</div>
+        <blockquote class="text-[15px] sm:text-base text-ink leading-relaxed flex-1">
+          "Ingen fremvisninger, ingen ventetid. Vi sparede 70.000 kr i mæglersalær og fik den overtagelsesdato vi ønskede."
+        </blockquote>
+        <figcaption class="pt-2">
+          <div class="text-sm font-semibold text-ink">Lars P.</div>
+          <div class="text-xs text-muted mt-0.5">Solgt i Roskilde</div>
+        </figcaption>
+      </figure>
+      <!-- Testimonial 3 -->
+      <figure class="bg-cream rounded-3xl p-7 sm:p-8 flex flex-col gap-5">
+        <div aria-hidden="true" class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-800 font-semibold text-sm tracking-tight">AS</div>
+        <blockquote class="text-[15px] sm:text-base text-ink leading-relaxed flex-1">
+          "Jacob var lige til at tale med, og prisen lå tæt på vores forventninger. Mere transparent end nogen mægler vi har snakket med."
+        </blockquote>
+        <figcaption class="pt-2">
+          <div class="text-sm font-semibold text-ink">Anne &amp; Søren</div>
+          <div class="text-xs text-muted mt-0.5">Solgt i Ringsted</div>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURE BLOCKS ──────────────────────────────────────────────── -->
+<section aria-labelledby="features-title" class="bg-white py-20 sm:py-28">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+    <div class="space-y-3 max-w-3xl">
+      <p class="text-sm font-medium text-brand-700">Start salget med et tilbud i hånden</p>
+      <h2 id="features-title" class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight">
+        Spring arbejdet over med et kontant tilbud fra 365.
+      </h2>
+      <p class="text-base text-muted max-w-xl pt-1">Tre måder vi gør salget nemmere end mæglervejen.</p>
+    </div>
+
+    <div class="space-y-4 sm:space-y-5">
+      <!-- Block 1 -->
+      <article class="bg-cream rounded-[32px] overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[360px] sm:min-h-[440px]">
+        <div class="p-8 sm:p-12 lg:p-16 flex flex-col justify-between gap-8">
+          <p class="text-sm font-medium text-ink/70">Kontant tilbud</p>
+          <div class="space-y-4">
+            <h3 class="text-[28px] sm:text-[36px] lg:text-[44px] font-semibold text-ink leading-[1.05] tracking-tight text-balance">
+              Se hvor meget vi vil betale for din bolig.
+            </h3>
+            <p class="text-base text-muted leading-relaxed max-w-md">
+              Vi baserer tilbuddet på sammenlignelige tinglyste handler i dit område plus vores afkast-model. Ingen ventetid.
+            </p>
+          </div>
+        </div>
+        <div class="relative min-h-[240px] md:min-h-full bg-cream-dark/40">
+          <img src="https://crm.365ejendom.dk/salg-photos/flow/02-estimat.png" alt="" class="absolute inset-0 w-full h-full object-contain p-8 sm:p-12" />
+        </div>
+      </article>
+
+      <!-- Block 2 -->
+      <article class="bg-cream rounded-[32px] overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[360px] sm:min-h-[440px]">
+        <div class="p-8 sm:p-12 lg:p-16 flex flex-col justify-between gap-8">
+          <p class="text-sm font-medium text-ink/70">Fleksibel overtagelse</p>
+          <div class="space-y-4">
+            <h3 class="text-[28px] sm:text-[36px] lg:text-[44px] font-semibold text-ink leading-[1.05] tracking-tight text-balance">
+              Du vælger overtagelsesdato. Fra 14 dage til 6 måneder.
+            </h3>
+            <p class="text-base text-muted leading-relaxed max-w-md">
+              Vi tilpasser handlen til din takt. Skal du flytte hurtigt? Skal du blive boende lidt endnu? Begge dele virker.
+            </p>
+          </div>
+        </div>
+        <div class="relative min-h-[240px] md:min-h-full bg-cream-dark/40">
+          <img src="https://crm.365ejendom.dk/salg-photos/flow/04-handel.png" alt="" class="absolute inset-0 w-full h-full object-contain p-8 sm:p-12" />
+        </div>
+      </article>
+
+      <!-- Block 3 -->
+      <article class="bg-cream rounded-[32px] overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[360px] sm:min-h-[440px]">
+        <div class="p-8 sm:p-12 lg:p-16 flex flex-col justify-between gap-8">
+          <p class="text-sm font-medium text-ink/70">Inspections-garanti</p>
+          <div class="space-y-4">
+            <h3 class="text-[28px] sm:text-[36px] lg:text-[44px] font-semibold text-ink leading-[1.05] tracking-tight text-balance">
+              5%-garanti: trækker du dig, koster det ingenting.
+            </h3>
+            <p class="text-base text-muted leading-relaxed max-w-md">
+              Hvis vores endelige tilbud efter besigtigelse afviger mere end 5%, kan du trække dig uden konsekvens.
+            </p>
+          </div>
+        </div>
+        <div class="relative min-h-[240px] md:min-h-full bg-cream-dark/40">
+          <img src="https://crm.365ejendom.dk/salg-photos/flow/03-besigtigelse.png" alt="" class="absolute inset-0 w-full h-full object-contain p-8 sm:p-12" />
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ─────────────────────────────────────────────────────────── -->
+<section aria-labelledby="faq-title" class="bg-white pb-20 sm:pb-28">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+    <div class="space-y-3 max-w-3xl">
+      <p class="text-sm font-medium text-brand-700">Ofte stillede spørgsmål</p>
+      <h2 id="faq-title" class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight">Det skal du vide først.</h2>
+    </div>
+
+    <div class="max-w-3xl divide-y divide-stone-200 border-y border-stone-200">
+      <details class="group">
+        <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer">
+          <h3 class="text-base sm:text-lg font-semibold text-ink">Er 365 Ejendomme legit?</h3>
+          <span aria-hidden="true" class="shrink-0 text-stone-400 plus-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </span>
+        </summary>
+        <div class="pb-6 pr-10 -mt-1"><p class="text-[15px] text-muted leading-relaxed max-w-2xl">
+          Ja. Vi er et registreret dansk ejendomsselskab (Boligselskabet Sommerhave ApS, ejet af United Capital ApS) med base i Næstved. Vi har købt over 87 ejerlejligheder siden 2024 og udlejer i dag ~218 lejemål i Næstved, Ringsted, Kalundborg, Taastrup og Roskilde.
+        </p></div>
+      </details>
+
+      <details class="group">
+        <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer">
+          <h3 class="text-base sm:text-lg font-semibold text-ink">Hvorfor sælge til os i stedet for mægler?</h3>
+          <span aria-hidden="true" class="shrink-0 text-stone-400 plus-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </span>
+        </summary>
+        <div class="pb-6 pr-10 -mt-1"><p class="text-[15px] text-muted leading-relaxed max-w-2xl">
+          Mægler-salget tager typisk 4-6 måneder og koster ~70.000 kr i salær plus markedsafslag på 5-10%. Hos os: ingen mæglersalær, ingen fremvisninger, kontant betaling, du vælger overtagelse fra 14 dage til 6 måneder.
+        </p></div>
+      </details>
+
+      <details class="group">
+        <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer">
+          <h3 class="text-base sm:text-lg font-semibold text-ink">Hvad nu hvis jeres tilbud er for lavt?</h3>
+          <span aria-hidden="true" class="shrink-0 text-stone-400 plus-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </span>
+        </summary>
+        <div class="pb-6 pr-10 -mt-1"><p class="text-[15px] text-muted leading-relaxed max-w-2xl">
+          Vores tilbud er ikke det højeste tal du kan få — det er det sikreste og hurtigste. Hvis vores foreløbige tilbud ikke giver mening, er der ingen forpligtelse. Vi følger ikke op aggressivt.
+        </p></div>
+      </details>
+
+      <details class="group">
+        <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer">
+          <h3 class="text-base sm:text-lg font-semibold text-ink">Hvordan får jeg et kontant tilbud?</h3>
+          <span aria-hidden="true" class="shrink-0 text-stone-400 plus-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </span>
+        </summary>
+        <div class="pb-6 pr-10 -mt-1"><p class="text-[15px] text-muted leading-relaxed max-w-2xl">
+          Udfyld formularen øverst på siden. Vi henter offentlige data fra OIS automatisk, beregner et foreløbigt tilbud, og Jacob kommer forbi inden for 24 timer til en gratis besigtigelse. Hele processen tager normalt 1-2 uger.
+        </p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ──────────────────────────────────────────────────────── -->
+<footer class="bg-cream py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 text-sm text-muted flex flex-col sm:flex-row gap-3 justify-between">
+    <div>© 365 Ejendomme — Boligselskabet Sommerhave ApS · Næstved</div>
+    <div class="flex gap-6">
+      <a href="https://crm.365ejendom.dk/salg" class="hover:text-ink">Salg</a>
+      <a href="mailto:jacob@365ejendom.dk" class="hover:text-ink">Kontakt</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── ADDRESS AUTOCOMPLETE (DAWA public API) ─────────────────────── -->
+<script>
+(function () {
+  const FUNNEL_URL = 'https://crm.365ejendom.dk/salg';
+  const input = document.getElementById('hero-address-input');
+  const list = document.getElementById('suggestions');
+  const goBtn = document.getElementById('address-go-btn');
+  const wrapper = document.getElementById('address-wrapper');
+  const spinner = document.getElementById('search-spinner');
+  const icon = document.getElementById('search-icon');
+  let results = [];
+  let debounce = null;
+
+  function showSpinner(on) {
+    spinner.classList.toggle('hidden', !on);
+    icon.classList.toggle('hidden', on);
+  }
+
+  async function fetchSuggestions(q) {
+    if (!q || q.trim().length < 3) {
+      list.classList.add('hidden');
+      results = [];
+      goBtn.disabled = true;
+      return;
+    }
+    try {
+      showSpinner(true);
+      const url = 'https://api.dataforsyningen.dk/autocomplete?type=adresse&q=' + encodeURIComponent(q) + '&fuzzy';
+      const r = await fetch(url);
+      const data = await r.json();
+      results = data.slice(0, 6);
+      renderSuggestions();
+    } catch (e) {
+      console.error('DAWA fail', e);
+    } finally {
+      showSpinner(false);
+    }
+  }
+
+  function renderSuggestions() {
+    if (results.length === 0) {
+      list.classList.add('hidden');
+      goBtn.disabled = true;
+      return;
+    }
+    list.innerHTML = results.map((s, i) => `
+      <li>
+        <button type="button" data-idx="${i}"
+                class="suggestion-btn w-full text-left px-5 py-3 text-[15px] text-ink hover:bg-stone-50 border-b border-stone-100 last:border-b-0 flex items-center gap-3">
+          <svg class="w-4 h-4 text-brand-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <span>${escapeHtml(s.tekst)}</span>
+        </button>
+      </li>`).join('');
+    list.classList.remove('hidden');
+    goBtn.disabled = false;
+    list.querySelectorAll('.suggestion-btn').forEach((btn) => {
+      btn.addEventListener('click', () => selectAddress(results[+btn.dataset.idx]));
+    });
+  }
+
+  function selectAddress(s) {
+    if (!s) return;
+    // Send brugeren videre til den live funnel med adressen pre-fyldt
+    // (live /salg har egen DAWA-autocomplete der re-finder samme adresse)
+    const url = FUNNEL_URL + '?a=' + encodeURIComponent(s.tekst);
+    window.location.href = url;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[c]));
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => fetchSuggestions(input.value), 250);
+  });
+  goBtn.addEventListener('click', () => {
+    if (results[0]) selectAddress(results[0]);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && results[0]) selectAddress(results[0]);
+  });
+  document.addEventListener('mousedown', (e) => {
+    if (!wrapper.contains(e.target)) list.classList.add('hidden');
+  });
+})();
+</script>
+
+</body>
+</html>

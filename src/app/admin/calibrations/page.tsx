@@ -8,6 +8,8 @@
  */
 import Link from 'next/link';
 import { listCalibrationGroups, listRecentCalibrations } from '@/lib/calibrations';
+import { listSessions, listLearnedDefaults } from '@/lib/learning-sessions';
+import { LearningSessionPanel } from './LearningSessionPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,9 +34,11 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 export default async function CalibrationsAdminPage() {
-  const [groups, recent] = await Promise.all([
+  const [groups, recent, sessions, learned] = await Promise.all([
     listCalibrationGroups(),
     listRecentCalibrations(100),
+    listSessions(20),
+    listLearnedDefaults(),
   ]);
 
   // Sortér grupper: høj sample-count først
@@ -45,9 +49,108 @@ export default async function CalibrationsAdminPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Learning Agent — Calibrations</h1>
         <p className="text-sm text-slate-600 mt-1">
-          Log af alle dine manuelle overrides på estimater. Bruges til at lære
-          bedre defaults pr. postnummer. Plan A: log + suggest, ingen auto-apply.
+          Log af alle dine manuelle overrides på estimater. Kør learning sessions
+          for at opdatere defaults pr. postnummer baseret på dine observationer.
         </p>
+
+      {/* === LEARNING SESSION PANEL === */}
+      <div className="mt-6">
+        <LearningSessionPanel />
+      </div>
+
+      {/* === LEARNED DEFAULTS (aktive overrides) === */}
+      {learned.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-3">
+            Aktive learned defaults ({learned.length})
+          </h2>
+          <div className="overflow-x-auto border border-slate-200 rounded-lg">
+            <table className="w-full text-sm">
+              <thead className="bg-emerald-50 border-b border-emerald-200">
+                <tr className="text-left text-xs uppercase text-emerald-800">
+                  <th className="px-3 py-2">Felt</th>
+                  <th className="px-3 py-2">Postnr</th>
+                  <th className="px-3 py-2 text-right">Værdi</th>
+                  <th className="px-3 py-2 text-right">Tidl.</th>
+                  <th className="px-3 py-2 text-right">Samples</th>
+                  <th className="px-3 py-2">Sidst opdateret</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {learned.map((ld) => (
+                  <tr key={ld.id} className="hover:bg-emerald-50/30">
+                    <td className="px-3 py-2 font-medium text-slate-900">
+                      {ld.field === 'lejeRatePerM2'
+                        ? 'Leje pr m²/md'
+                        : ld.field === 'refurbPerSqm'
+                          ? 'Refurb pr m²'
+                          : ld.field}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">{ld.postalCode ?? 'global'}</td>
+                    <td className="px-3 py-2 text-right tabular-nums font-semibold text-emerald-900">
+                      {ld.value.toLocaleString('da-DK')}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-slate-400">
+                      {ld.previousValue?.toLocaleString('da-DK') ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-slate-600">
+                      {ld.sampleCount}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-slate-500">
+                      {new Date(ld.updatedAt).toLocaleString('da-DK', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* === SESSION HISTORIK === */}
+      {sessions.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-3">
+            Tidligere sessions ({sessions.length})
+          </h2>
+          <div className="overflow-x-auto border border-slate-200 rounded-lg">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr className="text-left text-xs uppercase text-slate-600">
+                  <th className="px-3 py-2">Tid</th>
+                  <th className="px-3 py-2 text-right">Forslag</th>
+                  <th className="px-3 py-2 text-right">Accepteret</th>
+                  <th className="px-3 py-2 text-right">Afvist</th>
+                  <th className="px-3 py-2">Noter</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {sessions.map((s) => (
+                  <tr key={s.id} className="hover:bg-slate-50">
+                    <td className="px-3 py-2 text-xs text-slate-700 whitespace-nowrap">
+                      {new Date(s.ranAt).toLocaleString('da-DK', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      })}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{s.proposalsCount}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-emerald-700">
+                      {s.acceptedCount}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-slate-500">
+                      {s.rejectedCount}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-slate-500">{s.notes ?? ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
       </div>
 
       {/* === AGGREGERET PR. (FIELD, POSTNR) === */}

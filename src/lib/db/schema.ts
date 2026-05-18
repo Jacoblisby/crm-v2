@@ -536,11 +536,59 @@ export const estimateCalibrations = pgTable(
     brokerKind: text('broker_kind'),                    // danbolig | realequity | ...
     yearBuilt: integer('year_built'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    // Sat naar en learning session har "absorberet" denne observation —
+    // bruges saa naeste session kun ser nye overrides.
+    absorbedAt: timestamp('absorbed_at', { withTimezone: true }),
+    absorbedInSession: uuid('absorbed_in_session'),
   },
   (t) => [
     index('estimate_calibrations_field_postal_idx').on(t.field, t.postalCode),
     index('estimate_calibrations_listing_idx').on(t.listingId),
     index('estimate_calibrations_created_idx').on(t.createdAt),
+    index('estimate_calibrations_absorbed_idx').on(t.absorbedAt),
+  ],
+);
+
+// ─── G3. Learning Sessions ──────────────────────────────────────────────
+// Hver gang du koerer en learning session, logger vi den her: hvad blev
+// foreslaaet, hvad blev accepteret, hvad blev afvist. Bruges til historik
+// og til at undgaa at samme overrides foreslaar samme update igen.
+export const learningSessions = pgTable(
+  'learning_sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ranAt: timestamp('ran_at', { withTimezone: true }).notNull().defaultNow(),
+    proposalsCount: integer('proposals_count').notNull().default(0),
+    acceptedCount: integer('accepted_count').notNull().default(0),
+    rejectedCount: integer('rejected_count').notNull().default(0),
+    samplesAbsorbed: integer('samples_absorbed').notNull().default(0),
+    notes: text('notes'),
+  },
+  (t) => [index('learning_sessions_ran_at_idx').on(t.ranAt)],
+);
+
+// ─── G4. Learned Defaults ───────────────────────────────────────────────
+// Output af accepterede learning-session forslag. Overrider de hardcoded
+// LEJE_PR_M2_PR_MD og REFURB_DEFAULT_PER_SQM konstanter.
+//
+// Lookup: (field, postal_code) — fx ('lejeRatePerM2', '4700') = 97
+export const learnedDefaults = pgTable(
+  'learned_defaults',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    field: text('field').notNull(),
+    postalCode: text('postal_code'),  // null = global (alle postnr)
+    value: integer('value').notNull(),
+    previousValue: integer('previous_value'),  // hvad det var foer
+    sampleCount: integer('sample_count').notNull(),
+    sessionId: uuid('session_id').references(() => learningSessions.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('learned_defaults_field_postal_uniq').on(t.field, t.postalCode),
   ],
 );
 
@@ -571,3 +619,7 @@ export type ScrapeJob = typeof scrapeJobs.$inferSelect;
 export type NewScrapeJob = typeof scrapeJobs.$inferInsert;
 export type EstimateCalibration = typeof estimateCalibrations.$inferSelect;
 export type NewEstimateCalibration = typeof estimateCalibrations.$inferInsert;
+export type LearningSession = typeof learningSessions.$inferSelect;
+export type NewLearningSession = typeof learningSessions.$inferInsert;
+export type LearnedDefault = typeof learnedDefaults.$inferSelect;
+export type NewLearnedDefault = typeof learnedDefaults.$inferInsert;

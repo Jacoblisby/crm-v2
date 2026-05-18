@@ -19,6 +19,7 @@ import {
   type NewEstimateCalibration,
 } from './db/schema';
 import { estimateMonthlyRent } from './services/our-rentals';
+import { getLearnedDefault } from './learning-sessions';
 
 // ─── Defaults (samme som recompute-on-market.ts) ───────────────────────────
 const LEJE_PR_M2_PR_MD: Record<string, number> = {
@@ -60,8 +61,13 @@ export interface DefaultEstimates {
 /**
  * Hvad systemet VILLE foreslaa for et listing — uden brugerens overrides.
  * Bruges som "defaultValue" i calibrations-log.
+ *
+ * Reader-rækkefølge:
+ *   1. our-rentals.json (faktisk leje fra vores egne lejemål)
+ *   2. learned_defaults (fra accepterede learning sessions)
+ *   3. Hardcoded LEJE_PR_M2_PR_MD
  */
-export function computeDefaultEstimates(c: OnMarketCandidate): DefaultEstimates {
+export async function computeDefaultEstimates(c: OnMarketCandidate): Promise<DefaultEstimates> {
   // Leje-default
   let lejeMd = 0;
   if (c.postalCode && c.kvm && c.kvm > 0) {
@@ -70,12 +76,22 @@ export function computeDefaultEstimates(c: OnMarketCandidate): DefaultEstimates 
     if (match.monthlyRent > 0) {
       lejeMd = Math.round(match.monthlyRent * RENT_SAFETY_DISCOUNT);
     } else {
-      const rate = LEJE_PR_M2_PR_MD[c.postalCode] ?? DEFAULT_LEJE_RATE;
+      // Tjek learned default for dette postnr foer hardcoded fallback
+      const learned = await getLearnedDefault('lejeRatePerM2', c.postalCode);
+      const rate = learned ?? LEJE_PR_M2_PR_MD[c.postalCode] ?? DEFAULT_LEJE_RATE;
       lejeMd = Math.round(c.kvm * rate * RENT_SAFETY_DISCOUNT);
     }
   }
-  // Refurb-default
-  const refurbTotal = c.kvm > 0 ? Math.round(c.kvm * REFURB_DEFAULT_PER_SQM) : 0;
+  // Refurb-default: tjek learned (postnr-specifik > global) foer hardcoded
+  let refurbRate = REFURB_DEFAULT_PER_SQM;
+  if (c.kvm > 0) {
+    const learnedPostal = c.postalCode
+      ? await getLearnedDefault('refurbPerSqm', c.postalCode)
+      : null;
+    const learnedGlobal = learnedPostal ?? (await getLearnedDefault('refurbPerSqm', null));
+    if (learnedGlobal) refurbRate = learnedGlobal;
+  }
+  const refurbTotal = c.kvm > 0 ? Math.round(c.kvm * refurbRate) : 0;
   return { lejeMd, refurbTotal };
 }
 
@@ -130,7 +146,7 @@ export async function logEstimaterSave(input: {
   newRefurbRengoring: number;
   newRefurbAndre: number;
 }) {
-  const defaults = computeDefaultEstimates(input.candidate);
+  const defaults = await computeDefaultEstimates(input.candidate);
   const c = input.candidate;
   const ctx = {
     kvm: c.kvm,
