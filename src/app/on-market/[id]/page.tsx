@@ -17,6 +17,7 @@ import { EditEstimaterForm } from './EditEstimaterForm';
 import { PdfSourceForm } from './PdfSourceForm';
 import { CostBreakdownForm } from './CostBreakdownForm';
 import { ReviewStatusForm } from './ReviewStatusForm';
+import { CalibrationBadges } from './CalibrationBadges';
 import type { ReviewStatus } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -393,6 +394,9 @@ export default async function OnMarketDetailPage({
           </p>
         )}
       </div>
+
+      {/* === LEARNING AGENT (lært fra dine overrides i samme postnr) === */}
+      <CalibrationBadges postalCode={c.postalCode} kvm={c.kvm} />
 
       {/* === MELLEMREGNINGER === */}
       <AfkastDebug

@@ -516,6 +516,34 @@ export const scrapeJobs = pgTable(
   ],
 );
 
+// ─── G2. Estimate Calibrations (learning agent) ──────────────────────────
+// Log af alle manuelle overrides på estimater (leje, refurb, drift) så vi
+// kan lære hvad de "rigtige" defaults burde være pr. postnummer/standniveau.
+// Plan A: log + suggest, ingen auto-apply.
+export const estimateCalibrations = pgTable(
+  'estimate_calibrations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    listingId: uuid('listing_id')
+      .notNull()
+      .references(() => onMarketCandidates.id, { onDelete: 'cascade' }),
+    field: text('field').notNull(),  // 'lejeMd' | 'refurb' | 'drift' | etc.
+    defaultValue: integer('default_value').notNull(),  // hvad systemet foreslog
+    actualValue: integer('actual_value').notNull(),    // hvad brugeren satte
+    kvm: integer('kvm'),                                // kontekst
+    postalCode: text('postal_code'),
+    standLevel: text('stand_level'),                    // ny/god/middel/trænger/slidt
+    brokerKind: text('broker_kind'),                    // danbolig | realequity | ...
+    yearBuilt: integer('year_built'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('estimate_calibrations_field_postal_idx').on(t.field, t.postalCode),
+    index('estimate_calibrations_listing_idx').on(t.listingId),
+    index('estimate_calibrations_created_idx').on(t.createdAt),
+  ],
+);
+
 // ─── H. Auth (better-auth tabeller — autogenereret, men deklareret her) ───
 // Genereres af better-auth CLI når Resend SMTP er klar — pladsholder.
 // Se src/lib/auth.ts for konfiguration.
@@ -541,3 +569,5 @@ export type LeaseAgreement = typeof leaseAgreements.$inferSelect;
 export type OnMarketCandidate = typeof onMarketCandidates.$inferSelect;
 export type ScrapeJob = typeof scrapeJobs.$inferSelect;
 export type NewScrapeJob = typeof scrapeJobs.$inferInsert;
+export type EstimateCalibration = typeof estimateCalibrations.$inferSelect;
+export type NewEstimateCalibration = typeof estimateCalibrations.$inferInsert;

@@ -5,6 +5,7 @@ import { eq, sql, and } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { onMarketCandidates } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
+import { logEstimaterSave, logCostBreakdownSave } from '@/lib/calibrations';
 
 interface UpdateEstimaterInput {
   id: string;
@@ -69,6 +70,21 @@ export async function updateEstimaterAction(input: UpdateEstimaterInput) {
       updatedAt: new Date(),
     })
     .where(eq(onMarketCandidates.id, input.id));
+
+  // Learning agent — log overrides (best-effort, ignorerer fejl)
+  try {
+    await logEstimaterSave({
+      listingId: input.id,
+      candidate: c,
+      newLejeMd: input.estimeretLejeMd,
+      newRefurbGulv: input.refurbGulv,
+      newRefurbMaling: input.refurbMaling,
+      newRefurbRengoring: input.refurbRengoring,
+      newRefurbAndre: input.refurbAndre,
+    });
+  } catch {
+    // ignorer — calibration-log er ikke kritisk
+  }
 
   revalidatePath('/on-market');
   revalidatePath(`/on-market/${input.id}`);
@@ -481,6 +497,28 @@ export async function updateCostBreakdownAction(input: {
       updatedAt: new Date(),
     })
     .where(eq(onMarketCandidates.id, input.id));
+
+  // Learning agent — log drift-overrides
+  try {
+    await logCostBreakdownSave({
+      listingId: input.id,
+      candidate: c,
+      newBreakdown: {
+        costFaellesudgifter: input.costFaellesudgifter,
+        costGrundvaerdi: input.costGrundvaerdi,
+        costRottebekempelse: input.costRottebekempelse,
+        costRenovation: input.costRenovation,
+        costForsikringer: input.costForsikringer,
+        costFaelleslaan: input.costFaelleslaan,
+        costGrundfond: input.costGrundfond,
+        costVicevaert: input.costVicevaert,
+        costVedligeholdelse: input.costVedligeholdelse,
+        costAndreDrift: input.costAndreDrift,
+      },
+    });
+  } catch {
+    // ignorer
+  }
 
   revalidatePath('/on-market');
   revalidatePath(`/on-market/${input.id}`);
