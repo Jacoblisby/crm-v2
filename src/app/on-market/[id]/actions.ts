@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { onMarketCandidates } from '@/lib/db/schema';
 import { computeAfkast } from '@/lib/afkast';
@@ -228,6 +228,99 @@ export async function uploadPdfAction(formData: FormData) {
       .where(eq(onMarketCandidates.id, id));
     return { ok: false as const, error: `Parse fejlede: ${m.slice(0, 200)}` };
   }
+}
+
+/**
+ * BULK force-reparse: koerer forceReparsePdfAction-logik mod ALLE active
+ * candidates med pdf_url sat. Bruges naar parser-koden er forbedret og vi
+ * vil opdatere hele basen paa een gang.
+ *
+ * Returnerer summary: hvor mange blev re-parset, hvor mange fejlede.
+ */
+export async function bulkReparsePdfAction() {
+  const candidates = await db
+    .select()
+    .from(onMarketCandidates)
+    .where(
+      and(
+        eq(onMarketCandidates.status, 'active'),
+        sql`${onMarketCandidates.pdfUrl} IS NOT NULL`,
+      ),
+    );
+
+  let parsed = 0;
+  let failed = 0;
+  const errors: string[] = [];
+  const start = Date.now();
+
+  const { extractText, getDocumentProxy } = await import('unpdf');
+  const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed } =
+    await import('@/worker/parse-pdf');
+  const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+
+  for (const c of candidates) {
+    if (!c.pdfUrl) continue;
+    try {
+      const r = await fetch(c.pdfUrl, { headers: { 'User-Agent': UA }, redirect: 'follow' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const bytes = new Uint8Array(await r.arrayBuffer());
+      const pdf = await getDocumentProxy(bytes);
+      const { text } = await extractText(pdf, { mergePages: true });
+      const fullText = Array.isArray(text) ? text.join('\n') : text;
+      const breakdown = parseSalgsopstilling(fullText);
+      const ejerforeningSikkerhed = parseEjerforeningSikkerhed(fullText);
+
+      const driftTotal =
+        breakdown.costGrundvaerdi +
+        breakdown.costFaellesudgifter +
+        breakdown.costRottebekempelse +
+        breakdown.costRenovation +
+        breakdown.costForsikringer +
+        breakdown.costFaelleslaan +
+        breakdown.costGrundfond +
+        breakdown.costVicevaert +
+        breakdown.costVedligeholdelse +
+        breakdown.costAndreDrift;
+      const refurbTotal =
+        c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
+      const afk = computeAfkast({
+        rentMd: c.estimeretLejeMd ?? 0,
+        pris: c.listPrice,
+        forhandletPris: c.forhandletPris ?? null,
+        driftTotal,
+        refurbTotal,
+      });
+
+      await db
+        .update(onMarketCandidates)
+        .set({
+          ...breakdown,
+          ejerforeningSikkerhed,
+          bidDkk: afk.budAt20PctRoe,
+          marginPct: afk.roeNettoPct.toString(),
+          afkastCalculatedAt: new Date(),
+          pdfStatus: 'parsed',
+          pdfDownloadedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(onMarketCandidates.id, c.id));
+      parsed++;
+    } catch (err) {
+      failed++;
+      const m = err instanceof Error ? err.message : String(err);
+      errors.push(`${c.address.slice(0, 30)}: ${m.slice(0, 100)}`);
+    }
+  }
+
+  revalidatePath('/on-market');
+  return {
+    ok: true as const,
+    total: candidates.length,
+    parsed,
+    failed,
+    errors: errors.slice(0, 10),
+    durationSeconds: Math.round((Date.now() - start) / 1000),
+  };
 }
 
 /**

@@ -8,6 +8,7 @@ import path from 'path';
 import os from 'os';
 import Link from 'next/link';
 import { listOnMarketCandidates, type OnMarketSort } from '@/lib/db/queries';
+import { BulkReparseButton } from './BulkReparseButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,11 +174,16 @@ export default async function OnMarketPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-1">On-market</h1>
-      <p className="text-sm text-slate-500 mb-2">
-        {rows.length} listings · {downloaded} med salgsopstilling hentet
-        {isPocFallback && ' · viser POC-data (DB-tabel er tom indtil Uge 5)'}
-      </p>
+      <div className="flex items-start justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">On-market</h1>
+          <p className="text-sm text-slate-500">
+            {rows.length} listings · {downloaded} med salgsopstilling hentet
+            {isPocFallback && ' · viser POC-data (DB-tabel er tom indtil Uge 5)'}
+          </p>
+        </div>
+        {!isPocFallback && <BulkReparseButton />}
+      </div>
       <div className="mb-4 space-y-2">
         <nav className="flex gap-2 text-sm">
           {(['active', 'sold', 'all'] as const).map((s) => (
