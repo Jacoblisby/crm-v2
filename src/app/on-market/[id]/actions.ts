@@ -153,9 +153,10 @@ export async function uploadPdfAction(formData: FormData) {
     const { text } = await extractText(pdf, { mergePages: true });
     const fullText = Array.isArray(text) ? text.join('\n') : text;
 
-    const { parseSalgsopstilling, parseEjerudgiftTotal } = await import('@/worker/parse-pdf');
+    const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed } = await import('@/worker/parse-pdf');
     const breakdown = parseSalgsopstilling(fullText);
     const declaredTotal = parseEjerudgiftTotal(fullText);
+    const ejerforeningSikkerhed = parseEjerforeningSikkerhed(fullText);
 
     // Hent kandidaten for at recompute afkast
     const rows = await db
@@ -190,6 +191,7 @@ export async function uploadPdfAction(formData: FormData) {
       .update(onMarketCandidates)
       .set({
         ...breakdown,
+        ejerforeningSikkerhed,
         bidDkk: afk.budAt20PctRoe,
         marginPct: afk.roeNettoPct.toString(),
         afkastCalculatedAt: new Date(),
@@ -209,6 +211,7 @@ export async function uploadPdfAction(formData: FormData) {
       breakdown,
       driftTotal,
       declaredTotal, // "Ejerudgift i alt" fra PDF (hvis fundet) — sanity check
+      ejerforeningSikkerhed, // engangsbeloeb
       foundFields: Object.entries(breakdown).filter(([, v]) => (v as number) > 0).length,
       totalFields: Object.keys(breakdown).length,
       empty: total === 0,
@@ -243,6 +246,7 @@ export async function updateCostBreakdownAction(input: {
   costVicevaert: number;
   costVedligeholdelse: number;
   costAndreDrift: number;
+  ejerforeningSikkerhed: number;
 }) {
   const rows = await db
     .select()
@@ -287,6 +291,7 @@ export async function updateCostBreakdownAction(input: {
       costVicevaert: input.costVicevaert,
       costVedligeholdelse: input.costVedligeholdelse,
       costAndreDrift: input.costAndreDrift,
+      ejerforeningSikkerhed: input.ejerforeningSikkerhed,
       bidDkk: afk.budAt20PctRoe,
       marginPct: afk.roeNettoPct.toString(),
       afkastCalculatedAt: new Date(),

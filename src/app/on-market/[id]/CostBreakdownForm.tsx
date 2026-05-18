@@ -23,16 +23,25 @@ interface Props {
     costVicevaert: number;
     costVedligeholdelse: number;
     costAndreDrift: number;
+    ejerforeningSikkerhed: number;
   };
 }
 
-const FIELDS: Array<{
-  key: keyof Props['current'];
-  label: string;
-  hint?: string;
-}> = [
+type AnnualKey =
+  | 'costFaellesudgifter'
+  | 'costGrundvaerdi'
+  | 'costFaelleslaan'
+  | 'costForsikringer'
+  | 'costRenovation'
+  | 'costRottebekempelse'
+  | 'costGrundfond'
+  | 'costVicevaert'
+  | 'costVedligeholdelse'
+  | 'costAndreDrift';
+
+const ANNUAL_FIELDS: Array<{ key: AnnualKey; label: string; hint?: string }> = [
   { key: 'costFaellesudgifter', label: 'Fællesudgifter', hint: 'inkl. evt. acontovand' },
-  { key: 'costGrundvaerdi', label: 'Grundskyld', hint: 'ejendomsskat' },
+  { key: 'costGrundvaerdi', label: 'Grundskyld', hint: 'inkl. ejendomsværdiskat' },
   { key: 'costFaelleslaan', label: 'Fælleslån', hint: 'EF eller A/B' },
   { key: 'costForsikringer', label: 'Forsikringer' },
   { key: 'costRenovation', label: 'Renovation' },
@@ -48,9 +57,12 @@ export function CostBreakdownForm({ id, current }: Props) {
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
 
-  const total = Object.values(values).reduce((a, b) => a + (b || 0), 0);
-  const allEmpty = total === 0;
-  const dirty = FIELDS.some((f) => values[f.key] !== current[f.key]);
+  // Drift-total = kun aarlige felter (IKKE engangsbeloeb som sikkerhed)
+  const driftTotal = ANNUAL_FIELDS.reduce((sum, f) => sum + (values[f.key] || 0), 0);
+  const allEmpty = driftTotal === 0;
+  const dirty =
+    ANNUAL_FIELDS.some((f) => values[f.key] !== current[f.key]) ||
+    values.ejerforeningSikkerhed !== current.ejerforeningSikkerhed;
 
   function setField(key: keyof Props['current'], v: number) {
     setValues((p) => ({ ...p, [key]: v }));
@@ -74,7 +86,7 @@ export function CostBreakdownForm({ id, current }: Props) {
   return (
     <form
       onSubmit={onSubmit}
-      className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3"
+      className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4"
     >
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -90,13 +102,13 @@ export function CostBreakdownForm({ id, current }: Props) {
             Drift total
           </div>
           <div className="text-lg font-semibold tabular-nums">
-            {total.toLocaleString('da-DK')} kr
+            {driftTotal.toLocaleString('da-DK')} kr
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
-        {FIELDS.map((f) => (
+        {ANNUAL_FIELDS.map((f) => (
           <CostField
             key={f.key}
             label={f.label}
@@ -105,6 +117,28 @@ export function CostBreakdownForm({ id, current }: Props) {
             onChange={(v) => setField(f.key, v)}
           />
         ))}
+      </div>
+
+      {/* Engangsbeloeb — separat sektion fordi det ikke er aarlig drift */}
+      <div className="border-t border-slate-200 pt-3 space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+              Engangsbeløb
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Ikke en del af drift, men følger med købet
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+          <CostField
+            label="Sikkerhed til e/f"
+            hint="bankgaranti / depositum"
+            value={values.ejerforeningSikkerhed}
+            onChange={(v) => setField('ejerforeningSikkerhed', v)}
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-3 pt-1">

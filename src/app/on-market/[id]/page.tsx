@@ -440,6 +440,7 @@ export default async function OnMarketDetailPage({
           costVicevaert: c.costVicevaert,
           costVedligeholdelse: c.costVedligeholdelse,
           costAndreDrift: c.costAndreDrift,
+          ejerforeningSikkerhed: c.ejerforeningSikkerhed,
         }}
       />
 

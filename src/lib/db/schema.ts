@@ -433,6 +433,12 @@ export const onMarketCandidates = pgTable(
     costVedligeholdelse: integer('cost_vedligeholdelse').notNull().default(0),
     costAndreDrift: integer('cost_andre_drift').notNull().default(0),
 
+    // Engangsbeløb der følger med købet — ikke en del af årlig drift, men
+    // skal vises til brugeren (kan trækkes fra bid hvis vi vil tage højde for
+    // det i køberens cashflow). "Sikkerhed til e/f" på salgsopstillingen:
+    // fx "Ja, med kr. 50.000,00 I form af [bankgaranti/depositum]"
+    ejerforeningSikkerhed: integer('ejerforening_sikkerhed').notNull().default(0),
+
     // Istandsættelse (refurbish) — engangsomkostninger DKK
     refurbGulv: integer('refurb_gulv').notNull().default(0),
     refurbMaling: integer('refurb_maling').notNull().default(0),

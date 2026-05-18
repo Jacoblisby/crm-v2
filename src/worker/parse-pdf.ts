@@ -185,6 +185,53 @@ export function parseEjerudgiftTotal(text: string): number {
   );
 }
 
+/**
+ * Parse "Sikkerhed til e/f: Ja, med kr. 50.000,00" — engangsbeløb.
+ *
+ * Linjen kan have format:
+ *   "Sikkerhed til e/f: Ja, med kr. 50.000,00 I form af ..."
+ *   "Sikkerhed til ejerforening: 50.000"
+ *   "Sikkerhedsstillelse: 50.000 kr"
+ *
+ * Returns 0 hvis ikke fundet ELLER hvis svaret er "nej/ingen".
+ */
+export function parseEjerforeningSikkerhed(text: string): number {
+  // Find label
+  const labelRe = /Sikkerhed(?:sstillelse)?\s+til\s+(?:e\/f|ejerforening)/i;
+  const m = text.match(labelRe);
+  if (!m) return 0;
+
+  // Tag 200 chars window efter label
+  const windowStart = (m.index ?? 0) + m[0].length;
+  const window = text.slice(windowStart, windowStart + 200);
+
+  // Hvis "nej" eller "ingen" foer foerste tal → ingen sikkerhed
+  const lower = window.toLowerCase();
+  const firstNumMatch = lower.match(/[\d.,]+/);
+  if (firstNumMatch) {
+    const preNum = lower.slice(0, firstNumMatch.index ?? 0);
+    if (/\b(nej|ingen)\b/.test(preNum)) return 0;
+  } else {
+    return 0;
+  }
+
+  // Extract first amount-shaped tal (her er det FOERSTE — ikke aaret, fordi
+  // strukturen er "Ja, med kr. 50.000,00")
+  const numbers = [...window.matchAll(/(\d{1,3}(?:\.\d{3})+,\d{1,2}|\d+,\d{1,2}|\d{1,3}(?:\.\d{3})+|\d+)/g)];
+  for (const n of numbers) {
+    const raw = n[0];
+    const normalized = raw.replace(/\./g, '').replace(',', '.');
+    const val = parseFloat(normalized);
+    if (Number.isNaN(val) || val <= 0) continue;
+    // Filter aarstal
+    if (val >= 2015 && val <= 2035 && !raw.includes(',') && !raw.includes('.')) continue;
+    // Filter ekstreme noise
+    if (val > 10_000_000) continue;
+    return Math.round(val);
+  }
+  return 0;
+}
+
 async function fetchPdfBytes(url: string): Promise<Buffer> {
   const r = await fetch(url, {
     headers: { 'User-Agent': UA },
