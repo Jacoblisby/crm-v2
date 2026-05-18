@@ -18,24 +18,22 @@ export const metadata: Metadata = {
 export default function SalgLayout({ children }: { children: React.ReactNode }) {
   return (
     <FunnelProvider>
-      <div className="min-h-screen bg-surface-0">
+      <div className="min-h-screen bg-white">
         <SalgHeader />
         <main>{children}</main>
-        <footer className="border-t border-hairline py-8 text-xs text-muted">
+        <footer className="border-t border-stone-200 py-8 text-xs text-muted">
           <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 flex flex-wrap gap-4 justify-between items-center">
-            <div className="py-2 tracking-widest uppercase font-medium">
-              © 365 Ejendomme · CVR 42 80 04 22
-            </div>
+            <div className="py-2">© 365 Ejendomme · CVR 42 80 04 22</div>
             <div className="flex gap-1">
               <Link
                 href="https://365ejendom.dk/privatlivspolitik"
-                className="inline-flex items-center min-h-[44px] px-3 hover:text-brand-300 rounded-full transition-colors tracking-widest uppercase font-medium"
+                className="inline-flex items-center min-h-[44px] px-3 hover:text-brand-700 rounded-full transition-colors"
               >
                 Privatliv
               </Link>
               <Link
                 href="https://365ejendom.dk"
-                className="inline-flex items-center min-h-[44px] px-3 hover:text-brand-300 rounded-full transition-colors tracking-widest uppercase font-medium"
+                className="inline-flex items-center min-h-[44px] px-3 hover:text-brand-700 rounded-full transition-colors"
               >
                 Tilbage til 365ejendom.dk
               </Link>

@@ -141,17 +141,19 @@ export function Step1Address() {
   return (
     <div className="space-y-8">
       {hasAddress && (
-        <div className="flex items-start justify-between gap-4 bg-surface-2 rounded-xl p-4 ring-1 ring-hairline">
+        <div className="flex items-start justify-between gap-4 bg-cream rounded-2xl p-4">
           <div className="flex items-start gap-3 min-w-0">
             <div
               aria-hidden="true"
-              className="w-9 h-9 rounded-full bg-brand-500 text-ink flex items-center justify-center shrink-0"
+              className="w-9 h-9 rounded-full bg-brand-700 text-white flex items-center justify-center shrink-0"
             >
               <Check className="w-4 h-4" strokeWidth={3} />
             </div>
             <div className="min-w-0">
-              <div className="cine-kicker">Adresse fundet</div>
-              <div className="text-[15px] font-medium text-ink truncate mt-0.5">
+              <div className="text-xs font-medium text-brand-700">
+                Adresse fundet
+              </div>
+              <div className="text-[15px] font-semibold text-ink truncate mt-0.5">
                 {state.fullAddress}
               </div>
             </div>
@@ -180,22 +182,22 @@ export function Step1Address() {
                 isOnMarket: false,
               });
             }}
-            className="text-xs font-semibold text-brand-300 hover:text-brand-400 shrink-0 px-2 py-1 tracking-widest uppercase"
+            className="text-xs font-semibold text-brand-700 hover:text-brand-900 shrink-0 px-2 py-1"
           >
             Skift
           </button>
         </div>
       )}
 
-      <div className="space-y-3">
-        <p className="cine-kicker">Trin 1 · Lidt om dig</p>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-brand-700">Trin 1 · Lidt om dig</p>
         <h2
           id="step1-heading"
-          className="text-ink text-[32px] sm:text-[40px] font-semibold leading-[1.05] tracking-[-0.02em]"
+          className="text-ink text-[28px] sm:text-[36px] font-semibold leading-[1.1] tracking-tight"
         >
           Hvor sender vi dit estimat?
         </h2>
-        <p id="step1-helper" className="text-[15px] text-ink-soft text-pretty leading-relaxed max-w-md">
+        <p id="step1-helper" className="text-[15px] text-muted leading-relaxed max-w-md">
           Vi sender dit foreløbige tilbud på email + SMS, og ringer indenfor 24
           timer for at aftale gratis besigtigelse.
         </p>
@@ -341,7 +343,7 @@ export function Step1Address() {
           <button
             onClick={continueIfReady}
             disabled={!hasAddress || lookupPending || !contactValid}
-            className="w-full sm:w-auto px-10 py-4 bg-brand-500 hover:bg-brand-400 active:bg-brand-600 disabled:bg-surface-3 disabled:text-ink-soft disabled:cursor-not-allowed text-ink rounded-xl font-semibold text-base transition-colors tracking-tight"
+            className="w-full sm:w-auto px-8 py-3.5 bg-brand-700 hover:bg-brand-800 disabled:bg-stone-300 disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors"
           >
             Fortsæt
           </button>

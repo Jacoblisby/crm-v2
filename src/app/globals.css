@@ -1,95 +1,77 @@
 @import "tailwindcss";
 
-/* "Levende Reportage" — Variant D palette
-   Cinematic dark mode like Apple/Linear/Vercel.
-   Pure black + white + brand teal accent. */
+/* Opendoor 1:1 layout med 365's brand-teal i stedet for Opendoor's blue.
+   Cream-peach baggrund #F5EFE6 -> Opendoor pattern. Stone neutrals.
+   Inter font (taettest paa Opendoor's Graphik). */
 :root {
-  --background: #0a0c0d; /* near-black, slight blue tint */
-  --foreground: #f7f8f8; /* off-white, ikke pure for at undgaa overskinhed */
-  --muted: #9ba3a5; /* mid gray */
-  --muted-dark: #5a6164;
+  --background: #ffffff;
+  --foreground: #14181a; /* near-black charcoal */
+  --muted: #555a5d;
 
-  --teal-300: #6fb1b0;
-  --teal-400: #4c9695;
-  --teal-500: #2c5c5d; /* 365 brand teal */
-  --teal-600: #234848;
-  --teal-700: #1a3636;
+  --cream: #f5efe6;
+  --cream-soft: #faf5ec;
+  --cream-dark: #ece4d6;
 
-  --ink: #f7f8f8;
-  --ink-dim: #c8cdcf;
-  --ink-soft: #9ba3a5;
+  --stone-50: #fafaf9;
+  --stone-100: #f5f5f4;
+  --stone-200: #e7e5e4;
+  --stone-300: #d6d3d1;
+  --stone-700: #44403c;
+  --stone-900: #1c1917;
 
-  --surface-0: #0a0c0d;
-  --surface-1: #15191b; /* card */
-  --surface-2: #1f2426; /* elevated card */
-  --surface-3: #2a3033; /* input */
-  --hairline: rgba(255, 255, 255, 0.08);
-  --hairline-strong: rgba(255, 255, 255, 0.14);
+  /* 365 brand teal — bruges som Opendoor bruger deres blue (CTA + kicker accent) */
+  --teal-50: #ecf2f1;
+  --teal-100: #d2e0df;
+  --teal-200: #a5c1c0;
+  --teal-400: #588a8a;
+  --teal-500: #427a7b;
+  --teal-600: #335f60;
+  --teal-700: #2c5c5d;
+  --teal-800: #234848;
+  --teal-900: #1a3636;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --color-ink: var(--ink);
-  --color-ink-dim: var(--ink-dim);
-  --color-ink-soft: var(--ink-soft);
+  --color-cream: var(--cream);
+  --color-cream-soft: var(--cream-soft);
+  --color-cream-dark: var(--cream-dark);
+
+  --color-ink: var(--foreground);
   --color-muted: var(--muted);
 
-  --color-surface-0: var(--surface-0);
-  --color-surface-1: var(--surface-1);
-  --color-surface-2: var(--surface-2);
-  --color-surface-3: var(--surface-3);
-
-  --color-brand-300: var(--teal-300);
+  --color-brand-50: var(--teal-50);
+  --color-brand-100: var(--teal-100);
+  --color-brand-200: var(--teal-200);
   --color-brand-400: var(--teal-400);
   --color-brand-500: var(--teal-500);
   --color-brand-600: var(--teal-600);
   --color-brand-700: var(--teal-700);
+  --color-brand-800: var(--teal-800);
+  --color-brand-900: var(--teal-900);
 
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #14181a;
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: "ss01", "ss03", "cv11";
+  font-family: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "cv11", "ss01", "ss03";
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--muted-dark);
+  color: #9ca3a4;
   opacity: 1;
-}
-
-/* Cinematic kicker — small caps brass-ish teal */
-.cine-kicker {
-  font-size: 0.6875rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--teal-300);
-}
-
-/* Mono numeric — for stat reveals */
-.mono-num {
-  font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-
-/* Subtle grain texture overlay (CSS only) — virker som "film stock" */
-.grain-overlay {
-  position: relative;
-}
-.grain-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  mix-blend-mode: overlay;
 }

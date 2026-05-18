@@ -1,17 +1,13 @@
 'use client';
 
 /**
- * SalgContent — "Levende Reportage" (Variant D fra design-shotgun).
+ * SalgContent — Opendoor 1:1 layout copy med 365 teal palette.
  *
- * Cinematic dark-mode landing der laaner fra Apple, Linear, Vercel:
- *   - Pitch-black baggrund med high-contrast typografi
- *   - Geist Sans throughout
- *   - Kinetic ghost-headline (multiple low-opacity copies bag main H1)
- *   - Massive Geist Mono stat-reveals
- *   - Dark moody fotografi (door, keys, dusk interior)
- *   - Brand teal #2C5C5D som accent — bevidst sparsom brug
- *
- * Mode A: marketing-landing. Mode B: focused funnel-step.
+ * Eksakt struktur fra opendoor.com/sell:
+ *   1. Hero: full-bleed lifestyle photo + dark left-overlay + white H1 + pill input
+ *   2. Testimonials section paa cream: "X+ homeowners served" + 3 avatar-cards
+ *   3. Feature blocks: 3 STORE cards, hver er sin egen story-blok (title + big sub + img)
+ *   4. FAQ accordion
  */
 import Image from 'next/image';
 import { useFunnel } from './FunnelContext';
@@ -21,7 +17,6 @@ import { Funnel } from './Funnel';
 export function SalgContent() {
   const { state } = useFunnel();
   const isLanding = state.step === 1 && !state.fullAddress;
-
   if (isLanding) return <LandingMode />;
   return <FunnelMode />;
 }
@@ -30,9 +25,8 @@ function LandingMode() {
   return (
     <>
       <HeroSection />
-      <StatsSection />
-      <HowSection />
       <TestimonialsSection />
+      <FeatureBlocksSection />
       <FAQSection />
     </>
   );
@@ -40,7 +34,7 @@ function LandingMode() {
 
 function FunnelMode() {
   return (
-    <div className="min-h-screen bg-surface-0 pt-24 pb-12">
+    <div className="min-h-screen bg-cream pt-24 pb-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <Funnel />
       </div>
@@ -49,296 +43,215 @@ function FunnelMode() {
 }
 
 /**
- * Hero — full-bleed dark med kinetic ghost-typografi.
- * Layout: H1 venstre + cinematic dark photo hojre.
+ * Hero — Opendoor's eksakte pattern:
+ * Full-bleed lifestyle photo, dark gradient overlay paa venstre 50%,
+ * hvid H1 + sub + pill-input + small trust line under
  */
 function HeroSection() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="relative bg-surface-0 min-h-screen overflow-hidden grain-overlay"
+      className="relative w-full h-[680px] sm:h-[760px] overflow-hidden"
     >
-      {/* Subtle gradient lighting bag-grunden — som Linear */}
+      <Image
+        src="/salg-photos/hero/danish-apartment-1.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
+      {/* Opendoor's eksakte gradient: moerk venstre -> transparent hojre */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 80% 20%, rgba(44,92,93,0.25) 0%, transparent 50%), radial-gradient(circle at 20% 100%, rgba(44,92,93,0.15) 0%, transparent 60%)',
+            'linear-gradient(90deg, rgba(20,24,26,0.75) 0%, rgba(20,24,26,0.55) 35%, rgba(20,24,26,0.2) 70%, transparent 100%)',
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-32 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center min-h-screen">
-        {/* Left: tekst + form */}
-        <div className="lg:col-span-7 space-y-8 sm:space-y-10">
-          <div className="space-y-3">
-            <p className="cine-kicker">365 Ejendomme</p>
-            <KineticHeadline />
-          </div>
-
-          <p className="text-base sm:text-lg text-ink-dim max-w-xl leading-relaxed text-pretty">
-            Få et foreløbigt kontant tilbud baseret på sammenlignelige handler i
-            dit område. Ingen mægler, ingen lange ventetider. Du sparer typisk{' '}
-            <span className="text-ink font-semibold">70.000 kr i salær</span>.
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 h-full flex items-center pt-20">
+        <div className="max-w-xl space-y-6">
+          <h1
+            id="hero-title"
+            className="text-white text-[44px] sm:text-[58px] lg:text-[64px] font-medium leading-[1.05] tracking-[-0.02em] text-balance"
+          >
+            Sælg din bolig kontant.
+          </h1>
+          <p className="text-base sm:text-lg text-white/90 leading-relaxed max-w-md">
+            Få et foreløbigt tilbud og se hvordan vi hjælper dig med at sælge
+            din ejerlejlighed.
           </p>
-
           <div className="pt-2">
             <HeroAddressInput />
           </div>
-
-          <p className="text-xs text-muted tracking-widest uppercase font-semibold">
-            Næstved · Roskilde · Ringsted · Kalundborg · Taastrup
+          <p className="text-xs text-white/70 tracking-tight">
+            Ingen forpligtelse. Tager 5 minutter. Vi sender intet før sidste trin.
           </p>
         </div>
-
-        {/* Right: cinematic dark photo */}
-        <div className="lg:col-span-5 relative h-[460px] sm:h-[560px] lg:h-[680px]">
-          <div className="absolute inset-0 rounded-2xl overflow-hidden ring-1 ring-white/10">
-            <Image
-              src="/salg-photos/cinematic/door-open.png"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 42vw"
-              className="object-cover"
-            />
-            {/* Subtil teal lys-ovenfra */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0"
-              style={{
-                background:
-                  'linear-gradient(180deg, transparent 40%, rgba(10,12,13,0.5) 100%)',
-              }}
-            />
-          </div>
-
-          {/* Floating data-card paa fotoet — Apple/Linear style */}
-          <div className="absolute bottom-6 left-6 right-6 sm:left-auto sm:right-6 sm:w-[280px] bg-surface-1/80 backdrop-blur-md ring-1 ring-white/10 rounded-xl p-5 space-y-3">
-            <p className="cine-kicker">Live nu</p>
-            <p className="text-sm text-ink-dim leading-relaxed">
-              Vi har købt{' '}
-              <span className="mono-num text-brand-300 font-semibold">87+</span>{' '}
-              boliger siden 2024 — gennemsnitlig overtagelse på{' '}
-              <span className="mono-num text-brand-300 font-semibold">42 dage</span>.
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );
 }
 
 /**
- * KineticHeadline — H1 med overlappende ghost-copies i lav opacity teal
- * for at suggest motion. Pure CSS via flere stackede spans.
+ * Testimonials — Opendoor's "301,457 homeowners served" pattern.
+ * Cream baggrund, lille blue kicker, stor H2, 3 cards med rund avatar +
+ * italic quote + name + city.
  */
-function KineticHeadline() {
-  return (
-    <h1
-      id="hero-title"
-      className="relative text-ink text-[52px] sm:text-[80px] lg:text-[104px] font-semibold leading-[0.92] tracking-[-0.03em] text-balance"
-    >
-      {/* Ghost copies — placeret bag main H1 i lav opacity teal */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 text-brand-500 opacity-30 -translate-x-1 translate-y-0.5"
-      >
-        Sælg din bolig.
-      </span>
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 text-brand-400 opacity-15 translate-x-1 -translate-y-0.5"
-      >
-        Sælg din bolig.
-      </span>
-      <span className="relative">Sælg din bolig.</span>
-    </h1>
-  );
-}
-
-/**
- * StatsSection — massive Geist Mono tabular-nums stat-reveals.
- * Apple-style hard data display.
- */
-function StatsSection() {
-  const stats = [
-    { num: '87+', label: 'Boliger købt siden 2024', meta: 'Vækst 142% YoY' },
-    { num: '42d', label: 'Gennemsnitlig overtagelse', meta: 'Fra accept til closing' },
-    { num: '2,5M+', label: 'Sparet i mæglersalær', meta: 'Akkumuleret 2024–2025' },
-    { num: '5%', label: 'Garanti på tilbud', meta: 'Træk dig hvis vi afviger' },
-  ];
-
-  return (
-    <section
-      aria-label="Tal og data"
-      className="relative bg-surface-0 py-24 sm:py-32 border-t border-hairline"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
-        <div className="space-y-3 max-w-2xl mb-16">
-          <p className="cine-kicker">Tallene</p>
-          <h2 className="text-ink text-[40px] sm:text-[56px] font-semibold leading-[1.02] tracking-[-0.025em] text-balance">
-            Hvad vi har leveret.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-hairline">
-          {stats.map((s) => (
-            <div
-              key={s.num}
-              className="bg-surface-0 p-6 sm:p-8 space-y-2 min-h-[180px] sm:min-h-[200px] flex flex-col justify-end"
-            >
-              <div className="mono-num text-ink text-[44px] sm:text-[64px] lg:text-[80px] font-semibold leading-none">
-                {s.num}
-              </div>
-              <div className="text-sm text-ink-dim font-medium">{s.label}</div>
-              <div className="text-[11px] text-muted tracking-wider uppercase font-medium">
-                {s.meta}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/**
- * HowSection — 4 steps som horizontal "story" cards. Hver card har et lille
- * step-number i mono + title + body. Inspireret af Linear's roadmap-display.
- */
-function HowSection() {
-  const steps = [
-    {
-      num: '01',
-      title: 'Indtast adresse',
-      time: '5 min',
-      body: 'Vi henter offentlige data fra OIS automatisk. Du behøver kun beskrive din bolig kort.',
-    },
-    {
-      num: '02',
-      title: 'Få et foreløbigt tilbud',
-      time: 'Straks',
-      body: 'Baseret på sammenlignelige tinglyste handler + vores afkast-model.',
-    },
-    {
-      num: '03',
-      title: 'Gratis besigtigelse',
-      time: '24t',
-      body: 'Jacob kommer forbi, ser boligen og snakker om dine ønsker og overtagelsesdato.',
-    },
-    {
-      num: '04',
-      title: 'Bindende tilbud + handel',
-      time: '14d – 6 mdr',
-      body: 'Du vælger overtagelsesdato. Kontant betaling, ingen forbehold, ingen mægler.',
-    },
-  ];
-
-  return (
-    <section
-      aria-labelledby="how-title"
-      className="relative bg-surface-1 py-24 sm:py-32"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-16">
-        <div className="space-y-3 max-w-2xl">
-          <p className="cine-kicker">Sådan virker det</p>
-          <h2
-            id="how-title"
-            className="text-ink text-[40px] sm:text-[56px] font-semibold leading-[1.02] tracking-[-0.025em] text-balance"
-          >
-            Fra adresse til handel — fire skridt.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hairline">
-          {steps.map((s) => (
-            <article
-              key={s.num}
-              className="bg-surface-1 p-6 sm:p-8 space-y-5 min-h-[280px] flex flex-col"
-            >
-              <div className="flex items-center justify-between">
-                <span className="mono-num text-brand-300 text-sm font-semibold">
-                  {s.num}
-                </span>
-                <span className="text-[11px] text-muted tracking-widest uppercase font-medium">
-                  {s.time}
-                </span>
-              </div>
-              <h3 className="text-ink text-xl font-semibold leading-tight tracking-tight">
-                {s.title}
-              </h3>
-              <p className="text-sm text-ink-soft leading-relaxed mt-auto">{s.body}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function TestimonialsSection() {
   const items = [
     {
+      initials: 'MK',
       quote:
-        'Vi havde brug for at sælge hurtigt efter min mors bortgang. 365 kom forbi, gav et tilbud, og tre uger senere var handlen lukket.',
+        '"Vi havde brug for at sælge hurtigt efter min mors bortgang. 365 kom forbi, gav et tilbud, og 3 uger senere var handlen lukket."',
       name: 'Mette K.',
-      meta: 'Næstved · 2025',
+      city: 'Solgt i Næstved',
     },
     {
+      initials: 'LP',
       quote:
-        'Ingen fremvisninger, ingen ventetid. Vi sparede 70.000 kr i mæglersalær og fik den overtagelsesdato vi ønskede.',
+        '"Ingen fremvisninger, ingen ventetid. Vi sparede 70.000 kr i mæglersalær og fik den overtagelsesdato vi ønskede."',
       name: 'Lars P.',
-      meta: 'Roskilde · 2024',
+      city: 'Solgt i Roskilde',
     },
     {
+      initials: 'AS',
       quote:
-        'Jacob var lige til at tale med, og prisen lå tæt på vores forventninger. Mere transparent end nogen mægler vi har snakket med.',
+        '"Jacob var lige til at tale med, og prisen lå tæt på vores forventninger. Mere transparent end nogen mægler vi har snakket med."',
       name: 'Anne & Søren',
-      meta: 'Ringsted · 2024',
+      city: 'Solgt i Ringsted',
     },
   ];
 
   return (
     <section
       aria-labelledby="testimonials-title"
-      className="bg-surface-0 py-24 sm:py-32 border-t border-hairline"
+      className="bg-white py-20 sm:py-28"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-16">
-        <div className="space-y-3 max-w-2xl">
-          <p className="cine-kicker">Hvad sælgere siger</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+        <div className="space-y-3 max-w-3xl">
+          <p className="text-sm font-medium text-brand-700">
+            Hvorfor sælgere vælger 365
+          </p>
           <h2
             id="testimonials-title"
-            className="text-ink text-[40px] sm:text-[56px] font-semibold leading-[1.02] tracking-[-0.025em] text-balance"
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight"
           >
-            87+ historier siden 2024.
+            87+ boliger købt siden 2024.
           </h2>
+          <p className="text-base text-muted max-w-xl pt-1">
+            Rigtige sælgere. Rigtige historier. Sådan har vi gjort det enkelt
+            for andre på Sjælland.
+          </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {items.map((t) => (
             <figure
               key={t.name}
-              className="bg-surface-1 rounded-2xl p-7 sm:p-8 ring-1 ring-hairline space-y-6 flex flex-col"
+              className="bg-cream rounded-3xl p-7 sm:p-8 flex flex-col gap-5"
             >
-              <span
+              <div
                 aria-hidden="true"
-                className="text-brand-300 mono-num text-3xl leading-none opacity-60"
+                className="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-800 font-semibold text-sm tracking-tight"
               >
-                {'"'}
-              </span>
-              <blockquote className="text-[15px] sm:text-base text-ink-dim leading-relaxed flex-1">
+                {t.initials}
+              </div>
+              <blockquote className="text-[15px] sm:text-base text-ink leading-relaxed flex-1">
                 {t.quote}
               </blockquote>
-              <figcaption className="pt-4 border-t border-hairline">
-                <div className="text-sm font-semibold text-ink tracking-tight">
-                  {t.name}
-                </div>
-                <div className="mono-num text-[11px] text-muted tracking-wider uppercase mt-0.5">
-                  {t.meta}
-                </div>
+              <figcaption className="pt-2">
+                <div className="text-sm font-semibold text-ink">{t.name}</div>
+                <div className="text-xs text-muted mt-0.5">{t.city}</div>
               </figcaption>
             </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * FeatureBlocksSection — Opendoor's "Start your sale with an offer in hand".
+ * 3 STORE feature cards stacked. Hver card:
+ *   - Cream baggrund
+ *   - Small label top-left
+ *   - BIG sub-headline bottom-left
+ *   - Image right side
+ *   - Generos padding (min-h 360-440px)
+ */
+function FeatureBlocksSection() {
+  const blocks = [
+    {
+      label: 'Kontant tilbud',
+      title: 'Se hvor meget vi vil betale for din bolig.',
+      body: 'Vi baserer tilbuddet på sammenlignelige tinglyste handler i dit område plus vores afkast-model. Ingen ventetid.',
+      img: '/salg-photos/flow/02-estimat.png',
+    },
+    {
+      label: 'Fleksibel overtagelse',
+      title: 'Du vælger overtagelsesdato. Fra 14 dage til 6 måneder.',
+      body: 'Vi tilpasser handlen til din takt. Skal du flytte hurtigt? Skal du blive boende lidt endnu? Begge dele virker.',
+      img: '/salg-photos/flow/04-handel.png',
+    },
+    {
+      label: 'Inspections-garanti',
+      title: '5%-garanti: trækker du dig, koster det ingenting.',
+      body: 'Hvis vores endelige tilbud efter besigtigelse afviger mere end 5%, kan du trække dig uden konsekvens.',
+      img: '/salg-photos/flow/03-besigtigelse.png',
+    },
+  ];
+
+  return (
+    <section
+      aria-labelledby="features-title"
+      className="bg-white py-20 sm:py-28"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+        <div className="space-y-3 max-w-3xl">
+          <p className="text-sm font-medium text-brand-700">
+            Start salget med et tilbud i hånden
+          </p>
+          <h2
+            id="features-title"
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight"
+          >
+            Spring arbejdet over med et kontant tilbud fra 365.
+          </h2>
+          <p className="text-base text-muted max-w-xl pt-1">
+            Tre måder vi gør salget nemmere end mæglervejen.
+          </p>
+        </div>
+
+        <div className="space-y-4 sm:space-y-5">
+          {blocks.map((b) => (
+            <article
+              key={b.label}
+              className="bg-cream rounded-[32px] overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[360px] sm:min-h-[440px]"
+            >
+              <div className="p-8 sm:p-12 lg:p-16 flex flex-col justify-between gap-8">
+                <p className="text-sm font-medium text-ink/70">{b.label}</p>
+                <div className="space-y-4">
+                  <h3 className="text-[28px] sm:text-[36px] lg:text-[44px] font-semibold text-ink leading-[1.05] tracking-tight text-balance">
+                    {b.title}
+                  </h3>
+                  <p className="text-base text-muted leading-relaxed max-w-md">
+                    {b.body}
+                  </p>
+                </div>
+              </div>
+              <div className="relative min-h-[240px] md:min-h-full bg-cream-dark/40">
+                <Image
+                  src={b.img}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain p-8 sm:p-12"
+                />
+              </div>
+            </article>
           ))}
         </div>
       </div>
@@ -367,32 +280,43 @@ function FAQSection() {
   ];
 
   return (
-    <section className="bg-surface-0 py-24 sm:py-32 border-t border-hairline">
+    <section aria-labelledby="faq-title" className="bg-white pb-20 sm:pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
-        <div className="space-y-3 max-w-2xl">
-          <p className="cine-kicker">Ofte stillede spørgsmål</p>
-          <h2 className="text-ink text-[40px] sm:text-[56px] font-semibold leading-[1.02] tracking-[-0.025em] text-balance">
+        <div className="space-y-3 max-w-3xl">
+          <p className="text-sm font-medium text-brand-700">
+            Ofte stillede spørgsmål
+          </p>
+          <h2
+            id="faq-title"
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-ink leading-[1.1] tracking-tight"
+          >
             Det skal du vide først.
           </h2>
         </div>
 
-        <div className="max-w-3xl divide-y divide-hairline border-y border-hairline">
+        <div className="max-w-3xl divide-y divide-stone-200 border-y border-stone-200">
           {items.map((item, idx) => (
             <details key={idx} className="group">
-              <summary className="flex items-baseline justify-between gap-6 py-6 cursor-pointer list-none">
-                <h3 className="text-ink text-lg sm:text-xl font-semibold tracking-tight">
+              <summary className="flex items-center justify-between gap-6 py-6 cursor-pointer list-none">
+                <h3 className="text-base sm:text-lg font-semibold text-ink">
                   {item.q}
                 </h3>
                 <span
                   aria-hidden="true"
-                  className="cine-kicker shrink-0 transition-opacity"
+                  className="shrink-0 text-stone-400 transition-transform group-open:rotate-45"
                 >
-                  <span className="group-open:hidden">Vis</span>
-                  <span className="hidden group-open:inline text-brand-300">Skjul</span>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path
+                      d="M10 4v12M4 10h12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 </span>
               </summary>
-              <div className="pb-6 pr-8 -mt-2">
-                <p className="text-[15px] text-ink-soft leading-relaxed max-w-2xl">
+              <div className="pb-6 pr-10 -mt-1">
+                <p className="text-[15px] text-muted leading-relaxed max-w-2xl">
                   {item.a}
                 </p>
               </div>
