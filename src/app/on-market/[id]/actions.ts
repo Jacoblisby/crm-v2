@@ -153,8 +153,9 @@ export async function uploadPdfAction(formData: FormData) {
     const { text } = await extractText(pdf, { mergePages: true });
     const fullText = Array.isArray(text) ? text.join('\n') : text;
 
-    const { parseSalgsopstilling } = await import('@/worker/parse-pdf');
+    const { parseSalgsopstilling, parseEjerudgiftTotal } = await import('@/worker/parse-pdf');
     const breakdown = parseSalgsopstilling(fullText);
+    const declaredTotal = parseEjerudgiftTotal(fullText);
 
     // Hent kandidaten for at recompute afkast
     const rows = await db
@@ -207,6 +208,7 @@ export async function uploadPdfAction(formData: FormData) {
       ok: true as const,
       breakdown,
       driftTotal,
+      declaredTotal, // "Ejerudgift i alt" fra PDF (hvis fundet) — sanity check
       foundFields: Object.entries(breakdown).filter(([, v]) => (v as number) > 0).length,
       totalFields: Object.keys(breakdown).length,
       empty: total === 0,

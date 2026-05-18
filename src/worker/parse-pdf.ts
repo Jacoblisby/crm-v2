@@ -31,49 +31,89 @@ interface CostBreakdown {
   costAndreDrift: number;
 }
 
-function findInt(text: string, ...patterns: RegExp[]): number {
-  for (const pat of patterns) {
-    const m = text.match(pat);
-    if (m && m[1]) {
-      const s = m[1].replace(/\./g, '').replace(/,/g, '.');
-      const n = parseFloat(s);
-      if (!Number.isNaN(n)) return Math.round(n);
+/**
+ * Find amount efter label i en window — filtrerer aarstal vaek.
+ *
+ * Salgsopstilling-table-rows ser typisk saadan ud (efter PDF text-extract):
+ *   "Ejendomsvaerdiskat 2026 2.190,96"
+ *   "Grundskyld 2026 1.271,00"
+ *
+ * Naiv regex matcher FOERSTE tal (= aaret 2026). Vi vil have SIDSTE
+ * "amount-shaped" tal i window'en.
+ *
+ * Strategy:
+ *   1. Find label i text
+ *   2. Tag de naeste 150 chars som window
+ *   3. Stop window ved naeste section-header (CAPS letter + space + non-digit)
+ *   4. Extract alle tal-strenge
+ *   5. Filtrer aarstal (2015-2035 integers uden komma/decimal)
+ *   6. Returner den SIDSTE amount (= det rigtige beloeb)
+ */
+function findAmountAfter(text: string, ...labels: string[]): number {
+  for (const labelPattern of labels) {
+    const labelRe = new RegExp(labelPattern, 'gi');
+    let match: RegExpExecArray | null;
+    labelRe.lastIndex = 0;
+    while ((match = labelRe.exec(text)) !== null) {
+      const windowStart = match.index + match[0].length;
+      const window = text.slice(windowStart, windowStart + 150);
+
+      // Find alle tal — dansk format: 1.234,56 ELLER 1.234 ELLER 1234
+      const numbers = [...window.matchAll(/(\d{1,3}(?:\.\d{3})+,\d{1,2}|\d+,\d{1,2}|\d{1,3}(?:\.\d{3})+|\d+)/g)];
+
+      const amounts: number[] = [];
+      for (const n of numbers) {
+        const raw = n[0];
+        // Parse: dansk format med komma som decimal
+        const normalized = raw.replace(/\./g, '').replace(',', '.');
+        const val = parseFloat(normalized);
+        if (Number.isNaN(val) || val <= 0) continue;
+
+        // Filter aarstal: 2015-2035 uden decimal
+        const isYearLike = val >= 2015 && val <= 2035 && !raw.includes(',') && !raw.includes('.');
+        if (isYearLike) continue;
+
+        // Filter ekstreme "case-numre" eller andre noise (over 10M)
+        if (val > 10_000_000) continue;
+
+        amounts.push(val);
+      }
+
+      if (amounts.length === 0) continue;
+      // Tag SIDSTE amount (typisk beloebet, ikke aarstal eller side-tal)
+      return Math.round(amounts[amounts.length - 1]);
     }
   }
   return 0;
 }
 
-// "kr" prefix er optional og kan staa for/efter tallet, eller mangle helt.
-// Tal-format: dansk format "1.234,56" eller "1.234" eller "1234".
-// MELLEMRUM mellem keyword og number kan vaere op til 80 chars (label kan
-// inkludere "(skoen) jf. seneste regnskab")
-const NUM = '([\\d.,]+(?:[\\d]{3})*)';
-const KR_OPT = '(?:kr\\.?\\s*)?';
-const GAP = '[\\s\\S]{0,80}?';
-
 export function parseSalgsopstilling(text: string): CostBreakdown {
-  // Grundskyld / ejendomsskat — flere mulige labels
-  const grundv = findInt(text,
-    new RegExp(`Grundskyld(?:\\s*\\(ejendomsskat\\))?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Ejendomsskat${GAP}${KR_OPT}${NUM}`, 'i'),
+  // Grundskyld + Ejendomsvaerdiskat — begge er ejer-skatter, summeres i grundvaerdi
+  // (kunne adskilles i schema, men nuvaerende model behandler dem som "skat")
+  const grundskyld = findAmountAfter(text,
+    'Grundskyld(?:\\s*\\(ejendomsskat\\))?',
+    '(?<!værdi)Ejendomsskat\\b',
+  );
+  const ejdvaerdi = findAmountAfter(text,
+    'Ejendomsv[æa]rdiskat',
+  );
+  // Saml i costGrundvaerdi
+  const grundv = grundskyld + ejdvaerdi;
+
+  const faellesu = findAmountAfter(text,
+    'F[æa]llesudgifter?(?:,?\\s*(?:anslået|jf\\.|inkl\\.?\\s*acontovand|i alt))?',
+    'Boligens? andel af f[æa]llesudgifter?',
+    'Ejerforeningens? f[æa]llesudgifter?',
   );
 
-  // Faellesudgifter — naesten alle danske salgsopstillinger har dette
-  const faellesu = findInt(text,
-    new RegExp(`F[æa]llesudgifter?(?:,?\\s*(?:anslået|jf\\.|inkl\\.?\\s*acontovand|i alt))?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Boligens? andel af f[æa]llesudgifter?${GAP}${KR_OPT}${NUM}`, 'i'),
-    // Ejerforeningens fælles
-    new RegExp(`Ejerforeningens? f[æa]llesudgifter?${GAP}${KR_OPT}${NUM}`, 'i'),
+  const rotte = findAmountAfter(text,
+    'Rottebek[æa]mpelse(?:sgebyr)?',
+    'Rottegebyr',
   );
 
-  const rotte = findInt(text,
-    new RegExp(`Rottebek[æa]mpelse(?:sgebyr)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Rottegebyr${GAP}${KR_OPT}${NUM}`, 'i'),
-  );
-
-  const renov = findInt(text,
-    new RegExp(`(?:S[æa]rskilt\\s+)?[Rr]enovation(?:sgebyr)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Affaldsgebyr${GAP}${KR_OPT}${NUM}`, 'i'),
+  const renov = findAmountAfter(text,
+    '(?:S[æa]rskilt\\s+)?[Rr]enovation(?:sgebyr)?',
+    'Affaldsgebyr',
   );
 
   // Forsikring kun hvis IKKE inkl. i fællesudgifter
@@ -85,41 +125,38 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
     !lower.includes('inkl. acontovand') &&
     !lower.includes('inkluderet i fællesudgifter')
   ) {
-    forsikr = findInt(text,
-      new RegExp(`(?:Hus|Bygnings|Ejendoms)forsikring${GAP}${KR_OPT}${NUM}`, 'i'),
+    forsikr = findAmountAfter(text,
+      '(?:Hus|Bygnings|Ejendoms)forsikring',
     );
   }
 
-  const faellsl = findInt(text,
-    new RegExp(`(?:Ydelse\\s+(?:p[åa]\\s+)?)?[Ff][æa]llesl[åa]n(?:\\s*\\+\\s*gebyr)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Andelsboligforeningens\\s+l[åa]n${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Ejerforeningens?\\s+(?:fælles)?l[åa]n${GAP}${KR_OPT}${NUM}`, 'i'),
+  const faellsl = findAmountAfter(text,
+    '(?:Ydelse\\s+(?:p[åa]\\s+)?)?[Ff][æa]llesl[åa]n(?:\\s*\\+\\s*gebyr)?',
+    'Andelsboligforeningens\\s+l[åa]n',
+    'Ejerforeningens?\\s+(?:fælles)?l[åa]n',
   );
 
-  // NY: Grundfond / opsparing
-  const grundfond = findInt(text,
-    new RegExp(`Grundfond${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Henl[æa]ggelse(?:r)?(?:\\s+til\\s+grundfond)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Bidrag\\s+til\\s+grundfond${GAP}${KR_OPT}${NUM}`, 'i'),
+  const grundfond = findAmountAfter(text,
+    'Grundfond',
+    'Henl[æa]ggelse(?:r)?(?:\\s+til\\s+grundfond)?',
+    'Bidrag\\s+til\\s+grundfond',
   );
 
-  // NY: Vicevaert / serviceaftaler
-  const vice = findInt(text,
-    new RegExp(`Viceværts?(?:bidrag|udgift)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Ejendomsservice${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Trappevask${GAP}${KR_OPT}${NUM}`, 'i'),
+  const vice = findAmountAfter(text,
+    'Vicev[æa]rts?(?:bidrag|udgift)?',
+    'Ejendomsservice',
+    'Trappevask',
   );
 
-  // NY: Vedligeholdelse / drift
-  const vedlig = findInt(text,
-    new RegExp(`Vedligeholdelse(?:sbidrag)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Henl[æa]ggelse(?:r)?\\s+til\\s+vedligeholdelse${GAP}${KR_OPT}${NUM}`, 'i'),
+  const vedlig = findAmountAfter(text,
+    'Vedligeholdelse(?:sbidrag)?',
+    'Henl[æa]ggelse(?:r)?\\s+til\\s+vedligeholdelse',
   );
 
-  const andreD = findInt(text,
-    new RegExp(`Arbejdsdag${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Antenne(?:bidrag|forening)?${GAP}${KR_OPT}${NUM}`, 'i'),
-    new RegExp(`Internet${GAP}${KR_OPT}${NUM}`, 'i'),
+  const andreD = findAmountAfter(text,
+    'Arbejdsdag',
+    'Antenne(?:bidrag|forening)?',
+    'Internet',
   );
 
   return {
@@ -134,6 +171,18 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
     costVedligeholdelse: vedlig,
     costAndreDrift: andreD,
   };
+}
+
+/**
+ * Parse "Ejerudgift i alt 1. år: XX.XXX,XX" som sanity check.
+ * Bruges af UI til at verificere at vores parse matcher mæglerens total.
+ */
+export function parseEjerudgiftTotal(text: string): number {
+  return findAmountAfter(
+    text,
+    'Ejerudgift(?:\\s+i\\s+alt)?(?:\\s+1\\.?\\s*[åa]r)?',
+    'Boligydelse\\s+i\\s+alt',
+  );
 }
 
 async function fetchPdfBytes(url: string): Promise<Buffer> {

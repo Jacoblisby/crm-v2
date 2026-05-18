@@ -25,6 +25,7 @@ interface ParseSummary {
   foundFields: number;
   totalFields: number;
   driftTotal: number;
+  declaredTotal: number;
   empty: boolean;
 }
 
@@ -83,6 +84,7 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
           foundFields: r.foundFields,
           totalFields: r.totalFields,
           driftTotal: r.driftTotal,
+          declaredTotal: r.declaredTotal,
           empty: r.empty,
         });
         if (r.empty) {
@@ -90,6 +92,21 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
             `PDF læst men ingen ejerudgifter fundet. Indtast manuelt i feltet under.`,
             'warn',
           );
+        } else if (r.declaredTotal > 0) {
+          // Vi har mæglerens total — sammenlign for sanity-check
+          const diff = Math.abs(r.driftTotal - r.declaredTotal);
+          const diffPct = (diff / r.declaredTotal) * 100;
+          if (diffPct < 5) {
+            showMsg(
+              `Parsed ${r.foundFields}/${r.totalFields} felter — drift ${r.driftTotal.toLocaleString('da-DK')} kr/år ≈ mæglerens total ${r.declaredTotal.toLocaleString('da-DK')} kr (✓)`,
+              'ok',
+            );
+          } else {
+            showMsg(
+              `Parsed ${r.foundFields}/${r.totalFields} felter — vores ${r.driftTotal.toLocaleString('da-DK')} kr/år vs. mæglerens ${r.declaredTotal.toLocaleString('da-DK')} kr (afvigelse ${diffPct.toFixed(0)}%) — tjek felterne under`,
+              'warn',
+            );
+          }
         } else {
           showMsg(
             `Parsed ${r.foundFields}/${r.totalFields} felter — drift ${r.driftTotal.toLocaleString('da-DK')} kr/år`,
@@ -227,10 +244,22 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
       )}
 
       {parseSummary && !parseSummary.empty && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded p-2 text-xs text-emerald-900">
-          {parseSummary.foundFields}/{parseSummary.totalFields} felter udfyldt
-          · Drift {parseSummary.driftTotal.toLocaleString('da-DK')} kr/år. Tjek
-          felterne under og rediger hvis noget er forkert.
+        <div className="bg-emerald-50 border border-emerald-200 rounded p-2 text-xs text-emerald-900 space-y-0.5">
+          <div>
+            {parseSummary.foundFields}/{parseSummary.totalFields} felter
+            udfyldt · Drift{' '}
+            <strong>{parseSummary.driftTotal.toLocaleString('da-DK')} kr/år</strong>
+            {parseSummary.declaredTotal > 0 && (
+              <>
+                {' '}vs. mægler-total{' '}
+                <strong>{parseSummary.declaredTotal.toLocaleString('da-DK')} kr</strong>
+              </>
+            )}
+            .
+          </div>
+          <div className="text-emerald-700">
+            Tjek felterne under og ret tal der er forkerte.
+          </div>
         </div>
       )}
     </div>
