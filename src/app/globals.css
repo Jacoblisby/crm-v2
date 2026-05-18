@@ -1,71 +1,107 @@
 @import "tailwindcss";
 
-/* 365 Ejendomme brand palette — fra 365ejendom.dk/hjem/vores-boliger/
-   Deep teal accent, light cool green neutral, warm gray body.
-   Opendoor's layout-monster + 365's farver. */
+/* "Sommerhave Luxe" — Variant C palette
+   Premium Scandinavian boutique agency: dusty sage + warm cream + charcoal + brass.
+   Bryder bevidst 365's teal-brand for at ramme luxe-aesthetic. */
 :root {
-  --background: #f3f6f3; /* 365's light cool green neutral */
-  --foreground: #1a2829; /* slightly mere kontrast end 365 default for laesbarhed */
-  --muted: #4f5655; /* 365's warm gray body */
+  --background: #ede9dd; /* warm cream paper */
+  --foreground: #1f2624; /* charcoal */
+  --muted: #5a5f5a; /* warm gray */
 
-  --teal-50: #ecf2f1;
-  --teal-100: #d5e2e1;
-  --teal-200: #aac6c4;
-  --teal-300: #7fa9a7;
-  --teal-500: #427a7b;
-  --teal-600: #335f60;
-  --teal-700: #2c5c5d; /* 365's brand teal — primary accent */
-  --teal-800: #234848;
-  --teal-900: #1a3636;
+  --paper-50: #f4f0e5;
+  --paper-100: #ede9dd;
+  --paper-200: #e3ddc9;
+
+  --sage-50: #f0f2ee;
+  --sage-100: #d8dfd5;
+  --sage-300: #b1bfaf;
+  --sage-500: #9ca89c;
+  --sage-700: #6b7a6b;
+  --sage-900: #3d4a3d;
+
+  --brass-50: #f5ecd9;
+  --brass-100: #ead7b3;
+  --brass-400: #c9a87a;
+  --brass-500: #b8946a;
+  --brass-600: #9c7c52;
+  --brass-700: #7d6440;
+
+  --ink: #1f2624;
+  --ink-soft: #2f3835;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Brand teal exposed som Tailwind utilities (bg-brand, text-brand etc.) */
-  --color-brand-50: var(--teal-50);
-  --color-brand-100: var(--teal-100);
-  --color-brand-200: var(--teal-200);
-  --color-brand-300: var(--teal-300);
-  --color-brand-500: var(--teal-500);
-  --color-brand-600: var(--teal-600);
-  --color-brand-700: var(--teal-700);
-  --color-brand-800: var(--teal-800);
-  --color-brand-900: var(--teal-900);
+  --color-paper: var(--paper-100);
+  --color-paper-50: var(--paper-50);
+  --color-paper-200: var(--paper-200);
 
-  --color-paper: var(--background);
-  --color-ink: var(--foreground);
+  --color-sage-50: var(--sage-50);
+  --color-sage-100: var(--sage-100);
+  --color-sage-300: var(--sage-300);
+  --color-sage-500: var(--sage-500);
+  --color-sage-700: var(--sage-700);
+  --color-sage-900: var(--sage-900);
+
+  --color-brass-50: var(--brass-50);
+  --color-brass-100: var(--brass-100);
+  --color-brass-400: var(--brass-400);
+  --color-brass-500: var(--brass-500);
+  --color-brass-600: var(--brass-600);
+  --color-brass-700: var(--brass-700);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
   --color-muted: var(--muted);
 
-  --font-sans: "Hanken Grotesk", "Hanken Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
+  /* DM Serif Display = display, Inter = body */
+  --font-display: "DM Serif Display", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #f3f6f3;
-    --foreground: #1a2829;
+    --background: #ede9dd;
+    --foreground: #1f2624;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Hanken Grotesk", "Hanken Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11"; /* Inter open digits + cleaner a */
+}
+
+/* DM Serif Display utility for display H1/H2 */
+.font-serif-display {
+  font-family: "DM Serif Display", Georgia, "Times New Roman", serif;
+  font-weight: 400; /* DM Serif kommer kun i 400, men er meget heavy by default */
+  letter-spacing: -0.015em;
+  font-style: normal;
+}
+
+.font-serif-display-italic {
+  font-family: "DM Serif Display", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.005em;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #94a3b8;
+  color: #8a8f8a;
   opacity: 1;
 }
 
-/* Konsistent section-overline (saa hver section foler ens) */
-.section-overline {
-  font-size: 0.75rem;
-  letter-spacing: 0.25em;
+/* Luxe overline — tracking-widest small caps i brass */
+.luxe-overline {
+  font-size: 0.6875rem; /* 11px */
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   font-weight: 600;
-  color: var(--teal-700);
+  color: var(--brass-600);
 }

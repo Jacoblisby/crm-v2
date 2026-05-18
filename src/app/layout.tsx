@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk } from "next/font/google";
+import { DM_Serif_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { MainHeader, MainWrapper } from "@/components/MainHeader";
 
-// Hanken Grotesk — Zillow's "Object Sans" closest free analog.
-// Variable weight 100-900 lader os skrue paa display vs body via samme familie.
-// Det er "kun en font" filosofien fra Zillow.
-const hanken = Hanken_Grotesk({
+// DM Serif Display — Variant C "Sommerhave Luxe" display headlines.
+// Italic er en separat instance fordi DM Serif kun har vaegte 400.
+const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
-  variable: "--font-hanken",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-dm-serif",
+  display: "swap",
+});
+
+// Inter — body + UI. cv11/ss01 OpenType features via globals.css.
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -23,8 +31,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="da" className={`h-full antialiased ${hanken.variable}`}>
-      <body className="bg-white min-h-screen text-slate-900">
+    <html
+      lang="da"
+      className={`h-full antialiased ${dmSerif.variable} ${inter.variable}`}
+    >
+      <body className="bg-paper min-h-screen text-ink">
         <MainHeader />
         <MainWrapper>{children}</MainWrapper>
       </body>

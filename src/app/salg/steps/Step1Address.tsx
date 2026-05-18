@@ -140,22 +140,18 @@ export function Step1Address() {
 
   return (
     <div className="space-y-8">
-      {/* Adresse-bekraeftelse — vi har allerede adressen fra hero-input.
-          Her viser vi en compact confirmation + edit-link. */}
       {hasAddress && (
-        <div className="flex items-start justify-between gap-4 bg-brand-50/50 rounded-2xl p-4 border border-brand-100">
+        <div className="flex items-start justify-between gap-4 bg-sage-50 rounded-2xl p-4 border border-sage-300/40">
           <div className="flex items-start gap-3 min-w-0">
             <div
               aria-hidden="true"
-              className="w-9 h-9 rounded-full bg-brand-700 text-white flex items-center justify-center shrink-0"
+              className="w-9 h-9 rounded-full bg-brass-500 text-white flex items-center justify-center shrink-0"
             >
               <Check className="w-4 h-4" strokeWidth={3} />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] uppercase tracking-wider text-brand-700 font-semibold">
-                Adresse fundet
-              </div>
-              <div className="text-[15px] font-semibold text-ink truncate">
+              <div className="luxe-overline">Adresse fundet</div>
+              <div className="text-[15px] font-medium text-ink truncate mt-0.5">
                 {state.fullAddress}
               </div>
             </div>
@@ -184,23 +180,25 @@ export function Step1Address() {
                 isOnMarket: false,
               });
             }}
-            className="text-xs font-semibold text-brand-700 hover:text-brand-900 shrink-0 px-2 py-1"
+            className="text-xs font-semibold text-brass-600 hover:text-brass-700 shrink-0 px-2 py-1 tracking-wide"
           >
             Skift
           </button>
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
+        <p className="luxe-overline">Trin 1 · Lidt om dig</p>
         <h2
           id="step1-heading"
-          className="text-2xl sm:text-[30px] font-semibold text-ink tracking-tight"
+          className="font-serif-display text-ink text-[32px] sm:text-[40px] leading-[1.05] tracking-tight"
         >
-          Lidt info om dig
+          Hvor sender vi
+          <span className="font-serif-display-italic text-sage-700"> dit estimat?</span>
         </h2>
-        <p id="step1-helper" className="text-[15px] text-muted text-pretty leading-relaxed">
-          Vi sender dit foreløbige tilbud på email + SMS, og ringer indenfor 24 timer
-          for at aftale gratis besigtigelse.
+        <p id="step1-helper" className="text-[15px] text-muted text-pretty leading-relaxed max-w-md">
+          Vi sender dit foreløbige tilbud på email + SMS, og ringer indenfor 24
+          timer for at aftale gratis besigtigelse.
         </p>
       </div>
 
@@ -344,7 +342,7 @@ export function Step1Address() {
           <button
             onClick={continueIfReady}
             disabled={!hasAddress || lookupPending || !contactValid}
-            className="w-full sm:w-auto px-10 py-4 bg-brand-700 hover:bg-brand-800 active:bg-brand-900 disabled:bg-brand-200 disabled:text-white disabled:cursor-not-allowed text-white rounded-full font-semibold text-base transition-colors"
+            className="w-full sm:w-auto px-10 py-4 bg-ink hover:bg-ink-soft active:bg-black disabled:bg-sage-300 disabled:cursor-not-allowed text-paper-50 rounded-full font-semibold text-base transition-colors tracking-tight"
           >
             Fortsæt
           </button>

@@ -103,9 +103,9 @@ export function HeroAddressInput() {
       <label htmlFor="hero-address-input" className="sr-only">
         Boligens adresse
       </label>
-      <div className="relative flex items-center bg-white rounded-full shadow-[0_8px_24px_-4px_rgba(0,0,0,0.25)] focus-within:ring-4 focus-within:ring-white/30 transition-all">
+      <div className="relative flex items-center bg-paper-50 rounded-full border-2 border-brass-400/60 focus-within:border-brass-600 focus-within:bg-white transition-all">
         <Search
-          className="absolute left-6 w-6 h-6 text-brand-500 pointer-events-none"
+          className="absolute left-5 w-5 h-5 text-brass-600 pointer-events-none"
           strokeWidth={2}
           aria-hidden="true"
         />
@@ -116,10 +116,11 @@ export function HeroAddressInput() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
-          placeholder="Indtast din adresse"
-          className="w-full pl-16 pr-32 sm:pr-36 py-5 sm:py-6 text-base sm:text-lg bg-transparent placeholder:text-slate-400 focus:outline-none text-ink rounded-full"
+          placeholder="Hvor ligger din bolig?"
+          className="w-full pl-14 pr-32 sm:pr-40 py-4 sm:py-5 text-base sm:text-[17px] bg-transparent placeholder:text-muted placeholder:font-serif-display-italic focus:outline-none text-ink rounded-full"
           autoComplete="street-address"
           aria-label="Boligens adresse"
+          style={{ fontFamily: 'inherit' }}
         />
         <button
           type="button"
@@ -127,28 +128,26 @@ export function HeroAddressInput() {
             if (results[0]) selectAddress(results[0]);
           }}
           disabled={results.length === 0 || lookupPending}
-          className="absolute right-2 sm:right-2.5 px-5 sm:px-7 py-3 sm:py-4 bg-brand-700 hover:bg-brand-800 disabled:bg-brand-300 disabled:cursor-not-allowed text-white rounded-full font-semibold text-sm sm:text-base transition-colors"
+          className="absolute right-1.5 sm:right-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-ink hover:bg-ink-soft disabled:bg-sage-300 disabled:cursor-not-allowed text-paper-50 rounded-full font-semibold text-sm transition-colors tracking-tight"
         >
           {lookupPending ? 'Henter…' : pending ? 'Søger…' : 'Få tilbud'}
         </button>
       </div>
 
-      {/* Trust line under input */}
-      <p className="mt-4 text-sm text-white/85 text-center sm:text-left">
-        Ingen forpligtelse. Tager 5 minutter. Vi sender intet før sidste trin.
+      <p className="mt-3 text-xs text-muted tracking-wide">
+        Ingen forpligtelse · 5 minutter · Vi sender intet før sidste trin
       </p>
 
-      {/* Autocomplete dropdown */}
       {showResults && results.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full mt-3 bg-white border border-brand-100 rounded-2xl shadow-2xl overflow-hidden z-40 max-h-80 overflow-y-auto">
+        <ul className="absolute left-0 right-0 top-[68px] sm:top-[76px] mt-2 bg-paper-50 border border-sage-300/50 rounded-2xl shadow-[0_12px_32px_-8px_rgba(31,38,36,0.15)] overflow-hidden z-40 max-h-80 overflow-y-auto">
           {results.map((s) => (
             <li key={s.adresse.id}>
               <button
                 type="button"
                 onClick={() => selectAddress(s)}
-                className="w-full text-left px-6 py-3.5 text-[15px] text-ink hover:bg-brand-50/50 border-b border-brand-50 last:border-b-0 flex items-center gap-3"
+                className="w-full text-left px-5 py-3.5 text-[15px] text-ink hover:bg-sage-50 border-b border-sage-100 last:border-b-0 flex items-center gap-3"
               >
-                <Search className="w-4 h-4 text-brand-500 shrink-0" strokeWidth={2} />
+                <Search className="w-4 h-4 text-brass-500 shrink-0" strokeWidth={2} />
                 <span>{s.tekst}</span>
               </button>
             </li>
