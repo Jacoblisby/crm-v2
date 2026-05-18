@@ -102,17 +102,12 @@ function isYearLike(val: number, raw: string): boolean {
 }
 
 export function parseSalgsopstilling(text: string): CostBreakdown {
-  // Grundskyld + Ejendomsvaerdiskat — begge er ejer-skatter, summeres i grundvaerdi
-  // (kunne adskilles i schema, men nuvaerende model behandler dem som "skat")
-  const grundskyld = findAmountAfter(text,
+  // Grundskyld — KUN grundskyld, IKKE ejendomsvaerdiskat.
+  // Ejendomsvaerdiskat betales kun af ejer-bebooere, ikke ved udlejning. Vi
+  // koeber boliger til udlejning, saa ejdvaerdiskat er ikke en cost for os.
+  const grundv = findAmountAfter(text,
     'Grundskyld(?:\\s*\\(ejendomsskat\\))?',
-    '(?<!værdi)Ejendomsskat\\b',
   );
-  const ejdvaerdi = findAmountAfter(text,
-    'Ejendomsv[æa]rdiskat',
-  );
-  // Saml i costGrundvaerdi
-  const grundv = grundskyld + ejdvaerdi;
 
   const faellesu = findAmountAfter(text,
     'F[æa]llesudgifter?(?:,?\\s*(?:anslået|jf\\.|inkl\\.?\\s*acontovand|i alt))?',

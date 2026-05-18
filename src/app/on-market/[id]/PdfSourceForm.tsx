@@ -93,20 +93,14 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
             'warn',
           );
         } else if (r.declaredTotal > 0) {
-          // Vi har mæglerens total — sammenlign for sanity-check
-          const diff = Math.abs(r.driftTotal - r.declaredTotal);
-          const diffPct = (diff / r.declaredTotal) * 100;
-          if (diffPct < 5) {
-            showMsg(
-              `Parsed ${r.foundFields}/${r.totalFields} felter — drift ${r.driftTotal.toLocaleString('da-DK')} kr/år ≈ mæglerens total ${r.declaredTotal.toLocaleString('da-DK')} kr (✓)`,
-              'ok',
-            );
-          } else {
-            showMsg(
-              `Parsed ${r.foundFields}/${r.totalFields} felter — vores ${r.driftTotal.toLocaleString('da-DK')} kr/år vs. mæglerens ${r.declaredTotal.toLocaleString('da-DK')} kr (afvigelse ${diffPct.toFixed(0)}%) — tjek felterne under`,
-              'warn',
-            );
-          }
+          // Vi har mæglerens total — men vi ekskluderer ejendomsværdiskat (kun
+          // for ejer-bebooere), saa vores drift er typisk 2-5k under mæglerens.
+          // Vis BEGGE saa brugeren kan verificere.
+          const diff = r.declaredTotal - r.driftTotal;
+          showMsg(
+            `Parsed ${r.foundFields}/${r.totalFields} felter — vores drift ${r.driftTotal.toLocaleString('da-DK')} kr/år · mæglerens ejerudgift ${r.declaredTotal.toLocaleString('da-DK')} kr (diff ${diff.toLocaleString('da-DK')} kr = ejendomsværdiskat, som vi ikke betaler ved udlejning)`,
+            'ok',
+          );
         } else {
           showMsg(
             `Parsed ${r.foundFields}/${r.totalFields} felter — drift ${r.driftTotal.toLocaleString('da-DK')} kr/år`,

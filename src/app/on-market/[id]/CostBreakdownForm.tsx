@@ -41,7 +41,7 @@ type AnnualKey =
 
 const ANNUAL_FIELDS: Array<{ key: AnnualKey; label: string; hint?: string }> = [
   { key: 'costFaellesudgifter', label: 'Fællesudgifter', hint: 'inkl. evt. acontovand' },
-  { key: 'costGrundvaerdi', label: 'Grundskyld', hint: 'inkl. ejendomsværdiskat' },
+  { key: 'costGrundvaerdi', label: 'Grundskyld', hint: 'ekskl. ejendomsværdiskat (udlejning)' },
   { key: 'costFaelleslaan', label: 'Fælleslån', hint: 'EF eller A/B' },
   { key: 'costForsikringer', label: 'Forsikringer' },
   { key: 'costRenovation', label: 'Renovation' },
