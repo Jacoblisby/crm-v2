@@ -32,85 +32,73 @@ interface CostBreakdown {
 }
 
 /**
- * Find amount efter label i en window — filtrerer aarstal vaek og stopper
- * window ved totals-raekker (Ejerudgift i alt) og naeste label.
+ * Find amount efter label i salgsopstilling.
  *
- * Salgsopstilling-table-rows ser typisk saadan ud (efter PDF text-extract):
+ * Salgsopstilling-table-rows har dette format efter PDF text-extract:
  *   "Ejendomsvaerdiskat 2026 2.190,96"
  *   "Grundskyld 2026 1.271,00"
  *   "Fællesudgifter 2026 13.752,00"
  *   "Rottebekæmpelse 2026 99,21"
  *   "Ejerudgift i alt 1. år: 17.313,17"
  *
- * Strategy:
- *   1. Find label i text
- *   2. Tag de naeste 150 chars som window
- *   3. TRUNCATE window ved totals-keywords ("Ejerudgift i alt", "Boligydelse i alt",
- *      "i alt", linjeskift+anden label) — for at undgaa at fange TOTALEN i stedet
- *      for det individuelle felt
- *   4. Find foerste 4-cifrede aarstal (2015-2035)
- *   5. Returner FOERSTE amount EFTER aaret. Hvis intet aar: foerste amount.
- *   6. Filtrer aarstal og ekstreme noise vaek
+ * Strategy: STRIKT TABEL-MATCH foerst
+ *   1. Soeg efter `<label> <year> <amount>` pattern (label efterfulgt af aarstal og beloeb)
+ *   2. Fallback: `<label> kr <amount>` (linjer uden aarskolonne)
+ *   3. Fallback: `<label>: <amount>` med kolon-separator
+ *   4. Hvis intet match: return 0
+ *
+ * Vi tager IKKE FOERSTE amount efter label, fordi label appears multiple times
+ * i forskellige sammenhænge (fx "Grundlag for grundskyld: 181.600" foer den
+ * faktiske "Grundskyld 2026 1.271,00" table-row).
  */
 function findAmountAfter(text: string, ...labels: string[]): number {
-  // Stop-mønstre: hvis window'en indeholder "Ejerudgift i alt" eller lignende
-  // skal vi truncere FOER det punkt.
-  const STOP_PATTERNS = [
-    /Ejerudgift\s+i\s+alt/i,
-    /Boligydelse\s+i\s+alt/i,
-    /Bolig?ydelse\s+i\s+alt/i,
-    /\b[Ii]\s+alt\s+(?:\d|kr)/i,
-    /Sum\s+ejerudgifter?/i,
-  ];
-
   for (const labelPattern of labels) {
-    const labelRe = new RegExp(labelPattern, 'gi');
-    let match: RegExpExecArray | null;
-    labelRe.lastIndex = 0;
-    while ((match = labelRe.exec(text)) !== null) {
-      const windowStart = match.index + match[0].length;
-      let window = text.slice(windowStart, windowStart + 200);
+    // Pattern 1: <label> <YEAR> <amount> — table-row format
+    const tablePattern = new RegExp(
+      `${labelPattern}\\s+(?:20\\d{2})\\s+([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      'i',
+    );
+    const tableMatch = text.match(tablePattern);
+    if (tableMatch && tableMatch[1]) {
+      const val = parseAmount(tableMatch[1]);
+      if (val > 0) return val;
+    }
 
-      // Truncate ved foerste stop-pattern
-      for (const stop of STOP_PATTERNS) {
-        const m = window.match(stop);
-        if (m && m.index !== undefined) {
-          window = window.slice(0, m.index);
-        }
-      }
+    // Pattern 2: <label> kr. <amount> — explicit kr-format
+    const krPattern = new RegExp(
+      `${labelPattern}[^\\n]{0,30}?kr\\.?\\s*([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      'i',
+    );
+    const krMatch = text.match(krPattern);
+    if (krMatch && krMatch[1]) {
+      const val = parseAmount(krMatch[1]);
+      if (val > 0 && !isYearLike(val, krMatch[1])) return val;
+    }
 
-      // Begraens til ~100 chars efter truncate (table-row er typisk kort)
-      if (window.length > 120) window = window.slice(0, 120);
-
-      // Find alle tal — dansk format: 1.234,56 ELLER 1.234 ELLER 1234
-      const numbers = [...window.matchAll(/(\d{1,3}(?:\.\d{3})+,\d{1,2}|\d+,\d{1,2}|\d{1,3}(?:\.\d{3})+|\d+)/g)];
-
-      let yearSeen = false;
-      for (const n of numbers) {
-        const raw = n[0];
-        const normalized = raw.replace(/\./g, '').replace(',', '.');
-        const val = parseFloat(normalized);
-        if (Number.isNaN(val) || val <= 0) continue;
-
-        // Aarstal-detection: 2015-2035 uden decimal/tusinde
-        const isYearLike = val >= 2015 && val <= 2035 && !raw.includes(',') && !raw.includes('.');
-        if (isYearLike) {
-          yearSeen = true;
-          continue;
-        }
-
-        // Ekstreme noise filter
-        if (val > 10_000_000) continue;
-
-        // Foerste amount efter aar (eller foerste amount hvis intet aar) = vores tal
-        return Math.round(val);
-      }
-
-      // Fallback: hvis vi saa et aar men ikke amount efter, skip; proev naeste label-match
-      if (yearSeen) continue;
+    // Pattern 3: <label>: <amount> — kolon-separator format
+    const colonPattern = new RegExp(
+      `${labelPattern}:\\s*([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      'i',
+    );
+    const colonMatch = text.match(colonPattern);
+    if (colonMatch && colonMatch[1]) {
+      const val = parseAmount(colonMatch[1]);
+      if (val > 0 && !isYearLike(val, colonMatch[1])) return val;
     }
   }
   return 0;
+}
+
+function parseAmount(raw: string): number {
+  const normalized = raw.replace(/\./g, '').replace(',', '.');
+  const val = parseFloat(normalized);
+  if (Number.isNaN(val) || val <= 0) return 0;
+  if (val > 10_000_000) return 0;
+  return Math.round(val);
+}
+
+function isYearLike(val: number, raw: string): boolean {
+  return val >= 2015 && val <= 2035 && !raw.includes(',') && !raw.includes('.');
 }
 
 export function parseSalgsopstilling(text: string): CostBreakdown {
@@ -202,13 +190,25 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
 /**
  * Parse "Ejerudgift i alt 1. år: XX.XXX,XX" som sanity check.
  * Bruges af UI til at verificere at vores parse matcher mæglerens total.
+ *
+ * VIGTIGT: "i alt" + "år" er obligatorisk — ellers ville vi matche
+ * "Ejerudgift/md." (1.443) eller "Ejerudgifter pr. md." (forkert tal).
  */
 export function parseEjerudgiftTotal(text: string): number {
-  return findAmountAfter(
-    text,
-    'Ejerudgift(?:\\s+i\\s+alt)?(?:\\s+1\\.?\\s*[åa]r)?',
-    'Boligydelse\\s+i\\s+alt',
-  );
+  // Strikt: kraev "i alt" + "år" — undgaa per-md varianter
+  const patterns = [
+    /Ejerudgift\s+i\s+alt\s+1\.?\s*[åa]r[:\s]*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/i,
+    /Ejerudgifter?\s+i\s+alt[:\s]*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/i,
+    /Boligydelse\s+i\s+alt[:\s]*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/i,
+  ];
+  for (const pat of patterns) {
+    const m = text.match(pat);
+    if (m && m[1]) {
+      const val = parseAmount(m[1]);
+      if (val > 0 && !isYearLike(val, m[1])) return val;
+    }
+  }
+  return 0;
 }
 
 /**
@@ -219,41 +219,41 @@ export function parseEjerudgiftTotal(text: string): number {
  *   "Sikkerhed til ejerforening: 50.000"
  *   "Sikkerhedsstillelse: 50.000 kr"
  *
+ * NB: salgsopstilling indeholder ofte ogsaa "tinglyst sikkerhed til ejerforeningen"
+ * i en helt anden context (laaneprovenu-note) — vi skal iterere alle matches
+ * og returnere det foerste der har et beloeb i window'en.
+ *
  * Returns 0 hvis ikke fundet ELLER hvis svaret er "nej/ingen".
  */
 export function parseEjerforeningSikkerhed(text: string): number {
-  // Find label
-  const labelRe = /Sikkerhed(?:sstillelse)?\s+til\s+(?:e\/f|ejerforening)/i;
-  const m = text.match(labelRe);
-  if (!m) return 0;
+  // Pattern variations — proev mest specifikke foerst
+  const labelPatterns = [
+    /Sikkerhed\s+til\s+e\/f/gi,
+    /Sikkerhed\s+til\s+ejerforening(?:en)?/gi,
+    /Sikkerhedsstillelse\s+til\s+e\/f/gi,
+  ];
 
-  // Tag 200 chars window efter label
-  const windowStart = (m.index ?? 0) + m[0].length;
-  const window = text.slice(windowStart, windowStart + 200);
+  for (const labelRe of labelPatterns) {
+    labelRe.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = labelRe.exec(text)) !== null) {
+      const windowStart = m.index + m[0].length;
+      const window = text.slice(windowStart, windowStart + 200);
 
-  // Hvis "nej" eller "ingen" foer foerste tal → ingen sikkerhed
-  const lower = window.toLowerCase();
-  const firstNumMatch = lower.match(/[\d.,]+/);
-  if (firstNumMatch) {
-    const preNum = lower.slice(0, firstNumMatch.index ?? 0);
-    if (/\b(nej|ingen)\b/.test(preNum)) return 0;
-  } else {
-    return 0;
-  }
+      // Skip hvis "nej" eller "ingen" foer foerste tal
+      const lower = window.toLowerCase();
+      const firstNumMatch = lower.match(/[\d.,]+/);
+      if (!firstNumMatch) continue;
+      const preNum = lower.slice(0, firstNumMatch.index ?? 0);
+      if (/\b(nej|ingen|ikke)\b/.test(preNum)) continue;
 
-  // Extract first amount-shaped tal (her er det FOERSTE — ikke aaret, fordi
-  // strukturen er "Ja, med kr. 50.000,00")
-  const numbers = [...window.matchAll(/(\d{1,3}(?:\.\d{3})+,\d{1,2}|\d+,\d{1,2}|\d{1,3}(?:\.\d{3})+|\d+)/g)];
-  for (const n of numbers) {
-    const raw = n[0];
-    const normalized = raw.replace(/\./g, '').replace(',', '.');
-    const val = parseFloat(normalized);
-    if (Number.isNaN(val) || val <= 0) continue;
-    // Filter aarstal
-    if (val >= 2015 && val <= 2035 && !raw.includes(',') && !raw.includes('.')) continue;
-    // Filter ekstreme noise
-    if (val > 10_000_000) continue;
-    return Math.round(val);
+      // Extract foerste amount-shaped tal
+      const numbers = [...window.matchAll(/(\d{1,3}(?:\.\d{3})+,\d{1,2}|\d+,\d{1,2}|\d{1,3}(?:\.\d{3})+|\d+)/g)];
+      for (const n of numbers) {
+        const val = parseAmount(n[0]);
+        if (val > 0 && !isYearLike(val, n[0])) return val;
+      }
+    }
   }
   return 0;
 }
