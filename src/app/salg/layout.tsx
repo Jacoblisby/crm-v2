@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { SalgHeader } from './components/SalgHeader';
 import { FunnelProvider } from './FunnelContext';
+import { EmbedMode } from './EmbedMode';
 
 export const metadata: Metadata = {
   title: 'Få et tilbud på din ejerlejlighed på 5 minutter · 365 Ejendomme',
@@ -18,10 +20,20 @@ export const metadata: Metadata = {
 export default function SalgLayout({ children }: { children: React.ReactNode }) {
   return (
     <FunnelProvider>
+      {/* EmbedMode skjuler header + footer + sender postMessage height
+          updates til parent vindue naar /salg?embed=1 */}
+      <Suspense fallback={null}>
+        <EmbedMode />
+      </Suspense>
+      <style>{`
+        .embed-mode header,
+        .embed-mode footer.salg-footer { display: none !important; }
+        .embed-mode { background: transparent !important; }
+      `}</style>
       <div className="min-h-screen bg-white">
         <SalgHeader />
         <main>{children}</main>
-        <footer className="border-t border-stone-200 py-8 text-xs text-muted">
+        <footer className="salg-footer border-t border-stone-200 py-8 text-xs text-muted">
           <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 flex flex-wrap gap-4 justify-between items-center">
             <div className="py-2">© 365 Ejendomme · CVR 42 80 04 22</div>
             <div className="flex gap-1">
