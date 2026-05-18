@@ -231,6 +231,95 @@ export async function uploadPdfAction(formData: FormData) {
 }
 
 /**
+ * Force-reparse: henter PDF fra eksisterende pdf_url og koerer parser
+ * uconditionally (uden cost-breakdown-empty-check). Bruges naar:
+ *   - Parser-kode er blevet bedre og vi vil overskrive gamle (forkerte) tal
+ *   - Brugeren ved at de individuelle felter er off
+ *
+ * Hurtig vej for brugeren — ingen drag-drop kraevet.
+ */
+export async function forceReparsePdfAction(input: { id: string }) {
+  const rows = await db
+    .select()
+    .from(onMarketCandidates)
+    .where(eq(onMarketCandidates.id, input.id));
+  const c = rows[0];
+  if (!c) return { ok: false as const, error: 'kandidat ikke fundet' };
+  if (!c.pdfUrl) return { ok: false as const, error: 'Ingen PDF-URL gemt — upload PDF foerst' };
+
+  try {
+    const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
+    const r = await fetch(c.pdfUrl, { headers: { 'User-Agent': UA }, redirect: 'follow' });
+    if (!r.ok) throw new Error(`PDF download fejlede: HTTP ${r.status}`);
+    const bytes = new Uint8Array(await r.arrayBuffer());
+
+    const { extractText, getDocumentProxy } = await import('unpdf');
+    const pdf = await getDocumentProxy(bytes);
+    const { text } = await extractText(pdf, { mergePages: true });
+    const fullText = Array.isArray(text) ? text.join('\n') : text;
+
+    const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed } =
+      await import('@/worker/parse-pdf');
+    const breakdown = parseSalgsopstilling(fullText);
+    const declaredTotal = parseEjerudgiftTotal(fullText);
+    const ejerforeningSikkerhed = parseEjerforeningSikkerhed(fullText);
+
+    const driftTotal =
+      breakdown.costGrundvaerdi +
+      breakdown.costFaellesudgifter +
+      breakdown.costRottebekempelse +
+      breakdown.costRenovation +
+      breakdown.costForsikringer +
+      breakdown.costFaelleslaan +
+      breakdown.costGrundfond +
+      breakdown.costVicevaert +
+      breakdown.costVedligeholdelse +
+      breakdown.costAndreDrift;
+    const refurbTotal =
+      c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
+    const afk = computeAfkast({
+      rentMd: c.estimeretLejeMd ?? 0,
+      pris: c.listPrice,
+      forhandletPris: c.forhandletPris ?? null,
+      driftTotal,
+      refurbTotal,
+    });
+
+    await db
+      .update(onMarketCandidates)
+      .set({
+        ...breakdown,
+        ejerforeningSikkerhed,
+        bidDkk: afk.budAt20PctRoe,
+        marginPct: afk.roeNettoPct.toString(),
+        afkastCalculatedAt: new Date(),
+        pdfStatus: 'parsed',
+        pdfDownloadedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(onMarketCandidates.id, input.id));
+
+    revalidatePath('/on-market');
+    revalidatePath(`/on-market/${input.id}`);
+
+    const total = Object.values(breakdown).reduce((a, b) => a + (b as number), 0);
+    return {
+      ok: true as const,
+      breakdown,
+      driftTotal,
+      declaredTotal,
+      ejerforeningSikkerhed,
+      foundFields: Object.entries(breakdown).filter(([, v]) => (v as number) > 0).length,
+      totalFields: Object.keys(breakdown).length,
+      empty: total === 0,
+    };
+  } catch (err) {
+    const m = err instanceof Error ? err.message : String(err);
+    return { ok: false as const, error: m.slice(0, 200) };
+  }
+}
+
+/**
  * Manual override af cost-breakdown. Bruges naar PDF-parsing fejler eller
  * giver forkerte resultater — som med Benloeseparken 141 i Ringsted.
  */

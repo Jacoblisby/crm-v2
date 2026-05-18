@@ -11,7 +11,7 @@
  * smider den i feltet. Parser direkte server-side.
  */
 import { useState, useTransition, useRef, DragEvent } from 'react';
-import { setPdfUrlAction, uploadPdfAction } from './actions';
+import { setPdfUrlAction, uploadPdfAction, forceReparsePdfAction } from './actions';
 
 interface Props {
   id: string;
@@ -126,6 +126,39 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
     e.target.value = '';
   }
 
+  function onForceReparse() {
+    setMsg(null);
+    setParseSummary(null);
+    startTransition(async () => {
+      const r = await forceReparsePdfAction({ id });
+      if (r.ok) {
+        setParseSummary({
+          foundFields: r.foundFields,
+          totalFields: r.totalFields,
+          driftTotal: r.driftTotal,
+          declaredTotal: r.declaredTotal,
+          empty: r.empty,
+        });
+        if (r.empty) {
+          showMsg('Re-parse koert men ingen ejerudgifter fundet — tjek manuelt', 'warn');
+        } else if (r.declaredTotal > 0) {
+          const diff = r.declaredTotal - r.driftTotal;
+          showMsg(
+            `Re-parsed ${r.foundFields}/${r.totalFields} felter — vores drift ${r.driftTotal.toLocaleString('da-DK')} kr/aar · maeglerens ${r.declaredTotal.toLocaleString('da-DK')} kr (diff ${diff.toLocaleString('da-DK')} kr = ejdvaerdiskat)`,
+            'ok',
+          );
+        } else {
+          showMsg(
+            `Re-parsed ${r.foundFields}/${r.totalFields} felter — drift ${r.driftTotal.toLocaleString('da-DK')} kr/aar`,
+            'ok',
+          );
+        }
+      } else {
+        showMsg(r.error, 'err');
+      }
+    });
+  }
+
   const msgColor =
     msgType === 'err'
       ? 'text-red-700'
@@ -191,8 +224,8 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
         </div>
       </label>
 
-      {/* URL-input — bevares for cron-flow + manuel URL */}
-      <div className="border-t border-amber-200 pt-3 space-y-1">
+      {/* URL-input + re-parse — bevares for cron-flow + manuel URL */}
+      <div className="border-t border-amber-200 pt-3 space-y-2">
         <p className="text-xs text-slate-600">
           Eller indsæt direkte PDF-URL{' '}
           {brokerKind === 'realmaeglerne'
@@ -226,6 +259,16 @@ export function PdfSourceForm({ id, currentUrl, caseUrl, brokerKind, pdfStatus }
             Gem URL
           </button>
         </form>
+        {currentUrl && (
+          <button
+            type="button"
+            onClick={onForceReparse}
+            disabled={pending}
+            className="text-xs px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-50"
+          >
+            🔄 Re-parse fra eksisterende URL
+          </button>
+        )}
       </div>
 
       {msg && (
