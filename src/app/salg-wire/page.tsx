@@ -464,11 +464,6 @@ function Landing() {
           <p style={{ fontSize: 12, color: '#666', marginTop: 12 }}>
             Ingen forpligtelse · 5 min · Privat
           </p>
-          <div style={{ marginTop: 24, display: 'flex', gap: 24, fontSize: 13 }}>
-            <span><strong>87+</strong> boliger købt siden 2020</span>
-            <span><strong>bliv boende</strong> som lejer og nyd friværdien</span>
-            <span><strong>0 kr</strong> i mæglersalær</span>
-          </div>
         </div>
         <Box label="hero lifestyle photo (4:5)" h={400} />
       </div>
