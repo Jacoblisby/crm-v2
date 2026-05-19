@@ -199,41 +199,32 @@ export default function SalgWirePage() {
           .wire-root h2 {
             font-size: 22px !important;
           }
-          /* 2-kolonne screen-layout (label/input) → stack */
-          .wire-root [style*="grid-template-columns: 5fr 7fr"],
-          .wire-root [style*="grid-template-columns: 7fr 5fr"] {
+          /* React serialiserer uden mellemrum: "grid-template-columns:7fr 5fr" */
+          /* 2-kolonne screen-layout → stack */
+          .wire-root [style*="5fr 7fr"],
+          .wire-root [style*="7fr 5fr"],
+          .wire-root [style*="1fr 1fr"] {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
           }
-          /* Inner 1fr 1fr grids → stack */
-          .wire-root [style*="grid-template-columns: 1fr 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
-          /* 3-col → 2-col */
-          .wire-root [style*="grid-template-columns: repeat(3, 1fr)"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          /* 4-col chips → 2x2 */
-          .wire-root [style*="grid-template-columns: repeat(4, 1fr)"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-          /* 5-col stage-rail → wrap */
-          .wire-root [style*="grid-template-columns: repeat(5, 1fr)"] {
+          /* 3-col / 4-col / 5-col → 2-col */
+          .wire-root [style*="repeat(3, 1fr)"],
+          .wire-root [style*="repeat(4, 1fr)"],
+          .wire-root [style*="repeat(5, 1fr)"] {
             grid-template-columns: repeat(2, 1fr) !important;
           }
           /* Estimat number-cell adjust */
-          .wire-root [style*="grid-template-columns: 1fr auto"] {
+          .wire-root [style*="1fr auto"] {
             grid-template-columns: 1fr !important;
           }
           /* Estimat header big number — scale down */
+          .wire-root p[style*="font-size:56px"],
           .wire-root p[style*="font-size: 56px"] {
             font-size: 36px !important;
           }
-          /* Quick-jump screen-selector wraps fine, just bigger tap area */
           .wire-root button {
             min-height: 40px;
           }
-          /* Reduce top-of-section margins */
           .wire-root section {
             margin-top: 32px !important;
           }
