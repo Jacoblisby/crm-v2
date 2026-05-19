@@ -70,23 +70,17 @@ const SCREENS = [
   {
     n: 10,
     stage: 'lidt om dig',
-    name: 'Hvad er hovedgrunden?',
-    render: () => <GrundForSalg />,
-  },
-  {
-    n: 11,
-    stage: 'lidt om dig',
     name: 'Hvad skal du efter salget?',
     render: () => <EfterSalg />,
   },
   {
-    n: 12,
+    n: 11,
     stage: 'lidt om dig',
     name: 'Hvad leder du efter? (conditional)',
     render: () => <NyBolig />,
   },
   {
-    n: 13,
+    n: 12,
     stage: 'estimat',
     name: 'Foreløbigt tilbud',
     render: () => <Estimat />,
@@ -488,7 +482,7 @@ function Landing() {
             ['87', 'handler i alt (mar 20 – maj 26)'],
             ['218', 'lejemål under forvaltning'],
             ['2,5 mio', 'kr sparet i salærer'],
-            ['bliv boende', 'sale-leaseback kerneprodukt'],
+            ['bliv boende', 'nyd friværdien bekymringsfrit'],
           ].map(([n, l]) => (
             <div key={l} style={{ borderLeft: '1px solid #ccc', paddingLeft: 12 }}>
               <div style={{ fontSize: 32, fontWeight: 700 }}>{n}</div>
@@ -504,9 +498,9 @@ function Landing() {
         <ol style={{ marginTop: 16, paddingLeft: 0, listStyle: 'none' }}>
           {[
             ['01', 'Du indtaster adressen', 'OIS-data og sammenlignelige handler hentes automatisk.'],
-            ['02', 'Vi ringer inden et døgn', 'Uforpligtende prisverificerings-syn. Ingen aggressiv opfølgning.'],
-            ['03', 'Gratis besigtigelse', 'Vi måler op og giver et bindende tilbud.'],
-            ['04', 'Du vælger overtagelse', 'Når det passer dig — eller bliv boende som lejer (sale-leaseback).'],
+            ['02', 'Vi tager kontakt', 'Vedr. uforpligtende prisverificerings-besøg.'],
+            ['03', 'Gratis besigtigelse og kontraktoplæg', 'Vi måler op og giver et bindende tilbud.'],
+            ['04', 'Du vælger overtagelse', 'Når det passer dig — eller bliv boende og nyd friværdien bekymringsfrit.'],
           ].map(([n, t, d]) => (
             <li key={n} style={{ borderTop: '1px solid #ddd', padding: '16px 0', display: 'grid', gridTemplateColumns: '40px 1fr', gap: 16 }}>
               <span style={{ fontFamily: 'monospace', color: '#888' }}>{n}</span>
@@ -594,7 +588,7 @@ function Kontakt() {
       <StageRail active="adresse" />
       <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
         <div>
-          <Chip>HVOR SENDER VI TILBUDDET?</Chip>
+          <Chip>KONTAKT</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvor sender vi dit tilbud?</h1>
           <p style={{ fontSize: 14, color: '#666' }}>
             Du modtager estimat på email. Vi kontakter dig kun for at aftale en gratis besigtigelse.
@@ -617,24 +611,6 @@ function Kontakt() {
               <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Hvis vi har brug for at supplere</p>
             </div>
           </div>
-          <section style={{ borderTop: '1px solid #eee', paddingTop: 16 }}>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>antal ejere</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {['Kun mig', '2 ejere', '3 eller flere'].map((o) => (
-                <Chip key={o}>{o}</Chip>
-              ))}
-            </div>
-            <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Påvirker juridik — ægtefælle/arvinger-samtykke.</p>
-          </section>
-          <section>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>hvor længe har du boet der?</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {['Under 1 år', '1–3 år', '3–10 år', '10+ år'].map((o) => (
-                <Chip key={o}>{o}</Chip>
-              ))}
-            </div>
-            <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Påvirker skat ved &lt; 2 år (parcelhusreglen).</p>
-          </section>
           <p style={{ fontSize: 11, color: '#888', borderTop: '1px solid #eee', paddingTop: 8 }}>
             <strong>Required for next:</strong> navn + (email eller telefon).
           </p>
@@ -727,39 +703,26 @@ function RoomsOvrige() {
           <Chip>BOLIGENS STAND</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Øvrige rum</h1>
           <p style={{ fontSize: 14, color: '#666' }}>
-            Vurder kort stuen og soveværelset — primært malings- og slid-niveau. Stue + sov er kombineret
-            (brydeer 4-rum-i-træk monotoni; chip-baseret uden foto, fordi gulv/maling-vurdering ikke
-            kræver visuel reference).
+            Stue, sov, gang, entré — én samlet vurdering. Primært malings- og slid-niveau (gulv + vægge).
           </p>
           <p style={{ fontSize: 11, fontFamily: 'monospace', marginTop: 12, color: '#888' }}>ØVRIGE RUM (3/3)</p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {[
-            { room: 'Stue', helper: 'Gulv + vægge — typisk billigste rum at friske op.' },
-            { room: 'Soveværelse', helper: 'Samme — primært maling og gulv.' },
-          ].map((r) => (
-            <section key={r.room}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
-                <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{r.room}</h3>
-                <p style={{ fontSize: 12, color: '#888', margin: 0 }}>{r.helper}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            {[
+              ['Nyrenoveret', 'Klar til indflytning'],
+              ['God stand', 'Velholdt'],
+              ['Trænger', 'Skal males'],
+              ['Skal renoveres', 'Total omgang'],
+            ].map(([t, s]) => (
+              <div key={t} style={{ border: '1px solid #999', padding: 14 }}>
+                <strong style={{ fontSize: 14 }}>{t}</strong>
+                <p style={{ fontSize: 12, color: '#666', margin: '4px 0 0' }}>{s}</p>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 8 }}>
-                {[
-                  ['Nyrenoveret', 'Klar til indflytning'],
-                  ['God stand', 'Velholdt'],
-                  ['Trænger', 'Skal males'],
-                  ['Skal renoveres', 'Total omgang'],
-                ].map(([t, s]) => (
-                  <div key={t} style={{ border: '1px solid #999', padding: 12 }}>
-                    <strong style={{ fontSize: 13 }}>{t}</strong>
-                    <p style={{ fontSize: 11, color: '#666', margin: '4px 0 0' }}>{s}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
+            ))}
+          </div>
           <p style={{ fontSize: 11, color: '#888', borderTop: '1px solid #eee', paddingTop: 8 }}>
-            <strong>Required for next:</strong> stand valgt for begge rum.
+            <strong>Required for next:</strong> stand valgt.
           </p>
         </div>
       </div>
@@ -797,15 +760,6 @@ function SidsteDetaljer() {
             </div>
           </section>
           <section>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>tag-tilstand i bygningen</p>
-            <p style={{ fontSize: 12, color: '#666', margin: '4px 0' }}>Proxy for fælleslån-risiko (kommende renovering = stor udgift for alle ejere).</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {['God', 'Middel', 'Dårligt', 'Ved ikke'].map((o) => (
-                <Chip key={o}>{o}</Chip>
-              ))}
-            </div>
-          </section>
-          <section>
             <label style={{ fontSize: 12, fontWeight: 600 }}>Andre ting vi bør vide (valgfri)</label>
             <textarea
               placeholder="Fx fælles tagterrasse, husdyr accepteret af EF..."
@@ -823,8 +777,8 @@ function SidsteDetaljer() {
               ))}
             </div>
             <p style={{ fontSize: 13, color: '#666', margin: '16px 0 4px' }}>Forhold der kan påvirke prisen</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              {['Fælleslån i EF', 'Renoveringsplaner', 'Tinglyste servitutter'].map((t) => (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {['Renoveringsplaner', 'Tinglyste servitutter'].map((t) => (
                 <div key={t} style={{ border: '1px solid #999', padding: 12, fontSize: 12 }}>☐ {t}</div>
               ))}
             </div>
@@ -893,36 +847,20 @@ function Udgifter() {
             <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>0 hvis du intet skylder. Tjek tingbogen.dk.</p>
           </section>
           <section>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>fælleslån i ejerforeningen</p>
+            <p style={{ fontSize: 13 }}>Ja/Nej + din andel (kr) hvis ja</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Står på EFs årsopgørelse. Påvirker dit netto-provenu direkte.</p>
+          </section>
+          <section>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>gæld til ejerforening (ny)</p>
             <p style={{ fontSize: 13 }}>Ja/Nej + beløb (kr) hvis ja</p>
-            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Restance eller andel af EFs fælleslån. Står på EFs årsopgørelse.</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Skyldige bidrag. Står på EFs seneste opkrævning.</p>
           </section>
           <section>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>realkreditlån</p>
             <p style={{ fontSize: 13 }}>Restgæld (kr)</p>
             <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Ca-tal er fint. Står på seneste lånekontoudtog fra Nordea Kredit, Realkredit Danmark m.fl.</p>
           </section>
-        </div>
-      </div>
-      <FunnelBottom disabled />
-    </div>
-  );
-}
-
-function GrundForSalg() {
-  return (
-    <div>
-      <TopBar address />
-      <StageRail active="lidt om dig" />
-      <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
-        <div>
-          <Chip>DIN SITUATION</Chip>
-          <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvad er hovedgrunden til at sælge?</h1>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-          {['Flytter', 'Arv / dødsbo', 'Skilsmisse', 'Økonomi', 'Investering', 'Andet'].map((t) => (
-            <div key={t} style={{ border: '1px solid #999', padding: 24, textAlign: 'center', fontSize: 14 }}>{t}</div>
-          ))}
         </div>
       </div>
       <FunnelBottom disabled />
@@ -943,8 +881,8 @@ function EfterSalg() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
             ['Flytter ud helt', 'Jeg har et andet sted at bo.', false],
-            ['Vil blive boende som lejer', 'Sale-leaseback — vi køber, du bliver boende.', true],
-            ['Vil leje en anden bolig', 'Vi har 18+ lejemål klar.', false],
+            ['Vil blive boende', 'Du bliver boende og nyder friværdien bekymringsfrit.', true],
+            ['Vil leje en anden bolig', 'Vi har +20 lejemål klar til udlejning indenfor de næste 3 mdr.', false],
             ['Ved ikke endnu', 'Vi tager den snak senere.', false],
           ].map(([t, s, hl]) => (
             <div key={t as string} style={{ border: '1px solid #999', padding: 16 }}>
@@ -953,7 +891,7 @@ function EfterSalg() {
             </div>
           ))}
           <p style={{ fontSize: 12, color: '#888', marginTop: 8, borderTop: '1px solid #eee', paddingTop: 8 }}>
-            <strong>Conditional:</strong> Hvis &quot;Vil leje en anden bolig&quot; → screen 12 (NyBolig) tilføjes.
+            <strong>Conditional:</strong> Hvis &quot;Vil leje en anden bolig&quot; → screen 11 (NyBolig) tilføjes.
           </p>
         </div>
       </div>
