@@ -15,7 +15,7 @@ import { Udgifter } from '../salg-v2/screens/Udgifter';
 import { GrundForSalg } from '../salg-v2/screens/GrundForSalg';
 import { EfterSalg } from '../salg-v2/screens/EfterSalg';
 import { NyBolig } from '../salg-v2/screens/NyBolig';
-import { Estimat } from '../salg-v2/screens/Estimat';
+import { EstimatV3 } from './screens/EstimatV3';
 
 export function Funnel() {
   const { state, nextScreen, prevScreen } = useFunnelV3();
@@ -25,7 +25,7 @@ export function Funnel() {
 
   if (localIdx < 0 || localIdx >= screens.length + 1) return null;
   if (localIdx >= screens.length) {
-    return <Estimat />;
+    return <EstimatV3 />;
   }
 
   function next() {
