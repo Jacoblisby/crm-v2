@@ -969,37 +969,49 @@ function Estimat() {
           <p style={{ fontSize: 12, color: '#888' }}>Bindende tilbud gives efter besigtigelse.</p>
         </div>
 
-        <section style={{ border: '1px solid #999', padding: 16 }}>
-          <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>overtagelse</p>
-          <p style={{ fontSize: 16, fontWeight: 600 }}>Hvornår vil du overtage?</p>
-          <p style={{ fontSize: 12, color: '#666', marginTop: 8 }}>
-            Slider: 14 dage ← → 6 mdr · snapper til 4 punkter · price animerer live
-          </p>
-          <Box label="drag slider track + handle" h={50} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#666', marginTop: 8 }}>
-            <span>14 dage (+15.000)</span>
-            <span>1 mdr</span>
-            <span>3 mdr (standard)</span>
-            <span>6 mdr (−10.000)</span>
-          </div>
-        </section>
-
-        <section style={{ border: '1px solid #999', padding: 16 }}>
+        <section style={{ border: '1px solid #999', padding: 20 }}>
           <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>sammenligning</p>
-          <p style={{ fontSize: 16, fontWeight: 600 }}>Hvad du faktisk får i hånden.</p>
-          <Box label="split-bar: 365 tilbud (88%) | væk via mægler (12%)" h={60} />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 12 }}>
+          <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Hvad du faktisk får i hånden</p>
+          <p style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>
+            Sammenligning ved 90 dages salgsperiode hos mægler (standard).
+          </p>
+
+          {/* Split bar */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', height: 64, border: '1px solid #999' }}>
+              <div style={{ flexBasis: '87%', background: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 14px' }}>
+                <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.7, margin: 0 }}>kontant til dig</p>
+                <p style={{ fontSize: 17, fontWeight: 700, margin: '2px 0 0' }}>1.071.000 kr</p>
+              </div>
+              <div style={{ flexBasis: '13%', background: '#eee', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '0 14px' }}>
+                <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888', margin: 0 }}>væk via mægler</p>
+                <p style={{ fontSize: 14, fontWeight: 700, margin: '2px 0 0', color: '#333' }}>154.000 kr</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#888', marginTop: 6 }}>
+              <span>0 kr</span>
+              <span>mægler-pris i alt <strong style={{ color: '#000' }}>1.225.000 kr</strong></span>
+            </div>
+          </div>
+
+          {/* Breakdown cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 20 }}>
             {[
-              ['Mæglersalær', '70.000 kr'],
-              ['Markedsafslag', '76.020 kr'],
-              ['Drift i salgsperioden', '~ kr'],
-            ].map(([t, v]) => (
+              ['Mæglersalær', '70.000 kr', 'Vi tager intet salær. Spar 5–7% af salgsprisen.'],
+              ['Markedsafslag', '76.000 kr', 'Mægler-pris ligger typisk 6–8% under listepris.'],
+              ['Drift i 90 dages salgsperiode', '8.000 kr', '3 mdr ejerudgifter (fællesudg + grundskyld + renovation) uden lejeindtægt.'],
+            ].map(([t, v, d]) => (
               <div key={t} style={{ border: '1px solid #ddd', padding: 12 }}>
-                <p style={{ fontSize: 10, textTransform: 'uppercase', color: '#888' }}>{t}</p>
-                <p style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>{v}</p>
+                <p style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: 0 }}>{t}</p>
+                <p style={{ fontSize: 18, fontWeight: 700, margin: '6px 0 4px' }}>{v}</p>
+                <p style={{ fontSize: 11, color: '#666', lineHeight: 1.4, margin: 0 }}>{d}</p>
               </div>
             ))}
           </div>
+
+          <p style={{ fontSize: 12, color: '#666', marginTop: 16, borderTop: '1px solid #eee', paddingTop: 10 }}>
+            <strong>Net forskel:</strong> 154.000 kr blivende på din konto. Ingen ventetid, ingen bank-forbehold, ingen mæglerprovision.
+          </p>
         </section>
 
         <section style={{ border: '2px solid #000', padding: 24, textAlign: 'center' }}>
