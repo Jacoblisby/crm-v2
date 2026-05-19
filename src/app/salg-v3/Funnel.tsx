@@ -11,9 +11,9 @@ import { BekraeftV3 } from './screens/BekraeftV3';
 import { HvornaarFlytterV3 } from './screens/HvornaarFlytterV3';
 import { RoomScreenV3 } from './screens/RoomScreenV3';
 import { SidsteDetaljer } from '../salg-v2/screens/SidsteDetaljer';
-import { Udgifter } from '../salg-v2/screens/Udgifter';
-import { GrundForSalg } from '../salg-v2/screens/GrundForSalg';
-import { EfterSalg } from '../salg-v2/screens/EfterSalg';
+import { UdgifterV3 } from './screens/UdgifterV3';
+import { GrundForSalgV3 } from './screens/GrundForSalgV3';
+import { EfterSalgV3 } from './screens/EfterSalgV3';
 import { NyBolig } from '../salg-v2/screens/NyBolig';
 import { EstimatV3 } from './screens/EstimatV3';
 
@@ -92,9 +92,9 @@ export function Funnel() {
               {screen.id === 'hvornaar' && <HvornaarFlytterV3 />}
               {screen.kind === 'room' && screen.roomId && <RoomScreenV3 roomId={screen.roomId} />}
               {screen.id === 'detaljer' && <SidsteDetaljer />}
-              {screen.id === 'udgifter' && <Udgifter />}
-              {screen.id === 'grund' && <GrundForSalg />}
-              {screen.id === 'efter_salg' && <EfterSalg />}
+              {screen.id === 'udgifter' && <UdgifterV3 />}
+              {screen.id === 'grund' && <GrundForSalgV3 />}
+              {screen.id === 'efter_salg' && <EfterSalgV3 />}
               {screen.id === 'ny_bolig' && <NyBolig />}
             </div>
           </div>
