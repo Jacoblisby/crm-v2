@@ -187,6 +187,7 @@ export default function SalgSpoergsmaalPage() {
   return (
     <div style={{ background: 'oklch(0.965 0.012 80)', minHeight: '100vh', paddingBottom: 80 }}>
       <article
+        className="salg-q-article"
         style={{
           maxWidth: 1200,
           margin: '0 auto',
@@ -245,7 +246,7 @@ export default function SalgSpoergsmaalPage() {
           </p>
         </header>
 
-        <section style={{ marginBottom: 40, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <section className="salg-q-status" style={{ marginBottom: 40, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
           <div style={{ padding: 20, background: 'oklch(0.97 0.04 150)', borderRadius: 8 }}>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'oklch(0.4 0.1 150)', margin: 0, fontWeight: 600 }}>
               ✓ tilføjet/forbedret i flow ({IMPLEMENTERET.length})
@@ -301,7 +302,7 @@ export default function SalgSpoergsmaalPage() {
         </nav>
 
         {SECTIONS.map((sec, i) => (
-          <section key={sec.stage} id={`section-${i}`} style={{ marginBottom: 40 }}>
+          <section key={sec.stage} id={`section-${i}`} style={{ marginBottom: 40 }} className="salg-q-section">
             <header style={{ marginBottom: 12 }}>
               <p style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'oklch(0.46 0.02 80)', margin: 0, fontWeight: 600 }}>
                 {sec.screen}
@@ -322,7 +323,8 @@ export default function SalgSpoergsmaalPage() {
               </p>
             </header>
 
-            <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+            {/* Desktop tabel */}
+            <div className="salg-q-table" style={{ background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
                 <thead style={{ background: 'oklch(0.94 0.018 80)' }}>
                   <tr>
@@ -358,6 +360,56 @@ export default function SalgSpoergsmaalPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile cards */}
+            <div className="salg-q-cards" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {sec.rows.map((r) => (
+                <article
+                  key={r.q}
+                  style={{
+                    background: '#fff',
+                    borderRadius: 8,
+                    padding: 16,
+                  }}
+                >
+                  <header style={{ marginBottom: 10 }}>
+                    <h3 style={{ fontSize: 15, margin: 0, fontWeight: 600, color: 'oklch(0.18 0.015 80)' }}>
+                      {r.q}
+                      {r.flag === 'ny' && <Mark color="amber">NY</Mark>}
+                    </h3>
+                  </header>
+
+                  {/* Primary: 365 + hvorfor */}
+                  <div style={{ paddingBottom: 10, borderBottom: '1px solid oklch(0.94 0.015 80)' }}>
+                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'oklch(0.35 0.045 200)', margin: 0, fontWeight: 600 }}>
+                      365 Ejendomme
+                    </p>
+                    <p style={{ fontSize: 14, margin: '2px 0 6px', fontWeight: 500, color: 'oklch(0.18 0.015 80)' }}>
+                      {r.e365}
+                    </p>
+                    <p style={{ fontSize: 13, color: 'oklch(0.22 0.015 80)', margin: 0, lineHeight: 1.5 }}>
+                      {r.why}
+                    </p>
+                  </div>
+
+                  {/* Secondary: konkurrenter + placering */}
+                  <dl style={{ display: 'grid', gridTemplateColumns: '90px 1fr', columnGap: 10, rowGap: 4, margin: '10px 0 0', fontSize: 12.5 }}>
+                    <dt style={{ color: 'oklch(0.46 0.02 80)' }}>Konkurrenter</dt>
+                    <dd style={{ color: 'oklch(0.32 0.015 80)', margin: 0 }}>
+                      Opendoor: <span style={{ color: 'oklch(0.22 0.015 80)' }}>{r.od}</span>
+                      <span style={{ color: 'oklch(0.7 0.015 80)', margin: '0 6px' }}>·</span>
+                      Offerpad: <span style={{ color: 'oklch(0.22 0.015 80)' }}>{r.op}</span>
+                      <span style={{ color: 'oklch(0.7 0.015 80)', margin: '0 6px' }}>·</span>
+                      Zillow: <span style={{ color: 'oklch(0.22 0.015 80)' }}>{r.zi}</span>
+                    </dd>
+                    <dt style={{ color: 'oklch(0.46 0.02 80)' }}>Placering</dt>
+                    <dd style={{ color: 'oklch(0.32 0.015 80)', margin: 0, lineHeight: 1.5 }}>
+                      {r.whereWhy}
+                    </dd>
+                  </dl>
+                </article>
+              ))}
+            </div>
           </section>
         ))}
 
@@ -367,6 +419,17 @@ export default function SalgSpoergsmaalPage() {
       </article>
 
       <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,100..900,30..100;1,9..144,100..900,30..100&family=Geist:wght@300..700&display=swap" rel="stylesheet" />
+      <style>{`
+        /* Default (desktop): tabel shown, cards hidden */
+        .salg-q-table { display: block; }
+        .salg-q-cards { display: none; }
+        @media (max-width: 768px) {
+          .salg-q-table { display: none; }
+          .salg-q-cards { display: flex; }
+          .salg-q-status { grid-template-columns: 1fr !important; }
+          .salg-q-article { padding: 28px 16px !important; }
+        }
+      `}</style>
     </div>
   );
 }
