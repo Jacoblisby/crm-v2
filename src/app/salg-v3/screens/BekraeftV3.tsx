@@ -66,6 +66,13 @@ export function BekraeftV3() {
       value: state.hasAltan ? 'Ja' : 'Nej',
       onChangeString: (v) => update({ hasAltan: v === 'Ja' }),
     },
+    {
+      label: 'Energi-mærke',
+      key: 'energy',
+      opts: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+      value: state.energyClass ?? '—',
+      onChangeString: (v) => update({ energyClass: v }),
+    },
   ];
 
   return (

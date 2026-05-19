@@ -9,7 +9,6 @@ interface RoomConfig {
   id: RoomId;
   label: string;
   yearLabel?: string;
-  showBrand?: boolean;
   cards: Array<{ t: 'Nyrenoveret' | 'God stand' | 'Trænger' | 'Skal renoveres'; d: string; img: string }>;
 }
 
@@ -18,7 +17,6 @@ const ROOMS: Record<RoomId, RoomConfig> = {
     id: 'kokken',
     label: 'Køkken',
     yearLabel: 'Køkken-årgang',
-    showBrand: true,
     cards: [
       { t: 'Nyrenoveret', d: 'Stenlook-bordplade, integrerede hvidevarer, renoveret indenfor tre år.', img: 'https://picsum.photos/seed/365v3-kokken-ny/600/450' },
       { t: 'God stand', d: 'Velholdt, laminat-bordplade, hvidevarer fra de sidste ti år.', img: 'https://picsum.photos/seed/365v3-kokken-god/600/450' },
@@ -91,7 +89,6 @@ export function RoomScreenV3({ roomId }: { roomId: RoomId }) {
   const isKokken = roomId === 'kokken';
   const isBad = roomId === 'bad';
   const yearValue = isKokken ? state.kitchenYear : isBad ? state.bathroomYear : null;
-  const brandValue = isKokken ? state.kitchenBrand : '';
 
   function setStand(t: string) {
     const slug = STAND_MAP[t];
@@ -101,9 +98,6 @@ export function RoomScreenV3({ roomId }: { roomId: RoomId }) {
     const n = parseInt(v) || null;
     if (isKokken) update({ kitchenYear: n });
     else if (isBad) update({ bathroomYear: n });
-  }
-  function setBrand(v: string) {
-    if (isKokken) update({ kitchenBrand: v });
   }
 
   return (
@@ -169,45 +163,23 @@ export function RoomScreenV3({ roomId }: { roomId: RoomId }) {
         })}
       </div>
 
-      {(room.yearLabel || room.showBrand) && (
-        <div className="grid sm:grid-cols-2 gap-5">
-          {room.yearLabel && (
-            <div className="space-y-2">
-              <label className="font-body text-[13px] ink-soft" style={{ fontWeight: 500 }}>
-                {room.yearLabel}
-              </label>
-              <input
-                type="text"
-                placeholder="2015"
-                value={yearValue ?? ''}
-                onChange={(e) => setYear(e.target.value)}
-                className="w-full px-4 py-3 rounded-[10px] bg-paper border-warm font-body font-tabular ink text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--teal)]"
-                style={{
-                  border: '1px solid var(--border)',
-                  transition: 'border-color 180ms cubic-bezier(0.23, 1, 0.32, 1)',
-                }}
-              />
-              <p className="font-body text-[12px] soft">Året køkkenet sidst blev udskiftet (valgfri)</p>
-            </div>
-          )}
-          {room.showBrand && (
-            <div className="space-y-2">
-              <label className="font-body text-[13px] ink-soft" style={{ fontWeight: 500 }}>
-                Mærke (valgfri)
-              </label>
-              <input
-                type="text"
-                placeholder="HTH, Svane, IKEA..."
-                value={brandValue}
-                onChange={(e) => setBrand(e.target.value)}
-                className="w-full px-4 py-3 rounded-[10px] bg-paper font-body ink text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--teal)]"
-                style={{
-                  border: '1px solid var(--border)',
-                  transition: 'border-color 180ms cubic-bezier(0.23, 1, 0.32, 1)',
-                }}
-              />
-            </div>
-          )}
+      {room.yearLabel && (
+        <div className="space-y-2 max-w-sm">
+          <label className="font-body text-[13px] ink-soft" style={{ fontWeight: 500 }}>
+            {room.yearLabel}
+          </label>
+          <input
+            type="text"
+            placeholder="2015"
+            value={yearValue ?? ''}
+            onChange={(e) => setYear(e.target.value)}
+            className="w-full px-4 py-3 rounded-[10px] bg-paper font-body font-tabular ink text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--teal)]"
+            style={{
+              border: '1px solid var(--border)',
+              transition: 'border-color 180ms cubic-bezier(0.23, 1, 0.32, 1)',
+            }}
+          />
+          <p className="font-body text-[12px] soft">Året {isKokken ? 'køkkenet' : 'badet'} sidst blev udskiftet (valgfri)</p>
         </div>
       )}
 

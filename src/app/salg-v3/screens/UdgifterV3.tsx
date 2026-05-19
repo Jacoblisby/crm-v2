@@ -133,6 +133,23 @@ export function UdgifterV3() {
           unit="kr"
         />
       </section>
+
+      {/* Realkreditlån */}
+      <section className="space-y-5 pt-6 border-t border-warm">
+        <SectionTitle
+          kicker="realkreditlån"
+          title="Hvor meget skylder du?"
+          sub="Restgæld trækkes fra dit netto-provenu. Vi viser tallet transparent — så du ved præcis hvad du får i hånden."
+        />
+        <MoneyField
+          label="Restgæld på realkreditlån"
+          value={state.mortgageRemainingDebt}
+          onChange={(v) => update({ mortgageRemainingDebt: v })}
+          placeholder="450.000"
+          sub="Står på din seneste lånekontoudtog. Ca-tal er fint."
+          unit="kr"
+        />
+      </section>
     </div>
   );
 }

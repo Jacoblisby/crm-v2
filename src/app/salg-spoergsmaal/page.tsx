@@ -40,26 +40,26 @@ const ROWS: Row[] = [
   { n: '7', q: 'Etage', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Auto+editable', why: 'Udlejnings-pris (høje etager + lys = premium), tilgængelighed.', order: '2', whereWhy: 'Bekraeft.' },
   { n: '8', q: 'Elevator', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Auto+editable', why: 'Udlejnings-prestige, kritisk for ældre / mobilitetshæmmede målgruppe.', order: '2', whereWhy: 'Bekraeft.' },
   { n: '9', q: 'Altan eller terrasse', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Auto+editable', why: 'Premium-faktor på køb og leje (5-10% i Næstved-data).', order: '2', whereWhy: 'Bekraeft.' },
-  { n: '10', q: 'Energi-mærke (A-G)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'MANGLER', why: 'Allerede i BBR — bør vises og bekræftes. Påvirker varme-prognose + EF-renoverings-risiko.', order: '(foreslået 2)', whereWhy: 'Bekraeft — sammen med øvrige BBR-felter.', flag: 'mangler' },
+  { n: '10', q: 'Energi-mærke (A-G)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (auto+editable)', why: 'Allerede i BBR — vist og kan bekræftes. Påvirker varme-prognose + EF-renoverings-risiko.', order: '2', whereWhy: 'Bekraeft — sammen med øvrige BBR-felter.' },
   { n: '11', q: 'Kontakt: fulde navn', od: 'Slut', op: 'Slut', zi: 'Optional', e365: 'Tidlig (3)', why: 'Lead-relation, personlig henvendelse.', order: '3', whereWhy: 'Kontakt: efter Bekraeft (commit-peak) for tidlig lead-capture.' },
   { n: '12', q: 'Kontakt: email', od: 'Slut', op: 'Slut', zi: 'Optional', e365: 'Tidlig (3)', why: 'Tilbud-leverance, opfølgning, email-tracking.', order: '3', whereWhy: 'Kontakt.' },
   { n: '13', q: 'Kontakt: telefon', od: 'Slut', op: 'Slut', zi: 'Optional', e365: 'Tidlig (3)', why: 'Jacob ringer indenfor 24 timer. Critical for konvertering.', order: '3', whereWhy: 'Kontakt.' },
-  { n: '14', q: 'Antal ejere (samejer?)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'MANGLER', why: 'Påvirker juridik — ægtefælle-samtykke, samejekontrakt, hvis arv: er der enighed.', order: '(foreslået 3)', whereWhy: 'Kontakt — naturlig kontekst "hvem er involveret".', flag: 'mangler' },
-  { n: '15', q: 'Hvor længe har du boet der', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'MANGLER', why: 'Påvirker ejertid og fortjeneste-skat ved udlejning (<2 år = særlige regler).', order: '(foreslået 3 eller 11)', whereWhy: 'Lidt om dig — emotional investment + skat.', flag: 'mangler' },
+  { n: '14', q: 'Antal ejere (samejer?)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (3 chips)', why: 'Påvirker juridik — ægtefælle-samtykke, samejekontrakt, hvis arv: er der enighed.', order: '3', whereWhy: 'Kontakt — naturlig kontekst "hvem er involveret".' },
+  { n: '15', q: 'Hvor længe har du boet der', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (4 chips)', why: 'Påvirker ejertid og fortjeneste-skat ved udlejning (<2 år = særlige regler).', order: '3', whereWhy: 'Kontakt — under personlig info.' },
   { n: '16', q: 'Hvornår vil du flytte', od: 'Slut nogle', op: 'Tidligt-mid', zi: 'Nej', e365: 'Tidlig (4)', why: 'Planlægning + overtagelses-bonus (14d → 6m). Påvirker pris ±15.000 kr.', order: '4', whereWhy: 'Lige efter Kontakt: kvalificerer haste-niveau før vi går i detaljer.' },
   { n: '17', q: 'Køkken: stand (4 niveauer)', od: 'Overordnet', op: 'Overordnet', zi: 'Nej', e365: 'Detalje + foto', why: 'MUST for refurb-cost. Køkken er én af de to dyreste renoveringer.', order: '5', whereWhy: 'Boligen-stage: visuel + sjov start. Photo-grid feels som spil, ikke form.' },
   { n: '18', q: 'Køkken: årgang', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (valgfri)', why: 'Forfiner refurb-estimat — "god stand" + 2022 = ingen afsætninger.', order: '5', whereWhy: 'Sammen med stand-valg.' },
-  { n: '19', q: 'Køkken: mærke (HTH, Svane, IKEA)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (valgfri)', why: 'FJERN: vi bruger det ikke i pricing-model. Skip-able. Vi kan ikke fact-check brand.', order: '5', whereWhy: '(anbefalet fjernet)', flag: 'fjern' },
+  { n: '19', q: 'Køkken: mærke (HTH, Svane, IKEA)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'FJERNET', why: 'Fjernet: ikke brugt i pricing-model + kan ikke fact-checkes uden besigtigelse.', order: '—', whereWhy: 'Fjernet maj 2026.' },
   { n: '20', q: 'Bad: stand (4 niveauer)', od: 'Overordnet', op: 'Overordnet', zi: 'Nej', e365: 'Detalje + foto', why: 'MUST. Bad er dyrest at renovere + fugt-risiko er largest unknown.', order: '6', whereWhy: 'Efter køkken — natural progression af dyreste rum først.' },
   { n: '21', q: 'Bad: årgang', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (valgfri)', why: 'Forfiner refurb.', order: '6', whereWhy: 'Sammen med stand.' },
   { n: '22', q: 'Stue: stand (4 niveauer)', od: 'Overordnet', op: 'Overordnet', zi: 'Nej', e365: 'Detalje + foto', why: 'MUST. Gulv + maling refurb.', order: '7', whereWhy: 'Boligen-stage.' },
   { n: '23', q: 'Soveværelse: stand (4 niveauer)', od: 'Overordnet', op: 'Overordnet', zi: 'Nej', e365: 'Detalje + foto', why: 'MUST. Gulv + maling refurb.', order: '8', whereWhy: 'Boligen-stage afslutning — sidste rum-vurdering.' },
   { n: '24', q: 'Hvidevarer der følger med (8 chip)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'Marginal pris-påvirkning. Mest brugbar for udlejnings-pakke. Skip-able.', order: '9', whereWhy: 'Sidste detaljer: optional-bucket.' },
-  { n: '25', q: 'Andre fotos (altan, plantegning, gang)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (4 slots)', why: 'FORENKLES — 4 separate slots overkill. 1 "samlet billed-upload" virker bedre.', order: '9', whereWhy: '(anbefalet forenklet)', flag: 'fjern' },
+  { n: '25', q: 'Andre fotos (samlet upload)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (1 samlet upload)', why: 'Tilføj op til 10 fotos af altan, plantegning, entré eller andet. Mere fleksibelt end faste slots.', order: '9', whereWhy: 'Sidste detaljer (forenklet maj 2026 fra 4 slots til 1).' },
   { n: '26', q: 'Notes (fri tekst)', od: 'Nej', op: 'Sommetider', zi: 'Nej', e365: 'Ja (valgfri)', why: 'Catch-all for ting der ikke passer i felter.', order: '9', whereWhy: 'Sidste detaljer.' },
   { n: '27', q: 'Boligens specielle ting (solceller, udlejet)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (multi-select)', why: 'Solceller = energi-værdi. Aktuelt udlejet = KRITISK (kæmpe påvirkning på overtagelse).', order: '9', whereWhy: 'Sidste detaljer.' },
   { n: '28', q: 'Forhold der kan påvirke prisen', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (multi-select)', why: 'Negative pris-justeringer. MUST vi kender før vi giver estimat.', order: '9', whereWhy: 'Sidste detaljer.' },
-  { n: '29', q: 'Tag-tilstand i bygningen (EF-niveau)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'MANGLER', why: 'Proxy for EF fælleslån-risiko — kommende tag-renovering = stor udgift for alle ejere.', order: '(foreslået 9)', whereWhy: 'Sidste detaljer — under "forhold der kan påvirke prisen".', flag: 'mangler' },
+  { n: '29', q: 'Tag-tilstand i bygningen (EF-niveau)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (4 chips)', why: 'Proxy for EF fælleslån-risiko — kommende tag-renovering = stor udgift for alle ejere.', order: '9', whereWhy: 'Sidste detaljer — under "forhold der kan påvirke prisen".' },
   { n: '30', q: '(Cond.) Udlejning: månedlig leje', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'Cash-flow vurdering hvis udlejet.', order: '9 (cond.)', whereWhy: 'Reveal når "Aktuelt udlejet" valgt.' },
   { n: '31', q: '(Cond.) Udlejning: depositum', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'Lovgivnings-krav check.', order: '9 (cond.)', whereWhy: 'Conditional reveal.' },
   { n: '32', q: '(Cond.) Udlejning: forudbetalt leje', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'Cash-flow + opsigelses-friktion.', order: '9 (cond.)', whereWhy: 'Conditional reveal.' },
@@ -74,9 +74,9 @@ const ROWS: Row[] = [
   { n: '41', q: 'Varme (acontobeløb? + årlig regning)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (ja/nej + beløb)', why: 'MUST. Drift.', order: '10', whereWhy: 'Udgifter.' },
   { n: '42', q: 'Hæftelse tinglyst (engangsbeløb)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'MUST. Trækkes fra låneprovenuet.', order: '10', whereWhy: 'Udgifter.' },
   { n: '43', q: '(Dynamic) Øvrige driftudgifter (7 kategorier)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (+ knap)', why: 'Fleksibel input til drift. Bruger tilføjer kun det der gælder.', order: '10', whereWhy: 'Udgifter.' },
-  { n: '44', q: 'Eksisterende restgæld på realkreditlån', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'MANGLER', why: 'Påvirker netto-provenu og forventning ("jeg får 800k" vs "1.1m i hånden"). Transparens fra start.', order: '(foreslået 10)', whereWhy: 'Udgifter — money-context.', flag: 'mangler' },
+  { n: '44', q: 'Eksisterende restgæld på realkreditlån', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'Påvirker netto-provenu og forventning ("jeg får 800k" vs "1.1m i hånden"). Transparens fra start.', order: '10', whereWhy: 'Udgifter — egen "Realkreditlån"-section nederst.' },
   { n: '45', q: 'Dokumentation upload (PDF/JPG)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (valgfri)', why: 'Manual-validering af tal. Nice-to-have.', order: '10', whereWhy: 'Udgifter.' },
-  { n: '46', q: 'Eksisterende mægler-vurdering', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'MANGLER', why: 'Forventnings-set — vis hvor vores tilbud ligger ift. mægler-pris transparent.', order: '(foreslået 11)', whereWhy: 'Lidt om dig — sammen med "hvor er du i processen".', flag: 'mangler' },
+  { n: '46', q: 'Eksisterende mægler-vurdering', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (Ja/Nej + beløb)', why: 'Forventnings-set — vis hvor vores tilbud ligger ift. mægler-pris transparent.', order: '11', whereWhy: 'Lidt om dig — under hovedgrund-tiles, conditional reveal hvis Ja.' },
   { n: '47', q: 'Hvad er hovedgrunden til at sælge', od: 'Nej', op: 'Sometimes', zi: 'Nej', e365: 'Ja (6 valg)', why: 'Salgs-strategi (hastværk vs ikke), empati, forhandlings-position.', order: '11', whereWhy: 'Lidt om dig: efter money-stage er bruger committed.' },
   { n: '48', q: 'Hvad skal du efter salget (4 valg)', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'MUST — triggers sale-leaseback eller udflytter-product. Kerneforretningens kritiske distinction.', order: '12', whereWhy: 'Lidt om dig: efter grund — naturlig "hvorfor + hvad så".' },
   { n: '49', q: '(Cond.) Ny bolig: områder', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja (chip)', why: 'Match mod vores 218 lejemål. Cross-sell opportunity.', order: '13 (cond.)', whereWhy: 'Reveal når "Vil leje anden bolig" valgt.' },
@@ -86,10 +86,21 @@ const ROWS: Row[] = [
   { n: '53', q: '(Cond.) Ny bolig: indflytnings-timing', od: 'Nej', op: 'Nej', zi: 'Nej', e365: 'Ja', why: 'Logistik mod salgsdato.', order: '13 (cond.)', whereWhy: 'Conditional reveal.' },
 ];
 
-export default function SalgSpoergsmaalPage() {
-  const mangler = ROWS.filter((r) => r.flag === 'mangler');
-  const fjern = ROWS.filter((r) => r.flag === 'fjern');
+const IMPLEMENTERET = [
+  { q: 'Energi-mærke (A-G)', why: 'Tilføjet til Bekraeft-skærmen.' },
+  { q: 'Antal ejere', why: 'Tilføjet til Kontakt-skærmen som 3 chips.' },
+  { q: 'Hvor længe boet', why: 'Tilføjet til Kontakt-skærmen som 4 chips.' },
+  { q: 'Restgæld realkredit', why: 'Tilføjet til Udgifter som egen "Realkreditlån"-section.' },
+  { q: 'Mægler-vurdering', why: 'Tilføjet til GrundForSalg som Ja/Nej + conditional beløb.' },
+  { q: 'Tag-tilstand i bygningen', why: 'Tilføjet til SidsteDetaljer som 4 chips.' },
+];
 
+const FJERNET = [
+  { q: 'Køkken-mærke (HTH/Svane/IKEA)', why: 'Brugte det ikke i pricing-model. Kunne ikke fact-checkes.' },
+  { q: '4 separate andre-foto-slots', why: 'Forenklet til ét samlet upload-felt med op til 10 fotos.' },
+];
+
+export default function SalgSpoergsmaalPage() {
   return (
     <div style={{ background: 'oklch(0.965 0.012 80)', minHeight: '100vh', paddingBottom: 80 }}>
       <article
@@ -128,9 +139,7 @@ export default function SalgSpoergsmaalPage() {
             </em>
           </h1>
           <p style={{ fontSize: 15, color: 'oklch(0.32 0.015 80)', maxWidth: 720 }}>
-            53 spørgsmål mappet mod Opendoor, Offerpad og Zillow. Hver række forklarer hvorfor vi spørger, hvor i flowet det ligger, og hvorfor placeret der. Marker:{' '}
-            <Mark color="amber">MANGLER</Mark> = anbefalet tilføjet.{' '}
-            <Mark color="red">FJERN</Mark> = anbefalet fjernet eller forenklet.
+            53 spørgsmål mappet mod Opendoor, Offerpad og Zillow. Hver række forklarer hvorfor vi spørger, hvor i flowet det ligger, og hvorfor placeret der. Tabellen er opdateret maj 2026 med 6 tilføjelser og 2 forenklinger — se status-bokse nedenfor.
           </p>
           <p style={{ fontSize: 13, marginTop: 16 }}>
             <a
@@ -152,25 +161,25 @@ export default function SalgSpoergsmaalPage() {
         </header>
 
         <section style={{ marginBottom: 40, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-          <div style={{ padding: 20, background: 'oklch(0.98 0.025 80)', border: '1px solid oklch(0.86 0.04 70)', borderRadius: 8 }}>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'oklch(0.5 0.1 70)', margin: 0, fontWeight: 600 }}>
-              mangler — anbefalet tilføjet ({mangler.length})
+          <div style={{ padding: 20, background: 'oklch(0.97 0.04 150)', border: '1px solid oklch(0.82 0.07 150)', borderRadius: 8 }}>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'oklch(0.4 0.1 150)', margin: 0, fontWeight: 600 }}>
+              ✓ implementeret maj 2026 ({IMPLEMENTERET.length})
             </p>
             <ul style={{ fontSize: 13, marginTop: 12, paddingLeft: 20, lineHeight: 1.6 }}>
-              {mangler.map((r) => (
-                <li key={r.n}>
-                  <strong>{r.q}</strong> — {r.why.split('.')[0]}.
+              {IMPLEMENTERET.map((r) => (
+                <li key={r.q}>
+                  <strong>{r.q}</strong> — {r.why}
                 </li>
               ))}
             </ul>
           </div>
           <div style={{ padding: 20, background: 'oklch(0.97 0.015 30)', border: '1px solid oklch(0.85 0.05 30)', borderRadius: 8 }}>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'oklch(0.45 0.12 30)', margin: 0, fontWeight: 600 }}>
-              fjern eller forenkle ({fjern.length})
+              ✓ fjernet/forenklet maj 2026 ({FJERNET.length})
             </p>
             <ul style={{ fontSize: 13, marginTop: 12, paddingLeft: 20, lineHeight: 1.6 }}>
-              {fjern.map((r) => (
-                <li key={r.n}>
+              {FJERNET.map((r) => (
+                <li key={r.q}>
                   <strong>{r.q}</strong> — {r.why}
                 </li>
               ))}
@@ -222,7 +231,7 @@ export default function SalgSpoergsmaalPage() {
         </div>
 
         <footer style={{ marginTop: 40, fontSize: 12, color: 'oklch(0.46 0.02 80)' }}>
-          53 rækker · 4 mangler-flagged · 2 fjern-flagged · Senest opdateret maj 2026
+          53 rækker · 6 tilføjet maj 2026 · 2 forenklet maj 2026 · 17 conditional reveals
         </footer>
       </article>
 

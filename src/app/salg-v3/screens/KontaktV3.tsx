@@ -80,6 +80,83 @@ export function KontaktV3() {
         </div>
       </div>
 
+      <div className="bg-paper rounded-[14px] p-6 sm:p-8 shadow-soft space-y-5">
+        <div>
+          <label className="font-body text-[13px] ink-soft block mb-3" style={{ fontWeight: 500 }}>
+            Hvor mange ejer boligen sammen?
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: '1', label: 'Kun mig' },
+              { v: '2', label: '2 ejere' },
+              { v: '3plus', label: '3 eller flere' },
+            ].map((o) => {
+              const sel = state.ownerCount === o.v;
+              return (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => update({ ownerCount: o.v as typeof state.ownerCount })}
+                  className="px-4 py-2.5 rounded-full font-body text-[13.5px] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--teal)]"
+                  style={{
+                    background: sel ? 'var(--ink)' : 'var(--paper)',
+                    color: sel ? 'var(--cream)' : 'var(--ink)',
+                    border: `1px solid ${sel ? 'var(--ink)' : 'var(--border)'}`,
+                    fontWeight: 500,
+                    transitionProperty: 'transform, background-color, color, border-color',
+                    transitionDuration: '200ms',
+                    transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
+                  }}
+                >
+                  {o.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="font-body text-[12px] muted mt-2">
+            Påvirker juridik — ægtefælle eller arvinger-samtykke ved salg.
+          </p>
+        </div>
+
+        <div>
+          <label className="font-body text-[13px] ink-soft block mb-3" style={{ fontWeight: 500 }}>
+            Hvor længe har du boet der?
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: 'under1', label: 'Under 1 år' },
+              { v: '1to3', label: '1–3 år' },
+              { v: '3to10', label: '3–10 år' },
+              { v: '10plus', label: '10+ år' },
+            ].map((o) => {
+              const sel = state.livedHere === o.v;
+              return (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => update({ livedHere: o.v as typeof state.livedHere })}
+                  className="px-4 py-2.5 rounded-full font-body text-[13.5px] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--teal)]"
+                  style={{
+                    background: sel ? 'var(--ink)' : 'var(--paper)',
+                    color: sel ? 'var(--cream)' : 'var(--ink)',
+                    border: `1px solid ${sel ? 'var(--ink)' : 'var(--border)'}`,
+                    fontWeight: 500,
+                    transitionProperty: 'transform, background-color, color, border-color',
+                    transitionDuration: '200ms',
+                    transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
+                  }}
+                >
+                  {o.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="font-body text-[12px] muted mt-2">
+            Påvirker skat hvis under 2 år ved udlejning (parcelhusreglen).
+          </p>
+        </div>
+      </div>
+
       <div
         className="rounded-[12px] p-5 flex items-start gap-3 bg-teal-tint"
         style={{ border: '1px solid oklch(0.86 0.02 200)' }}

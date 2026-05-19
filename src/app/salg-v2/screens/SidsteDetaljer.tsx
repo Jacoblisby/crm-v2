@@ -70,32 +70,23 @@ export function SidsteDetaljer() {
         </div>
       </div>
 
-      {/* Andre fotos */}
+      {/* Andre fotos — forenklet til ét samlet upload-felt */}
       <div className="space-y-3 pt-2 border-t border-[#E5E2DA]">
         <div className="pt-6 text-[11px] font-medium tracking-[0.15em] uppercase text-[#9C988C]">
           Andre fotos (valgfri)
         </div>
         <p className="text-[12px] text-[#5A6166]">
-          Med billeder kan vi give et endnu mere præcist tilbud.
+          Tilføj fotos af altan/udsigt, plantegning, entré eller andet vi bør se. Med billeder kan vi give et endnu mere præcist tilbud.
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-          {[
-            { t: 'Altan/udsigt', icon: 'view' },
-            { t: 'Plantegning', icon: 'plan' },
-            { t: 'Gang/entré', icon: 'door' },
-            { t: 'Andet rum', icon: 'plus' },
-          ].map((p) => (
-            <button
-              key={p.t}
-              type="button"
-              className="aspect-[5/4] rounded-2xl border bg-white flex flex-col items-center justify-center gap-2 hover:bg-stone-50 active:scale-[0.97] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949] border-[#E5E2DA]"
-              style={{ transition: `transform 150ms ${EASE_OUT}, background-color 150ms ${EASE_OUT}` }}
-            >
-              <MiniIcon name={p.icon} />
-              <span className="text-[12px] font-medium text-[#14181A]">{p.t}</span>
-            </button>
-          ))}
-        </div>
+        <button
+          type="button"
+          className="w-full py-8 rounded-2xl border-2 border-dashed bg-white hover:bg-stone-50 flex flex-col items-center justify-center gap-2 active:scale-[0.99] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949] border-[#D6D2C5]"
+          style={{ transition: `transform 150ms ${EASE_OUT}, background-color 150ms ${EASE_OUT}` }}
+        >
+          <MiniIcon name="plus" />
+          <span className="text-[13px] font-medium text-[#14181A]">Tap for at vedhæfte billeder</span>
+          <span className="text-[11px] text-[#9C988C]">JPG, PNG, HEIC — max 10 stk</span>
+        </button>
       </div>
 
       {/* Andre ting vi bør vide */}
@@ -213,6 +204,40 @@ export function SidsteDetaljer() {
                       {s.sub}
                     </div>
                   </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tag-tilstand i bygningen */}
+        <div className="space-y-2 pt-2">
+          <label className="text-[13px] font-medium text-[#14181A]">Tag-tilstand i bygningen</label>
+          <p className="text-[12px] text-[#5A6166] mb-1">
+            Proxy for kommende EF-fælleslån. Et tag der trænger til udskiftning kan betyde en stor regning til alle ejere.
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: 'god', label: 'God' },
+              { v: 'middel', label: 'Middel' },
+              { v: 'daarligt', label: 'Dårligt' },
+              { v: 'ved_ikke', label: 'Ved ikke' },
+            ].map((o) => {
+              const sel = state.roofCondition === o.v;
+              return (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => update({ roofCondition: o.v as typeof state.roofCondition })}
+                  className="px-4 py-2 rounded-full text-[13px] font-medium border-2 active:scale-[0.97]"
+                  style={{
+                    borderColor: sel ? '#0F1A1A' : '#E5E2DA',
+                    background: sel ? '#0F1A1A' : '#fff',
+                    color: sel ? '#fff' : '#14181A',
+                    transition: `transform 150ms ${EASE_OUT}, background-color 150ms ${EASE_OUT}, color 150ms ${EASE_OUT}, border-color 150ms ${EASE_OUT}`,
+                  }}
+                >
+                  {o.label}
                 </button>
               );
             })}

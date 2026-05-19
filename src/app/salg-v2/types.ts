@@ -98,6 +98,16 @@ export interface FunnelStateV2 extends V1State {
   // Grundfond — standalone i v2 UI (v1 har ingen separat felt; syncer ind
   // i costAndreDrift sammen med dynamisk drift)
   costGrundfond: number;
+
+  // ─── v3-anbefalede tilfoejelser (maj 2026) ─────────────────────────────
+  /** Restgaeld paa realkreditlaan (engangsbeloeb, kr). Paavirker netto-provenu. */
+  mortgageRemainingDebt: number;
+  /** Har de faaet en maegler-vurdering? */
+  hasExistingValuation: boolean;
+  /** Maegler-vurdering beloeb (kr). 0 = ikke faaet. */
+  existingValuation: number;
+  /** Tag-tilstand i bygningen (EF-niveau). Proxy for faelleslaan-risiko. */
+  roofCondition: 'god' | 'middel' | 'daarligt' | 'ved_ikke' | null;
 }
 
 export const initialStateV2: FunnelStateV2 = {
@@ -117,6 +127,10 @@ export const initialStateV2: FunnelStateV2 = {
   notes: '',
   additionalDrift: [],
   costGrundfond: 0,
+  mortgageRemainingDebt: 0,
+  hasExistingValuation: false,
+  existingValuation: 0,
+  roofCondition: null,
 };
 
 // 13-screen array — pure function, recomputed when state changes for conditional
