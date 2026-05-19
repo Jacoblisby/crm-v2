@@ -30,65 +30,71 @@ const SCREENS = [
   {
     n: 3,
     stage: 'adresse',
+    name: 'Hvor sender vi dit tilbud? (kontakt)',
+    render: () => <Kontakt />,
+  },
+  {
+    n: 4,
+    stage: 'adresse',
     name: 'Hvornår vil du flytte?',
     render: () => <Hvornaar />,
   },
   {
-    n: 4,
+    n: 5,
     stage: 'boligen',
     name: 'Køkken (1/5)',
     render: () => <Room label="Køkken" hasYear hasBrand />,
   },
   {
-    n: 5,
+    n: 6,
     stage: 'boligen',
     name: 'Badeværelse (2/5)',
     render: () => <Room label="Badeværelse" hasYear />,
   },
   {
-    n: 6,
+    n: 7,
     stage: 'boligen',
     name: 'Stue (3/5)',
     render: () => <Room label="Stue" />,
   },
   {
-    n: 7,
+    n: 8,
     stage: 'boligen',
     name: 'Soveværelse (4/5)',
     render: () => <Room label="Soveværelse" />,
   },
   {
-    n: 8,
+    n: 9,
     stage: 'boligen',
     name: 'Sidste detaljer (5/5)',
     render: () => <SidsteDetaljer />,
   },
   {
-    n: 9,
+    n: 10,
     stage: 'udgifter',
     name: 'Boligens udgifter',
     render: () => <Udgifter />,
   },
   {
-    n: 10,
+    n: 11,
     stage: 'lidt om dig',
     name: 'Hvad er hovedgrunden?',
     render: () => <GrundForSalg />,
   },
   {
-    n: 11,
+    n: 12,
     stage: 'lidt om dig',
     name: 'Hvad skal du efter salget?',
     render: () => <EfterSalg />,
   },
   {
-    n: 12,
+    n: 13,
     stage: 'lidt om dig',
     name: 'Hvad leder du efter? (conditional)',
     render: () => <NyBolig />,
   },
   {
-    n: 13,
+    n: 14,
     stage: 'estimat',
     name: 'Foreløbigt tilbud',
     render: () => <Estimat />,
@@ -145,7 +151,7 @@ export default function SalgWirePage() {
       </div>
 
       <footer style={{ borderTop: '2px solid #000', marginTop: 80, paddingTop: 24, fontSize: 12, color: '#666' }}>
-        End of flow. 13 screens. Conditional: screen 12 vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 11.
+        End of flow. 14 screens. Conditional: screen 13 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 12.
       </footer>
     </div>
   );
@@ -406,6 +412,51 @@ function Bekraeft() {
         </div>
       </div>
       <FunnelBottom />
+    </div>
+  );
+}
+
+function Kontakt() {
+  return (
+    <div>
+      <TopBar address />
+      <StageRail active="adresse" />
+      <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
+        <div>
+          <Chip>HVOR SENDER VI TILBUDDET?</Chip>
+          <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvor sender vi dit tilbud?</h1>
+          <p style={{ fontSize: 14, color: '#666' }}>
+            Vi ringer dig op inden 24 timer for at aftale en gratis besigtigelse. Du modtager estimat på email + sms.
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>
+              Fulde navn <em style={{ fontSize: 11, color: '#888', fontWeight: 400 }}>valgfri</em>
+            </label>
+            <Input placeholder="Marie Hansen" />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600 }}>Email</label>
+              <Input placeholder="marie@example.dk" />
+              <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Vi sender estimatet hertil</p>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600 }}>Telefon</label>
+              <Input placeholder="+45 12 34 56 78" />
+              <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Jacob ringer dig op</p>
+            </div>
+          </div>
+          <div style={{ border: '1px solid #ccc', padding: 12, background: '#fafafa', fontSize: 12 }}>
+            🔒 <strong>Dine oplysninger forbliver private.</strong> Vi sælger ikke data videre. Vi ringer kun for at aftale besigtigelse. Hvis vores tilbud ikke giver mening, hører du ikke fra os igen.
+          </div>
+          <p style={{ fontSize: 11, color: '#888', borderTop: '1px solid #eee', paddingTop: 8 }}>
+            <strong>Required for next:</strong> mindst email eller telefon. Navn er valgfri.
+          </p>
+        </div>
+      </div>
+      <FunnelBottom disabled />
     </div>
   );
 }

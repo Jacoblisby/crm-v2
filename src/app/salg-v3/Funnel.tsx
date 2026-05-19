@@ -8,6 +8,7 @@
 import { useFunnelV3 } from './FunnelV3Context';
 import { getScreens } from '../salg-v2/types';
 import { BekraeftV3 } from './screens/BekraeftV3';
+import { KontaktV3 } from './screens/KontaktV3';
 import { HvornaarFlytterV3 } from './screens/HvornaarFlytterV3';
 import { RoomScreenV3 } from './screens/RoomScreenV3';
 import { SidsteDetaljer } from '../salg-v2/screens/SidsteDetaljer';
@@ -38,6 +39,7 @@ export function Funnel() {
   }
 
   const canProceed = (() => {
+    if (screen.id === 'kontakt') return !!(state.email || state.phone);
     if (screen.id === 'hvornaar') return !!state.moveTimeframeRaw;
     if (screen.kind === 'room' && screen.roomId) {
       const map = {
@@ -89,6 +91,7 @@ export function Funnel() {
             {/* Højre — answer */}
             <div className="lg:col-span-7">
               {screen.id === 'bekraeft' && <BekraeftV3 />}
+              {screen.id === 'kontakt' && <KontaktV3 />}
               {screen.id === 'hvornaar' && <HvornaarFlytterV3 />}
               {screen.kind === 'room' && screen.roomId && <RoomScreenV3 roomId={screen.roomId} />}
               {screen.id === 'detaljer' && <SidsteDetaljer />}
@@ -128,6 +131,11 @@ export function Funnel() {
             {!canProceed && screen.id === 'udgifter' && (
               <span className="font-body text-[12px] hidden sm:inline soft">
                 fællesudgifter skal udfyldes
+              </span>
+            )}
+            {!canProceed && screen.id === 'kontakt' && (
+              <span className="font-body text-[12px] hidden sm:inline soft">
+                mindst email eller telefon
               </span>
             )}
             <button

@@ -17,6 +17,7 @@ import { getScreens } from './types';
 import { RoomIcon } from './components/icons';
 import { EASE_OUT } from './components/primitives';
 import { BekraeftAdresse } from './screens/BekraeftAdresse';
+import { Kontakt } from './screens/Kontakt';
 import { HvornaarFlytter } from './screens/HvornaarFlytter';
 import { RoomScreen } from './screens/RoomScreen';
 import { SidsteDetaljer } from './screens/SidsteDetaljer';
@@ -58,6 +59,7 @@ export function Funnel() {
   }
 
   const canProceed = (() => {
+    if (screen.id === 'kontakt') return !!(state.email || state.phone);
     if (screen.id === 'hvornaar') return !!state.moveTimeframeRaw;
     if (screen.kind === 'room' && screen.roomId) {
       const map = {
@@ -119,6 +121,7 @@ export function Funnel() {
             {/* Right: answer */}
             <div className="lg:col-span-7">
               {screen.id === 'bekraeft' && <BekraeftAdresse />}
+              {screen.id === 'kontakt' && <Kontakt />}
               {screen.id === 'hvornaar' && <HvornaarFlytter />}
               {screen.kind === 'room' && screen.roomId && <RoomScreen roomId={screen.roomId} />}
               {screen.id === 'detaljer' && <SidsteDetaljer />}
@@ -159,6 +162,11 @@ export function Funnel() {
             {!canProceed && screen.id === 'udgifter' && (
               <span className="text-[12px] hidden sm:inline text-[#9C988C]">
                 Fællesudgifter skal udfyldes
+              </span>
+            )}
+            {!canProceed && screen.id === 'kontakt' && (
+              <span className="text-[12px] hidden sm:inline text-[#9C988C]">
+                Mindst email eller telefon
               </span>
             )}
             <button

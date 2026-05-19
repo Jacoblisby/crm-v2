@@ -143,6 +143,14 @@ export function getScreens(state: FunnelStateV2): ScreenDef[] {
       sub: 'Disse oplysninger er offentligt tilgængelige fra OIS og BBR. Tjek dem og ret hvis noget er ændret.',
     },
     {
+      id: 'kontakt',
+      stage: 'adresse',
+      kicker: 'Hvor sender vi tilbuddet?',
+      icon: 'user',
+      title: 'Hvor sender vi dit tilbud?',
+      sub: 'Vi ringer dig op inden 24 timer for at aftale en gratis besigtigelse. Du modtager estimat på email + sms.',
+    },
+    {
       id: 'hvornaar',
       stage: 'adresse',
       kicker: 'Tidsplan',
