@@ -6,8 +6,8 @@ const OPTS = [
   { t: 'Hurtigst muligt', sub: 'Inden for en måned' },
   { t: '1–3 måneder', sub: 'Vi har lidt fleksibilitet' },
   { t: '3–6 måneder', sub: 'Planlagt, men ikke hastværk' },
-  { t: '6+ måneder', sub: 'Vi undersøger først' },
-  { t: 'Ved ikke endnu', sub: 'Vi tager den snak senere' },
+  { t: '6+ måneder', sub: 'Jeg skal have tid og ro til at finde noget nyt' },
+  { t: 'Ved ikke endnu', sub: 'Jeg vil gerne lære mere om hvad jeg kan sælge for' },
 ];
 
 export function HvornaarFlytterV3() {

@@ -11,6 +11,7 @@ import { BekraeftV3 } from './screens/BekraeftV3';
 import { KontaktV3 } from './screens/KontaktV3';
 import { HvornaarFlytterV3 } from './screens/HvornaarFlytterV3';
 import { RoomScreenV3 } from './screens/RoomScreenV3';
+import { RoomsOvrigeV3 } from './screens/RoomsOvrigeV3';
 import { SidsteDetaljer } from '../salg-v2/screens/SidsteDetaljer';
 import { UdgifterV3 } from './screens/UdgifterV3';
 import { GrundForSalgV3 } from './screens/GrundForSalgV3';
@@ -20,7 +21,36 @@ import { EstimatV3 } from './screens/EstimatV3';
 
 export function Funnel() {
   const { state, nextScreen, prevScreen } = useFunnelV3();
-  const screens = getScreens(state);
+  const rawScreens = getScreens(state);
+  // v3 ombytning: kombiner stue + sove til ét "øvrige rum"-screen
+  const screens = (() => {
+    const stueIdx = rawScreens.findIndex((s) => s.id === 'stue');
+    const soveIdx = rawScreens.findIndex((s) => s.id === 'sove');
+    if (stueIdx === -1 || soveIdx === -1) return rawScreens;
+    const combined = {
+      id: 'ovrige_rum',
+      stage: 'boligen' as const,
+      kicker: 'Boligens stand',
+      icon: 'home',
+      title: 'Øvrige rum',
+      sub: 'Vurder kort stuen og soveværelset. Gulv + vægge — primært malings- og slid-niveau.',
+      counter: 'Øvrige rum (3/4)',
+    };
+    const next = [...rawScreens];
+    next.splice(stueIdx, 2, combined);
+    // re-count counters for remaining room screens (kokken+bad+ovrige = 3 i stedet for 5)
+    const roomCounters = ['Køkken (1/3)', 'Badeværelse (2/3)', 'Øvrige rum (3/3)', 'Resten (4/4)'];
+    let cIdx = 0;
+    return next.map((s) => {
+      if (s.id === 'kokken' || s.id === 'bad' || s.id === 'ovrige_rum') {
+        const out = { ...s, counter: roomCounters[cIdx] };
+        cIdx++;
+        return out;
+      }
+      if (s.id === 'detaljer') return { ...s, counter: 'Resten (4/4)' };
+      return s;
+    });
+  })();
   const screen = screens[Math.min(state.screenIdx - 1, screens.length - 1)];
   const localIdx = state.screenIdx - 1;
 
@@ -39,7 +69,8 @@ export function Funnel() {
   }
 
   const canProceed = (() => {
-    if (screen.id === 'kontakt') return !!(state.email || state.phone);
+    if (screen.id === 'kontakt') return !!state.fullName && !!(state.email || state.phone);
+    if (screen.id === 'ovrige_rum') return !!state.livingRoomStand && !!state.bedroomStand;
     if (screen.id === 'hvornaar') return !!state.moveTimeframeRaw;
     if (screen.kind === 'room' && screen.roomId) {
       const map = {
@@ -94,6 +125,7 @@ export function Funnel() {
               {screen.id === 'kontakt' && <KontaktV3 />}
               {screen.id === 'hvornaar' && <HvornaarFlytterV3 />}
               {screen.kind === 'room' && screen.roomId && <RoomScreenV3 roomId={screen.roomId} />}
+              {screen.id === 'ovrige_rum' && <RoomsOvrigeV3 />}
               {screen.id === 'detaljer' && <SidsteDetaljer />}
               {screen.id === 'udgifter' && <UdgifterV3 />}
               {screen.id === 'grund' && <GrundForSalgV3 />}
@@ -135,7 +167,12 @@ export function Funnel() {
             )}
             {!canProceed && screen.id === 'kontakt' && (
               <span className="font-body text-[12px] hidden sm:inline soft">
-                mindst email eller telefon
+                navn + email eller telefon
+              </span>
+            )}
+            {!canProceed && screen.id === 'ovrige_rum' && (
+              <span className="font-body text-[12px] hidden sm:inline soft">
+                vælg stand for begge rum
               </span>
             )}
             <button

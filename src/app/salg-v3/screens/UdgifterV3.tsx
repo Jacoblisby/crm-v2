@@ -42,28 +42,28 @@ export function UdgifterV3() {
             value={state.costFaellesudgifter}
             onChange={(v) => update({ costFaellesudgifter: v })}
             placeholder="24.000"
-            sub="Måneds-opkrævning × 12 (typisk 18-30k)."
+            sub="Månedlig opkrævning × 12. Står på din BetalingsService-aftale."
           />
           <MoneyField
             label="Grundskyld"
             value={state.costGrundvaerdi}
             onChange={(v) => update({ costGrundvaerdi: v })}
             placeholder="4.500"
-            sub="Står på opkrævningen fra kommunen"
+            sub="Ejendomsskat. Står på kommunens årsopgørelse eller skat.dk."
           />
           <MoneyField
             label="Renovation"
             value={state.costRenovation}
             onChange={(v) => update({ costRenovation: v })}
             placeholder="1.800"
-            sub="Skraldegebyr — ofte inkl. i fællesudg."
+            sub="Skraldegebyr. Ofte inkl. i fællesudg. — så skriv 0."
           />
           <MoneyField
             label="Grundfond"
             value={state.costGrundfond}
             onChange={(v) => update({ costGrundfond: v })}
             placeholder="2.400"
-            sub="EFs reserve-bidrag pr. år — ofte inkl. i fællesudg."
+            sub="EFs opsparing til vedligehold. Står i årsregnskabet."
           />
         </div>
       </section>
@@ -97,7 +97,7 @@ export function UdgifterV3() {
           value={state.waterUsageLastYearKr}
           onChange={(v) => update({ waterUsageLastYearKr: v })}
           placeholder="3.500"
-          sub="Sum af kvartalsregninger eller årsopgørelse"
+          sub="Hele 2025. Står på årsopgørelse fra vandværket."
         />
       </section>
 
@@ -114,7 +114,7 @@ export function UdgifterV3() {
           value={state.heatUsageLastYearKr}
           onChange={(v) => update({ heatUsageLastYearKr: v })}
           placeholder="11.500"
-          sub="Årsopgørelse fra fjernvarme eller varmeværket"
+          sub="Hele 2025. Årsopgørelse fra fjernvarme/varmeværket."
         />
       </section>
 
@@ -122,8 +122,8 @@ export function UdgifterV3() {
       <section className="space-y-5 pt-6 border-t border-warm">
         <SectionTitle
           kicker="hæftelse til ejerforening"
-          title="Engangsbeløb — separat fra gæld"
-          sub="Hæftelsen er en sikkerhed ejerforeningen tinglyser foran realkreditlånet."
+          title="Tinglyst sikkerhed"
+          sub="Engangs-sikkerhed EF har tinglyst foran realkreditten. Står i tingbogen + årsopgørelsen fra EF."
         />
         <MoneyField
           label="Hæftelse jf. tinglysning"
@@ -131,7 +131,32 @@ export function UdgifterV3() {
           onChange={(v) => update({ ejerforeningHaeftelseKr: v })}
           placeholder="0"
           unit="kr"
+          sub="0 hvis du intet skylder. Tjek tingbogen.dk for sikkerhed."
         />
+      </section>
+
+      {/* Gæld til ejerforening */}
+      <section className="space-y-5 pt-6 border-t border-warm">
+        <SectionTitle
+          kicker="gæld til ejerforening"
+          title="Skylder du noget?"
+          sub="Restance eller andel af EFs fælleslån. Trækkes fra dit netto-provenu."
+        />
+        <YesNo
+          label="Har du gæld til ejerforeningen?"
+          value={state.hasEjerforeningGaeld ? 'Ja' : undefined}
+          onChange={(v) => update({ hasEjerforeningGaeld: v === 'Ja' })}
+        />
+        {state.hasEjerforeningGaeld && (
+          <MoneyField
+            label="Beløb skyldig"
+            value={state.ejerforeningGaeldKr}
+            onChange={(v) => update({ ejerforeningGaeldKr: v })}
+            placeholder="0"
+            unit="kr"
+            sub="Står på EFs årsopgørelse eller seneste opkrævning."
+          />
+        )}
       </section>
 
       {/* Realkreditlån */}
@@ -146,7 +171,7 @@ export function UdgifterV3() {
           value={state.mortgageRemainingDebt}
           onChange={(v) => update({ mortgageRemainingDebt: v })}
           placeholder="450.000"
-          sub="Står på din seneste lånekontoudtog. Ca-tal er fint."
+          sub="Ca-tal er fint. Står på seneste lånekontoudtog fra Nordea Kredit, Realkredit Danmark m.fl."
           unit="kr"
         />
       </section>

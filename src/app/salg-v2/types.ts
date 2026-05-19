@@ -108,6 +108,10 @@ export interface FunnelStateV2 extends V1State {
   existingValuation: number;
   /** Tag-tilstand i bygningen (EF-niveau). Proxy for faelleslaan-risiko. */
   roofCondition: 'god' | 'middel' | 'daarligt' | 'ved_ikke' | null;
+  /** Har sælger gaeld til ejerforeningen (skyldige bidrag, raterstand etc)? */
+  hasEjerforeningGaeld: boolean;
+  /** Beløb skyldig til ejerforeningen (kr, engangsbeløb). */
+  ejerforeningGaeldKr: number;
 }
 
 export const initialStateV2: FunnelStateV2 = {
@@ -131,6 +135,8 @@ export const initialStateV2: FunnelStateV2 = {
   hasExistingValuation: false,
   existingValuation: 0,
   roofCondition: null,
+  hasEjerforeningGaeld: false,
+  ejerforeningGaeldKr: 0,
 };
 
 // 13-screen array — pure function, recomputed when state changes for conditional

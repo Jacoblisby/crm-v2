@@ -67,7 +67,7 @@ export function BekraeftV3() {
       onChangeString: (v) => update({ hasAltan: v === 'Ja' }),
     },
     {
-      label: 'Energi-mærke',
+      label: 'Energimærke',
       key: 'energy',
       opts: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
       value: state.energyClass ?? '—',
@@ -160,13 +160,6 @@ export function BekraeftV3() {
         </div>
       </div>
 
-      <p className="font-body text-[13px] muted leading-[1.6] max-w-md">
-        Tallene kommer fra det offentlige (OIS &amp; BBR). Er noget forkert eller ændret, klik{' '}
-        <em className="accent" style={{ fontStyle: 'italic', fontWeight: 500 }}>
-          ret detaljer
-        </em>{' '}
-        ovenfor og opdatér inden du fortsætter.
-      </p>
     </div>
   );
 }
