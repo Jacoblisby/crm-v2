@@ -17,12 +17,11 @@ export type V2Stage = 'adresse' | 'boligen' | 'udgifter' | 'lidtomdig' | 'estima
 // ─── Driftudgifter (dynamic add-line på Udgifter screen) ───────────────────
 export type DriftCategory =
   | 'Ejendomsforsikring'
-  | 'Grundfond'
   | 'Ydelse på fælleslån'
   | 'Administration'
   | 'Antenne'
   | 'Internet'
-  | 'Renovation'
+  | 'Vedligeholdelseskonto'
   | 'Andet';
 
 export interface AdditionalDriftItem {
@@ -34,12 +33,11 @@ export interface AdditionalDriftItem {
 
 export const DRIFT_CATEGORIES: DriftCategory[] = [
   'Ejendomsforsikring',
-  'Grundfond',
   'Ydelse på fælleslån',
   'Administration',
   'Antenne',
   'Internet',
-  'Renovation',
+  'Vedligeholdelseskonto',
   'Andet',
 ];
 
@@ -50,18 +48,23 @@ export const DRIFT_CATEGORIES: DriftCategory[] = [
  * Mappede kategorier:
  *   Ejendomsforsikring   → costForsikringer
  *   Ydelse på fælleslån  → costFaelleslaan
- *   Renovation           → costRenovation
- *   Resten (Grundfond/Administration/Antenne/Internet/Andet) → costAndreDrift (sum)
+ *   Resten (Administration/Antenne/Internet/Vedligeholdelseskonto/Andet)
+ *     → costAndreDrift (sum)
+ *
+ * Standalone (ikke i dropdown — egne MoneyInputs):
+ *   Fællesudgifter → costFaellesudgifter
+ *   Grundskyld     → costGrundvaerdi
+ *   Renovation     → costRenovation
+ *   Grundfond      → costGrundfond (v2-felt, syncer til costAndreDrift)
  */
 export const DRIFT_CATEGORY_TO_FIELD: Record<DriftCategory, keyof V1State | null> = {
   'Ejendomsforsikring': 'costForsikringer',
-  'Grundfond': null, // → costAndreDrift sum
   'Ydelse på fælleslån': 'costFaelleslaan',
   'Administration': null, // → costAndreDrift sum
-  'Antenne': null, // → costAndreDrift sum
-  'Internet': null, // → costAndreDrift sum
-  'Renovation': 'costRenovation',
-  'Andet': null, // → costAndreDrift sum
+  'Antenne': null,
+  'Internet': null,
+  'Vedligeholdelseskonto': null,
+  'Andet': null,
 };
 
 export interface FunnelStateV2 extends V1State {
@@ -91,6 +94,10 @@ export interface FunnelStateV2 extends V1State {
   // Dynamisk drift-liste (erstatter de gamle individuelle cost-felter i UI'en
   // men syncer stadig til dem så submit-action virker)
   additionalDrift: AdditionalDriftItem[];
+
+  // Grundfond — standalone i v2 UI (v1 har ingen separat felt; syncer ind
+  // i costAndreDrift sammen med dynamisk drift)
+  costGrundfond: number;
 }
 
 export const initialStateV2: FunnelStateV2 = {
@@ -109,6 +116,7 @@ export const initialStateV2: FunnelStateV2 = {
   priceImpactFlags: [],
   notes: '',
   additionalDrift: [],
+  costGrundfond: 0,
 };
 
 // 13-screen array — pure function, recomputed when state changes for conditional

@@ -12,26 +12,53 @@ import {
 
 /**
  * Derive v1 cost-felter fra dynamisk drift-liste.
- * Submit-action læser fra costForsikringer / costFaelleslaan / costRenovation
- * / costAndreDrift — vi syncer dem fra additionalDrift hver gang.
+ * Submit-action læser fra costForsikringer / costFaelleslaan / costAndreDrift —
+ * vi syncer dem fra additionalDrift hver gang.
+ *
+ * BEMÆRK: costRenovation og costGrundfond er IKKE i den dynamiske liste
+ * (de er egne MoneyInputs i UI'en). Vi rører dem ikke her, men costGrundfond
+ * lægges oven i costAndreDrift af caller.
  */
-function syncDriftToCostFields(items: AdditionalDriftItem[]): Partial<FunnelStateV2> {
+function syncDriftToCostFields(items: AdditionalDriftItem[]): {
+  costForsikringer: number;
+  costFaelleslaan: number;
+  driftAndre: number;
+} {
   let forsikringer = 0;
   let faelleslaan = 0;
-  let renovation = 0;
   let andre = 0;
   for (const item of items) {
     const amt = item.amount || 0;
     if (item.category === 'Ejendomsforsikring') forsikringer += amt;
     else if (item.category === 'Ydelse på fælleslån') faelleslaan += amt;
-    else if (item.category === 'Renovation') renovation += amt;
-    else andre += amt; // Grundfond, Administration, Antenne, Internet, Andet
+    else andre += amt; // Administration, Antenne, Internet, Vedligeholdelseskonto, Andet
+  }
+  return { costForsikringer: forsikringer, costFaelleslaan: faelleslaan, driftAndre: andre };
+}
+
+/**
+ * Migration: gamle localStorage-states kan have 'Renovation' eller 'Grundfond'
+ * som dropdown-kategorier. De er nu standalone felter — flyt deres beløb derhen.
+ */
+function migrateLegacyDrift(parsed: Partial<FunnelStateV2>): Partial<FunnelStateV2> {
+  if (!Array.isArray(parsed.additionalDrift)) return parsed;
+  let migratedRenovation = parsed.costRenovation || 0;
+  let migratedGrundfond = parsed.costGrundfond || 0;
+  const kept: AdditionalDriftItem[] = [];
+  for (const item of parsed.additionalDrift) {
+    if (item.category === ('Renovation' as AdditionalDriftItem['category'])) {
+      migratedRenovation += item.amount || 0;
+    } else if (item.category === ('Grundfond' as AdditionalDriftItem['category'])) {
+      migratedGrundfond += item.amount || 0;
+    } else {
+      kept.push(item);
+    }
   }
   return {
-    costForsikringer: forsikringer,
-    costFaelleslaan: faelleslaan,
-    costRenovation: renovation,
-    costAndreDrift: andre,
+    ...parsed,
+    additionalDrift: kept,
+    costRenovation: migratedRenovation,
+    costGrundfond: migratedGrundfond,
   };
 }
 
@@ -57,7 +84,8 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<FunnelStateV2>;
-        setState({ ...initialStateV2, ...parsed });
+        const migrated = migrateLegacyDrift(parsed);
+        setState({ ...initialStateV2, ...migrated });
       }
     } catch {}
     const params = new URLSearchParams(window.location.search);
@@ -87,9 +115,13 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
       if (patch.afterSaleRaw !== undefined) {
         next.afterSale = AFTER_SALE_DISPLAY_TO_SLUG[patch.afterSaleRaw] ?? null;
       }
-      // Sync drift-array → v1 cost-felter (submit-action læser dem)
-      if (patch.additionalDrift !== undefined) {
-        Object.assign(next, syncDriftToCostFields(patch.additionalDrift));
+      // Sync drift → v1 cost-felter. Trigger ved aendring i additionalDrift
+      // ELLER costGrundfond, da costAndreDrift = (drift andre) + costGrundfond.
+      if (patch.additionalDrift !== undefined || patch.costGrundfond !== undefined) {
+        const sums = syncDriftToCostFields(next.additionalDrift);
+        next.costForsikringer = sums.costForsikringer;
+        next.costFaelleslaan = sums.costFaelleslaan;
+        next.costAndreDrift = sums.driftAndre + (next.costGrundfond || 0);
       }
       return next;
     });

@@ -17,6 +17,8 @@ export function Udgifter() {
   const total =
     (state.costFaellesudgifter || 0) +
     (state.costGrundvaerdi || 0) +
+    (state.costRenovation || 0) +
+    (state.costGrundfond || 0) +
     dynamicTotal;
 
   function addDrift(category: DriftCategory) {
@@ -66,6 +68,20 @@ export function Udgifter() {
             onChange={(v) => update({ costGrundvaerdi: parseInt(v) || 0 })}
             placeholder="4.500"
             sub="Står på din opkrævning fra kommunen"
+          />
+          <MoneyInput
+            label="Renovation"
+            value={state.costRenovation || ''}
+            onChange={(v) => update({ costRenovation: parseInt(v) || 0 })}
+            placeholder="1.800"
+            sub="Skraldegebyr — ofte inkl. i fællesudg., skip ellers"
+          />
+          <MoneyInput
+            label="Grundfond"
+            value={state.costGrundfond || ''}
+            onChange={(v) => update({ costGrundfond: parseInt(v) || 0 })}
+            placeholder="2.400"
+            sub="EF's reserve-bidrag pr. år — ofte inkl. i fællesudg."
           />
         </div>
       </section>
@@ -203,7 +219,7 @@ function DriftRow({
 
   return (
     <div
-      className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[180px_1fr_auto] gap-2 sm:gap-3 items-stretch salg-drift-row-enter"
+      className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[220px_1fr_auto] gap-2 sm:gap-3 items-stretch salg-drift-row-enter"
       style={{ animationDelay: '0ms' }}
     >
       {/* Kategori dropdown */}
@@ -371,12 +387,11 @@ function AddDriftButton({
 function iconForCategory(c: DriftCategory): string {
   switch (c) {
     case 'Ejendomsforsikring': return 'doc';
-    case 'Grundfond': return 'coin2';
     case 'Ydelse på fælleslån': return 'warn';
     case 'Administration': return 'users';
     case 'Antenne': return 'arrows';
     case 'Internet': return 'arrows';
-    case 'Renovation': return 'wrench';
+    case 'Vedligeholdelseskonto': return 'wrench';
     case 'Andet': return 'plus';
   }
 }
