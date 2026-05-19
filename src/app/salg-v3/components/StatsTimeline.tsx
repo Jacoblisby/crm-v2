@@ -101,17 +101,17 @@ export function StatsTimeline() {
                 aria-label={`${p.label}: ${p.handler} handler`}
               >
                 <div
-                  className="w-full rounded-t-sm"
+                  className="w-full rounded-t-[2px]"
                   style={{
                     height: `${heightPct}%`,
-                    background: isActive ? 'var(--teal)' : 'var(--cream)',
-                    borderTop: isActive ? '2px solid var(--teal-deep)' : '1px solid var(--border)',
-                    borderLeft: '1px solid var(--border)',
-                    borderRight: '1px solid var(--border)',
-                    transitionProperty: 'background-color, border-color, transform',
+                    background: isActive ? 'var(--teal)' : 'var(--paper)',
+                    boxShadow: isActive
+                      ? '0 4px 12px -4px oklch(0.25 0.05 200 / 0.4)'
+                      : 'inset 0 0 0 1px oklch(0.86 0.02 80)',
+                    transitionProperty: 'background-color, box-shadow, transform',
                     transitionDuration: '180ms',
                     transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)',
-                    transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
+                    transform: isActive ? 'translateY(-3px)' : 'translateY(0)',
                   }}
                 />
               </button>
