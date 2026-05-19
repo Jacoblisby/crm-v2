@@ -2,7 +2,7 @@
 
 import { useFunnelV2 } from '../FunnelV2Context';
 import { MiniIcon } from '../components/icons';
-import { ToggleChip, EASE_OUT } from '../components/primitives';
+import { ToggleChip, MoneyInput, YesNoRow, EASE_OUT } from '../components/primitives';
 
 const ACCENT = '#244949';
 
@@ -170,6 +170,9 @@ export function SidsteDetaljer() {
           </div>
         </div>
 
+        {/* Conditional rental details — vises kun naar "Aktuelt udlejet" er valgt */}
+        <RentalDetailsSection />
+
         <div className="space-y-2 pt-2">
           <label className="text-[13px] font-medium text-[#14181A]">Forhold der kan påvirke prisen</label>
           <div className="grid sm:grid-cols-3 gap-2">
@@ -213,6 +216,172 @@ export function SidsteDetaljer() {
                 </button>
               );
             })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * RentalDetailsSection — conditional reveal naar isRented = true.
+ * Vi spoerger om alle de felter v1 brugte (rentalMonthlyRent etc.) plus
+ * smooth expand via grid-template-rows transition.
+ * ────────────────────────────────────────────────────────────────────── */
+function RentalDetailsSection() {
+  const { state, update } = useFunnelV2();
+  const open = state.isRented;
+
+  return (
+    <div
+      className="grid overflow-hidden"
+      style={{
+        gridTemplateRows: open ? '1fr' : '0fr',
+        transition: `grid-template-rows 280ms ${EASE_OUT}`,
+      }}
+      aria-hidden={!open}
+    >
+      <div className="min-h-0">
+        <div
+          className="mt-3 rounded-2xl p-5 sm:p-6 space-y-5"
+          style={{
+            background: '#F8F2E5',
+            opacity: open ? 1 : 0,
+            transform: open ? 'translateY(0)' : 'translateY(-4px)',
+            transition: `opacity 220ms ${EASE_OUT}, transform 220ms ${EASE_OUT}`,
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                <circle cx="9" cy="7" r="4" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-[11px] font-medium tracking-[0.15em] uppercase text-[#9C988C]">
+                Udlejning
+              </div>
+              <div className="text-[15px] font-semibold mt-0.5 text-[#14181A]">
+                Detaljer om lejekontrakten
+              </div>
+              <p className="text-[12px] mt-1 leading-relaxed text-[#5A6166] max-w-md">
+                Vi køber gerne udlejede boliger — men har brug for kontraktdetaljer for at give et præcist tilbud.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <MoneyInput
+              label="Månedlig leje"
+              value={state.rentalMonthlyRent || ''}
+              onChange={(v) => update({ rentalMonthlyRent: parseInt(v) || 0 })}
+              placeholder="9.500"
+              sub="Hvad lejeren betaler hver måned"
+              unit="kr/md"
+            />
+            <MoneyInput
+              label="Depositum"
+              value={state.rentalDeposit || ''}
+              onChange={(v) => update({ rentalDeposit: parseInt(v) || 0 })}
+              placeholder="28.500"
+              sub="Typisk 3 måneders leje"
+              unit="kr"
+            />
+            <MoneyInput
+              label="Forudbetalt leje"
+              value={state.rentalPrepaidRent || ''}
+              onChange={(v) => update({ rentalPrepaidRent: parseInt(v) || 0 })}
+              placeholder="0"
+              sub="Typisk 0-3 måneder (kontrakt-aftalt)"
+              unit="kr"
+            />
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-[#14181A]">
+                Startdato for lejekontrakt
+              </label>
+              <input
+                type="date"
+                value={state.rentalStartDate || ''}
+                onChange={(e) => update({ rentalStartDate: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl border bg-white text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949] border-[#E5E2DA] focus:border-stone-400 text-[#14181A]"
+                style={{ transition: `border-color 180ms ${EASE_OUT}` }}
+              />
+              <p className="text-[12px] text-[#5A6166]">Hvornår startede lejeforholdet</p>
+            </div>
+          </div>
+
+          {/* Uopsigelig */}
+          <div className="space-y-2 pt-1">
+            <YesNoRow
+              label="Er lejekontrakten uopsigelig fra udlejers side?"
+              value={state.rentalUopsigelig ? 'Ja' : undefined}
+              onChange={(v) => update({ rentalUopsigelig: v === 'Ja' })}
+            />
+            <div
+              className="grid overflow-hidden"
+              style={{
+                gridTemplateRows: state.rentalUopsigelig ? '1fr' : '0fr',
+                transition: `grid-template-rows 250ms ${EASE_OUT}`,
+              }}
+            >
+              <div className="min-h-0">
+                <div className="pt-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-[#14181A]">
+                      Antal måneder uopsigelig
+                    </label>
+                    <div className="relative max-w-[200px]">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={state.rentalUopsigeligMaaneder || ''}
+                        onChange={(e) =>
+                          update({
+                            rentalUopsigeligMaaneder:
+                              parseInt(e.target.value.replace(/[^\d]/g, '')) || 0,
+                          })
+                        }
+                        placeholder="12"
+                        className="w-full px-4 py-3 pr-16 rounded-xl border bg-white text-[15px] tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949] border-[#E5E2DA] focus:border-stone-400 text-[#14181A]"
+                        style={{ transition: `border-color 180ms ${EASE_OUT}` }}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] text-[#9C988C]">
+                        mdr
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-[#5A6166]">
+                      Hvor mange måneder du som udlejer er bundet til ikke at opsige
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Upload kontrakt */}
+          <div className="space-y-2">
+            <label className="text-[13px] font-medium text-[#14181A]">
+              Lejekontrakt (valgfri, anbefales)
+            </label>
+            <button
+              type="button"
+              className="w-full py-4 rounded-xl border-2 border-dashed bg-white hover:bg-stone-50 text-[14px] font-medium border-[#D6D2C5] text-[#14181A] active:scale-[0.99] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949]"
+              style={{ transition: `background-color 150ms ${EASE_OUT}, transform 150ms ${EASE_OUT}` }}
+            >
+              {state.rentalContract ? (
+                <span className="text-[#244949]">
+                  ✓ {state.rentalContract.name} ({Math.round(state.rentalContract.size / 1024)} KB)
+                </span>
+              ) : (
+                <>
+                  Upload lejekontrakt <span className="text-[#9C988C]">(PDF, JPG, DOC)</span>
+                </>
+              )}
+            </button>
+            <p className="text-[12px] text-[#5A6166]">
+              Sender en kopi du kan se mæglerens spørgsmål i forvejen — mere præcist tilbud.
+            </p>
           </div>
         </div>
       </div>
