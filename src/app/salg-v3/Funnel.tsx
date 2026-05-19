@@ -7,9 +7,9 @@
  */
 import { useFunnelV3 } from './FunnelV3Context';
 import { getScreens } from '../salg-v2/types';
-import { BekraeftAdresse } from '../salg-v2/screens/BekraeftAdresse';
-import { HvornaarFlytter } from '../salg-v2/screens/HvornaarFlytter';
-import { RoomScreen } from '../salg-v2/screens/RoomScreen';
+import { BekraeftV3 } from './screens/BekraeftV3';
+import { HvornaarFlytterV3 } from './screens/HvornaarFlytterV3';
+import { RoomScreenV3 } from './screens/RoomScreenV3';
 import { SidsteDetaljer } from '../salg-v2/screens/SidsteDetaljer';
 import { Udgifter } from '../salg-v2/screens/Udgifter';
 import { GrundForSalg } from '../salg-v2/screens/GrundForSalg';
@@ -88,9 +88,9 @@ export function Funnel() {
 
             {/* Højre — answer */}
             <div className="lg:col-span-7">
-              {screen.id === 'bekraeft' && <BekraeftAdresse />}
-              {screen.id === 'hvornaar' && <HvornaarFlytter />}
-              {screen.kind === 'room' && screen.roomId && <RoomScreen roomId={screen.roomId} />}
+              {screen.id === 'bekraeft' && <BekraeftV3 />}
+              {screen.id === 'hvornaar' && <HvornaarFlytterV3 />}
+              {screen.kind === 'room' && screen.roomId && <RoomScreenV3 roomId={screen.roomId} />}
               {screen.id === 'detaljer' && <SidsteDetaljer />}
               {screen.id === 'udgifter' && <Udgifter />}
               {screen.id === 'grund' && <GrundForSalg />}
