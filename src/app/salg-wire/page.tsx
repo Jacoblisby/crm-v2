@@ -40,59 +40,53 @@ const SCREENS = [
   {
     n: 5,
     stage: 'boligen',
-    name: 'Køkken (1/5)',
-    render: () => <Room label="Køkken" hasYear hasBrand />,
+    name: 'Køkken (1/3)',
+    render: () => <Room label="Køkken" hasYear />,
   },
   {
     n: 6,
     stage: 'boligen',
-    name: 'Badeværelse (2/5)',
+    name: 'Badeværelse (2/3)',
     render: () => <Room label="Badeværelse" hasYear />,
   },
   {
     n: 7,
     stage: 'boligen',
-    name: 'Stue (3/5)',
-    render: () => <Room label="Stue" />,
+    name: 'Øvrige rum (3/3) — stue + sov',
+    render: () => <RoomsOvrige />,
   },
   {
     n: 8,
     stage: 'boligen',
-    name: 'Soveværelse (4/5)',
-    render: () => <Room label="Soveværelse" />,
-  },
-  {
-    n: 9,
-    stage: 'boligen',
-    name: 'Sidste detaljer (5/5)',
+    name: 'Sidste detaljer (4/4)',
     render: () => <SidsteDetaljer />,
   },
   {
-    n: 10,
+    n: 9,
     stage: 'udgifter',
     name: 'Boligens udgifter',
     render: () => <Udgifter />,
   },
   {
-    n: 11,
+    n: 10,
     stage: 'lidt om dig',
     name: 'Hvad er hovedgrunden?',
     render: () => <GrundForSalg />,
   },
   {
-    n: 12,
+    n: 11,
     stage: 'lidt om dig',
     name: 'Hvad skal du efter salget?',
     render: () => <EfterSalg />,
   },
   {
-    n: 13,
+    n: 12,
     stage: 'lidt om dig',
     name: 'Hvad leder du efter? (conditional)',
     render: () => <NyBolig />,
   },
   {
-    n: 14,
+    n: 13,
     stage: 'estimat',
     name: 'Foreløbigt tilbud',
     render: () => <Estimat />,
@@ -460,12 +454,12 @@ function Landing() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: 32, alignItems: 'center' }}>
         <div>
-          <Chip>87 boliger købt siden 2024</Chip>
+          <Chip>87 boliger købt siden 2020</Chip>
           <h1 style={{ fontSize: 48, lineHeight: 1.05, margin: '16px 0', fontWeight: 700 }}>
             Sælg din bolig kontant.
           </h1>
           <p style={{ fontSize: 16, color: '#444', maxWidth: 480 }}>
-            Få et foreløbigt tilbud på 5 minutter. Du vælger overtagelsesdato fra 14 dage til 6 måneder.
+            Få et foreløbigt tilbud på 5 minutter. Du vælger overtagelsesdato — når det passer dig.
           </p>
           <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
             <Input placeholder="📍 Indtast din adresse" />
@@ -477,9 +471,9 @@ function Landing() {
             Ingen forpligtelse · 5 min · Privat
           </p>
           <div style={{ marginTop: 24, display: 'flex', gap: 24, fontSize: 13 }}>
-            <span><strong>87+</strong> boliger købt</span>
-            <span><strong>24 t</strong> svartid</span>
-            <span><strong>0 kr</strong> i salær</span>
+            <span><strong>87+</strong> boliger købt siden 2020</span>
+            <span><strong>bliv boende</strong> som lejer og nyd friværdien</span>
+            <span><strong>0 kr</strong> i mæglersalær</span>
           </div>
         </div>
         <Box label="hero lifestyle photo (4:5)" h={400} />
@@ -487,13 +481,14 @@ function Landing() {
 
       <section style={{ marginTop: 64, borderTop: '1px solid #ddd', paddingTop: 32 }}>
         <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>365 i tal</p>
-        <h2 style={{ fontSize: 28, fontWeight: 600 }}>Vi har handlet siden 2024</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 600 }}>Vi har handlet siden 2020</h2>
+        <p style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Drillable månedlig timeline 2020-2026 — bruger hover/click på måneder for at se aktivitet.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 16 }}>
           {[
+            ['87', 'handler i alt (mar 20 – maj 26)'],
             ['218', 'lejemål under forvaltning'],
             ['2,5 mio', 'kr sparet i salærer'],
-            ['14 dage', 'hurtigste overtagelse'],
-            ['5%', 'tilbageleveringsgaranti'],
+            ['bliv boende', 'sale-leaseback kerneprodukt'],
           ].map(([n, l]) => (
             <div key={l} style={{ borderLeft: '1px solid #ccc', paddingLeft: 12 }}>
               <div style={{ fontSize: 32, fontWeight: 700 }}>{n}</div>
@@ -509,9 +504,9 @@ function Landing() {
         <ol style={{ marginTop: 16, paddingLeft: 0, listStyle: 'none' }}>
           {[
             ['01', 'Du indtaster adressen', 'OIS-data og sammenlignelige handler hentes automatisk.'],
-            ['02', 'Jacob ringer inden 24 timer', 'Kort snak. Ingen pres.'],
-            ['03', 'Gratis besigtigelse', 'Vi måler op og bekræfter tilbud.'],
-            ['04', 'Du vælger overtagelse', '14 dage til 6 måneder. Kontant på konto.'],
+            ['02', 'Vi ringer inden et døgn', 'Uforpligtende prisverificerings-syn. Ingen aggressiv opfølgning.'],
+            ['03', 'Gratis besigtigelse', 'Vi måler op og giver et bindende tilbud.'],
+            ['04', 'Du vælger overtagelse', 'Når det passer dig — eller bliv boende som lejer (sale-leaseback).'],
           ].map(([n, t, d]) => (
             <li key={n} style={{ borderTop: '1px solid #ddd', padding: '16px 0', display: 'grid', gridTemplateColumns: '40px 1fr', gap: 16 }}>
               <span style={{ fontFamily: 'monospace', color: '#888' }}>{n}</span>
@@ -561,7 +556,6 @@ function Bekraeft() {
           <Chip>ADRESSE BEKRÆFTET</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Bekræft boligens detaljer</h1>
           <p style={{ fontSize: 14, color: '#666' }}>Disse oplysninger er fra OIS og BBR. Tjek og ret hvis noget er ændret.</p>
-          <p style={{ fontSize: 13, color: '#888', marginTop: 16, textDecoration: 'underline' }}>Hvorfor spørger vi?</p>
         </div>
         <div style={{ border: '1px solid #ccc' }}>
           <div style={{ padding: 16, background: '#f5f5f5', borderBottom: '1px solid #ccc' }}>
@@ -578,6 +572,7 @@ function Bekraeft() {
               ['Etage', '1.'],
               ['Elevator', 'Nej'],
               ['Altan/terrasse', 'Nej'],
+              ['Energimærke', 'D'],
             ].map(([k, v]) => (
               <li key={k} style={{ padding: '12px 16px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 13 }}>{k}</span>
@@ -602,14 +597,12 @@ function Kontakt() {
           <Chip>HVOR SENDER VI TILBUDDET?</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvor sender vi dit tilbud?</h1>
           <p style={{ fontSize: 14, color: '#666' }}>
-            Vi ringer dig op inden 24 timer for at aftale en gratis besigtigelse. Du modtager estimat på email + sms.
+            Du modtager estimat på email. Vi kontakter dig kun for at aftale en gratis besigtigelse.
           </p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600 }}>
-              Fulde navn <em style={{ fontSize: 11, color: '#888', fontWeight: 400 }}>valgfri</em>
-            </label>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Fulde navn</label>
             <Input placeholder="Marie Hansen" />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -621,14 +614,29 @@ function Kontakt() {
             <div>
               <label style={{ fontSize: 12, fontWeight: 600 }}>Telefon</label>
               <Input placeholder="+45 12 34 56 78" />
-              <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Jacob ringer dig op</p>
+              <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Hvis vi har brug for at supplere</p>
             </div>
           </div>
-          <div style={{ border: '1px solid #ccc', padding: 12, background: '#fafafa', fontSize: 12 }}>
-            🔒 <strong>Dine oplysninger forbliver private.</strong> Vi sælger ikke data videre. Vi ringer kun for at aftale besigtigelse. Hvis vores tilbud ikke giver mening, hører du ikke fra os igen.
-          </div>
+          <section style={{ borderTop: '1px solid #eee', paddingTop: 16 }}>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>antal ejere</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              {['Kun mig', '2 ejere', '3 eller flere'].map((o) => (
+                <Chip key={o}>{o}</Chip>
+              ))}
+            </div>
+            <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Påvirker juridik — ægtefælle/arvinger-samtykke.</p>
+          </section>
+          <section>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>hvor længe har du boet der?</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              {['Under 1 år', '1–3 år', '3–10 år', '10+ år'].map((o) => (
+                <Chip key={o}>{o}</Chip>
+              ))}
+            </div>
+            <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>Påvirker skat ved &lt; 2 år (parcelhusreglen).</p>
+          </section>
           <p style={{ fontSize: 11, color: '#888', borderTop: '1px solid #eee', paddingTop: 8 }}>
-            <strong>Required for next:</strong> mindst email eller telefon. Navn er valgfri.
+            <strong>Required for next:</strong> navn + (email eller telefon).
           </p>
         </div>
       </div>
@@ -653,8 +661,8 @@ function Hvornaar() {
             ['Hurtigst muligt', 'Inden for 1 måned'],
             ['1–3 måneder', 'Vi har lidt fleksibilitet'],
             ['3–6 måneder', 'Planlagt, men ikke hastværk'],
-            ['6+ måneder', 'Vi undersøger først'],
-            ['Ved ikke endnu', '—'],
+            ['6+ måneder', 'Jeg skal have tid og ro til at finde noget nyt'],
+            ['Ved ikke endnu', 'Jeg vil gerne lære mere om hvad jeg kan sælge for'],
           ].map(([t, s]) => (
             <div key={t} style={{ border: '1px solid #999', padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
@@ -671,7 +679,7 @@ function Hvornaar() {
   );
 }
 
-function Room({ label, hasYear, hasBrand }: { label: string; hasYear?: boolean; hasBrand?: boolean }) {
+function Room({ label, hasYear }: { label: string; hasYear?: boolean }) {
   return (
     <div>
       <TopBar address />
@@ -681,7 +689,7 @@ function Room({ label, hasYear, hasBrand }: { label: string; hasYear?: boolean; 
           <Chip>BOLIGENS STAND</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>{label}</h1>
           <p style={{ fontSize: 14, color: '#666' }}>Vælg det niveau der bedst beskriver {label.toLowerCase()}.</p>
-          <p style={{ fontSize: 11, fontFamily: 'monospace', marginTop: 12, color: '#888' }}>{label.toUpperCase()} (X/5)</p>
+          <p style={{ fontSize: 11, fontFamily: 'monospace', marginTop: 12, color: '#888' }}>{label.toUpperCase()} (X/3)</p>
         </div>
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -695,25 +703,64 @@ function Room({ label, hasYear, hasBrand }: { label: string; hasYear?: boolean; 
               </div>
             ))}
           </div>
-          {(hasYear || hasBrand) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
-              {hasYear && (
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600 }}>{label}-årgang</label>
-                  <Input placeholder="2015" />
-                  <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>valgfri</p>
-                </div>
-              )}
-              {hasBrand && (
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600 }}>Mærke</label>
-                  <Input placeholder="HTH, Svane, IKEA..." />
-                  <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>valgfri</p>
-                </div>
-              )}
+          {hasYear && (
+            <div style={{ marginTop: 16, maxWidth: 280 }}>
+              <label style={{ fontSize: 12, fontWeight: 600 }}>{label}-årgang</label>
+              <Input placeholder="2015" />
+              <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>valgfri</p>
             </div>
           )}
-          <Box label="upload foto (valgfri)" h={60} />
+        </div>
+      </div>
+      <FunnelBottom disabled />
+    </div>
+  );
+}
+
+function RoomsOvrige() {
+  return (
+    <div>
+      <TopBar address />
+      <StageRail active="boligen" />
+      <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
+        <div>
+          <Chip>BOLIGENS STAND</Chip>
+          <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Øvrige rum</h1>
+          <p style={{ fontSize: 14, color: '#666' }}>
+            Vurder kort stuen og soveværelset — primært malings- og slid-niveau. Stue + sov er kombineret
+            (brydeer 4-rum-i-træk monotoni; chip-baseret uden foto, fordi gulv/maling-vurdering ikke
+            kræver visuel reference).
+          </p>
+          <p style={{ fontSize: 11, fontFamily: 'monospace', marginTop: 12, color: '#888' }}>ØVRIGE RUM (3/3)</p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {[
+            { room: 'Stue', helper: 'Gulv + vægge — typisk billigste rum at friske op.' },
+            { room: 'Soveværelse', helper: 'Samme — primært maling og gulv.' },
+          ].map((r) => (
+            <section key={r.room}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{r.room}</h3>
+                <p style={{ fontSize: 12, color: '#888', margin: 0 }}>{r.helper}</p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 8 }}>
+                {[
+                  ['Nyrenoveret', 'Klar til indflytning'],
+                  ['God stand', 'Velholdt'],
+                  ['Trænger', 'Skal males'],
+                  ['Skal renoveres', 'Total omgang'],
+                ].map(([t, s]) => (
+                  <div key={t} style={{ border: '1px solid #999', padding: 12 }}>
+                    <strong style={{ fontSize: 13 }}>{t}</strong>
+                    <p style={{ fontSize: 11, color: '#666', margin: '4px 0 0' }}>{s}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+          <p style={{ fontSize: 11, color: '#888', borderTop: '1px solid #eee', paddingTop: 8 }}>
+            <strong>Required for next:</strong> stand valgt for begge rum.
+          </p>
         </div>
       </div>
       <FunnelBottom disabled />
@@ -731,7 +778,7 @@ function SidsteDetaljer() {
           <Chip>DETALJER OM BOLIGEN</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Sidste detaljer</h1>
           <p style={{ fontSize: 14, color: '#666' }}>Hvidevarer, fotos, særlige forhold. Alt er valgfrit.</p>
-          <p style={{ fontSize: 11, fontFamily: 'monospace', marginTop: 12, color: '#888' }}>RESTEN (5/5)</p>
+          <p style={{ fontSize: 11, fontFamily: 'monospace', marginTop: 12, color: '#888' }}>RESTEN (4/4)</p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <section>
@@ -744,9 +791,17 @@ function SidsteDetaljer() {
           </section>
           <section>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>andre fotos (valgfri)</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 8 }}>
-              {['Altan/udsigt', 'Plantegning', 'Gang/entré', 'Andet rum'].map((t) => (
-                <Box key={t} label={t} h={70} />
+            <div style={{ border: '1px dashed #999', padding: 24, textAlign: 'center', fontSize: 13, color: '#666', marginTop: 8 }}>
+              📎 Tap for at vedhæfte op til 10 billeder
+              <p style={{ fontSize: 11, color: '#888', margin: '4px 0 0' }}>Altan, plantegning, entré, andet rum, eller hvad du vil</p>
+            </div>
+          </section>
+          <section>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>tag-tilstand i bygningen</p>
+            <p style={{ fontSize: 12, color: '#666', margin: '4px 0' }}>Proxy for fælleslån-risiko (kommende renovering = stor udgift for alle ejere).</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              {['God', 'Middel', 'Dårligt', 'Ved ikke'].map((o) => (
+                <Chip key={o}>{o}</Chip>
               ))}
             </div>
           </section>
@@ -801,37 +856,51 @@ function Udgifter() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <section>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>ejerudgifter — påkrævet</p>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>kerne-udgifter — påkrævet (kr/år)</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
               {[
-                ['Fællesudg. til EF *', '24.000'],
-                ['Grundskyld', '4.500'],
-                ['Renovation', '1.800'],
-                ['Grundfond', '2.400'],
-              ].map(([l, p]) => (
+                ['Fællesudg. til EF *', '24.000', 'Månedlig opkrævning × 12. Står på BetalingsService-aftalen.'],
+                ['Grundskyld', '4.500', 'Ejendomsskat. Står på kommunens årsopgørelse eller skat.dk.'],
+                ['Renovation', '1.800', 'Skraldegebyr. Ofte inkl. i fællesudg. — så skriv 0.'],
+                ['Grundfond', '2.400', 'EFs opsparing til vedligehold. Står i årsregnskabet.'],
+              ].map(([l, p, h]) => (
                 <div key={l}>
                   <label style={{ fontSize: 11, fontWeight: 600 }}>{l}</label>
                   <Input placeholder={`${p} kr/år`} />
+                  <p style={{ fontSize: 10.5, color: '#888', marginTop: 4, lineHeight: 1.4 }}>{h}</p>
                 </div>
               ))}
             </div>
           </section>
           <section>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>øvrige driftudgifter</p>
-            <p style={{ fontSize: 12, color: '#666', margin: '4px 0' }}>Bruger tilføjer linjer dynamisk via + knap. Kategorier: Ejendomsforsikring · Ydelse på fælleslån · Administration · Antenne · Internet · Vedligeholdelseskonto · Andet (m. custom label).</p>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>øvrige udgifter</p>
+            <p style={{ fontSize: 12, color: '#666', margin: '4px 0' }}>Bruger tilføjer linjer dynamisk via + knap. Kategorier: Ejendomsforsikring · Ydelse på fælleslån · Administration · Antenne · Internet · Vedligeholdelseskonto · Andet.</p>
             <div style={{ border: '1px dashed #999', padding: 16, textAlign: 'center', fontSize: 13, color: '#666' }}>+ tilføj udgift</div>
           </section>
           <section>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>vand</p>
             <p style={{ fontSize: 13 }}>Ja/Nej acontobeløb? + samlet årlig regning</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Hele 2025. Årsopgørelse fra vandværket.</p>
           </section>
           <section>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>varme</p>
             <p style={{ fontSize: 13 }}>Ja/Nej acontobeløb? + samlet årlig regning</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Hele 2025. Årsopgørelse fra fjernvarme/varmeværket.</p>
           </section>
           <section>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>hæftelse til ejerforening</p>
-            <p style={{ fontSize: 13 }}>Engangsbeløb fra tinglysning (kr)</p>
+            <p style={{ fontSize: 13 }}>Tinglyst engangs-sikkerhed (kr)</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>0 hvis du intet skylder. Tjek tingbogen.dk.</p>
+          </section>
+          <section>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>gæld til ejerforening (ny)</p>
+            <p style={{ fontSize: 13 }}>Ja/Nej + beløb (kr) hvis ja</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Restance eller andel af EFs fælleslån. Står på EFs årsopgørelse.</p>
+          </section>
+          <section>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>realkreditlån</p>
+            <p style={{ fontSize: 13 }}>Restgæld (kr)</p>
+            <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Ca-tal er fint. Står på seneste lånekontoudtog fra Nordea Kredit, Realkredit Danmark m.fl.</p>
           </section>
         </div>
       </div>
