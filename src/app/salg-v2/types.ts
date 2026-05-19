@@ -14,6 +14,56 @@ import { initialState as V1Initial } from '../salg/types';
 
 export type V2Stage = 'adresse' | 'boligen' | 'udgifter' | 'lidtomdig' | 'estimat';
 
+// ─── Driftudgifter (dynamic add-line på Udgifter screen) ───────────────────
+export type DriftCategory =
+  | 'Ejendomsforsikring'
+  | 'Grundfond'
+  | 'Ydelse på fælleslån'
+  | 'Administration'
+  | 'Antenne'
+  | 'Internet'
+  | 'Renovation'
+  | 'Andet';
+
+export interface AdditionalDriftItem {
+  id: string;
+  category: DriftCategory;
+  customLabel?: string; // kun for 'Andet'
+  amount: number; // kr/år
+}
+
+export const DRIFT_CATEGORIES: DriftCategory[] = [
+  'Ejendomsforsikring',
+  'Grundfond',
+  'Ydelse på fælleslån',
+  'Administration',
+  'Antenne',
+  'Internet',
+  'Renovation',
+  'Andet',
+];
+
+/**
+ * Map fra dynamisk-item kategori → v1 cost-felt navn så submit-action
+ * (uændret) får data ind på det rigtige felt.
+ *
+ * Mappede kategorier:
+ *   Ejendomsforsikring   → costForsikringer
+ *   Ydelse på fælleslån  → costFaelleslaan
+ *   Renovation           → costRenovation
+ *   Resten (Grundfond/Administration/Antenne/Internet/Andet) → costAndreDrift (sum)
+ */
+export const DRIFT_CATEGORY_TO_FIELD: Record<DriftCategory, keyof V1State | null> = {
+  'Ejendomsforsikring': 'costForsikringer',
+  'Grundfond': null, // → costAndreDrift sum
+  'Ydelse på fælleslån': 'costFaelleslaan',
+  'Administration': null, // → costAndreDrift sum
+  'Antenne': null, // → costAndreDrift sum
+  'Internet': null, // → costAndreDrift sum
+  'Renovation': 'costRenovation',
+  'Andet': null, // → costAndreDrift sum
+};
+
 export interface FunnelStateV2 extends V1State {
   screenIdx: number; // 0..N-1, flad screen-array
 
@@ -37,6 +87,10 @@ export interface FunnelStateV2 extends V1State {
   // Sidste detaljer extras
   priceImpactFlags: string[]; // 'Fælleslån i ejerforeningen' etc.
   notes: string;
+
+  // Dynamisk drift-liste (erstatter de gamle individuelle cost-felter i UI'en
+  // men syncer stadig til dem så submit-action virker)
+  additionalDrift: AdditionalDriftItem[];
 }
 
 export const initialStateV2: FunnelStateV2 = {
@@ -54,6 +108,7 @@ export const initialStateV2: FunnelStateV2 = {
   nyIndflytning: '',
   priceImpactFlags: [],
   notes: '',
+  additionalDrift: [],
 };
 
 // 13-screen array — pure function, recomputed when state changes for conditional

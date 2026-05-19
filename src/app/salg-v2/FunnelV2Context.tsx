@@ -4,10 +4,36 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import {
   initialStateV2,
   type FunnelStateV2,
+  type AdditionalDriftItem,
   TIMEFRAME_DISPLAY_TO_SLUG,
   REASON_DISPLAY_TO_SLUG,
   AFTER_SALE_DISPLAY_TO_SLUG,
 } from './types';
+
+/**
+ * Derive v1 cost-felter fra dynamisk drift-liste.
+ * Submit-action læser fra costForsikringer / costFaelleslaan / costRenovation
+ * / costAndreDrift — vi syncer dem fra additionalDrift hver gang.
+ */
+function syncDriftToCostFields(items: AdditionalDriftItem[]): Partial<FunnelStateV2> {
+  let forsikringer = 0;
+  let faelleslaan = 0;
+  let renovation = 0;
+  let andre = 0;
+  for (const item of items) {
+    const amt = item.amount || 0;
+    if (item.category === 'Ejendomsforsikring') forsikringer += amt;
+    else if (item.category === 'Ydelse på fælleslån') faelleslaan += amt;
+    else if (item.category === 'Renovation') renovation += amt;
+    else andre += amt; // Grundfond, Administration, Antenne, Internet, Andet
+  }
+  return {
+    costForsikringer: forsikringer,
+    costFaelleslaan: faelleslaan,
+    costRenovation: renovation,
+    costAndreDrift: andre,
+  };
+}
 
 interface Ctx {
   state: FunnelStateV2;
@@ -60,6 +86,10 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
       }
       if (patch.afterSaleRaw !== undefined) {
         next.afterSale = AFTER_SALE_DISPLAY_TO_SLUG[patch.afterSaleRaw] ?? null;
+      }
+      // Sync drift-array → v1 cost-felter (submit-action læser dem)
+      if (patch.additionalDrift !== undefined) {
+        Object.assign(next, syncDriftToCostFields(patch.additionalDrift));
       }
       return next;
     });
