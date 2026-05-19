@@ -1,18 +1,16 @@
+'use client';
+
 /**
  * /salg-wire — wireframe-version af hele salg-flowet.
  *
- * INGEN DESIGN. Kun layout + flow:
- *   - System font (system-ui)
- *   - Sort tekst paa hvid baggrund
- *   - Hairline 1px grey borders
- *   - [box] placeholder for billeder
- *   - Plain HTML inputs, ingen styling
- *   - Alle 13 screens vist vertikalt scroll-down for at se hele flowet paa een gang
+ * To modes:
+ *   - "clickable" (default): klik dig gennem som en rigtig funnel,
+ *     next/prev knapper, stage-rail viser hvor du er
+ *   - "stacked": alle 14 screens vist vertikalt for overblik
  *
- * Bruges til at vurdere strukturen uden at aestetik staa i vejen.
+ * INGEN DESIGN. Kun layout + flow.
  */
-
-export const dynamic = 'force-static';
+import { useState } from 'react';
 
 const SCREENS = [
   {
@@ -104,6 +102,11 @@ const SCREENS = [
 const STAGES = ['adresse', 'boligen', 'udgifter', 'lidt om dig', 'estimat'];
 
 export default function SalgWirePage() {
+  const [mode, setMode] = useState<'clickable' | 'stacked'>('clickable');
+  const [idx, setIdx] = useState(0);
+
+  const screen = SCREENS[Math.min(idx, SCREENS.length - 1)];
+
   return (
     <div
       style={{
@@ -117,14 +120,51 @@ export default function SalgWirePage() {
       }}
     >
       <header style={{ borderBottom: '2px solid #000', paddingBottom: 24, marginBottom: 48 }}>
-        <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#666', margin: 0 }}>
-          wireframe — flow + layout only
-        </p>
-        <h1 style={{ fontSize: 32, fontWeight: 600, margin: '8px 0 0', letterSpacing: '-0.01em' }}>
-          /salg flow
-        </h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 24, flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#666', margin: 0 }}>
+              wireframe — flow + layout only
+            </p>
+            <h1 style={{ fontSize: 32, fontWeight: 600, margin: '8px 0 0', letterSpacing: '-0.01em' }}>
+              /salg flow
+            </h1>
+          </div>
+          <div style={{ display: 'flex', gap: 0, border: '1px solid #000' }}>
+            <button
+              type="button"
+              onClick={() => setMode('clickable')}
+              style={{
+                padding: '6px 14px',
+                fontSize: 12,
+                background: mode === 'clickable' ? '#000' : '#fff',
+                color: mode === 'clickable' ? '#fff' : '#000',
+                border: 0,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              clickable
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('stacked')}
+              style={{
+                padding: '6px 14px',
+                fontSize: 12,
+                background: mode === 'stacked' ? '#000' : '#fff',
+                color: mode === 'stacked' ? '#fff' : '#000',
+                border: 0,
+                borderLeft: '1px solid #000',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              stacked
+            </button>
+          </div>
+        </div>
         <p style={{ fontSize: 14, color: '#444', margin: '12px 0 0', maxWidth: 540 }}>
-          13 screens vertikalt scroll. Ingen farver, ingen typografi-valg, ingen shadows. Brug det her til at vurdere flow + informationshierarki uden at aestetikken kommer i vejen.
+          14 screens. Ingen farver, ingen typografi-valg, ingen shadows. Brug det her til at vurdere flow + informationshierarki uden at aestetikken kommer i vejen.
         </p>
         <div style={{ marginTop: 20, fontSize: 12, color: '#666' }}>
           Stage rail (vises øverst i hver funnel-screen):
@@ -138,17 +178,21 @@ export default function SalgWirePage() {
         </div>
       </header>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
-        {SCREENS.map((s) => (
-          <section
-            key={s.n}
-            style={{ borderTop: '1px dashed #aaa', paddingTop: 24 }}
-          >
-            <ScreenHeader n={s.n} stage={s.stage} name={s.name} totalStages={s.stage} />
-            <div style={{ marginTop: 20 }}>{s.render()}</div>
-          </section>
-        ))}
-      </div>
+      {mode === 'clickable' ? (
+        <ClickableFlow idx={idx} setIdx={setIdx} screen={screen} />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
+          {SCREENS.map((s) => (
+            <section
+              key={s.n}
+              style={{ borderTop: '1px dashed #aaa', paddingTop: 24 }}
+            >
+              <ScreenHeader n={s.n} stage={s.stage} name={s.name} totalStages={s.stage} />
+              <div style={{ marginTop: 20 }}>{s.render()}</div>
+            </section>
+          ))}
+        </div>
+      )}
 
       <footer style={{ borderTop: '2px solid #000', marginTop: 80, paddingTop: 24, fontSize: 12, color: '#666' }}>
         End of flow. 14 screens. Conditional: screen 13 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 12.
@@ -158,6 +202,138 @@ export default function SalgWirePage() {
 }
 
 // ─── Components ───────────────────────────────────────────────────────────
+
+function ClickableFlow({
+  idx,
+  setIdx,
+  screen,
+}: {
+  idx: number;
+  setIdx: (n: number) => void;
+  screen: typeof SCREENS[number];
+}) {
+  function next() {
+    if (idx < SCREENS.length - 1) {
+      setIdx(idx + 1);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }
+  function prev() {
+    if (idx > 0) {
+      setIdx(idx - 1);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }
+
+  return (
+    <div>
+      {/* Position-indicator + nav */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, fontSize: 12, color: '#666' }}>
+        <span>
+          screen <strong style={{ color: '#000' }}>{idx + 1}</strong> af {SCREENS.length}
+        </span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            onClick={prev}
+            disabled={idx === 0}
+            style={{
+              padding: '6px 14px',
+              fontSize: 12,
+              background: idx === 0 ? '#eee' : '#fff',
+              color: idx === 0 ? '#999' : '#000',
+              border: '1px solid #000',
+              cursor: idx === 0 ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            ← forrige
+          </button>
+          <button
+            type="button"
+            onClick={next}
+            disabled={idx === SCREENS.length - 1}
+            style={{
+              padding: '6px 14px',
+              fontSize: 12,
+              background: idx === SCREENS.length - 1 ? '#eee' : '#000',
+              color: idx === SCREENS.length - 1 ? '#999' : '#fff',
+              border: '1px solid #000',
+              cursor: idx === SCREENS.length - 1 ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            næste →
+          </button>
+        </div>
+      </div>
+
+      {/* Quick-jump screen-selector */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 32, flexWrap: 'wrap', fontSize: 11 }}>
+        {SCREENS.map((s, i) => (
+          <button
+            key={s.n}
+            type="button"
+            onClick={() => {
+              setIdx(i);
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }}
+            style={{
+              padding: '4px 8px',
+              background: i === idx ? '#000' : '#fff',
+              color: i === idx ? '#fff' : '#000',
+              border: '1px solid #ccc',
+              cursor: 'pointer',
+              fontSize: 11,
+              fontFamily: 'inherit',
+            }}
+          >
+            {String(s.n).padStart(2, '0')}
+          </button>
+        ))}
+      </div>
+
+      <ScreenHeader n={screen.n} stage={screen.stage} name={screen.name} totalStages={screen.stage} />
+      <div style={{ marginTop: 24 }}>{screen.render()}</div>
+
+      {/* Bottom nav too */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 48, paddingTop: 24, borderTop: '1px solid #ddd', fontSize: 13 }}>
+        <button
+          type="button"
+          onClick={prev}
+          disabled={idx === 0}
+          style={{
+            padding: '8px 18px',
+            background: idx === 0 ? '#eee' : '#fff',
+            color: idx === 0 ? '#999' : '#000',
+            border: '1px solid #000',
+            cursor: idx === 0 ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit',
+            fontSize: 13,
+          }}
+        >
+          ← forrige
+        </button>
+        <button
+          type="button"
+          onClick={next}
+          disabled={idx === SCREENS.length - 1}
+          style={{
+            padding: '8px 18px',
+            background: idx === SCREENS.length - 1 ? '#eee' : '#000',
+            color: idx === SCREENS.length - 1 ? '#999' : '#fff',
+            border: '1px solid #000',
+            cursor: idx === SCREENS.length - 1 ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit',
+            fontSize: 13,
+          }}
+        >
+          næste →
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function ScreenHeader({ n, stage, name }: { n: number; stage: string; name: string; totalStages: string }) {
   return (
