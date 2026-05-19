@@ -15,6 +15,24 @@ import { StickyHowItWorks } from './components/StickyHowItWorks';
 import { StatsTimeline } from './components/StatsTimeline';
 import { TestimonialsEditorial } from './components/TestimonialsEditorial';
 
+function TrustPoint({ kicker, body }: { kicker: string; body: string }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <span
+        className="font-display ink text-[18px] sm:text-[20px] leading-[1.1] shrink-0"
+        style={{
+          fontWeight: 500,
+          fontVariationSettings: "'opsz' 30, 'SOFT' 30",
+          letterSpacing: '-0.01em',
+        }}
+      >
+        {kicker}
+      </span>
+      <span className="font-body text-[13px] muted leading-[1.4]">{body}</span>
+    </div>
+  );
+}
+
 export function Landing() {
   return (
     <div className="relative">
@@ -25,7 +43,7 @@ export function Landing() {
           <div className="lg:col-span-7 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-body tracking-tight bg-teal-tint accent" style={{ fontWeight: 500 }}>
               <span className="w-1 h-1 rounded-full accent" style={{ background: 'currentColor' }} />
-              <span className="lowercase">drevet siden 2024 — 87 boliger købt</span>
+              <span className="lowercase">drevet siden 2020 — 87 boliger købt</span>
             </div>
 
             <h1
@@ -45,10 +63,26 @@ export function Landing() {
             </h1>
 
             <p className="font-body text-[17px] sm:text-[19px] muted leading-[1.55] max-w-lg text-balance">
-              Foreløbigt tilbud på fem minutter. Du vælger overtagelsesdato fra fjorten dage til seks måneder. Ingen mæglersalær, ingen fremvisninger.
+              Foreløbigt tilbud på fem minutter. Du vælger overtagelsesdato — når det passer dig. Ingen mæglersalær, ingen fremvisninger.
             </p>
 
             <AddressPillV3 />
+
+            {/* Trust-strip under address pill */}
+            <div className="pt-2 grid sm:grid-cols-3 gap-x-6 gap-y-3 max-w-2xl">
+              <TrustPoint
+                kicker="87+"
+                body="boliger købt siden 2020"
+              />
+              <TrustPoint
+                kicker="bliv boende"
+                body="som lejer og nyd friværdien"
+              />
+              <TrustPoint
+                kicker="0 kr"
+                body="i mæglersalær"
+              />
+            </div>
           </div>
 
           {/* Højre — editorial billede + caption */}

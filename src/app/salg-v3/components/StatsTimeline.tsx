@@ -16,6 +16,27 @@ interface Period {
 
 // Stub-data — kommer fra DB i production
 const PERIODS: Period[] = [
+  // 2020 — første år, langsom start
+  { label: 'mar 20', monthIso: '2020-03', handler: 1, highlight: 'Første handel — startskuddet for 365 Ejendomme.' },
+  { label: 'jun 20', monthIso: '2020-06', handler: 1 },
+  { label: 'sep 20', monthIso: '2020-09', handler: 2 },
+  { label: 'dec 20', monthIso: '2020-12', handler: 1 },
+  // 2021 — ramp-up
+  { label: 'mar 21', monthIso: '2021-03', handler: 2 },
+  { label: 'jun 21', monthIso: '2021-06', handler: 2 },
+  { label: 'sep 21', monthIso: '2021-09', handler: 3 },
+  { label: 'dec 21', monthIso: '2021-12', handler: 2 },
+  // 2022
+  { label: 'mar 22', monthIso: '2022-03', handler: 3 },
+  { label: 'jun 22', monthIso: '2022-06', handler: 3, highlight: 'Første sale-leaseback til pensioneret enke i Næstved.' },
+  { label: 'sep 22', monthIso: '2022-09', handler: 3 },
+  { label: 'dec 22', monthIso: '2022-12', handler: 2 },
+  // 2023
+  { label: 'mar 23', monthIso: '2023-03', handler: 4 },
+  { label: 'jun 23', monthIso: '2023-06', handler: 3 },
+  { label: 'sep 23', monthIso: '2023-09', handler: 4 },
+  { label: 'dec 23', monthIso: '2023-12', handler: 3 },
+  // 2024 — kraftig vækst
   { label: 'jan 24', monthIso: '2024-01', handler: 2 },
   { label: 'feb 24', monthIso: '2024-02', handler: 3 },
   { label: 'mar 24', monthIso: '2024-03', handler: 5 },
@@ -57,7 +78,7 @@ export function StatsTimeline() {
     <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-20 sm:py-28">
       <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-end mb-10">
         <div className="lg:col-span-6 space-y-3">
-          <p className="font-body text-[12px] tracking-[0.2em] uppercase soft">drevet siden 2024</p>
+          <p className="font-body text-[12px] tracking-[0.2em] uppercase soft">drevet siden 2020</p>
           <h2 className="font-display ink text-[clamp(36px,5vw,60px)] leading-[1.02] tracking-[-0.025em] text-balance" style={{ fontWeight: 400 }}>
             {totalHandler} handler.{' '}
             <em
@@ -120,9 +141,13 @@ export function StatsTimeline() {
         </div>
 
         {/* Year ticks */}
-        <div className="grid grid-cols-3 mt-2 font-body text-[11px] soft tracking-[0.1em] uppercase">
+        <div className="grid grid-cols-7 mt-2 font-body text-[11px] soft tracking-[0.1em] uppercase">
+          <span>2020</span>
+          <span>2021</span>
+          <span>2022</span>
+          <span>2023</span>
           <span>2024</span>
-          <span className="text-center">2025</span>
+          <span>2025</span>
           <span className="text-right">2026</span>
         </div>
 
@@ -155,7 +180,7 @@ export function StatsTimeline() {
             </div>
           ) : (
             <p className="font-body text-[14px] soft">
-              <span className="font-tabular">{totalHandler}</span> handler i alt mellem januar 2024 og maj 2026.
+              <span className="font-tabular">{totalHandler}</span> handler i alt mellem marts 2020 og maj 2026.
               <span className="block mt-1">Gennemsnit: <span className="font-tabular">{(totalHandler / PERIODS.length).toFixed(1)}</span> handler om måneden.</span>
             </p>
           )}

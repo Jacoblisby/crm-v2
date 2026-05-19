@@ -25,21 +25,21 @@ const STEPS: Step[] = [
   },
   {
     n: '02',
-    title: 'Jacob ringer inden et døgn',
-    body: 'Kort snak. Vi forstår din situation og bolig. Du forpligter ikke til noget.',
+    title: 'Vi ringer inden et døgn',
+    body: 'Du kan vælge at følge op med et uforpligtende prisverificerings-syn — vi kigger forbi og bekræfter tallene.',
     detail: 'Ingen aggressiv opfølgning. Hvis vores tilbud ikke giver mening for dig, hører du ikke fra os igen.',
   },
   {
     n: '03',
     title: 'Gratis besigtigelse',
-    body: 'Vi kommer forbi inden for en uge. Måler op, fotograferer, bekræfter tilstanden.',
-    detail: 'Falder vores tilbud mere end 5% under det foreløbige, kan du trække dig uden konsekvens.',
+    body: 'Vi kommer forbi, måler op, fotograferer og bekræfter tilstanden — så får du et bindende tilbud.',
+    detail: 'Hvis vores endelige tilbud afviger fra det foreløbige, kan du trække dig uden konsekvens.',
   },
   {
     n: '04',
     title: 'Du vælger overtagelse',
-    body: 'Fjorten dage til seks måneder. Kontant på konto. Ingen bank-forbehold.',
-    detail: 'Hurtigere overtagelse giver bonus. Længere overtagelse gør tilbuddet en smule lavere.',
+    body: 'Når det passer dig — fra hurtigt til måneder fremme. Kontant på konto. Ingen bank-forbehold.',
+    detail: 'Du kan også vælge at blive boende som lejer og nyde friværdien. Sale-leaseback er kerneproduktet for os.',
   },
 ];
 
