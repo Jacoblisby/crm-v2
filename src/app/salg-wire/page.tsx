@@ -97,6 +97,7 @@ export default function SalgWirePage() {
 
   return (
     <div
+      className="wire-root"
       style={{
         fontFamily: 'system-ui, -apple-system, sans-serif',
         background: '#fff',
@@ -152,7 +153,7 @@ export default function SalgWirePage() {
           </div>
         </div>
         <p style={{ fontSize: 14, color: '#444', margin: '12px 0 0', maxWidth: 540 }}>
-          14 screens. Ingen farver, ingen typografi-valg, ingen shadows. Brug det her til at vurdere flow + informationshierarki uden at aestetikken kommer i vejen.
+          12 screens. Ingen farver, ingen typografi-valg, ingen shadows. Brug det her til at vurdere flow + informationshierarki uden at aestetikken kommer i vejen.
         </p>
         <div style={{ marginTop: 20, fontSize: 12, color: '#666' }}>
           Stage rail (vises øverst i hver funnel-screen):
@@ -183,8 +184,61 @@ export default function SalgWirePage() {
       )}
 
       <footer style={{ borderTop: '2px solid #000', marginTop: 80, paddingTop: 24, fontSize: 12, color: '#666' }}>
-        End of flow. 14 screens. Conditional: screen 13 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 12.
+        End of flow. 12 screens. Conditional: screen 11 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 10.
       </footer>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .wire-root {
+            padding: 20px 14px !important;
+            font-size: 14px;
+          }
+          .wire-root h1 {
+            font-size: 26px !important;
+          }
+          .wire-root h2 {
+            font-size: 22px !important;
+          }
+          /* 2-kolonne screen-layout (label/input) → stack */
+          .wire-root [style*="grid-template-columns: 5fr 7fr"],
+          .wire-root [style*="grid-template-columns: 7fr 5fr"] {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          /* Inner 1fr 1fr grids → stack */
+          .wire-root [style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+          }
+          /* 3-col → 2-col */
+          .wire-root [style*="grid-template-columns: repeat(3, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          /* 4-col chips → 2x2 */
+          .wire-root [style*="grid-template-columns: repeat(4, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          /* 5-col stage-rail → wrap */
+          .wire-root [style*="grid-template-columns: repeat(5, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          /* Estimat number-cell adjust */
+          .wire-root [style*="grid-template-columns: 1fr auto"] {
+            grid-template-columns: 1fr !important;
+          }
+          /* Estimat header big number — scale down */
+          .wire-root p[style*="font-size: 56px"] {
+            font-size: 36px !important;
+          }
+          /* Quick-jump screen-selector wraps fine, just bigger tap area */
+          .wire-root button {
+            min-height: 40px;
+          }
+          /* Reduce top-of-section margins */
+          .wire-root section {
+            margin-top: 32px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -361,7 +415,7 @@ function StageRail({ active }: { active: string }) {
 
 function TopBar({ address }: { address?: boolean }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #ddd', marginBottom: 16, fontSize: 12 }}>
+    <div className="wire-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #ddd', marginBottom: 16, fontSize: 12, gap: 8, flexWrap: 'wrap' }}>
       <span>[ 365 ejendomme logo ]</span>
       {address && <span style={{ color: '#666' }}>📍 Bogensevej 53, 1. th, 4700 Næstved</span>}
       <span style={{ color: '#666' }}>📞 tel · gem</span>
