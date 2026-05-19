@@ -1,0 +1,54 @@
+#	Spørgsmål	Opendoor	Offerpad	Zillow	365 Ejendomme	Hvorfor 365 spørger	Rækkefølge i 365-flow	Hvorfor placeret der
+1	Adresse	Ja	Ja	Ja	Ja	Trigger OIS+BBR-opslag, comparable handler, postnr-baseret leje-rate (kr/m²/md). MUST.	1	Hot-start: laveste friktion + maksimal automatik. Adresse alene driver 60% af pricing-input.
+2	Boligtype	Auto	Manuel	Nej	Auto+editable	Eksklusionskriterium — vi køber primært ejerlejligheder. Triggers conditional hvis villa/rækkehus.	2	Bekraeft: bruger ser OIS-data og siger "ja det er min bolig" — peak commit-vilje.
+3	Boligareal (kvm)	Auto	Manuel	Optional	Auto+editable	MUST for kr/m²-beregning. Direkte input til pricing-model.	2	Bekraeft: BBR-værdi vises, bruger kan rette hvis BBR er forkert.
+4	Antal værelser	Manuel	Manuel	Optional	Auto+editable	Udlejnings-rate (3v vs 2v har 15% premium). Comparable-faktor.	2	Bekraeft: BBR-værdi vises.
+5	Antal badeværelser	Manuel	Manuel	Optional	NEJ	BBR har inkonsistent badeværelse-data. Vi udleder via kvm + grundplan ved besigtigelse.	—	Ikke spurgt.
+6	Byggeår	Auto	Manuel	Optional	Auto+editable	Standardiseret risiko-faktor — pre-1970 bygninger har højere EF-vedligehold.	2	Bekraeft.
+7	Etage	Nej	Nej	Nej	Auto+editable	Udlejnings-pris (høje etager + lys = premium), tilgængelighed.	2	Bekraeft.
+8	Elevator	Nej	Nej	Nej	Auto+editable	Udlejnings-prestige, kritisk for ældre / mobilitetshæmmede målgruppe.	2	Bekraeft.
+9	Altan eller terrasse	Nej	Nej	Nej	Auto+editable	Premium-faktor på køb og leje (5-10% i Næstved-data).	2	Bekraeft.
+10	Energi-mærke (A-G)	Nej	Nej	Nej	MANGLER	Allerede i BBR — bør vises og bekræftes. Påvirker varme-prognose + EF-renoverings-risiko.	(foreslået 2)	Bekraeft — sammen med øvrige BBR-felter.
+11	Kontakt: fulde navn	Slut	Slut	Optional	Tidlig (3)	Lead-relation, personlig henvendelse.	3	Kontakt: efter Bekraeft (commit-peak) for tidlig lead-capture.
+12	Kontakt: email	Slut	Slut	Optional	Tidlig (3)	Tilbud-leverance, opfølgning, email-tracking.	3	Kontakt.
+13	Kontakt: telefon	Slut	Slut	Optional	Tidlig (3)	Jacob ringer indenfor 24 timer. Critical for konvertering.	3	Kontakt.
+14	Antal ejere (samejer?)	Nej	Nej	Nej	MANGLER	Påvirker juridik — ægtefælle-samtykke, samejekontrakt, hvis arv: er der enighed.	(foreslået 3)	Kontakt — naturlig kontekst "hvem er involveret".
+15	Hvor længe har du boet der	Nej	Nej	Nej	MANGLER	Påvirker ejertid og fortjeneste-skat ved udlejning (<2 år = særlige regler).	(foreslået 3 eller 11)	Lidt om dig — emotional investment + skat.
+16	Hvornår vil du flytte	Slut nogle steder	Tidligt-mid	Nej	Tidlig (4)	Planlægning + overtagelses-bonus (14d → 6m). Påvirker pris ±15.000 kr.	4	Lige efter Kontakt: kvalificerer haste-niveau før vi går i detaljer.
+17	Køkken: stand (4 niveauer)	Overordnet	Overordnet	Nej	Detalje + foto-grid	MUST for refurb-cost. Køkken er én af de to dyreste renoveringer.	5	Boligen-stage: visuel + sjov start. Photo-grid feels som spil, ikke form.
+18	Køkken: årgang	Nej	Nej	Nej	Ja (valgfri)	Forfiner refurb-estimat — "god stand" + 2022 = ingen afsætninger.	5	Sammen med stand-valg.
+19	Køkken: mærke (HTH, Svane, IKEA)	Nej	Nej	Nej	Ja (valgfri)	FJERN: vi bruger det ikke i pricing-model. Skip-able. Vi kan ikke fact-check brand.	5	(anbefalet fjernet)
+20	Bad: stand (4 niveauer)	Overordnet	Overordnet	Nej	Detalje + foto-grid	MUST. Bad er dyrest at renovere + fugt-risiko er largest unknown.	6	Efter køkken — natural progression af dyreste rum først.
+21	Bad: årgang	Nej	Nej	Nej	Ja (valgfri)	Forfiner refurb.	6	Sammen med stand.
+22	Stue: stand (4 niveauer)	Overordnet	Overordnet	Nej	Detalje + foto-grid	MUST. Gulv + maling refurb.	7	Boligen-stage.
+23	Soveværelse: stand (4 niveauer)	Overordnet	Overordnet	Nej	Detalje + foto-grid	MUST. Gulv + maling refurb.	8	Boligen-stage afslutning — sidste rum-vurdering.
+24	Hvidevarer der følger med (8 chip)	Nej	Nej	Nej	Ja	Marginal pris-påvirkning. Mest brugbar for udlejnings-pakke. Skip-able.	9	Sidste detaljer: optional-bucket.
+25	Andre fotos (altan, plantegning, gang)	Nej	Nej	Nej	Ja (4 slots valgfri)	FORENKLES — 4 separate slots overkill. 1 "samlet billed-upload" virker bedre.	9	(anbefalet forenklet)
+26	Notes (fri tekst)	Nej	Sommetider	Nej	Ja (valgfri)	Catch-all for ting der ikke passer i felter.	9	Sidste detaljer.
+27	Boligens specielle ting (solceller, udlejet, etc.)	Nej	Nej	Nej	Ja (multi-select)	Solceller = energi-værdi. Aktuelt udlejet = KRITISK (kæmpe påvirkning på overtagelse).	9	Sidste detaljer.
+28	Forhold der kan påvirke prisen (fælleslån, renoveringsplaner, servitutter)	Nej	Nej	Nej	Ja (multi-select)	Negative pris-justeringer. MUST kender vi før vi giver estimat.	9	Sidste detaljer.
+29	Tag-tilstand i bygningen (EF-niveau)	Nej	Nej	Nej	MANGLER	Proxy for EF fælleslån-risiko — kommende tag-renovering = stor udgift for alle ejere.	(foreslået 9)	Sidste detaljer — under "forhold der kan påvirke prisen".
+30	(Conditional) Udlejning: månedlig leje	Nej	Nej	Nej	Ja	Cash-flow vurdering hvis udlejet.	9 (conditional)	Reveal når "Aktuelt udlejet" valgt.
+31	(Conditional) Udlejning: depositum	Nej	Nej	Nej	Ja	Lovgivnings-krav check.	9 (conditional)	Conditional reveal.
+32	(Conditional) Udlejning: forudbetalt leje	Nej	Nej	Nej	Ja	Cash-flow + opsigelses-friktion.	9 (conditional)	Conditional reveal.
+33	(Conditional) Udlejning: startdato	Nej	Nej	Nej	Ja	Tidsdimension — hvor længe har lejekontrakt eksisteret.	9 (conditional)	Conditional reveal.
+34	(Conditional) Udlejning: uopsigelig fra udlejer	Nej	Nej	Nej	Ja (ja/nej + mdr)	KRITISK — bestemmer om vi overhovedet kan disponere over boligen.	9 (conditional)	Conditional reveal.
+35	(Conditional) Udlejning: lejekontrakt upload	Nej	Nej	Nej	Ja (valgfri)	Verificering + fund af specialvilkår.	9 (conditional)	Conditional reveal.
+36	Fællesudgifter til ejerforeningen	Nej	Nej	Nej	Ja (PÅKRÆVET)	MUST. Direkte input til drift-beregning i afkast.	10	Udgifter: money-context. Eneste required-felt på dette step.
+37	Grundskyld	Nej	Nej	Nej	Ja	MUST. Drift.	10	Udgifter.
+38	Renovation	Nej	Nej	Nej	Ja	Drift. Ofte inkluderet i fællesudg.	10	Udgifter.
+39	Grundfond	Nej	Nej	Nej	Ja	Drift-bidrag til EF reserve.	10	Udgifter.
+40	Vand (acontobeløb? + årlig regning)	Nej	Nej	Nej	Ja (ja/nej + beløb)	MUST. Drift.	10	Udgifter.
+41	Varme (acontobeløb? + årlig regning)	Nej	Nej	Nej	Ja (ja/nej + beløb)	MUST. Drift.	10	Udgifter.
+42	Hæftelse tinglyst (engangsbeløb)	Nej	Nej	Nej	Ja	MUST. Trækkes fra låneprovenuet.	10	Udgifter.
+43	(Dynamic) Øvrige driftudgifter (forsikring, fælleslån, adm, antenne, internet, vedligeh., andet)	Nej	Nej	Nej	Ja (+ knap dropdown)	Fleksibel input til drift. Bruger tilføjer kun det der gælder.	10	Udgifter.
+44	Eksisterende restgæld på realkreditlån	Nej	Nej	Nej	MANGLER	Påvirker netto-provenu og forventning ("jeg får 800k" vs "1.1m i hånden"). Transparens fra start.	(foreslået 10)	Udgifter — money-context.
+45	Dokumentation upload (PDF/JPG)	Nej	Nej	Nej	Ja (valgfri)	Manual-validering af tal. Nice-to-have.	10	Udgifter.
+46	Eksisterende mægler-vurdering	Nej	Nej	Nej	MANGLER	Forventnings-set — vis hvor vores tilbud ligger ift. mægler-pris transparent.	(foreslået 11)	Lidt om dig — sammen med "hvor er du i processen".
+47	Hvad er hovedgrunden til at sælge	Nej	Sometimes	Nej	Ja (6 valg)	Salgs-strategi (hastværk vs ikke), empati, forhandlings-position.	11	Lidt om dig: efter money-stage er bruger committed.
+48	Hvad skal du efter salget (4 valg)	Nej	Nej	Nej	Ja	MUST — triggers sale-leaseback eller udflytter-product. Kerneforretningens kritiske distinction.	12	Lidt om dig: efter grund — naturlig "hvorfor + hvad så".
+49	(Conditional) Ny bolig: områder	Nej	Nej	Nej	Ja (chip multi-select)	Match mod vores 218 lejemål. Cross-sell opportunity.	13 (conditional)	Reveal når "Vil leje anden bolig" valgt.
+50	(Conditional) Ny bolig: rum + kvm min	Nej	Nej	Nej	Ja	Match-kriterier.	13 (conditional)	Conditional reveal.
+51	(Conditional) Ny bolig: max husleje	Nej	Nej	Nej	Ja	Budget-grænse for match.	13 (conditional)	Conditional reveal.
+52	(Conditional) Ny bolig: must-have features (8 chip)	Nej	Nej	Nej	Ja	Match-kriterier.	13 (conditional)	Conditional reveal.
+53	(Conditional) Ny bolig: indflytnings-timing	Nej	Nej	Nej	Ja	Logistik mod salgsdato.	13 (conditional)	Conditional reveal.
