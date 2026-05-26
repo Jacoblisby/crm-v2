@@ -37,14 +37,22 @@ interface CostBreakdown {
  * Salgsopstilling-table-rows har dette format efter PDF text-extract:
  *   "Ejendomsvaerdiskat 2026 2.190,96"
  *   "Grundskyld 2026 1.271,00"
+ *   "Grundskyld bolig 2026 3.669,00"            ← danbolig variant m. "bolig"
+ *   "Rottebekæmpelse Anslået 2026 200,00"        ← variant m. "Anslået" mellem
+ *   "VVS fælleslån Anslået 2026 6.553,92"
+ *   "Opsparing tagfond 2026 10.845,00"
  *   "Fællesudgifter 2026 13.752,00"
- *   "Rottebekæmpelse 2026 99,21"
  *   "Ejerudgift i alt 1. år: 17.313,17"
  *
  * Strategy: STRIKT TABEL-MATCH foerst
- *   1. Soeg efter `<label> <year> <amount>` pattern (label efterfulgt af aarstal og beloeb)
+ *   1. Soeg efter `<label> [<optional-word>] <year> <amount>` pattern.
+ *      Optional ord taeller ting som "bolig", "Anslået", "anslået", "jf." etc
+ *      som maeglere proppe ind mellem label og aar.
  *   2. Fallback: `<label> kr <amount>` (linjer uden aarskolonne)
- *   3. Fallback: `<label>: <amount>` med kolon-separator
+ *   3. Fallback: `<label>: <amount>` med kolon-separator. KUN aktiv hvis ikke
+ *      foretaget pattern 1 match — fordi "Grundlag for grundskyld: 582.400"
+ *      ville ellers fange beskatningsgrundlag i stedet for actual grundskyld.
+ *      Vi anchorer derfor labelet med (?<![\\wæøå]) word-boundary foran.
  *   4. Hvis intet match: return 0
  *
  * Vi tager IKKE FOERSTE amount efter label, fordi label appears multiple times
@@ -53,10 +61,15 @@ interface CostBreakdown {
  */
 function findAmountAfter(text: string, ...labels: string[]): number {
   for (const labelPattern of labels) {
-    // Pattern 1: <label> <YEAR> <amount> — table-row format
+    // Pattern 1: <label> [<word>] <YEAR> <amount> — table-row format
+    // Optional intermediate-word fanger varianter som:
+    //   "Grundskyld bolig 2026 3.669,00"
+    //   "Rottebekæmpelse Anslået 2026 200,00"
+    //   "VVS fælleslån Anslået 2026 6.553,92"
+    // \\w+ matcher alfanumerisk inkl. unicode-bogstaver pga 'u' flag.
     const tablePattern = new RegExp(
-      `${labelPattern}\\s+(?:20\\d{2})\\s+([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
-      'i',
+      `${labelPattern}(?:\\s+[\\p{L}.]+)?\\s+(?:20\\d{2})\\s+([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      'iu',
     );
     const tableMatch = text.match(tablePattern);
     if (tableMatch && tableMatch[1]) {
@@ -67,7 +80,7 @@ function findAmountAfter(text: string, ...labels: string[]): number {
     // Pattern 2: <label> kr. <amount> — explicit kr-format
     const krPattern = new RegExp(
       `${labelPattern}[^\\n]{0,30}?kr\\.?\\s*([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
-      'i',
+      'iu',
     );
     const krMatch = text.match(krPattern);
     if (krMatch && krMatch[1]) {
@@ -75,10 +88,13 @@ function findAmountAfter(text: string, ...labels: string[]): number {
       if (val > 0 && !isYearLike(val, krMatch[1])) return val;
     }
 
-    // Pattern 3: <label>: <amount> — kolon-separator format
+    // Pattern 3: <label>: <amount> — kolon-separator format.
+    // Vi kraever word-boundary foran labelet saa "Grundlag for grundskyld: X"
+    // ikke matcher "Grundskyld" som label. Pre-context "for " eller "af "
+    // foran label skal afvises.
     const colonPattern = new RegExp(
-      `${labelPattern}:\\s*([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
-      'i',
+      `(?<![\\w])(?<!\\bfor\\s)(?<!\\baf\\s)${labelPattern}:\\s*([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      'iu',
     );
     const colonMatch = text.match(colonPattern);
     if (colonMatch && colonMatch[1]) {
@@ -145,10 +161,16 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
     'Ejerforeningens?\\s+(?:fælles)?l[åa]n',
   );
 
+  // Grundfond + tagfond/vedligeholdelsesfond — EF-opsparing til kommende
+  // store-projekter. Danbolig bruger "Opsparing tagfond" som table-row;
+  // andre maeglere bruger "Henlæggelse til grundfond" osv. Vi samler alle
+  // under costGrundfond (semantisk: EF reserve-bidrag).
   const grundfond = findAmountAfter(text,
+    'Opsparing(?:\\s+til)?(?:\\s+(?:tag|grund|vedligeholdelses))?fond',
+    'Henl[æa]ggelse(?:r)?(?:\\s+til\\s+(?:tag|grund|vedligeholdelses)?fond)?',
+    'Bidrag\\s+til\\s+(?:tag|grund)?fond',
+    'Tagfond',
     'Grundfond',
-    'Henl[æa]ggelse(?:r)?(?:\\s+til\\s+grundfond)?',
-    'Bidrag\\s+til\\s+grundfond',
   );
 
   const vice = findAmountAfter(text,
