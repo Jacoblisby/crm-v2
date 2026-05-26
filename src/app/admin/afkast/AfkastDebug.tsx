@@ -57,12 +57,65 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
   const t = result.trace;
   const ydelsePct = (betalingPrMio / 1_000_000) * 100;
 
+  // Hjælper: targetMet flag — viser tydeligt om vores bud-model rammer target.
+  const targetMet = result.roeEbtPct >= targetRoe;
+  const afslagKr = initial?.prisLabel === 'listepris' && result.budAt20PctRoe
+    ? pris - result.budAt20PctRoe
+    : 0;
+  const afslagPct = afslagKr > 0 && pris > 0 ? Math.round((afslagKr / pris) * 100) : 0;
+
   return (
-    <div className="space-y-6">
-      {/* INPUTS */}
-      <section className="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
-        <h2 className="font-semibold">Inputs</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="space-y-4">
+      {/* HOVEDRESULTAT — bud + afkast PROMINENT, øverst */}
+      <section className="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4 items-start">
+          <div>
+            <div className="text-xs text-slate-600 uppercase tracking-wide">Vores bud (target ROE EBT ≥ {targetRoe}%)</div>
+            <div className="text-4xl font-bold tabular-nums text-emerald-700 mt-1">
+              {result.budAt20PctRoe ? `${fmt(result.budAt20PctRoe)} kr` : '— target ikke nået'}
+            </div>
+            {initial?.prisLabel === 'listepris' && afslagKr > 0 && (
+              <div className="text-sm text-slate-600 mt-1">
+                <span className="font-semibold text-slate-900">{fmt(afslagKr)} kr</span> under listepris ({afslagPct}% afslag)
+              </div>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-[11px] text-slate-600 uppercase tracking-wide">ROA EBIT</div>
+              <div className={`text-2xl font-bold tabular-nums ${result.roaEbitPct >= 5 ? 'text-emerald-700' : result.roaEbitPct >= 3 ? 'text-amber-700' : 'text-red-600'}`}>
+                {result.roaEbitPct}%
+              </div>
+              <div className="text-[10px] text-slate-500 italic">EBIT / kapitalbehov</div>
+            </div>
+            <div>
+              <div className="text-[11px] text-slate-600 uppercase tracking-wide">
+                ROE EBT {targetMet && <span className="text-emerald-700">✓ target</span>}
+              </div>
+              <div className={`text-2xl font-bold tabular-nums ${targetMet ? 'text-emerald-700' : result.roeEbtPct >= 10 ? 'text-amber-700' : 'text-red-600'}`}>
+                {result.roeEbtPct}%
+              </div>
+              <div className="text-[10px] text-slate-500 italic">EBT / EK (før skat)</div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-emerald-200">
+          <Stat label="Cash flow / md (EBT)" value={`${fmt(result.cfMd)} kr`} />
+          <Stat label="Egenkapital binding" value={`${fmt(result.egenkapital)} kr`} />
+          <Stat label="Kapitalbehov" value={`${fmt(result.kapitalbehov)} kr`} />
+          <Stat
+            label="ROE Netto (m. skat)"
+            value={`${result.roeNettoPct}%`}
+            sublabel="kun reference"
+            muted
+          />
+        </div>
+      </section>
+
+      {/* FORUDSÆTNINGER — Inputs + Finansiering samlet */}
+      <section className="bg-white border border-slate-200 rounded-lg p-4 space-y-4">
+        <h2 className="font-semibold text-sm uppercase tracking-wide text-slate-600">Forudsætninger</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <Field
             label={
               initial?.prisLabel === 'listepris'
@@ -80,48 +133,10 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
           <Field label="Refurbish (engang)" value={refurb} onChange={setRefurb} suffix="kr" />
           <Field label="Hæftelse EF" value={haeftelse} onChange={setHaeftelse} suffix="kr" />
         </div>
-      </section>
-
-      {/* HOVEDRESULTAT — ROA + ROE EBT prominent (uden skat) */}
-      <section className="bg-emerald-50 border border-emerald-300 rounded-lg p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <BigStat
-            label="Bud ved target"
-            sublabel={`ROE EBT ≥ ${targetRoe}% (uden skat)`}
-            value={result.budAt20PctRoe ? `${fmt(result.budAt20PctRoe)} kr` : '—'}
-            color="emerald"
-          />
-          <BigStat
-            label="ROA EBIT"
-            sublabel="EBIT / kapitalbehov"
-            value={`${result.roaEbitPct}%`}
-          />
-          <BigStat
-            label="ROE EBT"
-            sublabel="EBT / egenkapital (før skat)"
-            value={`${result.roeEbtPct}%`}
-          />
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-emerald-200">
-          <Stat label="Cash flow / md (EBT)" value={`${fmt(result.cfMd)} kr`} />
-          <Stat label="Egenkapital" value={`${fmt(result.egenkapital)} kr`} />
-          <Stat label="Kapitalbehov" value={`${fmt(result.kapitalbehov)} kr`} />
-          <Stat
-            label="ROE Netto (m. skat)"
-            value={`${result.roeNettoPct}%`}
-            sublabel="kun til reference"
-            muted
-          />
-        </div>
-      </section>
-
-      {/* RENTE / YDELSE — vigtigt at se tydeligt */}
-      <section className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-        <h2 className="font-semibold">📊 Finansiering — rente & ydelse</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <div className="text-xs text-slate-600 mb-1">
-              Årlig ydelse (rente + evt. afdrag) — kr per lånt mio
+              Årlig ydelse — kr per lånt mio
             </div>
             <div className="relative">
               <input
@@ -135,11 +150,11 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
                 kr/mio
               </span>
             </div>
-            <div className="text-xs text-slate-600 mt-1">
-              = <strong>{ydelsePct.toFixed(2)}%</strong> af hovedstol/år
-              {ydelsePct < 4 && <span className="text-amber-600"> (lavt — antager afdragsfri F-kort)</span>}
-              {ydelsePct >= 4 && ydelsePct < 6 && <span className="text-slate-500"> (afdragsfri ved 4-6% rente)</span>}
-              {ydelsePct >= 6 && <span className="text-slate-500"> (typisk 30-år med afdrag + rente)</span>}
+            <div className="text-xs text-slate-500 mt-1">
+              = <strong className="text-slate-700">{ydelsePct.toFixed(2)}%</strong> af hovedstol/år
+              {ydelsePct < 4 && <span className="text-amber-600"> · afdragsfri F-kort</span>}
+              {ydelsePct >= 4 && ydelsePct < 6 && <span> · afdragsfri ved 4-6%</span>}
+              {ydelsePct >= 6 && <span> · 30-år m. afdrag</span>}
             </div>
           </div>
           <div>
@@ -157,30 +172,34 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
                 %
               </span>
             </div>
-            <div className="text-xs text-slate-600 mt-1">
+            <div className="text-xs text-slate-500 mt-1">
               Bud-modellen finder højeste pris hvor ROE EBT ≥ {targetRoe}%
             </div>
           </div>
-          <div className="sm:col-span-2 grid grid-cols-3 gap-3 text-sm bg-white p-3 rounded border border-blue-200">
-            <Stat label="Hovedstol" value={`${fmt(t.hovedstol)} kr`} />
-            <Stat label="Årlig ydelse" value={`${fmt(t.aarligYdelse)} kr`} sublabel={`= ${ydelsePct.toFixed(2)}%`} />
-            <Stat
-              label="Rente-andel ca."
-              value={
-                ydelsePct < 4
-                  ? `~${ydelsePct.toFixed(1)}%`
-                  : `Skal opdeles manuelt`
-              }
-              sublabel="afdragsfri = ren rente"
-              muted
-            />
-          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 text-sm bg-slate-50 p-3 rounded border border-slate-200">
+          <Stat label="Hovedstol" value={`${fmt(t.hovedstol)} kr`} />
+          <Stat label="Årlig ydelse" value={`${fmt(t.aarligYdelse)} kr`} sublabel={`= ${ydelsePct.toFixed(2)}%`} />
+          <Stat
+            label="Rente-andel ca."
+            value={
+              ydelsePct < 4
+                ? `~${ydelsePct.toFixed(1)}%`
+                : 'Manuel opdeling'
+            }
+            sublabel="afdragsfri = ren rente"
+            muted
+          />
         </div>
       </section>
 
-      {/* MELLEMREGNINGER */}
-      <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <h2 className="font-semibold p-4 pb-2">Mellemregninger</h2>
+      {/* MELLEMREGNINGER — fuldt audit-trail, default collapsed */}
+      <details className="bg-white border border-slate-200 rounded-lg overflow-hidden group">
+        <summary className="font-semibold p-4 cursor-pointer select-none flex items-center justify-between hover:bg-slate-50">
+          <span>Mellemregninger</span>
+          <span className="text-xs text-slate-500 group-open:hidden">vis fulde beregningskæde →</span>
+          <span className="text-xs text-slate-500 hidden group-open:inline">skjul ↑</span>
+        </summary>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-slate-100">
             <SectionRow title="A. KAPITALBEHOV" />
@@ -277,12 +296,14 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
             />
           </tbody>
         </table>
-      </section>
+      </details>
 
-      {/* CONSTANTS */}
-      <section className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs space-y-1">
-        <h3 className="font-semibold text-sm mb-2">Antagelser (constants — ikke editerbare i denne version)</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {/* CONSTANTS — antagelser, default collapsed */}
+      <details className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs">
+        <summary className="font-semibold text-sm cursor-pointer select-none">
+          Antagelser (constants — ikke editerbare)
+        </summary>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
           <Const label="Bankvurd %" value={`${AFKAST_CONSTANTS.BANKVURD_PCT * 100}%`} />
           <Const label="Realkredit %" value={`${AFKAST_CONSTANTS.REALKREDIT_PCT * 100}%`} />
           <Const label="Kurs" value={`${AFKAST_CONSTANTS.KURS}`} />
@@ -292,7 +313,7 @@ export function AfkastDebug({ initial }: { initial?: AfkastInitial } = {}) {
           <Const label="Tinglysning lån" value={`${AFKAST_CONSTANTS.TINGLYSNING_LAAN * 100}%`} />
           <Const label="Default target ROE" value={`${AFKAST_CONSTANTS.TARGET_ROE * 100}% EBT`} />
         </div>
-      </section>
+      </details>
     </div>
   );
 }
@@ -326,28 +347,6 @@ function Field({
         )}
       </div>
     </label>
-  );
-}
-
-function BigStat({
-  label,
-  sublabel,
-  value,
-  color,
-}: {
-  label: string;
-  sublabel?: string;
-  value: string;
-  color?: 'emerald';
-}) {
-  return (
-    <div>
-      <div className="text-xs text-slate-600">{label}</div>
-      {sublabel && <div className="text-[10px] text-slate-500 italic">{sublabel}</div>}
-      <div className={`font-bold tabular-nums text-2xl mt-1 ${color === 'emerald' ? 'text-emerald-700' : 'text-slate-900'}`}>
-        {value}
-      </div>
-    </div>
   );
 }
 
