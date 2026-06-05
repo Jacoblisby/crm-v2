@@ -98,4 +98,49 @@ Sikkerhed til e/f: Ja, med kr. 80.000,00 I form af: Vedtægter lyst pantstiftend
     expect(b.costFaelleslaan).toBe(0);
     expect(b.costGrundfond).toBe(0);
   });
+
+  /**
+   * danbolig Næstved — Kählersvej 2H, 1. 6., 4700 Næstved.
+   * Sag 0520002765. Salgsopstilling 4.6.2026.
+   *
+   * Format-quirk i denne PDF: cost-rows har INGEN aar mellem label og beloeb.
+   *   "Grundskyld bolig 6.029,00"          (vs Lindevang: "... bolig 2026 3.669,00")
+   *   "Fællesudgifter 10.500,00"
+   *   "Rottebekæmpelse 79,03"
+   *
+   * Pattern 1 maa derfor have aar som OPTIONAL.
+   */
+  const DANBOLIG_KAEHLERSVEJ = `
+Adresse: Kählersvej 2H, 1. 6., 4700 Næstved
+Kontantpris: kr. 995.000 Sagsnr.: 0520002765 Ejerudgift/md.: kr. 2.128
+Ejerudgift 1. år: Pr. år: Kontantbehov ved køb: kr. kr. kr. kr. kr. kr. kr.
+Ejendomsværdiskat 4.218,72
+Grundskyld bolig 6.029,00
+Fællesudgifter 10.500,00
+Grundfond 3.300,00
+Renovation 1.406,00
+Rottebekæmpelse 79,03
+Ejerudgift i alt 1. år: 25.532,75
+Sikkerhed til e/f: Ja, med kr. 20.000,00 I form af: Vedtægter lyst pantstiftende
+`;
+
+  it('parses danbolig Kählersvej 2H (uden aar mellem label og beloeb)', () => {
+    const b = parseSalgsopstilling(DANBOLIG_KAEHLERSVEJ);
+    expect(b.costGrundvaerdi).toBe(6029);
+    expect(b.costFaellesudgifter).toBe(10500);
+    expect(b.costRottebekempelse).toBe(79);
+    expect(b.costRenovation).toBe(1406);
+    expect(b.costGrundfond).toBe(3300);
+    expect(b.costForsikringer).toBe(0);
+    expect(b.costFaelleslaan).toBe(0);
+
+    const drift =
+      b.costGrundvaerdi + b.costFaellesudgifter + b.costRottebekempelse +
+      b.costRenovation + b.costForsikringer + b.costFaelleslaan +
+      b.costGrundfond + b.costVicevaert + b.costVedligeholdelse + b.costAndreDrift;
+    expect(drift).toBe(21314);
+
+    expect(parseEjerudgiftTotal(DANBOLIG_KAEHLERSVEJ)).toBe(25533);
+    expect(parseEjerforeningSikkerhed(DANBOLIG_KAEHLERSVEJ)).toBe(20000);
+  });
 });
