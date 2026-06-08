@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import type { StandLevel } from '@/lib/services/price-engine';
 import {
   initialStateV2,
   type FunnelStateV2,
@@ -9,6 +10,29 @@ import {
   REASON_DISPLAY_TO_SLUG,
   AFTER_SALE_DISPLAY_TO_SLUG,
 } from './types';
+
+/**
+ * Per-rum-stand syncer til v1's overall `state.stand` (vaerste vinder, da
+ * det er det der driver refurb-prisen). submit-action kraever state.stand
+ * — uden denne sync fejler v2/v3 submit med "Mangler stand-vurdering".
+ */
+const STAND_PRIORITY: Record<StandLevel, number> = {
+  slidt: 5,
+  trænger: 4,
+  middel: 3,
+  god: 2,
+  nyrenoveret: 1,
+};
+
+function deriveWorstStand(s: FunnelStateV2): StandLevel | null {
+  const rooms = [s.kitchenStand, s.bathroomStand, s.livingRoomStand, s.bedroomStand]
+    .filter((x): x is StandLevel => x != null);
+  if (rooms.length === 0) return null;
+  return rooms.reduce<StandLevel>(
+    (worst, cur) => (STAND_PRIORITY[cur] > STAND_PRIORITY[worst] ? cur : worst),
+    rooms[0],
+  );
+}
 
 /**
  * Derive v1 cost-felter fra dynamisk drift-liste.
@@ -85,7 +109,12 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<FunnelStateV2>;
         const migrated = migrateLegacyDrift(parsed);
-        setState({ ...initialStateV2, ...migrated });
+        const next: FunnelStateV2 = { ...initialStateV2, ...migrated };
+        // Migration: gamle states har ikke synket per-rum-stand til state.stand.
+        if (!next.stand) {
+          next.stand = deriveWorstStand(next);
+        }
+        setState(next);
       }
     } catch {}
     const params = new URLSearchParams(window.location.search);
@@ -114,6 +143,16 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
       }
       if (patch.afterSaleRaw !== undefined) {
         next.afterSale = AFTER_SALE_DISPLAY_TO_SLUG[patch.afterSaleRaw] ?? null;
+      }
+      // Sync per-rum-stand → v1 state.stand (vaerste rum vinder).
+      // submit-action kraever state.stand for at oprette lead + sende email.
+      if (
+        patch.kitchenStand !== undefined ||
+        patch.bathroomStand !== undefined ||
+        patch.livingRoomStand !== undefined ||
+        patch.bedroomStand !== undefined
+      ) {
+        next.stand = deriveWorstStand(next);
       }
       // Sync drift → v1 cost-felter. Trigger ved aendring i additionalDrift
       // ELLER costGrundfond, da costAndreDrift = (drift andre) + costGrundfond.

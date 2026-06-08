@@ -11,13 +11,69 @@
  * Overtagelse-slider fjernet maj 2026: gav ikke mening paa foreloebig
  * estimat-side. Bruger har allerede valgt overtagelse paa step 4 (Hvornaar
  * flytter); detaljer faar de paa besigtigelse.
+ *
+ * SUBMIT ved mount (juni 2026): tidligere ramte estimat-skaermen kun
+ * client-side — ingen lead i DB, ingen email. Nu firer vi submitFunnelAction
+ * ved foerste mount per address (idempotent via localStorage key).
  */
+import { useEffect, useRef, useState } from 'react';
 import { useFunnelV3 } from '../FunnelV3Context';
+import { submitFunnelAction } from '../../salg/submit-action';
 
 const TEAL = 'oklch(0.35 0.045 200)';
+const SUBMIT_KEY = 'salg.v3.submitted';
+
+type SubmitState =
+  | { status: 'idle' }
+  | { status: 'sending' }
+  | { status: 'sent'; leadId: string | null }
+  | { status: 'error'; error: string }
+  | { status: 'already' };
 
 export function EstimatV3() {
   const { state, reset } = useFunnelV3();
+  const submittedRef = useRef(false);
+  const [submit, setSubmit] = useState<SubmitState>({ status: 'idle' });
+
+  useEffect(() => {
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+
+    // Mangler kontakt-data → kan ikke submitte. Bruger har sandsynligvis hoppet
+    // direkte til estimat via dev-tools; vi ignorerer stille.
+    if (!state.fullName || !state.email || !state.phone) return;
+    if (!state.postalCode || !state.kvm) return;
+
+    // Idempotency: sammensaet noegle fra adresse + email saa samme bruger ikke
+    // submitter flere gange ved page-reload. Hvis adressen aendres, faar de
+    // et nyt submit.
+    const idemKey = `${state.fullAddress || state.postalCode}|${state.email}`;
+    try {
+      const prev = localStorage.getItem(SUBMIT_KEY);
+      if (prev === idemKey) {
+        setSubmit({ status: 'already' });
+        return;
+      }
+    } catch {}
+
+    setSubmit({ status: 'sending' });
+    (async () => {
+      try {
+        const r = await submitFunnelAction(state, []);
+        if (r.ok) {
+          try {
+            localStorage.setItem(SUBMIT_KEY, idemKey);
+          } catch {}
+          setSubmit({ status: 'sent', leadId: r.leadId ?? null });
+        } else {
+          setSubmit({ status: 'error', error: r.error || 'Ukendt fejl' });
+        }
+      } catch (err) {
+        const m = err instanceof Error ? err.message : String(err);
+        setSubmit({ status: 'error', error: m });
+      }
+    })();
+  }, [state]);
 
   // Beregn bud
   const bud = state.kvm
@@ -141,6 +197,22 @@ export function EstimatV3() {
           <p className="font-body text-[15px] muted max-w-md mx-auto leading-[1.6]">
             For at aftale en gratis besigtigelse. Efter besigtigelsen giver vi et endeligt bindende tilbud.
           </p>
+          {(submit.status === 'sent' || submit.status === 'already') && (
+            <p className="font-body text-[13px] accent flex items-center justify-center gap-1.5">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              Tilbud sendt på {state.email}
+            </p>
+          )}
+          {submit.status === 'sending' && (
+            <p className="font-body text-[13px] soft">Sender bekræftelse til {state.email}…</p>
+          )}
+          {submit.status === 'error' && (
+            <p className="font-body text-[13px]" style={{ color: 'oklch(0.55 0.15 25)' }}>
+              Kunne ikke sende mail-bekræftelse ({submit.error}) — vi har stadig dine oplysninger og ringer alligevel.
+            </p>
+          )}
           <div className="pt-2 flex flex-wrap gap-3 justify-center">
             <a
               href="tel:+4589876634"
