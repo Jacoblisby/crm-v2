@@ -39,39 +39,39 @@ const SCREENS = [
   },
   {
     n: 5,
+    stage: 'adresse',
+    name: 'Hvad leder du efter? (conditional — direkte efter)',
+    render: () => <NyBolig />,
+  },
+  {
+    n: 6,
     stage: 'boligen',
     name: 'Køkken (1/3)',
     render: () => <Room label="Køkken" hasYear />,
   },
   {
-    n: 6,
+    n: 7,
     stage: 'boligen',
     name: 'Badeværelse (2/3)',
     render: () => <Room label="Badeværelse" hasYear />,
   },
   {
-    n: 7,
+    n: 8,
     stage: 'boligen',
     name: 'Øvrige rum (3/3) — stue + sov',
     render: () => <RoomsOvrige />,
   },
   {
-    n: 8,
+    n: 9,
     stage: 'boligen',
     name: 'Sidste detaljer (4/4)',
     render: () => <SidsteDetaljer />,
   },
   {
-    n: 9,
+    n: 10,
     stage: 'udgifter',
     name: 'Boligens udgifter',
     render: () => <Udgifter />,
-  },
-  {
-    n: 10,
-    stage: 'lidt om dig',
-    name: 'Hvad leder du efter? (conditional)',
-    render: () => <NyBolig />,
   },
   {
     n: 11,
@@ -81,7 +81,7 @@ const SCREENS = [
   },
 ];
 
-const STAGES = ['adresse', 'boligen', 'udgifter', 'lidt om dig', 'estimat'];
+const STAGES = ['adresse', 'boligen', 'udgifter', 'estimat'];
 
 export default function SalgWirePage() {
   const [mode, setMode] = useState<'clickable' | 'stacked'>('clickable');
@@ -178,7 +178,7 @@ export default function SalgWirePage() {
       )}
 
       <footer style={{ borderTop: '2px solid #000', marginTop: 80, paddingTop: 24, fontSize: 12, color: '#666' }}>
-        End of flow. 11 screens. Conditional: screen 10 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 4 (Din situation).
+        End of flow. 11 screens. Conditional: screen 5 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 4 (Din situation) — afsløres direkte herefter.
       </footer>
 
       <style>{`
@@ -705,7 +705,7 @@ function Placering() {
               ))}
             </div>
             <p style={{ fontSize: 12, color: '#888', marginTop: 8, borderTop: '1px solid #eee', paddingTop: 8 }}>
-              <strong>Conditional:</strong> Hvis &quot;Vil leje en anden bolig&quot; → screen 10 (NyBolig) tilføjes.
+              <strong>Conditional:</strong> Hvis &quot;Vil leje en anden bolig&quot; → screen 5 (NyBolig) afsløres direkte herefter.
             </p>
           </section>
         </div>
@@ -932,12 +932,12 @@ function NyBolig() {
   return (
     <div>
       <TopBar address />
-      <StageRail active="lidt om dig" />
+      <StageRail active="adresse" />
       <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
         <div>
           <Chip>DIN NYE BOLIG</Chip>
           <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvad leder du efter?</h1>
-          <p style={{ fontSize: 14, color: '#666' }}>Vises kun hvis &quot;Vil leje en anden bolig&quot; valgt.</p>
+          <p style={{ fontSize: 14, color: '#666' }}>Conditional — vises kun hvis du valgte &quot;Vil leje en anden bolig&quot; på forrige side. Vi viser den straks, så vi har match-data klar mens du beskriver boligen.</p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <section>
