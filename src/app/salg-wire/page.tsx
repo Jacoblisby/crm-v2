@@ -34,8 +34,8 @@ const SCREENS = [
   {
     n: 4,
     stage: 'adresse',
-    name: 'Hvornår vil du flytte?',
-    render: () => <Hvornaar />,
+    name: 'Din situation (timing + efter salg)',
+    render: () => <Placering />,
   },
   {
     n: 5,
@@ -70,17 +70,11 @@ const SCREENS = [
   {
     n: 10,
     stage: 'lidt om dig',
-    name: 'Hvad skal du efter salget?',
-    render: () => <EfterSalg />,
-  },
-  {
-    n: 11,
-    stage: 'lidt om dig',
     name: 'Hvad leder du efter? (conditional)',
     render: () => <NyBolig />,
   },
   {
-    n: 12,
+    n: 11,
     stage: 'estimat',
     name: 'Foreløbigt tilbud',
     render: () => <Estimat />,
@@ -153,7 +147,7 @@ export default function SalgWirePage() {
           </div>
         </div>
         <p style={{ fontSize: 14, color: '#444', margin: '12px 0 0', maxWidth: 540 }}>
-          12 screens. Ingen farver, ingen typografi-valg, ingen shadows. Brug det her til at vurdere flow + informationshierarki uden at aestetikken kommer i vejen.
+          11 screens. Ingen farver, ingen typografi-valg, ingen shadows. Brug det her til at vurdere flow + informationshierarki uden at aestetikken kommer i vejen.
         </p>
         <div style={{ marginTop: 20, fontSize: 12, color: '#666' }}>
           Stage rail (vises øverst i hver funnel-screen):
@@ -184,7 +178,7 @@ export default function SalgWirePage() {
       )}
 
       <footer style={{ borderTop: '2px solid #000', marginTop: 80, paddingTop: 24, fontSize: 12, color: '#666' }}>
-        End of flow. 12 screens. Conditional: screen 11 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 10.
+        End of flow. 11 screens. Conditional: screen 10 (NyBolig) vises kun hvis &quot;Vil leje en anden bolig&quot; valgt på screen 4 (Din situation).
       </footer>
 
       <style>{`
@@ -661,33 +655,59 @@ function Kontakt() {
   );
 }
 
-function Hvornaar() {
+function Placering() {
   return (
     <div>
       <TopBar address />
       <StageRail active="adresse" />
       <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
         <div>
-          <Chip>TIDSPLAN</Chip>
-          <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvornår vil du flytte?</h1>
-          <p style={{ fontSize: 14, color: '#666' }}>Påvirker ikke tilbuddet — hjælper os med at planlægge.</p>
+          <Chip>DIN SITUATION</Chip>
+          <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvornår + hvad så?</h1>
+          <p style={{ fontSize: 14, color: '#666' }}>
+            To korte spørgsmål om tidsplan og hvad du skal efter salget. Påvirker ikke tilbuddet — hjælper os med at finde den rigtige løsning.
+          </p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            ['Hurtigst muligt', 'Inden for 1 måned'],
-            ['1–3 måneder', 'Vi har lidt fleksibilitet'],
-            ['3–6 måneder', 'Planlagt, men ikke hastværk'],
-            ['6+ måneder', 'Jeg skal have tid og ro til at finde noget nyt'],
-            ['Ved ikke endnu', 'Jeg vil gerne lære mere om hvad jeg kan sælge for'],
-          ].map(([t, s]) => (
-            <div key={t} style={{ border: '1px solid #999', padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>{t}</strong>
-                <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>{s}</p>
-              </div>
-              <span style={{ width: 18, height: 18, border: '1px solid #999', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <section>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>hvornår vil du flytte?</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+              {[
+                ['Hurtigst muligt', 'Inden for 1 måned'],
+                ['1–3 måneder', 'Vi har lidt fleksibilitet'],
+                ['3–6 måneder', 'Planlagt, men ikke hastværk'],
+                ['6+ måneder', 'Jeg skal have tid og ro til at finde noget nyt'],
+                ['Ved ikke endnu', 'Jeg vil gerne lære mere om hvad jeg kan sælge for'],
+              ].map(([t, s]) => (
+                <div key={t} style={{ border: '1px solid #999', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong>{t}</strong>
+                    <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>{s}</p>
+                  </div>
+                  <span style={{ width: 16, height: 16, border: '1px solid #999', borderRadius: '50%' }} />
+                </div>
+              ))}
             </div>
-          ))}
+          </section>
+          <section style={{ borderTop: '1px solid #eee', paddingTop: 16 }}>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>hvad skal du efter salget?</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+              {[
+                ['Flytter ud helt', 'Jeg har et andet sted at bo.', false],
+                ['Vil blive boende', 'Du bliver boende og nyder friværdien bekymringsfrit.', true],
+                ['Vil leje en anden bolig', 'Vi har +20 lejemål klar til udlejning indenfor de næste 3 mdr.', false],
+                ['Ved ikke endnu', 'Vi tager den snak senere.', false],
+              ].map(([t, s, hl]) => (
+                <div key={t as string} style={{ border: '1px solid #999', padding: 12 }}>
+                  <strong>{t}</strong> {hl && <em style={{ fontSize: 11, color: '#888' }}>· populært</em>}
+                  <p style={{ fontSize: 13, color: '#666', margin: '4px 0 0' }}>{s}</p>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: 12, color: '#888', marginTop: 8, borderTop: '1px solid #eee', paddingTop: 8 }}>
+              <strong>Conditional:</strong> Hvis &quot;Vil leje en anden bolig&quot; → screen 10 (NyBolig) tilføjes.
+            </p>
+          </section>
         </div>
       </div>
       <FunnelBottom disabled />
@@ -793,7 +813,7 @@ function SidsteDetaljer() {
             </div>
           </section>
           <section>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>andre fotos (valgfri)</p>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#888' }}>tilføj billeder</p>
             <div style={{ border: '1px dashed #999', padding: 24, textAlign: 'center', fontSize: 13, color: '#666', marginTop: 8 }}>
               📎 Tap for at vedhæfte op til 10 billeder
               <p style={{ fontSize: 11, color: '#888', margin: '4px 0 0' }}>Altan, plantegning, entré, andet rum, eller hvad du vil</p>
@@ -901,38 +921,6 @@ function Udgifter() {
             <p style={{ fontSize: 13 }}>Restgæld (kr)</p>
             <p style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Ca-tal er fint. Står på seneste lånekontoudtog fra Nordea Kredit, Realkredit Danmark m.fl.</p>
           </section>
-        </div>
-      </div>
-      <FunnelBottom disabled />
-    </div>
-  );
-}
-
-function EfterSalg() {
-  return (
-    <div>
-      <TopBar address />
-      <StageRail active="lidt om dig" />
-      <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: 32, alignItems: 'flex-start' }}>
-        <div>
-          <Chip>DIN SITUATION</Chip>
-          <h1 style={{ fontSize: 32, margin: '16px 0', fontWeight: 600 }}>Hvad skal du efter salget?</h1>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            ['Flytter ud helt', 'Jeg har et andet sted at bo.', false],
-            ['Vil blive boende', 'Du bliver boende og nyder friværdien bekymringsfrit.', true],
-            ['Vil leje en anden bolig', 'Vi har +20 lejemål klar til udlejning indenfor de næste 3 mdr.', false],
-            ['Ved ikke endnu', 'Vi tager den snak senere.', false],
-          ].map(([t, s, hl]) => (
-            <div key={t as string} style={{ border: '1px solid #999', padding: 16 }}>
-              <strong>{t}</strong> {hl && <em style={{ fontSize: 11, color: '#888' }}>· populært</em>}
-              <p style={{ fontSize: 13, color: '#666', margin: '4px 0 0' }}>{s}</p>
-            </div>
-          ))}
-          <p style={{ fontSize: 12, color: '#888', marginTop: 8, borderTop: '1px solid #eee', paddingTop: 8 }}>
-            <strong>Conditional:</strong> Hvis &quot;Vil leje en anden bolig&quot; → screen 11 (NyBolig) tilføjes.
-          </p>
         </div>
       </div>
       <FunnelBottom disabled />
