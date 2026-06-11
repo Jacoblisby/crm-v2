@@ -61,19 +61,21 @@ interface CostBreakdown {
  */
 function findAmountAfter(text: string, ...labels: string[]): number {
   for (const labelPattern of labels) {
-    // Pattern 1: <label> [<word>] [<YEAR>] <amount> — table-row format
-    // Optional intermediate-word fanger varianter som:
+    // Pattern 1: <label> [<word>|<(parens)>]{0,2} [<YEAR>] <amount> — table-row format
+    // Optional mellem-indhold fanger varianter som:
     //   "Grundskyld bolig 2026 3.669,00"     ← Lindevangshusene-format m. aar
     //   "Grundskyld bolig 6.029,00"          ← Kählersvej-format UDEN aar
     //   "Rottebekæmpelse Anslået 2026 200,00"
     //   "VVS fælleslån Anslået 2026 6.553,92"
     //   "Fællesudgifter 10.500,00"           ← samme uden aar
+    //   "Fællesudgifter (fratrukket YouSee - afmeldt) 15.852,00" ← home-format
+    //                                          m. parentes mellem label og beloeb
     // \\p{L}+ matcher unicode-bogstaver (incl. å, ø, æ) pga 'u' flag.
     // Vi anchorer labelet med (?<![\\p{L}]) saa "for grundskyld" eller
     // "andel af fælleslån" ikke matcher (de er allerede dekkkt af colon-fallback,
     // men her hvor aar er optional faar vi flere false positives uden anchor).
     const tablePattern = new RegExp(
-      `(?<![\\p{L}])${labelPattern}(?:\\s+[\\p{L}.]+)?\\s+(?:20\\d{2}\\s+)?([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      `(?<![\\p{L}])${labelPattern}(?:\\s+[\\p{L}.]+|\\s*\\([^)]{0,80}\\)){0,2}\\s+(?:20\\d{2}\\s+)?([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
       'iu',
     );
     const tableMatch = text.match(tablePattern);
@@ -138,6 +140,7 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
 
   const rotte = findAmountAfter(text,
     'Rottebek[æa]mpelse(?:sgebyr)?',
+    'Skadedyrsbek[æa]mpelse(?:sgebyr)?', // home-mæglerens betegnelse
     'Rottegebyr',
   );
 

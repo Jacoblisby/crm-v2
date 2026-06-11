@@ -124,6 +124,46 @@ Ejerudgift i alt 1. år: 25.532,75
 Sikkerhed til e/f: Ja, med kr. 20.000,00 I form af: Vedtægter lyst pantstiftende
 `;
 
+  /**
+   * home Taastrup — Taastrup Vænge 49, 2. 3., 2630 Taastrup.
+   * Sag 1330002877. Salgsopstilling 10.6.2026.
+   *
+   * Format-quirks i home-PDF'er:
+   *   "Fællesudgifter (fratrukket YouSee - afmeldt) 15.852,00"
+   *     ← parentes-kommentar mellem label og beloeb
+   *   "Skadedyrsbekæmpelse 123,76"
+   *     ← home's betegnelse for rottebekæmpelse
+   */
+  const HOME_TAASTRUP_VAENGE = `
+Adresse: Taastrup Vænge 49, 2. 3., 2630 Taastrup
+Kontantpris: kr. 1.495.000 Sagsnr.: 1330002877 Ejerudgift/md.: kr. 2.119
+Ejerudgift 1. år: Pr. år: Kontantbehov ved køb: kr. kr. kr. kr. kr.
+Ejendomsværdiskat 5.283,60
+Grundskyld bolig 4.173,00
+Skadedyrsbekæmpelse 123,76
+Fællesudgifter (fratrukket YouSee - afmeldt) 15.852,00
+Ejerudgift i alt 1. år: 25.432,36
+Sikkerhed til e/f: Ja, med kr. 15.000,00 I form af: Ejerpantebrev
+`;
+
+  it('parses home Taastrup Vænge (parentes i label + Skadedyrsbekæmpelse)', () => {
+    const b = parseSalgsopstilling(HOME_TAASTRUP_VAENGE);
+    expect(b.costGrundvaerdi).toBe(4173);
+    expect(b.costFaellesudgifter).toBe(15852);
+    expect(b.costRottebekempelse).toBe(124);
+    expect(b.costRenovation).toBe(0);
+    expect(b.costFaelleslaan).toBe(0);
+
+    const drift =
+      b.costGrundvaerdi + b.costFaellesudgifter + b.costRottebekempelse +
+      b.costRenovation + b.costForsikringer + b.costFaelleslaan +
+      b.costGrundfond + b.costVicevaert + b.costVedligeholdelse + b.costAndreDrift;
+    expect(drift).toBe(20149);
+
+    expect(parseEjerudgiftTotal(HOME_TAASTRUP_VAENGE)).toBe(25432);
+    expect(parseEjerforeningSikkerhed(HOME_TAASTRUP_VAENGE)).toBe(15000);
+  });
+
   it('parses danbolig Kählersvej 2H (uden aar mellem label og beloeb)', () => {
     const b = parseSalgsopstilling(DANBOLIG_KAEHLERSVEJ);
     expect(b.costGrundvaerdi).toBe(6029);
