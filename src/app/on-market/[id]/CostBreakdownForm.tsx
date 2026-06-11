@@ -180,13 +180,17 @@ function CostField({
       <div className="text-xs text-slate-600 mb-0.5 truncate" title={label}>
         {label}
       </div>
+      {/* step="any": step={100} blokerede submit LYDLØST naar beloeb ikke var
+          deleligt med 100 (fx 15.852 fra PDF-parse) — requestSubmit/klik fejler
+          paa constraint validation uden synlig fejl. Reelle ejerudgifter er
+          aldrig hele hundreder. */}
       <input
         type="number"
         value={value || ''}
         onChange={(e) => onChange(Math.max(0, Math.round(Number(e.target.value) || 0)))}
         placeholder="0"
         min={0}
-        step={100}
+        step="any"
         className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded font-medium tabular-nums focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
       />
       {hint && (
