@@ -70,6 +70,8 @@ function findAmountAfter(text: string, ...labels: string[]): number {
     //   "Fællesudgifter 10.500,00"           ← samme uden aar
     //   "Fællesudgifter (fratrukket YouSee - afmeldt) 15.852,00" ← home-format
     //                                          m. parentes mellem label og beloeb
+    //   "Fællesudgifter kr. 1.490 pr. md. 17.880,00" ← danbolig md+aar-format:
+    //                                          md-beloeb FOERST, aars-beloeb sidst
     // \\p{L}+ matcher unicode-bogstaver (incl. å, ø, æ) pga 'u' flag.
     // Vi anchorer labelet med (?<![\\p{L}]) saa "for grundskyld" eller
     // "andel af fælleslån" ikke matcher (de er allerede dekkkt af colon-fallback,
@@ -78,10 +80,29 @@ function findAmountAfter(text: string, ...labels: string[]): number {
       `(?<![\\p{L}])${labelPattern}(?:\\s+[\\p{L}.]+|\\s*\\([^)]{0,80}\\)){0,2}\\s+(?:20\\d{2}\\s+)?([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
       'iu',
     );
-    const tableMatch = text.match(tablePattern);
+    const tableMatch = tablePattern.exec(text);
     if (tableMatch && tableMatch[1]) {
       const val = parseAmount(tableMatch[1]);
-      if (val > 0) return val;
+      if (val > 0) {
+        // md-check: hvis beloebet efterfoelges af "pr. md" er det MAANEDLIGT.
+        // Tabellen har da typisk aars-beloebet bagefter ("kr. 1.490 pr. md.
+        // 17.880,00") — brug det. Ellers gang md-beloebet med 12.
+        const after = text.slice(
+          tableMatch.index + tableMatch[0].length,
+          tableMatch.index + tableMatch[0].length + 50,
+        );
+        const mdMatch = after.match(
+          /^\s*(?:kr\.?\s*)?pr\.?\s*md\.?\s*(?:kr\.?\s*)?([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)?/i,
+        );
+        if (mdMatch) {
+          if (mdMatch[1]) {
+            const annual = parseAmount(mdMatch[1]);
+            if (annual > 0) return annual;
+          }
+          return Math.round(val * 12);
+        }
+        return val;
+      }
     }
 
     // Pattern 2: <label> kr. <amount> — explicit kr-format

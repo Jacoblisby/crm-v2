@@ -125,6 +125,51 @@ Sikkerhed til e/f: Ja, med kr. 20.000,00 I form af: Vedtægter lyst pantstiftend
 `;
 
   /**
+   * danbolig Slagelse — Nansensgade 14, st. 1, 4200 Slagelse.
+   * Sag 2840001501. Salgsopstilling 11.6.2026.
+   *
+   * Format-quirk: nogle rows viser BAADE md- og aars-beloeb:
+   *   "Fællesudgifter kr. 1.490 pr. md. 17.880,00"
+   *   "Grundfond kr. 339 pr. md. 4.068,00"
+   * Parseren skal tage AARS-beloebet (sidst), ikke md-beloebet (foerst).
+   * Tidligere bug: fangede 1.490 som aarlig fællesudgift.
+   */
+  const DANBOLIG_NANSENSGADE = `
+Adresse: Nansensgade 14, st. 1, 4200 Slagelse
+Kontantpris: kr. 895.000 Sagsnr.: 2840001501 Ejerudgift/md.: kr. 2.361
+Ejerudgift 1. år: Pr. år: Kontantbehov ved køb: kr. kr. kr. kr. kr. kr.
+Ejendomsværdiskat 3.321,12
+Grundskyld bolig 2.957,04
+Fællesudgifter kr. 1.490 pr. md. 17.880,00
+Rottebekæmpelse 108,65
+Grundfond kr. 339 pr. md. 4.068,00
+Ejerudgift i alt 1. år: 28.334,81
+Sikkerhed til e/f: Ja, med kr. 20.000,00 I form af: Vedtægter lyst pantstiftende
+`;
+
+  it('parses danbolig Nansensgade (md + aar paa samme row → tag aars-beloeb)', () => {
+    const b = parseSalgsopstilling(DANBOLIG_NANSENSGADE);
+    expect(b.costFaellesudgifter).toBe(17880); // IKKE 1490 (md-beloebet)
+    expect(b.costGrundfond).toBe(4068); // IKKE 339
+    expect(b.costGrundvaerdi).toBe(2957);
+    expect(b.costRottebekempelse).toBe(109);
+
+    const drift =
+      b.costGrundvaerdi + b.costFaellesudgifter + b.costRottebekempelse +
+      b.costRenovation + b.costForsikringer + b.costFaelleslaan +
+      b.costGrundfond + b.costVicevaert + b.costVedligeholdelse + b.costAndreDrift;
+    expect(drift).toBe(25014);
+
+    expect(parseEjerudgiftTotal(DANBOLIG_NANSENSGADE)).toBe(28335);
+    expect(parseEjerforeningSikkerhed(DANBOLIG_NANSENSGADE)).toBe(20000);
+  });
+
+  it('ganger md-beloeb med 12 hvis aars-tal mangler', () => {
+    const b = parseSalgsopstilling('Fællesudgifter kr. 1.490 pr. md.');
+    expect(b.costFaellesudgifter).toBe(17880);
+  });
+
+  /**
    * home Taastrup — Taastrup Vænge 49, 2. 3., 2630 Taastrup.
    * Sag 1330002877. Salgsopstilling 10.6.2026.
    *
