@@ -170,6 +170,48 @@ Sikkerhed til e/f: Ja, med kr. 20.000,00 I form af: Vedtægter lyst pantstiftend
   });
 
   /**
+   * estaldo (Steffen Christensen) — Nansensgade 14, 2. 16, 4200 Slagelse.
+   * Sag SC00218392. Salgsopstilling 25.06.2026.
+   *
+   * Ikke-DE-format. To-kolonne tabel "Pr. md. / Pr. år" hvor hver row har
+   * md-beloeb FOERST og aars-beloeb bagefter, begge med " kr." suffix:
+   *   "Ejerforening 1.031 kr. 12.372 kr."   ← "Ejerforening" = fællesudgifter
+   *   "Grundfond 227 kr. 2.724 kr."
+   *   "Grundskyld 166 kr. 1.989 kr."
+   *   "Rottebekæmpelse 8 kr. 95 kr."
+   * Parseren skal tage AARS-beloebet (det andet), ikke md.
+   */
+  const ESTALDO_NANSENSGADE = `
+ADRESSE Nansensgade 14, 2. 16, 4200 Slagelse SAGSNR SC00218392 KONTANTPRIS 695.000 kr. DATO 25.06.2026
+Ejerudgifter 1. år Pr. md. Pr. år
+Ejendomsværdiskat 185 kr. 2.224 kr.
+Ejerforening 1.031 kr. 12.372 kr.
+Grundfond 227 kr. 2.724 kr.
+Grundskyld 166 kr. 1.989 kr.
+Rottebekæmpelse 8 kr. 95 kr.
+Ejerudgifter i alt 1. år 1.617 kr. 19.404 kr.
+Forsikringsforhold Kilde til forsikringspræmie Ejerforenings ejendomsforsikring Forsikringsselskab Tryg
+Forening sikkerhed 20.000 kr. - I form af Ejerpantebrev
+`;
+
+  it('parses estaldo to-kolonne (md/år) — tager aars-beloeb', () => {
+    const b = parseSalgsopstilling(ESTALDO_NANSENSGADE);
+    expect(b.costFaellesudgifter).toBe(12372); // "Ejerforening", IKKE 1031
+    expect(b.costGrundfond).toBe(2724); // IKKE 227
+    expect(b.costGrundvaerdi).toBe(1989); // IKKE 166
+    expect(b.costRottebekempelse).toBe(95); // IKKE 8
+    expect(b.costForsikringer).toBe(0); // inkl. i ejerforening
+
+    const drift =
+      b.costGrundvaerdi + b.costFaellesudgifter + b.costRottebekempelse +
+      b.costRenovation + b.costForsikringer + b.costFaelleslaan +
+      b.costGrundfond + b.costVicevaert + b.costVedligeholdelse + b.costAndreDrift;
+    expect(drift).toBe(17180);
+
+    expect(parseEjerudgiftTotal(ESTALDO_NANSENSGADE)).toBe(19404); // IKKE 1 eller 1617
+  });
+
+  /**
    * home Taastrup — Taastrup Vænge 49, 2. 3., 2630 Taastrup.
    * Sag 1330002877. Salgsopstilling 10.6.2026.
    *

@@ -84,13 +84,26 @@ function findAmountAfter(text: string, ...labels: string[]): number {
     if (tableMatch && tableMatch[1]) {
       const val = parseAmount(tableMatch[1]);
       if (val > 0) {
-        // md-check: hvis beloebet efterfoelges af "pr. md" er det MAANEDLIGT.
-        // Tabellen har da typisk aars-beloebet bagefter ("kr. 1.490 pr. md.
-        // 17.880,00") — brug det. Ellers gang md-beloebet med 12.
         const after = text.slice(
           tableMatch.index + tableMatch[0].length,
           tableMatch.index + tableMatch[0].length + 50,
         );
+
+        // To-kolonne "Pr. md. / Pr. år"-tabel (estaldo): rows har formen
+        //   "Grundskyld 166 kr. 1.989 kr."  ← md FOERST, aar bagefter
+        // Vi fangede md-beloebet (val); aars-beloebet staar lige efter som
+        // "kr. <aar> kr.". Hvis aars-beloeb > md-beloeb er det den aarlige.
+        const twoColMatch = after.match(
+          /^\s*kr\.\s*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)\s*kr\./i,
+        );
+        if (twoColMatch && twoColMatch[1]) {
+          const annual = parseAmount(twoColMatch[1]);
+          if (annual > val) return annual;
+        }
+
+        // md-check: hvis beloebet efterfoelges af "pr. md" er det MAANEDLIGT.
+        // Tabellen har da typisk aars-beloebet bagefter ("kr. 1.490 pr. md.
+        // 17.880,00") — brug det. Ellers gang md-beloebet med 12.
         const mdMatch = after.match(
           /^\s*(?:kr\.?\s*)?pr\.?\s*md\.?\s*(?:kr\.?\s*)?([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)?/i,
         );
@@ -157,6 +170,9 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
     'F[æa]llesudgifter?(?:,?\\s*(?:anslået|jf\\.|inkl\\.?\\s*acontovand|i alt))?',
     'Boligens? andel af f[æa]llesudgifter?',
     'Ejerforeningens? f[æa]llesudgifter?',
+    // estaldo bruger bare "Ejerforening <beloeb>" som fællesudgift-row.
+    // Negative lookahead (?![\\p{L}]) saa "Ejerforeningens forsikring" ikke fanges.
+    'Ejerforening(?![\\p{L}])',
   );
 
   const rotte = findAmountAfter(text,
@@ -243,6 +259,9 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
 export function parseEjerudgiftTotal(text: string): number {
   // Strikt: kraev "i alt" + "år" — undgaa per-md varianter
   const patterns = [
+    // estaldo to-kolonne: "Ejerudgifter i alt 1. år 1.617 kr. 19.404 kr."
+    // → tag aars-beloebet (det andet), ikke md-beloebet (det foerste).
+    /Ejerudgifter?\s+i\s+alt\s+1\.?\s*[åa]r\s+[\d.,]+\s*kr\.\s*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)\s*kr/i,
     /Ejerudgift\s+i\s+alt\s+1\.?\s*[åa]r[:\s]*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/i,
     /Ejerudgifter?\s+i\s+alt[:\s]*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/i,
     /Boligydelse\s+i\s+alt[:\s]*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/i,
