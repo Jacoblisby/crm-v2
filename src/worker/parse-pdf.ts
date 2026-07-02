@@ -277,6 +277,44 @@ export function parseEjerudgiftTotal(text: string): number {
 }
 
 /**
+ * Parse ejendomsvaerdiskat (aarlig). Vi ekskluderer den fra drift (kun
+ * ejer-bebooere betaler den, ikke ved udlejning), men vi bruger den til at
+ * afstemme vores drift mod mæglerens "Ejerudgift i alt":
+ *   mæglers total = vores drift + ejendomsvaerdiskat
+ * Genbruger findAmountAfter saa den haandterer alle formater (aar-optional,
+ * to-kolonne md/aar, parentes, "pr. md").
+ */
+export function parseEjendomsvaerdiskat(text: string): number {
+  return findAmountAfter(text, 'Ejendomsv[æa]rdiskat(?:sbidrag)?');
+}
+
+export type ParseConfidence = 'ok' | 'uncertain';
+
+/**
+ * Sanity-check: afstemmer vores parsede drift mod mæglerens erklaerede total.
+ *
+ * Forventet: driftTotal + ejendomsvaerdiskat ≈ declaredTotal.
+ * Naar de afviger mere end tolerancen har parseren sandsynligvis misset et
+ * felt (nyt mægler-format) — returnér 'uncertain' saa UI'et kan flagge det
+ * i stedet for at vise falsk grøn "✓ udspecificeret".
+ *
+ * declaredTotal <= 0 → ingen reference at validere mod → 'ok' (neutral).
+ */
+export function assessParseConfidence(opts: {
+  driftTotal: number;
+  declaredTotal: number;
+  ejendomsvaerdiskat: number;
+}): ParseConfidence {
+  const { driftTotal, declaredTotal, ejendomsvaerdiskat } = opts;
+  if (declaredTotal <= 0) return 'ok';
+  const expectedDrift = declaredTotal - ejendomsvaerdiskat;
+  if (expectedDrift <= 0) return 'ok';
+  const diff = Math.abs(driftTotal - expectedDrift);
+  const tolerance = Math.max(1000, declaredTotal * 0.05);
+  return diff > tolerance ? 'uncertain' : 'ok';
+}
+
+/**
  * Parse engangsbeløb der følger med købet — typisk kaldet:
  *   - "Sikkerhed til e/f: Ja, med kr. 50.000,00" (danbolig format)
  *   - "Eksisterende sikkerhed: Kr. 49.000 i form af Ejerpantebrev" (realequity format)
@@ -391,6 +429,8 @@ export async function runParsePdfJob(opts: {
       const { text } = await extractText(pdf, { mergePages: true });
       const fullText = Array.isArray(text) ? text.join('\n') : text;
       const breakdown = parseSalgsopstilling(fullText);
+      const declaredTotal = parseEjerudgiftTotal(fullText);
+      const ejendomsvaerdiskat = parseEjendomsvaerdiskat(fullText);
 
       // Recompute afkast med ny breakdown (alle 10 cost-felter)
       const driftTotal =
@@ -404,6 +444,7 @@ export async function runParsePdfJob(opts: {
         breakdown.costVicevaert +
         breakdown.costVedligeholdelse +
         breakdown.costAndreDrift;
+      const confidence = assessParseConfidence({ driftTotal, declaredTotal, ejendomsvaerdiskat });
       const refurbTotal =
         c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
       const afk = computeAfkast({
@@ -421,7 +462,7 @@ export async function runParsePdfJob(opts: {
           bidDkk: afk.budAt20PctRoe,
           marginPct: afk.roeNettoPct.toString(),
           afkastCalculatedAt: new Date(),
-          pdfStatus: 'parsed',
+          pdfStatus: confidence === 'uncertain' ? 'parsed_uncertain' : 'parsed',
           pdfDownloadedAt: new Date(),
           updatedAt: new Date(),
         })

@@ -169,9 +169,10 @@ export async function uploadPdfAction(formData: FormData) {
     const { text } = await extractText(pdf, { mergePages: true });
     const fullText = Array.isArray(text) ? text.join('\n') : text;
 
-    const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed } = await import('@/worker/parse-pdf');
+    const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed, parseEjendomsvaerdiskat, assessParseConfidence } = await import('@/worker/parse-pdf');
     const breakdown = parseSalgsopstilling(fullText);
     const declaredTotal = parseEjerudgiftTotal(fullText);
+    const ejendomsvaerdiskat = parseEjendomsvaerdiskat(fullText);
     const ejerforeningSikkerhed = parseEjerforeningSikkerhed(fullText);
 
     // Hent kandidaten for at recompute afkast
@@ -193,6 +194,7 @@ export async function uploadPdfAction(formData: FormData) {
       breakdown.costVicevaert +
       breakdown.costVedligeholdelse +
       breakdown.costAndreDrift;
+    const confidence = assessParseConfidence({ driftTotal, declaredTotal, ejendomsvaerdiskat });
     const refurbTotal =
       c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
     const afk = computeAfkast({
@@ -211,7 +213,7 @@ export async function uploadPdfAction(formData: FormData) {
         bidDkk: afk.budAt20PctRoe,
         marginPct: afk.roeNettoPct.toString(),
         afkastCalculatedAt: new Date(),
-        pdfStatus: 'parsed',
+        pdfStatus: confidence === 'uncertain' ? 'parsed_uncertain' : 'parsed',
         pdfDownloadedAt: new Date(),
         updatedAt: new Date(),
       })
@@ -270,7 +272,7 @@ export async function bulkReparsePdfAction() {
   const start = Date.now();
 
   const { extractText, getDocumentProxy } = await import('unpdf');
-  const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed } =
+  const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed, parseEjendomsvaerdiskat, assessParseConfidence } =
     await import('@/worker/parse-pdf');
   const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
 
@@ -284,6 +286,8 @@ export async function bulkReparsePdfAction() {
       const { text } = await extractText(pdf, { mergePages: true });
       const fullText = Array.isArray(text) ? text.join('\n') : text;
       const breakdown = parseSalgsopstilling(fullText);
+      const declaredTotal = parseEjerudgiftTotal(fullText);
+      const ejendomsvaerdiskat = parseEjendomsvaerdiskat(fullText);
       const ejerforeningSikkerhed = parseEjerforeningSikkerhed(fullText);
 
       const driftTotal =
@@ -297,6 +301,7 @@ export async function bulkReparsePdfAction() {
         breakdown.costVicevaert +
         breakdown.costVedligeholdelse +
         breakdown.costAndreDrift;
+      const confidence = assessParseConfidence({ driftTotal, declaredTotal, ejendomsvaerdiskat });
       const refurbTotal =
         c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
       const afk = computeAfkast({
@@ -315,7 +320,7 @@ export async function bulkReparsePdfAction() {
           bidDkk: afk.budAt20PctRoe,
           marginPct: afk.roeNettoPct.toString(),
           afkastCalculatedAt: new Date(),
-          pdfStatus: 'parsed',
+          pdfStatus: confidence === 'uncertain' ? 'parsed_uncertain' : 'parsed',
           pdfDownloadedAt: new Date(),
           updatedAt: new Date(),
         })
@@ -367,10 +372,11 @@ export async function forceReparsePdfAction(input: { id: string }) {
     const { text } = await extractText(pdf, { mergePages: true });
     const fullText = Array.isArray(text) ? text.join('\n') : text;
 
-    const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed } =
+    const { parseSalgsopstilling, parseEjerudgiftTotal, parseEjerforeningSikkerhed, parseEjendomsvaerdiskat, assessParseConfidence } =
       await import('@/worker/parse-pdf');
     const breakdown = parseSalgsopstilling(fullText);
     const declaredTotal = parseEjerudgiftTotal(fullText);
+    const ejendomsvaerdiskat = parseEjendomsvaerdiskat(fullText);
     const ejerforeningSikkerhed = parseEjerforeningSikkerhed(fullText);
 
     const driftTotal =
@@ -384,6 +390,7 @@ export async function forceReparsePdfAction(input: { id: string }) {
       breakdown.costVicevaert +
       breakdown.costVedligeholdelse +
       breakdown.costAndreDrift;
+    const confidence = assessParseConfidence({ driftTotal, declaredTotal, ejendomsvaerdiskat });
     const refurbTotal =
       c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
     const afk = computeAfkast({
@@ -402,7 +409,7 @@ export async function forceReparsePdfAction(input: { id: string }) {
         bidDkk: afk.budAt20PctRoe,
         marginPct: afk.roeNettoPct.toString(),
         afkastCalculatedAt: new Date(),
-        pdfStatus: 'parsed',
+        pdfStatus: confidence === 'uncertain' ? 'parsed_uncertain' : 'parsed',
         pdfDownloadedAt: new Date(),
         updatedAt: new Date(),
       })

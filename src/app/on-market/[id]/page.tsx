@@ -67,6 +67,11 @@ export default async function OnMarketDetailPage({
         ? 'monthly-expense'
         : 'none';
 
+  // Parse-usikkerhed: sat af parser naar vores drift ikke afstemmer med
+  // mæglerens erklaerede "Ejerudgift i alt" (typisk nyt mægler-format vi
+  // ikke fanger korrekt). Flagges gult saa forkerte tal er selv-detekterende.
+  const parseUncertain = c.pdfStatus === 'parsed_uncertain';
+
   // User-overridden refurb hvis felter er udfyldt, ellers default 'middel'-rate.
   const userRefurbTotal =
     c.refurbGulv + c.refurbMaling + c.refurbRengoring + c.refurbAndre;
@@ -280,11 +285,13 @@ export default async function OnMarketDetailPage({
         {/* Drift-kilde */}
         <div
           className={`border rounded-lg p-4 space-y-1 ${
-            driftSource === 'breakdown'
-              ? 'bg-white border-slate-200'
-              : driftSource === 'monthly-expense'
-                ? 'bg-amber-50 border-amber-200'
-                : 'bg-red-50 border-red-200'
+            parseUncertain
+              ? 'bg-amber-50 border-amber-300'
+              : driftSource === 'breakdown'
+                ? 'bg-white border-slate-200'
+                : driftSource === 'monthly-expense'
+                  ? 'bg-amber-50 border-amber-200'
+                  : 'bg-red-50 border-red-200'
           }`}
         >
           <div className="text-[11px] uppercase tracking-wide text-slate-500">💰 Drift-kilde</div>
@@ -294,25 +301,35 @@ export default async function OnMarketDetailPage({
           <div className="text-xs">
             <span
               className={
-                driftSource === 'breakdown'
-                  ? 'text-emerald-700 font-semibold'
-                  : driftSource === 'monthly-expense'
-                    ? 'text-amber-700 font-semibold'
-                    : 'text-red-600 font-semibold'
+                parseUncertain
+                  ? 'text-amber-800 font-semibold'
+                  : driftSource === 'breakdown'
+                    ? 'text-emerald-700 font-semibold'
+                    : driftSource === 'monthly-expense'
+                      ? 'text-amber-700 font-semibold'
+                      : 'text-red-600 font-semibold'
               }
             >
-              {driftSource === 'breakdown'
-                ? 'Udspec. fra prospekt ✓'
-                : driftSource === 'monthly-expense'
-                  ? 'Mæglers ejerudgift × 12'
-                  : '❌ Ingen data'}
+              {parseUncertain
+                ? '⚠ Parse usikker — tjek tal'
+                : driftSource === 'breakdown'
+                  ? 'Udspec. fra prospekt ✓'
+                  : driftSource === 'monthly-expense'
+                    ? 'Mæglers ejerudgift × 12'
+                    : '❌ Ingen data'}
             </span>
-            {driftSource === 'monthly-expense' && c.monthlyExpense != null && (
+            {driftSource === 'monthly-expense' && c.monthlyExpense != null && !parseUncertain && (
               <span className="text-slate-500 ml-1">
                 ({c.monthlyExpense.toLocaleString('da-DK')} × 12)
               </span>
             )}
           </div>
+          {parseUncertain && (
+            <p className="text-[11px] text-amber-800 leading-snug pt-0.5">
+              Vores drift matcher ikke mæglerens erklærede total — parseren har
+              sandsynligvis misset et felt. Tjek Ejerudgifter mod salgsopstillingen.
+            </p>
+          )}
         </div>
       </section>
 
@@ -400,7 +417,11 @@ export default async function OnMarketDetailPage({
         <summary className="font-semibold p-4 cursor-pointer select-none flex items-center justify-between hover:bg-slate-50 text-sm">
           <span>📄 Salgsopstilling & ejerudgifter</span>
           <span className="text-xs text-slate-500 flex items-center gap-2">
-            {c.pdfUrl ? (
+            {parseUncertain ? (
+              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
+                ⚠ parse usikker
+              </span>
+            ) : c.pdfUrl ? (
               <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-medium">
                 PDF parsed ✓
               </span>

@@ -10,6 +10,8 @@ import {
   parseSalgsopstilling,
   parseEjerudgiftTotal,
   parseEjerforeningSikkerhed,
+  parseEjendomsvaerdiskat,
+  assessParseConfidence,
 } from './parse-pdf';
 
 describe('parseSalgsopstilling', () => {
@@ -269,5 +271,37 @@ Sikkerhed til e/f: Ja, med kr. 15.000,00 I form af: Ejerpantebrev
 
     expect(parseEjerudgiftTotal(DANBOLIG_KAEHLERSVEJ)).toBe(25533);
     expect(parseEjerforeningSikkerhed(DANBOLIG_KAEHLERSVEJ)).toBe(20000);
+  });
+});
+
+describe('parseEjendomsvaerdiskat', () => {
+  it('fanger simpelt format', () => {
+    expect(parseEjendomsvaerdiskat('Ejendomsværdiskat 4.630,80')).toBe(4631);
+  });
+  it('fanger estaldo to-kolonne (aars-beloeb)', () => {
+    expect(parseEjendomsvaerdiskat('Ejendomsværdiskat 185 kr. 2.224 kr.')).toBe(2224);
+  });
+  it('returnerer 0 hvis ikke fundet', () => {
+    expect(parseEjendomsvaerdiskat('Ingen skat her')).toBe(0);
+  });
+});
+
+describe('assessParseConfidence', () => {
+  it('ok naar drift + ejdvaerdiskat afstemmer med declared total', () => {
+    // estaldo Nansensgade: drift 17180 + ejdvaerdiskat 2224 = 19404 = declared
+    expect(assessParseConfidence({ driftTotal: 17180, declaredTotal: 19404, ejendomsvaerdiskat: 2224 })).toBe('ok');
+  });
+  it('uncertain naar drift er langt under forventet (parser missede felter)', () => {
+    // estaldo-bug: drift 401 mod forventet 17180
+    expect(assessParseConfidence({ driftTotal: 401, declaredTotal: 19404, ejendomsvaerdiskat: 2224 })).toBe('uncertain');
+  });
+  it('uncertain naar drift er absurd hoej (582k grundskyld-bug)', () => {
+    expect(assessParseConfidence({ driftTotal: 592113, declaredTotal: 35612, ejendomsvaerdiskat: 4631 })).toBe('uncertain');
+  });
+  it('ok (neutral) naar declared total ikke kunne parses', () => {
+    expect(assessParseConfidence({ driftTotal: 5000, declaredTotal: 0, ejendomsvaerdiskat: 0 })).toBe('ok');
+  });
+  it('tolererer smaa afvigelser inden for 5%', () => {
+    expect(assessParseConfidence({ driftTotal: 20000, declaredTotal: 25000, ejendomsvaerdiskat: 4200 })).toBe('ok');
   });
 });
