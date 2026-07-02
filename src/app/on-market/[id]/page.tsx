@@ -365,7 +365,12 @@ export default async function OnMarketDetailPage({
       )}
 
       {/* === MELLEMREGNINGER === */}
+      {/* key remounter komponenten naar de DB-persisterede tal aendrer sig
+          (PDF-parse, manuel cost-save). Uden key beholder AfkastDebug's
+          useState de gamle initial-vaerdier indtil fuld page-reload — saa
+          Forudsætninger + bud opdaterede sig ikke efter parsing. */}
       <AfkastDebug
+        key={`afk-${c.forhandletPris ?? c.listPrice}-${rentMd}-${driftTotal}-${refurbTotal}-${c.ejerforeningSikkerhed}`}
         initial={{
           pris: c.forhandletPris ?? c.listPrice,
           prisLabel: 'listepris',
@@ -417,6 +422,7 @@ export default async function OnMarketDetailPage({
             pdfStatus={c.pdfStatus}
           />
           <CostBreakdownForm
+            key={`cost-${c.costFaellesudgifter}-${c.costGrundvaerdi}-${c.costFaelleslaan}-${c.costRenovation}-${c.costForsikringer}-${c.costRottebekempelse}-${c.costGrundfond}-${c.costVicevaert}-${c.costVedligeholdelse}-${c.costAndreDrift}-${c.ejerforeningSikkerhed}`}
             id={c.id}
             current={{
               costGrundvaerdi: c.costGrundvaerdi,
@@ -446,6 +452,7 @@ export default async function OnMarketDetailPage({
         </summary>
         <div className="p-4 pt-0">
           <EditEstimaterForm
+            key={`est-${c.estimeretLejeMd ?? estimate.estimatedRentMd}-${c.refurbGulv}-${c.refurbMaling}-${c.refurbRengoring}-${c.refurbAndre}`}
             id={c.id}
             currentLeje={c.estimeretLejeMd ?? estimate.estimatedRentMd}
             currentRefurb={{
