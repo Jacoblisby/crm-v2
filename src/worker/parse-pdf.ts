@@ -241,11 +241,25 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
   // Fælleslån kan optræde som FLERE rows i samme opstilling (fx tre
   // anlægslån: taglån + radiator + asfalt) — derfor summeres alle
   // table-row-matches. Fallback til enkelt-match for kolon/kr-formater.
+  // Aliaserne daekker alle laane-betegnelser vi har set + gaengse EF-
+  // projektnavne. Misses et navn alligevel, fanger parse-confidence-checket
+  // mismatchen mod mæglerens "Ejerudgift i alt" og flagger listingen gult.
   const faellslSum = sumTableAmounts(text,
     '(?:Ydelse\\s+(?:p[åa]\\s+)?)?[Ff][æa]llesl[åa]n(?:\\s*\\+\\s*gebyr)?',
     'Anl[æa]gsl[åa]n', // danbolig: "Anlægslån (taglån)" etc
     'VVS[\\s-]*l[åa]n',
     'Tagl[åa]n',
+    'Renoveringsl[åa]n',
+    'Byggel[åa]n',
+    'Moderniseringsl[åa]n',
+    'Facadel[åa]n',
+    'Altanl[åa]n',
+    'Vinduesl[åa]n',
+    'Elevatorl[åa]n',
+    'Kloakl[åa]n',
+    'Faldstammel[åa]n',
+    'Byggeteknisk\\s+l[åa]n',
+    'L[åa]n\\s+til\\s+[\\p{L}]+', // "Lån til vinduer 2026 1.234,00" etc
   );
   const faellsl = faellslSum > 0
     ? faellslSum
