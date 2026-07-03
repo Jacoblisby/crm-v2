@@ -59,6 +59,74 @@ interface CostBreakdown {
  * i forskellige sammenhænge (fx "Grundlag for grundskyld: 181.600" foer den
  * faktiske "Grundskyld 2026 1.271,00" table-row).
  */
+/**
+ * Konverter et table-row-match til AARLIGT beloeb ud fra hvad der staar
+ * lige efter beloebet i teksten:
+ *
+ * 1. To-kolonne "Pr. md. / Pr. år" (estaldo): "Grundskyld 166 kr. 1.989 kr."
+ *    — vi fangede md-beloebet; aars-beloebet foelger som "kr. <aar> kr.".
+ *    Hvis aars-beloeb > md-beloeb bruges det.
+ * 2. "pr. md"-suffix (danbolig Slagelse): "Fællesudgifter kr. 1.490 pr. md.
+ *    17.880,00" — brug aars-beloebet bagefter, ellers md × 12.
+ * 3. Ellers: beloebet ER aarligt.
+ */
+function resolveAnnualAmount(text: string, matchEnd: number, val: number): number {
+  const after = text.slice(matchEnd, matchEnd + 50);
+
+  const twoColMatch = after.match(
+    /^\s*kr\.\s*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)\s*kr\./i,
+  );
+  if (twoColMatch && twoColMatch[1]) {
+    const annual = parseAmount(twoColMatch[1]);
+    if (annual > val) return annual;
+  }
+
+  const mdMatch = after.match(
+    /^\s*(?:kr\.?\s*)?pr\.?\s*md\.?\s*(?:kr\.?\s*)?([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)?/i,
+  );
+  if (mdMatch) {
+    if (mdMatch[1]) {
+      const annual = parseAmount(mdMatch[1]);
+      if (annual > 0) return annual;
+    }
+    return Math.round(val * 12);
+  }
+  return val;
+}
+
+/**
+ * Summér ALLE table-row-matches for et sæt labels — til poster der kan
+ * optræde flere gange i samme salgsopstilling, fx flere anlægslån:
+ *   "Anlægslån (taglån) 2026 3.077,28"
+ *   "Anlægslån (radiator) 2026 689,04"
+ *   "Anlægslån (asfalt m.m.) 2026 686,88"
+ * findAmountAfter returnerer kun FOERSTE match — denne summerer alle.
+ *
+ * Dedup via amount-position i teksten saa overlappende alias-moenstre
+ * (fx "Ydelse på fælleslån" og "fælleslån" der rammer samme row) ikke
+ * taeller samme beloeb dobbelt.
+ */
+function sumTableAmounts(text: string, ...labels: string[]): number {
+  const seenAmountPos = new Set<number>();
+  let sum = 0;
+  for (const labelPattern of labels) {
+    const re = new RegExp(
+      `(?<![\\p{L}])${labelPattern}(?:\\s+[\\p{L}.]+|\\s*\\([^)]{0,80}\\)){0,2}\\s+(?:20\\d{2}\\s+)?([\\d]{1,3}(?:\\.[\\d]{3})*(?:,[\\d]{1,2})?|[\\d]+,[\\d]{1,2})`,
+      'giu',
+    );
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      const val = parseAmount(m[1]);
+      if (val <= 0) continue;
+      const amountPos = m.index + m[0].length - m[1].length;
+      if (seenAmountPos.has(amountPos)) continue;
+      seenAmountPos.add(amountPos);
+      sum += resolveAnnualAmount(text, m.index + m[0].length, val);
+    }
+  }
+  return sum;
+}
+
 function findAmountAfter(text: string, ...labels: string[]): number {
   for (const labelPattern of labels) {
     // Pattern 1: <label> [<word>|<(parens)>]{0,2} [<YEAR>] <amount> — table-row format
@@ -84,37 +152,7 @@ function findAmountAfter(text: string, ...labels: string[]): number {
     if (tableMatch && tableMatch[1]) {
       const val = parseAmount(tableMatch[1]);
       if (val > 0) {
-        const after = text.slice(
-          tableMatch.index + tableMatch[0].length,
-          tableMatch.index + tableMatch[0].length + 50,
-        );
-
-        // To-kolonne "Pr. md. / Pr. år"-tabel (estaldo): rows har formen
-        //   "Grundskyld 166 kr. 1.989 kr."  ← md FOERST, aar bagefter
-        // Vi fangede md-beloebet (val); aars-beloebet staar lige efter som
-        // "kr. <aar> kr.". Hvis aars-beloeb > md-beloeb er det den aarlige.
-        const twoColMatch = after.match(
-          /^\s*kr\.\s*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)\s*kr\./i,
-        );
-        if (twoColMatch && twoColMatch[1]) {
-          const annual = parseAmount(twoColMatch[1]);
-          if (annual > val) return annual;
-        }
-
-        // md-check: hvis beloebet efterfoelges af "pr. md" er det MAANEDLIGT.
-        // Tabellen har da typisk aars-beloebet bagefter ("kr. 1.490 pr. md.
-        // 17.880,00") — brug det. Ellers gang md-beloebet med 12.
-        const mdMatch = after.match(
-          /^\s*(?:kr\.?\s*)?pr\.?\s*md\.?\s*(?:kr\.?\s*)?([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)?/i,
-        );
-        if (mdMatch) {
-          if (mdMatch[1]) {
-            const annual = parseAmount(mdMatch[1]);
-            if (annual > 0) return annual;
-          }
-          return Math.round(val * 12);
-        }
-        return val;
+        return resolveAnnualAmount(text, tableMatch.index + tableMatch[0].length, val);
       }
     }
 
@@ -200,11 +238,22 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
     );
   }
 
-  const faellsl = findAmountAfter(text,
+  // Fælleslån kan optræde som FLERE rows i samme opstilling (fx tre
+  // anlægslån: taglån + radiator + asfalt) — derfor summeres alle
+  // table-row-matches. Fallback til enkelt-match for kolon/kr-formater.
+  const faellslSum = sumTableAmounts(text,
     '(?:Ydelse\\s+(?:p[åa]\\s+)?)?[Ff][æa]llesl[åa]n(?:\\s*\\+\\s*gebyr)?',
-    'Andelsboligforeningens\\s+l[åa]n',
-    'Ejerforeningens?\\s+(?:fælles)?l[åa]n',
+    'Anl[æa]gsl[åa]n', // danbolig: "Anlægslån (taglån)" etc
+    'VVS[\\s-]*l[åa]n',
+    'Tagl[åa]n',
   );
+  const faellsl = faellslSum > 0
+    ? faellslSum
+    : findAmountAfter(text,
+        '(?:Ydelse\\s+(?:p[åa]\\s+)?)?[Ff][æa]llesl[åa]n(?:\\s*\\+\\s*gebyr)?',
+        'Andelsboligforeningens\\s+l[åa]n',
+        'Ejerforeningens?\\s+(?:fælles)?l[åa]n',
+      );
 
   // Grundfond + tagfond/vedligeholdelsesfond — EF-opsparing til kommende
   // store-projekter. Danbolig bruger "Opsparing tagfond" som table-row;

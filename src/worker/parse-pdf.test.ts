@@ -274,6 +274,54 @@ Sikkerhed til e/f: Ja, med kr. 15.000,00 I form af: Ejerpantebrev
   });
 });
 
+describe('parseSalgsopstilling — flere fælleslån', () => {
+  /**
+   * danbolig Taastrup — Taastrup Have 32, st. mf., 2630 Taastrup.
+   * Sag 0060001342. Salgsopstilling 2.7.2026.
+   *
+   * Format-quirk: TRE anlægslån som separate rows — alle skal summeres:
+   *   "Anlægslån (taglån) 2026 3.077,28"
+   *   "Anlægslån (radiator) 2026 689,04"
+   *   "Anlægslån (asfalt m.m.) 2026 686,88"
+   * Tidligere bug: kun foerste match blev taget (eller ingen, da
+   * "Anlægslån" ikke var et kendt alias).
+   */
+  const DANBOLIG_TAASTRUP_HAVE = `
+Adresse: Taastrup Have 32, st. mf., 2630 Taastrup
+Kontantpris: kr. 1.520.000 Sagsnr.: 0060001342 Ejerudgift/md.: kr. 1.881
+Ejerudgift 1. år: Pr. år: Kontantbehov ved køb: kr. kr. kr. kr. kr. kr. kr.
+Ejendomsværdiskat 2026 4.659,36
+Grundskyld 2026 3.664,00
+Fællesudgifter 2026 9.800,52
+Anlægslån (taglån) 2026 3.077,28
+Anlægslån (radiator) 2026 689,04
+Anlægslån (asfalt m.m.) 2026 686,88
+Ejerudgift i alt 1. år: 22.577,08
+`;
+
+  it('summerer alle tre anlægslån til costFaelleslaan', () => {
+    const b = parseSalgsopstilling(DANBOLIG_TAASTRUP_HAVE);
+    expect(b.costFaelleslaan).toBe(4453); // 3077 + 689 + 687
+    expect(b.costGrundvaerdi).toBe(3664);
+    expect(b.costFaellesudgifter).toBe(9801);
+
+    const drift =
+      b.costGrundvaerdi + b.costFaellesudgifter + b.costRottebekempelse +
+      b.costRenovation + b.costForsikringer + b.costFaelleslaan +
+      b.costGrundfond + b.costVicevaert + b.costVedligeholdelse + b.costAndreDrift;
+    expect(drift).toBe(17918);
+
+    // Afstemmer: declared 22.577 − ejdvaerdiskat 4.659 = 17.918
+    expect(parseEjerudgiftTotal(DANBOLIG_TAASTRUP_HAVE)).toBe(22577);
+    expect(parseEjendomsvaerdiskat(DANBOLIG_TAASTRUP_HAVE)).toBe(4659);
+    expect(assessParseConfidence({
+      driftTotal: drift,
+      declaredTotal: 22577,
+      ejendomsvaerdiskat: 4659,
+    })).toBe('ok');
+  });
+});
+
 describe('parseEjendomsvaerdiskat', () => {
   it('fanger simpelt format', () => {
     expect(parseEjendomsvaerdiskat('Ejendomsværdiskat 4.630,80')).toBe(4631);
