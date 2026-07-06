@@ -322,6 +322,50 @@ Ejerudgift i alt 1. år: 22.577,08
   });
 });
 
+describe('parseSalgsopstilling — EDC kolonne-format', () => {
+  /**
+   * EDC Poul Erik Bech Næstved — Marievej 5, 1. th, 4700 Næstved.
+   * Sag 47115281. Salgsopstilling 04-07-2026.
+   *
+   * EDC's PDF har to-kolonne layout hvor text-extraktion laeser kolonnevis:
+   * ALLE labels foerst (kolon-suffikset), derefter ALLE beloeb i samme
+   * raekkefoelge. Raekke-parseren kan ikke laese det — kolonne-parseren
+   * zipper label[i] → beloeb[i]. "kr." uden tal (tomme celler) springes over.
+   */
+  const EDC_MARIEVEJ = `
+Marievej 5, 1. th, 4700 Næstved Sagsnr.: 47115281 Dato: 04-07-2026 Kontantpris: kr. 995.000 Ejerudgift/md.: kr. 1.803
+Ejerudgift 1. år: Pr. år: Kontantbehov ved køb: Ejendomsværdiskat: Grundskyld: Fællesudgifter: Grundfond: Rottebekæmpelsesgebyr: Ejerlaug: Særskilt renovationsbidrag: Ejerudgift i alt 1.år: kr. 3.831,00 kr. 2.516,64 kr. 10.857,60 kr. 1.080,00 kr. 82,30 kr. 1.868,04 kr. 1.406,00 kr. kr. kr. 21.641,58 Kontantpris kr. 995.000,00 Tinglysningsafgift af skødet kr. 7.850,00
+Forbehold: Ejerskiftelånet skal reduceres med sikkerhed til ejerforeningen med kr. 20.000,00.
+`;
+
+  it('zipper labels → beloeb korrekt', () => {
+    const b = parseSalgsopstilling(EDC_MARIEVEJ);
+    expect(b.costGrundvaerdi).toBe(2517);
+    expect(b.costFaellesudgifter).toBe(10858);
+    expect(b.costGrundfond).toBe(1080);
+    expect(b.costRottebekempelse).toBe(82);
+    expect(b.costAndreDrift).toBe(1868); // Ejerlaug
+    expect(b.costRenovation).toBe(1406); // Særskilt renovationsbidrag
+    expect(b.costFaelleslaan).toBe(0);
+
+    const drift =
+      b.costGrundvaerdi + b.costFaellesudgifter + b.costRottebekempelse +
+      b.costRenovation + b.costForsikringer + b.costFaelleslaan +
+      b.costGrundfond + b.costVicevaert + b.costVedligeholdelse + b.costAndreDrift;
+    expect(drift).toBe(17811);
+  });
+
+  it('laeser declared total + ejdvaerdiskat fra kolonne-mappingen', () => {
+    expect(parseEjerudgiftTotal(EDC_MARIEVEJ)).toBe(21642);
+    expect(parseEjendomsvaerdiskat(EDC_MARIEVEJ)).toBe(3831);
+    expect(assessParseConfidence({
+      driftTotal: 17811,
+      declaredTotal: 21642,
+      ejendomsvaerdiskat: 3831,
+    })).toBe('ok');
+  });
+});
+
 describe('parseEjendomsvaerdiskat', () => {
   it('fanger simpelt format', () => {
     expect(parseEjendomsvaerdiskat('Ejendomsværdiskat 4.630,80')).toBe(4631);

@@ -196,7 +196,98 @@ function isYearLike(val: number, raw: string): boolean {
   return val >= 2015 && val <= 2035 && !raw.includes(',') && !raw.includes('.');
 }
 
+export interface ColumnarParseResult {
+  breakdown: CostBreakdown;
+  ejendomsvaerdiskat: number;
+  declaredTotal: number;
+}
+
+/**
+ * EDC-format: to-kolonne PDF-layout hvor text-extraktion laeser kolonnevis —
+ * ALLE labels foerst (med kolon), derefter ALLE beloeb i samme raekkefoelge:
+ *
+ *   "Ejerudgift 1. år: Pr. år: Kontantbehov ved køb: Ejendomsværdiskat:
+ *    Grundskyld: Fællesudgifter: Grundfond: Rottebekæmpelsesgebyr: Ejerlaug:
+ *    Særskilt renovationsbidrag: Ejerudgift i alt 1.år:
+ *    kr. 3.831,00 kr. 2.516,64 kr. 10.857,60 kr. 1.080,00 kr. 82,30
+ *    kr. 1.868,04 kr. 1.406,00 kr. kr. kr. 21.641,58"
+ *
+ * Vi zipper label[i] → beloeb[i]. Returns null hvis teksten ikke matcher
+ * kolonne-signaturen (saa falder caller tilbage til raekke-parseren).
+ */
+export function parseColumnarCosts(text: string): ColumnarParseResult | null {
+  const startMatch = text.match(/Ejerudgift(?:er)?\s+1\.?\s*[åa]r:/i);
+  if (!startMatch || startMatch.index === undefined) return null;
+  const window = text.slice(startMatch.index, startMatch.index + 1500);
+
+  // Beloebs-blokken starter ved foerste "kr. <tal>"
+  const firstAmount = window.search(/kr\.\s*[\d]/i);
+  if (firstAmount < 0) return null;
+
+  const labelPart = window.slice(0, firstAmount);
+  // Labels = kolon-separerede tokens. Filtrér headers væk.
+  const rawLabels = labelPart.split(':').map((s) => s.trim()).filter(Boolean);
+  const labels = rawLabels.filter(
+    (l) =>
+      !/^ejerudgift(?:er)?\s+1\.?\s*[åa]r$/i.test(l) && // section-header
+      !/^pr\.?\s*[åa]r$/i.test(l) &&
+      !/kontantbehov/i.test(l),
+  );
+  // Kolonne-signatur kraever: mindst 3 labels, ingen cifre i labels
+  // (raekke-format har beloeb mellem labels og ville fejle her), og
+  // sidste label skal vaere "i alt"-totalen.
+  if (labels.length < 3) return null;
+  if (labels.some((l) => /\d/.test(l.replace(/1\.?\s*[åa]r/i, '')))) return null;
+  if (!/i\s*alt/i.test(labels[labels.length - 1])) return null;
+
+  // Beloeb i raekkefoelge — "kr." uden tal (tomme celler) springes over
+  // automatisk fordi regex kraever cifre efter.
+  const amountPart = window.slice(firstAmount);
+  const amounts = [...amountPart.matchAll(/kr\.\s*([\d]{1,3}(?:\.[\d]{3})*(?:,[\d]{1,2})?)/gi)]
+    .map((m) => parseAmount(m[1]));
+  if (amounts.length < labels.length) return null;
+
+  const breakdown: CostBreakdown = {
+    costGrundvaerdi: 0,
+    costFaellesudgifter: 0,
+    costRottebekempelse: 0,
+    costRenovation: 0,
+    costForsikringer: 0,
+    costFaelleslaan: 0,
+    costGrundfond: 0,
+    costVicevaert: 0,
+    costVedligeholdelse: 0,
+    costAndreDrift: 0,
+  };
+  let ejendomsvaerdiskat = 0;
+  let declaredTotal = 0;
+
+  labels.forEach((label, i) => {
+    const val = amounts[i];
+    if (!val) return;
+    if (/i\s*alt/i.test(label)) declaredTotal = val;
+    else if (/ejendomsv[æa]rdiskat/i.test(label)) ejendomsvaerdiskat = val;
+    else if (/grundskyld/i.test(label)) breakdown.costGrundvaerdi += val;
+    else if (/f[æa]llesudgift/i.test(label)) breakdown.costFaellesudgifter += val;
+    else if (/grundfond|tagfond|henl[æa]ggelse/i.test(label)) breakdown.costGrundfond += val;
+    else if (/rottebek|skadedyr/i.test(label)) breakdown.costRottebekempelse += val;
+    else if (/renovation|affald/i.test(label)) breakdown.costRenovation += val;
+    else if (/forsikring/i.test(label)) breakdown.costForsikringer += val;
+    else if (/l[åa]n/i.test(label)) breakdown.costFaelleslaan += val;
+    else if (/vicev[æa]rt|ejendomsservice|trappevask/i.test(label)) breakdown.costVicevaert += val;
+    else if (/vedligehold/i.test(label)) breakdown.costVedligeholdelse += val;
+    else breakdown.costAndreDrift += val; // ejerlaug, antenne, adm, ...
+  });
+
+  return { breakdown, ejendomsvaerdiskat, declaredTotal };
+}
+
 export function parseSalgsopstilling(text: string): CostBreakdown {
+  // EDC-kolonne-format detekteres FOERST — der er raekke-moenstrene ubrugelige
+  // og kan fange garbage (fx "Fællesudgifter" matchet mod et tal langt vaek).
+  const columnar = parseColumnarCosts(text);
+  if (columnar) return columnar.breakdown;
+
   // Grundskyld — KUN grundskyld, IKKE ejendomsvaerdiskat.
   // Ejendomsvaerdiskat betales kun af ejer-bebooere, ikke ved udlejning. Vi
   // koeber boliger til udlejning, saa ejdvaerdiskat er ikke en cost for os.
@@ -320,6 +411,10 @@ export function parseSalgsopstilling(text: string): CostBreakdown {
  * "Ejerudgift/md." (1.443) eller "Ejerudgifter pr. md." (forkert tal).
  */
 export function parseEjerudgiftTotal(text: string): number {
+  // EDC-kolonne-format: totalen ligger i den zippede label→beloeb-mapping.
+  const columnar = parseColumnarCosts(text);
+  if (columnar && columnar.declaredTotal > 0) return columnar.declaredTotal;
+
   // Strikt: kraev "i alt" + "år" — undgaa per-md varianter
   const patterns = [
     // estaldo to-kolonne: "Ejerudgifter i alt 1. år 1.617 kr. 19.404 kr."
@@ -348,6 +443,9 @@ export function parseEjerudgiftTotal(text: string): number {
  * to-kolonne md/aar, parentes, "pr. md").
  */
 export function parseEjendomsvaerdiskat(text: string): number {
+  // EDC-kolonne-format foerst — raekke-moenstre kan ikke laese det.
+  const columnar = parseColumnarCosts(text);
+  if (columnar && columnar.ejendomsvaerdiskat > 0) return columnar.ejendomsvaerdiskat;
   return findAmountAfter(text, 'Ejendomsv[æa]rdiskat(?:sbidrag)?');
 }
 
