@@ -59,7 +59,8 @@ export function Funnel() {
   }
 
   const canProceed = (() => {
-    if (screen.id === 'kontakt') return !!(state.email || state.phone);
+    // Backend (submitFunnelAction) kraever alle tre — ellers oprettes leadet ikke
+    if (screen.id === 'kontakt') return !!(state.fullName && state.email && state.phone);
     if (screen.id === 'hvornaar') return !!state.moveTimeframeRaw;
     if (screen.kind === 'room' && screen.roomId) {
       const map = {
@@ -166,7 +167,7 @@ export function Funnel() {
             )}
             {!canProceed && screen.id === 'kontakt' && (
               <span className="text-[12px] hidden sm:inline text-[#9C988C]">
-                Mindst email eller telefon
+                Navn, email og telefon
               </span>
             )}
             <button

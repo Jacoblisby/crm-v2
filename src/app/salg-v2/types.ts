@@ -90,6 +90,10 @@ export interface FunnelStateV2 extends V1State {
   // Sidste detaljer extras
   priceImpactFlags: string[]; // 'Fælleslån i ejerforeningen' etc.
   notes: string;
+  /** v4 (designer-flow): "Har boligen været røgfri?" — synces ind i standNote */
+  smokeFree: 'Ja' | 'Nej' | null;
+  /** v4: "Er der andre økonomiske forhold?" fri-tekst — synces ind i standNote */
+  econNotes: string;
 
   // Dynamisk drift-liste (erstatter de gamle individuelle cost-felter i UI'en
   // men syncer stadig til dem så submit-action virker)
@@ -129,6 +133,8 @@ export const initialStateV2: FunnelStateV2 = {
   nyIndflytning: '',
   priceImpactFlags: [],
   notes: '',
+  smokeFree: null,
+  econNotes: '',
   additionalDrift: [],
   costGrundfond: 0,
   mortgageRemainingDebt: 0,

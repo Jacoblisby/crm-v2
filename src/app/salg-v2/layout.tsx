@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Inter } from 'next/font/google';
 import { FunnelV2Provider } from './FunnelV2Context';
 import { SalgHeader } from './components/SalgHeader';
+
+// Handoff-spec: Inter 400/500/600/700, font-display: swap
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Sælg din bolig kontant · 365 Ejendomme',
@@ -17,7 +24,7 @@ export const metadata: Metadata = {
 export default function SalgV2Layout({ children }: { children: React.ReactNode }) {
   return (
     <FunnelV2Provider>
-      <div className="min-h-screen bg-white">
+      <div className={`${inter.className} min-h-screen bg-white`}>
         <SalgHeader />
         <main>{children}</main>
         <footer className="border-t border-[#E5E2DA] py-8 text-xs text-[#5A6166] salg-footer-v2">

@@ -1,27 +1,47 @@
 'use client';
 
 /**
- * Estimat — final offer screen.
+ * Estimat — final offer screen (designer-handoff 1:1).
  *
- * Design-eng key fixes:
- *   - Price number gets blur-crossfade when overtagelse changes (Emil's
- *     "two distinct states overlapping" mask)
- *   - tabular-nums + lining-nums so digit widths don't shift
- *   - active:scale on overtagelse chips + CTAs
- *   - Comparables collapsible uses CSS grid-template-rows transition
+ * Sektioner (handoff-rækkefølge):
+ *   stage-progress → titel → pris-card (sort) → overtagelse-selector →
+ *   hvad du sparer → næste skridt (sort) → virtuelt møde → comparables →
+ *   disclaimer → reset
+ *
+ * SUBMIT ved mount: submitFunnelAction opretter lead i CRM, sender email til
+ * Jacob + bekræftelse til kunden, og returnerer det RIGTIGE estimat fra
+ * prismotoren (comparables + ROE-model). Idempotent via localStorage-nøgle,
+ * og estimatet caches så reload viser samme tal uden re-submit.
  */
 import { useState, useEffect, useRef } from 'react';
 import { useFunnelV2 } from '../FunnelV2Context';
+import { submitFunnelAction } from '../../salg/submit-action';
+import type { computeEstimate } from '@/lib/services/price-engine';
 import { EASE_OUT } from '../components/primitives';
 
 const ACCENT = '#244949';
+const SUBMIT_KEY = 'salg.v2.submitted';
+const ESTIMATE_CACHE_KEY = 'salg.v2.estimate';
+
+type Estimate = Awaited<ReturnType<typeof computeEstimate>>;
+
+type SubmitState =
+  | { status: 'idle' }
+  | { status: 'sending' }
+  | { status: 'sent' }
+  | { status: 'error'; error: string }
+  | { status: 'already' };
 
 export function Estimat() {
-  const { state, reset } = useFunnelV2();
-  const [overtagelse, setOvertagelse] = useState<0.5 | 1 | 3 | 6>(3);
+  const { state, update, reset } = useFunnelV2();
   const [comparablesOpen, setComparablesOpen] = useState(true);
   const [priceBlur, setPriceBlur] = useState(false);
+  const [estimate, setEstimate] = useState<Estimate | null>(null);
+  const [submit, setSubmit] = useState<SubmitState>({ status: 'idle' });
   const lastBudRef = useRef<number>(0);
+  const submittedRef = useRef(false);
+
+  const overtagelse = state.chosenOvertagelseMaaneder ?? 3;
 
   const overtagelseOptions: Array<{ value: 0.5 | 1 | 3 | 6; t: string; sub: string; delta: number }> = [
     { value: 0.5, t: '14 dage', sub: '+15.000 kr', delta: 15000 },
@@ -30,17 +50,81 @@ export function Estimat() {
     { value: 6, t: '6 mdr', sub: '−10.000 kr', delta: -10000 },
   ];
 
-  // Beregn foreløbig pris baseret på state (simplified — final pris kommer fra backend)
-  const baseBud = state.kvm
-    ? Math.round((state.kvm ?? 60) * (state.postalCode === '2630' ? 18000 : 14000) * 0.85)
-    : 945000;
+  // Submit ved mount — opretter lead + henter rigtigt estimat fra prismotoren
+  useEffect(() => {
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+
+    if (!state.fullName || !state.email || !state.phone) return;
+    if (!state.postalCode || !state.kvm) return;
+
+    const idemKey = `${state.fullAddress || state.postalCode}|${state.email}`;
+
+    // Allerede submittet? Genindlæs cached estimat i stedet for at re-submitte.
+    try {
+      const prev = localStorage.getItem(SUBMIT_KEY);
+      if (prev === idemKey) {
+        const rawCache = localStorage.getItem(ESTIMATE_CACHE_KEY);
+        if (rawCache) {
+          const cache = JSON.parse(rawCache) as { key: string; estimate: Estimate };
+          if (cache.key === idemKey) setEstimate(cache.estimate);
+        }
+        setSubmit({ status: 'already' });
+        return;
+      }
+    } catch {}
+
+    setSubmit({ status: 'sending' });
+    (async () => {
+      try {
+        const r = await submitFunnelAction(state, []);
+        if (r.ok) {
+          if (r.estimate) {
+            setEstimate(r.estimate);
+            try {
+              localStorage.setItem(
+                ESTIMATE_CACHE_KEY,
+                JSON.stringify({ key: idemKey, estimate: r.estimate }),
+              );
+            } catch {}
+          }
+          try {
+            localStorage.setItem(SUBMIT_KEY, idemKey);
+          } catch {}
+          setSubmit({ status: 'sent' });
+        } else {
+          setSubmit({ status: 'error', error: r.error || 'Ukendt fejl' });
+        }
+      } catch (err) {
+        setSubmit({ status: 'error', error: err instanceof Error ? err.message : String(err) });
+      }
+    })();
+  }, [state]);
+
+  // Rigtigt bud fra prismotoren; kvm-baseret fallback hvis submit fejlede
+  const baseBud = estimate
+    ? estimate.netForkortet.finalOffer
+    : state.kvm
+      ? Math.round((state.kvm ?? 60) * (state.postalCode === '2630' ? 18000 : 14000) * 0.85)
+      : 945000;
   const selected = overtagelseOptions.find((o) => o.value === overtagelse) ?? overtagelseOptions[2];
   const bud = baseBud + selected.delta;
 
   const maeglerSalaer = 70000;
-  const markedAfslag = Math.round(bud * 0.07);
-  const driftSalg = Math.max(1, Math.round(((state.costFaellesudgifter || 24000) / 12) * 3 - 6000));
+  const markedAfslag = estimate
+    ? estimate.netForkortet.minusMarketDiscount
+    : Math.round(bud * 0.07);
+  const driftSalg = estimate
+    ? estimate.netForkortet.minusOwnershipCosts
+    : Math.max(1, Math.round(((state.costFaellesudgifter || 24000) / 12) * 3 - 6000));
   const maeglerEkvivalent = bud + maeglerSalaer + markedAfslag + driftSalg;
+
+  // Comparables: kun handler inden for ±8% af ækvivalent mægler-pris
+  const comparables = (estimate?.comparables ?? []).filter((c) => {
+    const ratio = c.price / maeglerEkvivalent;
+    return ratio >= 0.92 && ratio <= 1.08;
+  });
+  const sameEfCount = estimate?.sameEfCount ?? 0;
 
   const fmt = (n: number) => n.toLocaleString('da-DK');
 
@@ -53,6 +137,8 @@ export function Estimat() {
     }
     lastBudRef.current = bud;
   }, [bud]);
+
+  const isCalculating = submit.status === 'sending' && !estimate;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F5EFE6]">
@@ -73,9 +159,7 @@ export function Estimat() {
             className="flex items-center gap-2 text-[14px] font-medium hover:opacity-70 text-[#14181A]"
             style={{ transition: `opacity 150ms ${EASE_OUT}` }}
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z" />
-            </svg>
+            <PhoneIcon className="w-4 h-4" stroke={ACCENT} />
             +45 89 87 66 34
           </a>
         </div>
@@ -119,19 +203,21 @@ export function Estimat() {
             <div className="rounded-2xl py-10 text-center text-white bg-[#0F1A1A]">
               <div className="text-[14px] mb-3 text-white/70">Vores foreløbige tilbud</div>
               <div
-                className="text-[64px] sm:text-[88px] font-medium tracking-[-0.04em] leading-none"
+                className="text-[52px] sm:text-[88px] font-medium tracking-[-0.04em] leading-none"
                 style={{
                   fontVariantNumeric: 'tabular-nums lining-nums',
-                  filter: priceBlur ? 'blur(4px)' : 'none',
-                  opacity: priceBlur ? 0.6 : 1,
+                  filter: priceBlur || isCalculating ? 'blur(6px)' : 'none',
+                  opacity: priceBlur || isCalculating ? 0.6 : 1,
                   transition: `filter 180ms ${EASE_OUT}, opacity 180ms ${EASE_OUT}`,
                 }}
               >
                 {fmt(bud)}{' '}
-                <span className="text-[28px] sm:text-[36px] font-normal align-baseline text-white/70">kr</span>
+                <span className="text-[24px] sm:text-[36px] font-normal align-baseline text-white/70">kr</span>
               </div>
               <div className="text-[13px] mt-3 text-white/55">
-                Bindende tilbud gives efter gratis besigtigelse
+                {isCalculating
+                  ? 'Beregner ud fra tinglyste handler i dit område…'
+                  : 'Bindende tilbud gives efter gratis besigtigelse'}
               </div>
             </div>
 
@@ -141,14 +227,14 @@ export function Estimat() {
                 <span className="text-[15px] font-medium text-[#14181A]">Hvornår vil du overtage?</span>
                 <span className="text-[12px] text-[#9C988C]">Du kan altid ændre i besigtigelsen</span>
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {overtagelseOptions.map((o) => {
                   const sel = overtagelse === o.value;
                   return (
                     <button
                       key={o.value}
                       type="button"
-                      onClick={() => setOvertagelse(o.value)}
+                      onClick={() => update({ chosenOvertagelseMaaneder: o.value })}
                       className="px-3 py-3 rounded-xl border-2 text-center active:scale-[0.97] touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949]"
                       style={{
                         borderColor: sel ? '#0F1A1A' : '#E5E2DA',
@@ -208,8 +294,8 @@ export function Estimat() {
                   className="text-[20px] sm:text-[24px] font-semibold shrink-0 ml-3 text-[#14181A]"
                   style={{
                     fontVariantNumeric: 'tabular-nums lining-nums',
-                    filter: priceBlur ? 'blur(3px)' : 'none',
-                    opacity: priceBlur ? 0.6 : 1,
+                    filter: priceBlur || isCalculating ? 'blur(3px)' : 'none',
+                    opacity: priceBlur || isCalculating ? 0.6 : 1,
                     transition: `filter 180ms ${EASE_OUT}, opacity 180ms ${EASE_OUT}`,
                   }}
                 >
@@ -227,15 +313,29 @@ export function Estimat() {
               <p className="text-[14px] max-w-md mx-auto leading-relaxed text-white/70">
                 Vi ringer dig op indenfor 24 timer for at aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen giver vi et endeligt bindende tilbud.
               </p>
+              {(submit.status === 'sent' || submit.status === 'already') && state.email && (
+                <p className="text-[13px] flex items-center justify-center gap-1.5" style={{ color: '#8FD4C1' }}>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  Tilbud sendt på {state.email}
+                </p>
+              )}
+              {submit.status === 'sending' && (
+                <p className="text-[13px] text-white/55">Sender bekræftelse til {state.email}…</p>
+              )}
+              {submit.status === 'error' && (
+                <p className="text-[13px] text-white/70">
+                  Kunne ikke sende mail-bekræftelse — vi har stadig dine oplysninger og ringer alligevel.
+                </p>
+              )}
               <div className="pt-2">
                 <a
                   href="tel:+4589876634"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[14px] font-medium text-[#0F1A1A] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-white"
                   style={{ transition: `transform 150ms ${EASE_OUT}` }}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z" />
-                  </svg>
+                  <PhoneIcon className="w-4 h-4" stroke="currentColor" />
                   Ring direkte til os
                 </a>
               </div>
@@ -247,63 +347,88 @@ export function Estimat() {
               </p>
             </div>
 
-            {/* Comparables — collapsible m. grid-template-rows transition */}
-            <div className="rounded-2xl border border-[#E5E2DA]">
-              <button
-                type="button"
-                onClick={() => setComparablesOpen(!comparablesOpen)}
-                className="w-full px-6 py-4 flex items-center justify-between active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949] rounded-2xl"
-                style={{ transition: `transform 150ms ${EASE_OUT}` }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-[15px] font-medium text-[#14181A]">
-                    Bygger på 3 tinglyste handler
+            {/* Virtuelt møde */}
+            <div className="rounded-2xl border p-6 flex items-start gap-4 border-[#E5E2DA]">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#F5EFE6]">
+                <VideoIcon className="w-5 h-5" stroke={ACCENT} />
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="text-[15px] font-semibold text-[#14181A]">Vil du møde os virtuelt først?</div>
+                <p className="text-[13px] leading-relaxed text-[#5A6166]">
+                  Book et 20-minutters Google Meet hvor vi gennemgår dit estimat sammen og svarer på dine spørgsmål. Du behøver ikke installere noget — du klikker bare på linket vi sender på email. Vi kommer derefter forbi til den fysiske besigtigelse.
+                </p>
+                <a
+                  href={`mailto:administration@365ejendom.dk?subject=${encodeURIComponent('Book virtuelt møde — ' + (state.fullAddress || ''))}&body=${encodeURIComponent('Hej,\n\nJeg vil gerne booke et virtuelt møde om mit estimat.\n\nAdresse: ' + (state.fullAddress || '') + '\nTelefon: ' + (state.phone || '') + '\n\nForslag til tidspunkter:\n')}`}
+                  className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-medium text-white bg-[#0F1A1A] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949]"
+                  style={{ transition: `transform 150ms ${EASE_OUT}` }}
+                >
+                  <VideoIcon className="w-3.5 h-3.5" stroke="currentColor" />
+                  Book virtuelt møde
+                </a>
+              </div>
+            </div>
+
+            {/* Comparables — kun når prismotoren fandt relevante handler */}
+            {comparables.length > 0 && (
+              <div className="rounded-2xl border border-[#E5E2DA]">
+                <button
+                  type="button"
+                  onClick={() => setComparablesOpen(!comparablesOpen)}
+                  className="w-full px-6 py-4 flex items-center justify-between active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#244949] rounded-2xl"
+                  style={{ transition: `transform 150ms ${EASE_OUT}` }}
+                >
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-[15px] font-medium text-[#14181A] text-left">
+                      Bygger på {comparables.length} tinglyste handler
+                    </span>
+                    {sameEfCount > 0 && (
+                      <span
+                        className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-tight bg-[#F5EFE6]"
+                        style={{ color: ACCENT }}
+                      >
+                        {sameEfCount} i samme ejerforening
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[12px] text-[#5A6166] shrink-0">
+                    {comparablesOpen ? 'Skjul' : 'Se'}
                   </span>
-                  <span
-                    className="px-2 py-0.5 rounded-full text-[10px] font-medium tracking-tight bg-[#F5EFE6]"
-                    style={{ color: ACCENT }}
-                  >
-                    1 i samme ejerforening
-                  </span>
-                </div>
-                <span className="text-[12px] text-[#5A6166]">
-                  Klik for at {comparablesOpen ? 'skjule' : 'se'}
-                </span>
-              </button>
-              <div
-                className="grid"
-                style={{
-                  gridTemplateRows: comparablesOpen ? '1fr' : '0fr',
-                  transition: `grid-template-rows 250ms ${EASE_OUT}`,
-                }}
-              >
-                <div className="overflow-hidden">
-                  <div className="px-6 pb-5 space-y-3 border-t border-[#E5E2DA] pt-4">
-                    {[
-                      { adr: 'H C Andersens Vej 63, 2. tv, 4700 Næstved', sqm: 75, pris: 1125000, ppsqm: 15000, dato: '2026-04' },
-                      { adr: 'Præstøvej 57A, st. th, 4700 Næstved', sqm: 59, pris: 1085000, ppsqm: 18390, dato: '2026-04' },
-                      { adr: 'Grønlandsvej 26, st. mf, 4700 Næstved', sqm: 59, pris: 1050000, ppsqm: 17797, dato: '2026-02' },
-                    ].map((c) => (
-                      <div key={c.adr} className="flex items-baseline justify-between gap-4 py-2 border-b last:border-0 border-[#F2F0EB]">
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[13px] font-medium truncate text-[#14181A]">
-                            {c.adr} <span className="text-[11px] font-normal ml-1 text-[#9C988C]">{c.sqm}m²</span>
+                </button>
+                <div
+                  className="grid"
+                  style={{
+                    gridTemplateRows: comparablesOpen ? '1fr' : '0fr',
+                    transition: `grid-template-rows 250ms ${EASE_OUT}`,
+                  }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-6 pb-5 space-y-3 border-t border-[#E5E2DA] pt-4">
+                      {comparables.slice(0, 8).map((c) => (
+                        <div key={c.address} className="flex items-baseline justify-between gap-4 py-2 border-b last:border-0 border-[#F2F0EB]">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13px] font-medium truncate text-[#14181A]">
+                              {c.address}{' '}
+                              {c.kvm ? (
+                                <span className="text-[11px] font-normal ml-1 text-[#9C988C]">{c.kvm}m²</span>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-[14px] font-semibold tabular-nums text-[#14181A]">
+                              {fmt(c.price)} kr
+                            </div>
+                            <div className="text-[11px] text-[#9C988C]">
+                              {c.pricePerSqm ? `${fmt(c.pricePerSqm)}/m²` : ''}
+                              {c.date ? ` · ${c.date.slice(0, 7)}` : ''}
+                            </div>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <div className="text-[14px] font-semibold tabular-nums text-[#14181A]">
-                            {fmt(c.pris)} kr
-                          </div>
-                          <div className="text-[11px] text-[#9C988C]">
-                            {c.ppsqm.toLocaleString('da-DK')}/m² · {c.dato}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Disclaimer */}
             <div className="rounded-xl px-5 py-4 text-center text-[13px] leading-relaxed bg-[#F5EFE6] text-[#14181A]">
@@ -327,5 +452,22 @@ export function Estimat() {
         </div>
       </main>
     </div>
+  );
+}
+
+function PhoneIcon({ className, stroke }: { className?: string; stroke: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+}
+
+function VideoIcon({ className, stroke }: { className?: string; stroke: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="6" width="14" height="12" rx="2" />
+      <path d="m22 8-6 4 6 4z" />
+    </svg>
   );
 }

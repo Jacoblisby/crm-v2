@@ -7,6 +7,7 @@ export function MainHeader() {
   const pathname = usePathname();
   // Auto-skjul CRM-nav på public funnel-routes + design-prototyper
   if (pathname?.startsWith('/salg')) return null;
+  if (pathname?.startsWith('/frontpage')) return null;
   if (pathname?.startsWith('/design-preview')) return null;
   if (pathname?.startsWith('/design-vote')) return null;
 
@@ -45,8 +46,8 @@ interface MainProps {
 
 export function MainWrapper({ children }: MainProps) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/salg')) {
-    // Salg har sit eget layout — ingen CRM-wrapper
+  if (pathname?.startsWith('/salg') || pathname?.startsWith('/frontpage')) {
+    // Salg + frontpage har eget layout — ingen CRM-wrapper
     return <>{children}</>;
   }
   return <main className="max-w-6xl mx-auto px-4 py-6">{children}</main>;

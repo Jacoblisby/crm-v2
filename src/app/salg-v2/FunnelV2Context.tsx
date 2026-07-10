@@ -98,7 +98,7 @@ interface Ctx {
 
 const Ctx = createContext<Ctx | null>(null);
 
-const STORAGE_KEY = 'salg.funnel.v2';
+export const STORAGE_KEY = 'salg.funnel.v2';
 
 export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<FunnelStateV2>(initialStateV2);
@@ -126,6 +126,11 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Persistér ALDRIG den urørte initial-state: ved mount kører denne effekt
+    // FØR load-effektens setState er committet, og ville ellers overskrive
+    // (klobbe) en gemt state fra en anden route (fx /frontpage → /salg-v4).
+    // React StrictMode's dobbelt-mount gør klobningen permanent i dev.
+    if (state === initialStateV2) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {}
@@ -161,6 +166,40 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
         next.costForsikringer = sums.costForsikringer;
         next.costFaelleslaan = sums.costFaelleslaan;
         next.costAndreDrift = sums.driftAndre + (next.costGrundfond || 0);
+      }
+      // Sync fri-tekst → v1 standNote (den ENESTE fri-tekst submit-action medtager)
+      if (
+        patch.notes !== undefined ||
+        patch.smokeFree !== undefined ||
+        patch.econNotes !== undefined
+      ) {
+        next.standNote = [
+          next.notes,
+          next.smokeFree ? `Røgfri: ${next.smokeFree}` : '',
+          next.econNotes ? `Økonomiske forhold: ${next.econNotes}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · ');
+      }
+      // Sync ny-bolig ønskeliste → v1 rentalSearch-felter (indgår i lead-noten)
+      if (
+        patch.nyOmraade !== undefined ||
+        patch.nyRoomsMin !== undefined ||
+        patch.nySqmMin !== undefined ||
+        patch.nyHuslejeMax !== undefined ||
+        patch.nyMustHave !== undefined ||
+        patch.nyIndflytning !== undefined
+      ) {
+        next.rentalSearchCity = (next.nyOmraade || []).join(', ');
+        next.rentalSearchType = [
+          next.nyRoomsMin ? `min ${next.nyRoomsMin} vær` : '',
+          next.nySqmMin ? `min ${next.nySqmMin} m²` : '',
+          next.nyHuslejeMax ? `max ${next.nyHuslejeMax} kr/md` : '',
+          (next.nyMustHave || []).length ? `skal have: ${next.nyMustHave.join(', ')}` : '',
+          next.nyIndflytning ? `indflytning: ${next.nyIndflytning}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · ');
       }
       return next;
     });

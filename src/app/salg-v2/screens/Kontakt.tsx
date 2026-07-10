@@ -17,7 +17,7 @@ export function Kontakt() {
       <div className="bg-white rounded-2xl border border-[#EAE7DE] p-6 sm:p-7 space-y-4">
         <div>
           <label className="text-[13px] font-medium text-[#14181A] block mb-1.5">
-            Fulde navn <span className="text-[11px] text-[#9C988C] font-normal italic">valgfri</span>
+            Fulde navn
           </label>
           <input
             type="text"
