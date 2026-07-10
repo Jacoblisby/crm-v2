@@ -40,31 +40,33 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
       </div>
       <style>{`
         .fp-root {
-          --fp-green:      #145d5f; /* primær petroleum */
+          /* Eksakte farver samplet fra designfilen (NXq53grC6JZj0AeCK657Yw) */
+          --fp-green:      #145d5f; /* primær petroleum (ikoner, quote-kort, CTA-sektion, footer) */
           --fp-green-deep: #0f4749;
-          --fp-footer:     #365a5c;
-          --fp-accent:     #429798; /* accent teal */
-          --fp-mint:       #cce0dc; /* mint sektion */
-          --fp-mint-card:  #b9d8d3; /* mint kort */
-          --fp-cream:      #f4f6f3; /* lys baggrund */
-          --fp-rose:       #eae1dd; /* hero dusty rosa */
-          --fp-cta:        #7ce0da; /* turkis CTA */
+          --fp-teal-mid:   #007f80; /* midterste quote-kort */
+          --fp-accent-bar: #009fa3; /* accent-streg ved stats */
+          --fp-mint:       #c8dfdd; /* "Sådan virker det"-sektion */
+          --fp-mint-card:  #b4d4d1; /* mint kort + lyst quote-kort */
+          --fp-faq:        #deeceb; /* FAQ-sektion */
+          --fp-cream:      #f5f2f1; /* lyse sektioner */
+          --fp-rose:       #e8dfde; /* hero + foto-sektioner */
+          --fp-cta:        #83ebeb; /* turkis CTA-knap */
           --fp-ink:        #1c2b2b;
-          --fp-muted:      #5c6b6a;
+          --fp-muted:      #4d5a59;
           background: #ffffff;
           color: var(--fp-ink);
           font-weight: 400;
         }
         .fp-root h1, .fp-root h2, .fp-root h3 {
-          font-weight: 300; /* designer: lettere vægtning end nuværende site */
-          letter-spacing: -0.01em;
+          font-weight: 400;
+          letter-spacing: -0.005em;
         }
         .fp-root .fp-kicker {
           font-size: 12px;
           font-weight: 500;
-          letter-spacing: 0.22em;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: var(--fp-accent);
+          color: #3a4746;
         }
       `}</style>
     </FunnelV2Provider>
