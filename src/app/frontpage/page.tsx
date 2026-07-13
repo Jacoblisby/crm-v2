@@ -234,9 +234,10 @@ function BlivBoende() {
               alt="Lys entré i skandinavisk lejlighed"
               className="w-full aspect-[4/5] object-cover"
             />
-            <DarkBadge icon={Coins} title="Friværdi frigivet" sub="Eksempel: 2.250.000 kr." className="top-[16%] left-5" />
-            <DarkBadge icon={HouseLine} title="Samme adresse" sub="Mulighed for at blive boende" className="bottom-[28%] right-4 lg:-right-10" />
-            <DarkBadge icon={FileText} title="Klar aftale" sub="Pris, husleje og vilkår gennemgås først" className="bottom-[8%] left-8" />
+            {/* Placering 1:1 fra Figma-framen: diagonalt forskudt, alle inde på fotoet */}
+            <DarkBadge icon={Coins} title="Friværdi frigivet" sub="Eksempel: 2.250.000 kr." className="top-[33%] left-[13%]" />
+            <DarkBadge icon={HouseLine} title="Samme adresse" sub="Mulighed for at blive boende" className="top-[53%] left-[35%]" />
+            <DarkBadge icon={FileText} title="Klar aftale" sub="Pris, husleje og vilkår gennemgås først" className="top-[70%] left-[9%]" />
           </div>
         </div>
 
