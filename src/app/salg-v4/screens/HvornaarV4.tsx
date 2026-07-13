@@ -1,9 +1,8 @@
 'use client';
 
 /**
- * HvornaarV4 — "Hvornår vil du flytte?" (01_Adresse trin 3).
- * Designer-copy inkl. brugerens rettelser ("Jeg skal have tid og ro...",
- * "Jeg vil gerne lære mere om hvad jeg kan sælge for").
+ * HvornaarV4 — "Hvornår vil du flytte?" (Figma: 01_Adresse trin 3).
+ * Flade hvide rækker: titel venstre, forklaring højre. Valgt = teal fyld.
  */
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
 import { OptionRowV4, V4 } from '../primitives';
@@ -19,7 +18,7 @@ const OPTIONS = [
 export function HvornaarV4() {
   const { state, update } = useFunnelV2();
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {OPTIONS.map((o) => (
         <OptionRowV4
           key={o.t}
@@ -29,7 +28,7 @@ export function HvornaarV4() {
           onSelect={() => update({ moveTimeframeRaw: o.t })}
         />
       ))}
-      <p className="text-[12.5px] pt-3" style={{ color: V4.soft }}>
+      <p className="text-[12.5px] pt-2" style={{ color: V4.soft }}>
         Det her påvirker ikke dit tilbud, men hjælper os med at planlægge.
       </p>
     </div>

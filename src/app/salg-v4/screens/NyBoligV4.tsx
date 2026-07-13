@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * NyBoligV4 — "Hvad leder du efter?" (01_Adresse ekstra trin, DIN NÆSTE BOLIG).
- * Kun når efter_salg = "Vil leje en anden bolig". Ønskerne synces til
- * rentalSearchCity/rentalSearchType via FunnelV2Context, så de når lead-noten.
+ * NyBoligV4 — "Hvad leder du efter?" (ekstra adresse-trin — markeret
+ * "IKKE DESIGNET" i Figma-filen; bygget i flowets design-sprog).
+ * Ønskerne synces til rentalSearchCity/Type via FunnelV2Context.
  */
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
-import { V4, EASE, MoneyInputV4 } from '../primitives';
+import { V4, Card, CardLabel, ChipV4, FieldV4 } from '../primitives';
 
 const OMRAADER = ['Næstved', 'Ringsted', 'Roskilde', 'Kalundborg', 'Taastrup', 'København S', 'Andet'];
 const MUST_HAVES = ['Altan/terrasse', 'Have', 'Elevator', 'Husdyr tilladt', 'Tæt på togstation', 'Tæt på skole', 'Møbleret', 'Parkering'];
@@ -21,102 +21,75 @@ export function NyBoligV4() {
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
 
   return (
-    <div className="space-y-8">
-      <Field label="Hvilke områder er interessante?">
+    <div className="space-y-5">
+      <Card className="p-6 space-y-4">
+        <CardLabel>Områder</CardLabel>
         <div className="flex flex-wrap gap-2">
           {OMRAADER.map((o) => (
-            <TogglePill key={o} label={o} selected={omr.includes(o)} onClick={() => update({ nyOmraade: toggle(omr, o) })} />
+            <ChipV4 key={o} label={o} selected={omr.includes(o)} onClick={() => update({ nyOmraade: toggle(omr, o) })} />
           ))}
         </div>
-      </Field>
+      </Card>
 
-      <div className="grid sm:grid-cols-2 gap-5">
-        <Field label="Antal værelser (min)">
-          <select
-            value={state.nyRoomsMin || '2'}
-            onChange={(e) => update({ nyRoomsMin: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border bg-white text-[15px] focus:outline-none"
-            style={{ borderColor: V4.border, color: V4.ink }}
-          >
-            {['1', '2', '3', '4', '5+'].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-        </Field>
-        <MoneyInputV4
-          label="Boligareal (min)"
-          value={state.nySqmMin}
-          onChange={(v) => update({ nySqmMin: v })}
-          placeholder="60"
-          unit="m²"
+      <Card className="p-6 space-y-5">
+        <CardLabel>Størrelse og husleje</CardLabel>
+        <div className="grid sm:grid-cols-2 gap-5">
+          <div className="space-y-1.5">
+            <label className="text-[13.5px] block" style={{ color: V4.ink, fontWeight: 500 }}>
+              Antal værelser (min)
+            </label>
+            <select
+              value={state.nyRoomsMin || '2'}
+              onChange={(e) => update({ nyRoomsMin: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-md text-[14.5px] focus:outline-none"
+              style={{ background: '#f2f0ed', border: `1px solid ${V4.border}`, color: V4.ink }}
+            >
+              {['1', '2', '3', '4', '5+'].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+          <FieldV4
+            label="Boligareal (min)"
+            value={state.nySqmMin}
+            onChange={(v) => update({ nySqmMin: v })}
+            placeholder="60 m²"
+            numeric
+          />
+        </div>
+        <FieldV4
+          label="Max månedlig husleje"
+          value={state.nyHuslejeMax}
+          onChange={(v) => update({ nyHuslejeMax: v })}
+          placeholder="9.500 kr/md"
+          numeric
         />
-      </div>
+      </Card>
 
-      <MoneyInputV4
-        label="Max månedlig husleje"
-        value={state.nyHuslejeMax}
-        onChange={(v) => update({ nyHuslejeMax: v })}
-        placeholder="9.500"
-        unit="kr/md"
-      />
-
-      <Field label="Skal-have (valgfri)">
-        <div className="grid sm:grid-cols-2 gap-2">
+      <Card className="p-6 space-y-4">
+        <CardLabel>Skal-have (valgfri)</CardLabel>
+        <div className="flex flex-wrap gap-2">
           {MUST_HAVES.map((m) => (
-            <TogglePill key={m} label={m} selected={must.includes(m)} onClick={() => update({ nyMustHave: toggle(must, m) })} wide />
+            <ChipV4 key={m} label={m} selected={must.includes(m)} onClick={() => update({ nyMustHave: toggle(must, m) })} />
           ))}
         </div>
-      </Field>
+      </Card>
 
-      <Field label="Hvornår skal du bo i den nye bolig?">
+      <Card className="p-6 space-y-4">
+        <CardLabel>Hvornår skal du bo i den nye bolig?</CardLabel>
         <div className="flex flex-wrap gap-2">
           {INDFLYTNING.map((o) => (
-            <TogglePill key={o} label={o} selected={state.nyIndflytning === o} onClick={() => update({ nyIndflytning: o })} />
+            <ChipV4 key={o} label={o} selected={state.nyIndflytning === o} onClick={() => update({ nyIndflytning: o })} />
           ))}
         </div>
-      </Field>
+      </Card>
 
-      <div className="rounded-2xl p-5 flex items-start gap-3" style={{ background: V4.mintSoft }}>
-        <svg className="w-[18px] h-[18px] mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke={V4.green} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 16v-4M12 8h.01" />
-        </svg>
+      <div className="rounded-[10px] px-5 py-4" style={{ background: V4.mintSoft }}>
         <p className="text-[13px] leading-relaxed" style={{ color: V4.ink }}>
           Vi har <strong style={{ fontWeight: 600 }}>+20 lejemål</strong> klar til udlejning indenfor de
-          næste 3 måneder i Næstved, Ringsted, Kalundborg, Taastrup og Roskilde. Når vi
-          snakker, kobler vi dig med en mulig matchende lejebolig.
+          næste 3 måneder i Næstved, Ringsted, Kalundborg, Taastrup og Roskilde.
         </p>
       </div>
     </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-3">
-      <label className="text-[14px] block" style={{ color: V4.ink, fontWeight: 500 }}>{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function TogglePill({ label, selected, onClick, wide }: { label: string; selected: boolean; onClick: () => void; wide?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-4 py-2.5 rounded-lg border text-[13.5px] transition-all active:scale-[0.98] ${wide ? 'text-left' : ''}`}
-      style={{
-        borderColor: selected ? V4.green : V4.border,
-        background: selected ? V4.mintSoft : '#fff',
-        color: selected ? V4.greenDeep : V4.ink,
-        fontWeight: selected ? 600 : 400,
-        boxShadow: selected ? `inset 0 0 0 1px ${V4.green}` : 'none',
-        transitionDuration: '150ms',
-        transitionTimingFunction: EASE,
-      }}
-    >
-      {label}
-    </button>
   );
 }

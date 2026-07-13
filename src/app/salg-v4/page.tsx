@@ -8,7 +8,7 @@
 import { useFunnelV2 } from '../salg-v2/FunnelV2Context';
 import { AddressCta } from '../frontpage/AddressCta';
 import { Funnel } from './Funnel';
-import { V4, SectionKicker } from './primitives';
+import { V4 } from './primitives';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ export default function SalgV4Page() {
 
   if (state.screenIdx === 0) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: V4.cream }}>
+      <div className="min-h-screen flex flex-col" style={{ background: V4.beige }}>
         <header className="px-6 py-5">
           <a href="/frontpage" className="flex items-baseline gap-1.5" style={{ color: V4.ink }}>
             <span className="text-[22px] leading-none" style={{ fontWeight: 400 }}>365</span>
@@ -26,7 +26,9 @@ export default function SalgV4Page() {
         </header>
         <main className="flex-1 flex items-center justify-center px-6 pb-24">
           <div className="w-full max-w-xl text-center space-y-6">
-            <SectionKicker>Tjek din pris</SectionKicker>
+            <div className="text-[12px] tracking-[0.18em] uppercase" style={{ color: V4.ink, fontWeight: 500 }}>
+              Tjek din pris
+            </div>
             <h1 className="text-[34px] sm:text-[44px] leading-[1.12]" style={{ color: V4.ink }}>
               Start med din adresse
             </h1>

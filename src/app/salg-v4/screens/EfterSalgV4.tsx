@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * EfterSalgV4 — "Hvad skal du efter salget?" (01_Adresse trin 4, DIN SITUATION).
- * Viser designerens korte titler, men gemmer de v2-display-strenge som
- * FunnelV2Context mapper til v1-slugs (submit-action).
+ * EfterSalgV4 — "Hvad skal du efter salget?" (Figma: 01_Adresse trin 4).
+ * Flade rækker m. forklaring højre; valgt = teal fyld.
+ * Viser designerens titler, gemmer v2-display-strenge (mapper til v1-slugs).
  */
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
 import { OptionRowV4 } from '../primitives';
 
-const OPTIONS: Array<{ display: string; stateValue: string; sub: string; badge?: string }> = [
+const OPTIONS: Array<{ display: string; stateValue: string; sub: string }> = [
   {
     display: 'Flytter ud helt',
     stateValue: 'Flytter ud helt',
@@ -18,7 +18,6 @@ const OPTIONS: Array<{ display: string; stateValue: string; sub: string; badge?:
     display: 'Vil blive boende',
     stateValue: 'Vil blive boende som lejer',
     sub: 'Du bliver boende og nyder friværdien bekymringsfrit.',
-    badge: 'POPULÆR',
   },
   {
     display: 'Vil leje en anden bolig',
@@ -35,13 +34,12 @@ const OPTIONS: Array<{ display: string; stateValue: string; sub: string; badge?:
 export function EfterSalgV4() {
   const { state, update } = useFunnelV2();
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {OPTIONS.map((o) => (
         <OptionRowV4
           key={o.stateValue}
           title={o.display}
           sub={o.sub}
-          badge={o.badge}
           selected={state.afterSaleRaw === o.stateValue}
           onSelect={() => update({ afterSaleRaw: o.stateValue })}
         />

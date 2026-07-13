@@ -1,214 +1,199 @@
 'use client';
 
 /**
- * v4 primitives — designerens grønne design-sprog (Montserrat, petroleum/mint).
- * Selected state: petroleum-grøn border + soft mint fill (ikke sort som v2).
+ * v4 primitives — designerens flow-design-sprog (fra Figma-framesene):
+ *   - Beige baggrund #F5F2F1 ("Beige 3"), hvide kort m. blød skygge
+ *   - Valgt tilstand: HEL flade fyldt teal m. hvid tekst (ingen borders/radioer)
+ *   - Chips (stand, Ja/Nej/Ved ikke): rounded-full, hvid m. grå border;
+ *     valgt = petroleum fyld m. hvid tekst
+ *   - Inputs: lys flade, hint-tekst under
  */
 
 export const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
 
 export const V4 = {
-  green: '#145d5f',
+  green: '#145d5f',       // petroleum — knapper, ikoner, footer
   greenDeep: '#0f4749',
-  accent: '#429798',
-  mint: '#cce0dc',
-  mintCard: '#b9d8d3',
+  selected: '#317779',    // valgt række (teal fyld, fra "trin 3 valgt"-framen)
+  mint: '#cce0dc',        // mint header-bar + prisboks
   mintSoft: '#e7f0ed',
-  cream: '#f4f6f3',
-  cta: '#7ce0da',
+  beige: '#f5f2f1',       // skærm-baggrund ("Beige 3")
+  cta: '#83ebeb',         // turkis (Ring-knap på estimat)
+  prevBtn: '#c9d9d6',     // "Forrige"-knap
   ink: '#1c2b2b',
   muted: '#5c6b6a',
   soft: '#8a9695',
-  border: '#e3e9e7',
+  border: '#e5e3df',
+  cardShadow: '0 6px 24px -10px rgba(28,43,43,0.12)',
 };
 
-export function SectionKicker({ children }: { children: React.ReactNode }) {
+export function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className="text-[11px] tracking-[0.2em] uppercase"
-      style={{ color: V4.accent, fontWeight: 500 }}
+      className={`bg-white rounded-[10px] ${className ?? ''}`}
+      style={{ boxShadow: V4.cardShadow }}
     >
       {children}
     </div>
   );
 }
 
-export function MoneyInputV4({
-  label,
-  value,
-  onChange,
-  placeholder,
-  sub,
-  unit = 'kr/år',
-}: {
-  label: string;
-  value: number | string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  sub?: string;
-  unit?: string;
-}) {
+export function CardLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] block" style={{ color: V4.ink, fontWeight: 500 }}>
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ''))}
-          placeholder={placeholder}
-          className="w-full px-4 py-3 pr-16 rounded-lg border bg-white text-[15px] tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-          style={{ borderColor: V4.border, color: V4.ink, ['--tw-ring-color' as never]: V4.accent }}
-        />
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px]" style={{ color: V4.soft }}>
-          {unit}
-        </span>
-      </div>
-      {sub && <p className="text-[12px]" style={{ color: V4.muted }}>{sub}</p>}
+    <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: V4.muted, fontWeight: 500 }}>
+      {children}
     </div>
   );
 }
 
-export function YesNoV4({
-  label,
-  value,
-  onChange,
-  allowUnsure,
-}: {
-  label: string;
-  value: 'Ja' | 'Nej' | 'Ved ikke' | null | undefined;
-  onChange: (v: 'Ja' | 'Nej' | 'Ved ikke') => void;
-  allowUnsure?: boolean;
-}) {
-  const options: Array<'Ja' | 'Nej' | 'Ved ikke'> = allowUnsure ? ['Ja', 'Nej', 'Ved ikke'] : ['Ja', 'Nej'];
-  return (
-    <div className="flex items-center justify-between gap-4 py-2 flex-wrap">
-      <span className="text-[14px]" style={{ color: V4.ink }}>{label}</span>
-      <div className="flex gap-2 shrink-0">
-        {options.map((v) => {
-          const sel = value === v;
-          return (
-            <button
-              key={v}
-              type="button"
-              onClick={() => onChange(v)}
-              className="px-4 py-2 rounded-lg text-[13px] border transition-all active:scale-[0.97]"
-              style={{
-                borderColor: sel ? V4.green : V4.border,
-                background: sel ? V4.mintSoft : '#fff',
-                color: sel ? V4.greenDeep : V4.ink,
-                fontWeight: sel ? 600 : 400,
-                boxShadow: sel ? `inset 0 0 0 1px ${V4.green}` : 'none',
-                transitionDuration: '160ms',
-                transitionTimingFunction: EASE,
-              }}
-            >
-              {v}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/** Stor option-række med radio-cirkel (Hvornår / Efter salget) */
+/** Flad valg-række: titel venstre, forklaring højre. Valgt = teal fyld. */
 export function OptionRowV4({
   title,
   sub,
   selected,
   onSelect,
-  badge,
 }: {
   title: string;
   sub?: string;
   selected: boolean;
   onSelect: () => void;
-  badge?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onSelect}
-      className="w-full px-5 py-4 rounded-xl border flex items-center gap-4 text-left transition-all bg-white active:scale-[0.99]"
+      className="w-full px-6 py-5 rounded-[10px] flex items-center justify-between gap-6 text-left transition-all active:scale-[0.995]"
       style={{
-        borderColor: selected ? V4.green : V4.border,
-        background: selected ? V4.mintSoft : '#fff',
-        boxShadow: selected ? `inset 0 0 0 1px ${V4.green}` : 'none',
+        background: selected ? V4.selected : '#fff',
+        boxShadow: V4.cardShadow,
         transitionDuration: '180ms',
         transitionTimingFunction: EASE,
       }}
     >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[15.5px]" style={{ color: V4.ink, fontWeight: 500 }}>{title}</span>
-          {badge && (
-            <span
-              className="px-2 py-0.5 rounded-full text-[10px] tracking-wide"
-              style={{ background: V4.green, color: '#fff', fontWeight: 600 }}
-            >
-              {badge}
-            </span>
-          )}
-        </div>
-        {sub && <div className="text-[12.5px] mt-0.5" style={{ color: V4.muted }}>{sub}</div>}
-      </div>
-      <div
-        className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0"
-        style={{
-          borderColor: selected ? V4.green : '#c8d2cf',
-          background: selected ? V4.green : '#fff',
-          transition: `all 160ms ${EASE}`,
-        }}
-      >
-        {selected && (
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-        )}
-      </div>
+      <span className="text-[16px] shrink-0" style={{ color: selected ? '#fff' : V4.ink, fontWeight: 500 }}>
+        {title}
+      </span>
+      {sub && (
+        <span className="text-[13px] text-right" style={{ color: selected ? 'rgba(255,255,255,0.85)' : V4.soft }}>
+          {sub}
+        </span>
+      )}
     </button>
   );
 }
 
-export function TextInputV4({
+/** Chip — stand-niveauer og Ja/Nej/Ved ikke. Valgt = petroleum fyld. */
+export function ChipV4({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="px-4 py-2 rounded-full text-[13.5px] border transition-all active:scale-[0.97]"
+      style={{
+        borderColor: selected ? V4.green : '#d4d9d6',
+        background: selected ? V4.green : '#fff',
+        color: selected ? '#fff' : V4.ink,
+        fontWeight: selected ? 600 : 400,
+        transitionDuration: '150ms',
+        transitionTimingFunction: EASE,
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+export function ChipGroupV4({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string | null | undefined;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => (
+        <ChipV4 key={o} label={o} selected={value === o} onClick={() => onChange(o)} />
+      ))}
+    </div>
+  );
+}
+
+/** Input m. label over og hint under (som Udgifter-framen) */
+export function FieldV4({
   label,
   value,
   onChange,
   placeholder,
-  sub,
+  hint,
+  numeric,
   type = 'text',
   autoComplete,
-  inputMode,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
-  sub?: string;
+  hint?: string;
+  numeric?: boolean;
   type?: string;
   autoComplete?: string;
-  inputMode?: 'email' | 'tel' | 'numeric' | 'text';
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[13px] block" style={{ color: V4.ink, fontWeight: 500 }}>
+      <label className="text-[13.5px] block" style={{ color: V4.ink, fontWeight: 500 }}>
         {label}
       </label>
       <input
         type={type}
+        inputMode={numeric ? 'numeric' : undefined}
         value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(numeric ? e.target.value.replace(/[^\d]/g, '') : e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        inputMode={inputMode}
-        className="w-full px-4 py-3 rounded-lg border bg-white text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
-        style={{ borderColor: V4.border, color: V4.ink, ['--tw-ring-color' as never]: V4.accent }}
+        className="w-full px-3.5 py-2.5 rounded-md text-[14.5px] focus:outline-none focus-visible:ring-2 tabular-nums"
+        style={{
+          background: '#f2f0ed',
+          border: `1px solid ${V4.border}`,
+          color: V4.ink,
+          ['--tw-ring-color' as never]: V4.selected,
+        }}
       />
-      {sub && <p className="text-[12px]" style={{ color: V4.muted }}>{sub}</p>}
+      {hint && <p className="text-[12px]" style={{ color: V4.soft }}>{hint}</p>}
+    </div>
+  );
+}
+
+/** Ja/Nej(/Ved ikke)-spørgsmål på én linje: tekst venstre, chips højre */
+export function QuestionRowV4({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: string | null | undefined;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 flex-wrap">
+      <span className="text-[14.5px]" style={{ color: V4.ink }}>{label}</span>
+      <div className="flex gap-2 shrink-0">
+        {options.map((o) => (
+          <ChipV4 key={o} label={o} selected={value === o} onClick={() => onChange(o)} />
+        ))}
+      </div>
     </div>
   );
 }
