@@ -1,21 +1,20 @@
 'use client';
 
 /**
- * Frontpage — pixel-matchet mod designfilen (Figma NXq53grC6JZj0AeCK657Yw,
- * frame "Landingpage" 7254:6750, 1440x6369). Farver samplet fra framen.
+ * Frontpage — matchet mod BÅDE desktop- og mobil-framen i designfilen
+ * (Figma NXq53grC6JZj0AeCK657Yw: desktop 7254:6750, mobil 7254:7256,
+ * mobilmenu 7254:7450).
  *
- * Sektioner (nøjagtig rækkefølge og layout fra designet):
- *   1. Nav — mørk blur-bar m. logo, links, turkis tlf-pill
- *   2. Hero — rosa venstre + foto højre; mørk blur-plade m. adressefelt og
- *      trust-line HENOVER overgangen
- *   3. Direkte salg — cream, 3 flade mint-kort
- *   4. Bliv måske boende — rosa, foto VENSTRE (full-bleed) m. 3 mørke badges
- *   5. Sådan virker det — mint, overskrift venstre; foto + 4 lodrette trin
- *   6. Erfaringer — cream, 3 quote-kort (#145d5f / #007f80 / #b4d4d1)
- *   7. Vi køber for at eje — rosa, foto VENSTRE, stats m. teal streg (ingen ikoner)
- *   8. FAQ — #deeceb, 2 kolonner, divider-liste (ingen kort)
- *   9. Kom i gang — #145d5f, hvid adresse-bar
- *  10. Footer — #145d5f m. hvid divider
+ * Mobil afviger bevidst fra desktop flere steder — det er designerens valg:
+ *   - Nav: kun logo + burger; menuen er et stort blur-panel med X
+ *   - Hero: tekst → foto i fuld bredde → adresse-pladen ligger HEN OVER fotoet
+ *   - Direkte salg og Erfaringer: swipe-karruseller med prik-indikator
+ *   - Bliv boende: ingen badges (de ville dække motivet på 390 px)
+ *   - Sådan virker det: runde ikoner, trin FØR foto
+ *   - Footer: centreret og stablet
+ *
+ * Bevægelse: rolige reveals ved scroll (se Motion.tsx) — designeren beder om
+ * at effekter bruges "selektivt og med omtanke", så intet svæver eller hopper.
  */
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -35,6 +34,7 @@ import {
   HouseLine,
 } from '@phosphor-icons/react';
 import { AddressCta } from './AddressCta';
+import { Reveal, useScrolled, MobileCarousel } from './Motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,82 +64,136 @@ export default function Frontpage() {
   );
 }
 
-/* ─── 1. Nav ───────────────────────────────────────────────────────────────── */
+/* ─── 1. Nav — sticky (designer: "Logo med baggrund er sticky ved scroll") ─── */
 function Nav() {
   const [open, setOpen] = useState(false);
+  const scrolled = useScrolled(40);
+
+  // Lås baggrunds-scroll når mobilmenuen er åben
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
   return (
-    <header className="absolute top-0 inset-x-0 z-40 px-3 sm:px-5 pt-3 sm:pt-4">
-      <div
-        className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-5 sm:pl-7 pr-2 py-2"
-        style={{
-          background: 'rgba(105,110,108,0.5)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-        }}
-      >
-        <a href="#" className="flex items-baseline gap-1.5 text-white">
-          <span className="text-[24px] leading-none" style={{ fontWeight: 400 }}>365</span>
-          <span className="text-[11px] tracking-[0.2em]" style={{ fontWeight: 500 }}>EJENDOM</span>
-        </a>
-
-        <nav className="hidden lg:flex items-center gap-9 text-[13.5px] text-white" style={{ fontWeight: 400 }}>
-          {NAV_LINKS.map((l) => (
-            <a key={l.label} href={l.href} className="hover:opacity-75 transition-opacity">
-              {l.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <a
-            href="tel:+4589876634"
-            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-[13.5px]"
-            style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
-          >
-            <Phone size={15} weight="regular" />
-            <span className="hidden sm:inline">+45 89 87 66 34</span>
-          </a>
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            aria-label={open ? 'Luk menu' : 'Åbn menu'}
-            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg text-white"
-          >
-            {open ? <X size={22} /> : <List size={22} />}
-          </button>
-        </div>
-      </div>
-
-      {open && (
+    <>
+      <header className="sticky top-0 z-40 px-3 sm:px-5 pt-3 sm:pt-4">
         <div
-          className="lg:hidden max-w-[1380px] mx-auto mt-2 rounded-lg overflow-hidden"
+          className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-5 sm:pl-7 pr-2 py-2"
           style={{
-            background: 'rgba(60,70,68,0.72)',
-            backdropFilter: 'blur(18px)',
-            WebkitBackdropFilter: 'blur(18px)',
+            background: scrolled ? 'rgba(78,83,81,0.72)' : 'rgba(105,110,108,0.5)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            boxShadow: scrolled ? '0 8px 28px -14px rgba(20,45,45,0.5)' : 'none',
+            transition: 'background-color 320ms ease, box-shadow 320ms ease',
           }}
         >
-          {NAV_LINKS.map((l) => (
+          <a href="#" className="flex items-baseline gap-1.5 text-white">
+            <span className="text-[24px] leading-none" style={{ fontWeight: 400 }}>365</span>
+            <span className="text-[11px] tracking-[0.2em]" style={{ fontWeight: 500 }}>EJENDOM</span>
+          </a>
+
+          <nav className="hidden lg:flex items-center gap-9 text-[13.5px] text-white" style={{ fontWeight: 400 }}>
+            {NAV_LINKS.map((l) => (
+              <a key={l.label} href={l.href} className="hover:opacity-75 transition-opacity">
+                {l.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            {/* Telefon-pill: skjult på mobil (som i mobil-framen) */}
             <a
-              key={l.label}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="block px-6 py-4 text-[15px] text-white border-b border-white/10 last:border-0"
+              href="tel:+4589876634"
+              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13.5px]"
+              style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
             >
-              {l.label}
+              <Phone size={15} weight="regular" />
+              +45 89 87 66 34
             </a>
-          ))}
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label="Åbn menu"
+              className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-white active:scale-95 transition-transform"
+            >
+              <List size={24} />
+            </button>
+          </div>
         </div>
-      )}
-    </header>
+      </header>
+
+      {/* Mobilmenu — stort blur-panel med centrerede links og X (Figma 7254:7450) */}
+      <div
+        className="lg:hidden fixed inset-0 z-50 px-3 pt-3"
+        style={{
+          pointerEvents: open ? 'auto' : 'none',
+          opacity: open ? 1 : 0,
+          transition: 'opacity 260ms cubic-bezier(0.23,1,0.32,1)',
+        }}
+        aria-hidden={!open}
+      >
+        <div
+          className="absolute inset-0"
+          onClick={() => setOpen(false)}
+          style={{ background: 'rgba(20,30,29,0.25)' }}
+        />
+        <div
+          className="relative rounded-xl px-6 pt-5 pb-12"
+          style={{
+            background: 'rgba(72,66,60,0.66)',
+            backdropFilter: 'blur(26px)',
+            WebkitBackdropFilter: 'blur(26px)',
+            transform: open ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.98)',
+            transition: 'transform 300ms cubic-bezier(0.23,1,0.32,1)',
+          }}
+        >
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Luk menu"
+              className="w-11 h-11 inline-flex items-center justify-center text-white active:scale-90 transition-transform"
+            >
+              <X size={26} />
+            </button>
+          </div>
+          <nav className="flex flex-col items-center gap-7 pt-4 pb-6">
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="text-[19px] text-white"
+                style={{ fontWeight: 400 }}
+              >
+                {l.label}
+              </a>
+            ))}
+            <a
+              href="tel:+4589876634"
+              className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[15px]"
+              style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
+            >
+              <Phone size={17} weight="regular" />
+              +45 89 87 66 34
+            </a>
+          </nav>
+        </div>
+      </div>
+    </>
   );
 }
 
-/* ─── 2. Hero — rosa venstre, foto højre, mørk adresse-plade henover ───────── */
+/* ─── 2. Hero ──────────────────────────────────────────────────────────────
+   Desktop: rosa venstre + foto højre, adresse-plade centreret nederst.
+   Mobil:   rosa tekstblok → foto i fuld bredde → plade hen over fotoet.      */
 function Hero() {
   return (
-    <section className="relative" style={{ background: 'var(--fp-rose)' }}>
-      {/* Foto — højre halvdel, full-bleed til kant og top (nav ligger ovenpå) */}
+    <section className="relative -mt-[68px] sm:-mt-[76px]" style={{ background: 'var(--fp-rose)' }}>
+      {/* Desktop-foto: højre halvdel, helt til kanten */}
       <div className="hidden lg:block absolute top-0 right-0 bottom-0" style={{ width: '49%' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -149,12 +203,12 @@ function Hero() {
         />
       </div>
 
-      <div className="relative max-w-[1380px] mx-auto px-6 sm:px-10 pt-28 sm:pt-32 pb-12 lg:min-h-[850px] flex flex-col">
-        {/* Tekst — venstre kolonne */}
-        <div className="max-w-[560px] space-y-5">
+      <div className="relative max-w-[1380px] mx-auto lg:px-10 pt-28 sm:pt-32 lg:pb-12 lg:min-h-[850px] flex flex-col">
+        {/* Tekst */}
+        <div className="px-6 sm:px-10 lg:px-6 max-w-[560px] space-y-5">
           <p className="fp-kicker">Sælg på nye vilkår</p>
-          <h1 className="text-[38px] sm:text-[48px] lg:text-[52px] leading-[1.15]" style={{ color: 'var(--fp-ink)' }}>
-            Frigør din friværdi<br className="hidden sm:inline" /> uden nødvendigvis<br className="hidden sm:inline" /> at flytte.
+          <h1 className="text-[36px] sm:text-[46px] lg:text-[52px] leading-[1.15]" style={{ color: 'var(--fp-ink)' }}>
+            Frigør din friværdi<br className="hidden lg:inline" /> uden nødvendigvis<br className="hidden lg:inline" /> at flytte.
           </h1>
           <p className="text-[14.5px] leading-[1.7] max-w-[430px]" style={{ color: 'var(--fp-muted)' }}>
             365 Ejendomme køber lejligheder kontant på Sjælland.
@@ -164,26 +218,31 @@ function Hero() {
           </p>
         </div>
 
-        {/* Mobil-foto */}
-        <div className="lg:hidden mt-8 -mx-6 sm:-mx-10">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/frontpage/couple-planning-table.jpg"
-            alt="Par gennemgår boligpapirer ved spisebordet"
-            className="w-full h-[300px] object-cover"
-          />
+        {/* Mobil: foto i fuld bredde, plade hen over (som i mobil-framen) */}
+        <div className="lg:hidden mt-9">
+          <div className="fp-photo overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/frontpage/couple-planning-table.jpg"
+              alt="Par gennemgår boligpapirer ved spisebordet"
+              className="w-full h-[330px] sm:h-[420px] object-cover"
+            />
+          </div>
+          <div id="hero-adresse" className="px-4 sm:px-8 -mt-[132px] relative z-10 pb-8 scroll-mt-28">
+            <AddressCta id="fp-address" variant="plate" />
+          </div>
         </div>
 
-        {/* Adresse-plade — centreret henover foto-overgangen (som i designet) */}
-        <div id="hero-adresse" className="w-full max-w-[720px] mx-auto mt-10 lg:mt-auto scroll-mt-28">
-          <AddressCta id="fp-address" variant="plate" />
+        {/* Desktop: plade centreret i bunden */}
+        <div id="hero-adresse-desktop" className="hidden lg:block w-full max-w-[720px] mx-auto mt-auto scroll-mt-28">
+          <AddressCta id="fp-address-desktop" variant="plate" />
         </div>
       </div>
     </section>
   );
 }
 
-/* ─── 3. Direkte salg — 3 flade mint-kort ──────────────────────────────────── */
+/* ─── 3. Direkte salg — karrusel på mobil, grid på desktop ─────────────────── */
 function DirekteSalg() {
   const cards = [
     { icon: Handshake, title: 'Direkte køber', body: 'Vi køber boligen direkte af dig.' },
@@ -193,7 +252,7 @@ function DirekteSalg() {
   return (
     <section className="px-6 sm:px-10 py-16 sm:py-24" style={{ background: 'var(--fp-cream)' }}>
       <div className="max-w-[1240px] mx-auto space-y-10">
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
+        <Reveal className="text-left sm:text-center space-y-4 max-w-2xl sm:mx-auto">
           <p className="fp-kicker">Direkte salg</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-balance">En mere rolig måde at sælge på</h2>
           <p className="text-[14px] leading-[1.65]" style={{ color: 'var(--fp-muted)' }}>
@@ -201,48 +260,52 @@ function DirekteSalg() {
             fremvisninger og usikker ventetid — og du får mulighed for at tage næste
             skridt i dit eget tempo.
           </p>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-5 max-w-[1100px] mx-auto">
-          {cards.map((c) => (
-            <div
-              key={c.title}
-              className="rounded-xl px-7 py-8 text-center space-y-2.5"
-              style={{ background: 'var(--fp-mint-card)' }}
-            >
-              <c.icon size={26} weight="thin" color="var(--fp-green)" className="mx-auto" />
-              <h3 className="text-[16px]" style={{ fontWeight: 600, color: 'var(--fp-ink)' }}>{c.title}</h3>
-              <p className="text-[13.5px] leading-[1.55]" style={{ color: 'var(--fp-ink)' }}>{c.body}</p>
-            </div>
-          ))}
-        </div>
+        </Reveal>
+
+        <Reveal delay={80}>
+          <MobileCarousel count={cards.length} className="max-w-[1100px] mx-auto">
+            {cards.map((c) => (
+              <div
+                key={c.title}
+                className="shrink-0 w-[82%] sm:w-auto rounded-xl px-7 py-8 text-center space-y-2.5"
+                style={{ background: 'var(--fp-mint-card)' }}
+              >
+                <c.icon size={26} weight="thin" color="var(--fp-green)" className="mx-auto" />
+                <h3 className="text-[16px]" style={{ fontWeight: 600, color: 'var(--fp-ink)' }}>{c.title}</h3>
+                <p className="text-[13.5px] leading-[1.55]" style={{ color: 'var(--fp-ink)' }}>{c.body}</p>
+              </div>
+            ))}
+          </MobileCarousel>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-/* ─── 4. Bliv måske boende — rosa, foto venstre full-bleed, mørke badges ───── */
+/* ─── 4. Bliv måske boende — badges kun på desktop ─────────────────────────── */
 function BlivBoende() {
   return (
     <section id="bliv-boende" className="scroll-mt-20" style={{ background: 'var(--fp-rose)' }}>
       <div className="grid lg:grid-cols-2 items-center">
-        {/* Foto — bleeder til venstre kant */}
-        <div className="relative order-last lg:order-first py-14 lg:py-20 pl-0 pr-6 lg:pr-0">
-          <div className="relative lg:max-w-[620px]">
+        {/* Foto — bleeder til venstre kant på desktop, fuld bredde på mobil */}
+        <Reveal className="fp-photo relative order-last lg:order-first pb-12 lg:py-20 lg:pr-0">
+          <div className="relative lg:max-w-[620px] overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/frontpage/entre.jpg"
               alt="Lys entré i skandinavisk lejlighed"
               className="w-full aspect-[4/5] object-cover"
             />
-            {/* Placering 1:1 fra Figma-framen: diagonalt forskudt, alle inde på fotoet */}
-            <DarkBadge icon={Coins} title="Friværdi frigivet" sub="Eksempel: 2.250.000 kr." className="top-[33%] left-[13%]" />
-            <DarkBadge icon={HouseLine} title="Samme adresse" sub="Mulighed for at blive boende" className="top-[53%] left-[35%]" />
-            <DarkBadge icon={FileText} title="Klar aftale" sub="Pris, husleje og vilkår gennemgås først" className="top-[70%] left-[9%]" />
+            {/* Badges: kun desktop — på 390 px dækker de motivet */}
+            <div className="hidden lg:block">
+              <DarkBadge icon={Coins} title="Friværdi frigivet" sub="Eksempel: 2.250.000 kr." className="top-[33%] left-[13%]" />
+              <DarkBadge icon={HouseLine} title="Samme adresse" sub="Mulighed for at blive boende" className="top-[53%] left-[35%]" />
+              <DarkBadge icon={FileText} title="Klar aftale" sub="Pris, husleje og vilkår gennemgås først" className="top-[70%] left-[9%]" />
+            </div>
           </div>
-        </div>
+        </Reveal>
 
-        {/* Tekst — højre */}
-        <div className="px-6 sm:px-10 lg:px-16 py-14 lg:py-20 max-w-[560px]">
+        <Reveal className="px-6 sm:px-10 lg:px-16 pt-16 pb-10 lg:py-20 max-w-[560px]">
           <div className="space-y-5">
             <p className="fp-kicker">Bliv måske boende</p>
             <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">
@@ -257,7 +320,7 @@ function BlivBoende() {
               lejer. Vi gennemgår både pris, husleje og vilkår med dig, før du beslutter noget.
             </p>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -297,7 +360,7 @@ function DarkBadge({
   );
 }
 
-/* ─── 5. Sådan virker det — mint, foto + lodrette nummererede trin ─────────── */
+/* ─── 5. Sådan virker det — trin FØR foto på mobil, runde ikoner ───────────── */
 function SaadanVirkerDet() {
   const steps = [
     { icon: House, title: '1. Start med adressen', body: 'Indtast din adresse, så ser vi på boligen og de offentlige boligdata.' },
@@ -308,37 +371,36 @@ function SaadanVirkerDet() {
   return (
     <section id="saadan-virker-det" className="px-6 sm:px-10 py-16 sm:py-24 scroll-mt-20" style={{ background: 'var(--fp-mint)' }}>
       <div className="max-w-[1240px] mx-auto space-y-10">
-        <div className="space-y-4 max-w-lg">
+        <Reveal className="space-y-4 max-w-lg">
           <p className="fp-kicker">Sådan virker det</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.25]">
             Fire enkle trin fra adresse til afklaring
           </h2>
-        </div>
+        </Reveal>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-          {/* Foto — gardin m. lysindfald (designerens billedstil) */}
-          <div className="max-w-[490px]">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-20 items-start">
+          {/* Foto: sidst på mobil, først på desktop */}
+          <Reveal className="fp-photo order-last lg:order-first max-w-[490px] overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/frontpage/curtain.jpg"
               alt="Gardin med naturligt lysindfald og grøn plante"
               className="w-full aspect-[3/4] object-cover"
             />
-          </div>
+          </Reveal>
 
-          {/* Trin — lodret liste */}
           <div className="space-y-8 max-w-[460px]">
-            {steps.map((s) => (
-              <div key={s.title} className="space-y-2.5">
+            {steps.map((s, i) => (
+              <Reveal key={s.title} delay={i * 90} className="space-y-2.5">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  className="w-11 h-11 rounded-full lg:rounded-lg flex items-center justify-center"
                   style={{ background: 'var(--fp-green)' }}
                 >
-                  <s.icon size={19} weight="thin" color="#fff" />
+                  <s.icon size={20} weight="thin" color="#fff" />
                 </div>
                 <h3 className="text-[17px]" style={{ fontWeight: 600, color: 'var(--fp-ink)' }}>{s.title}</h3>
                 <p className="text-[13.5px] leading-[1.6]" style={{ color: 'var(--fp-muted)' }}>{s.body}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -347,7 +409,7 @@ function SaadanVirkerDet() {
   );
 }
 
-/* ─── 6. Erfaringer — 3 quote-kort i eksakte teal-toner ────────────────────── */
+/* ─── 6. Erfaringer — karrusel på mobil ────────────────────────────────────── */
 function Erfaringer() {
   const quotes = [
     {
@@ -375,44 +437,45 @@ function Erfaringer() {
   return (
     <section id="erfaringer" className="px-6 sm:px-10 py-16 sm:py-24 scroll-mt-20" style={{ background: 'var(--fp-cream)' }}>
       <div className="max-w-[1240px] mx-auto space-y-10">
-        <div className="text-center space-y-4 max-w-xl mx-auto">
+        <Reveal className="text-left sm:text-center space-y-4 max-w-xl sm:mx-auto">
           <p className="fp-kicker">Erfaringer fra sælgere</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">Andre har stået samme sted</h2>
           <p className="text-[13.5px] leading-[1.65]" style={{ color: 'var(--fp-muted)' }}>
-            Et boligsalg kan være en stor beslutning.
-            <br />
-            Derfor betyder det noget at høre fra andre, der har valgt en mere enkel og
-            diskret vej.
+            Et boligsalg kan være en stor beslutning. Derfor betyder det noget at høre fra
+            andre, der har valgt en mere enkel og diskret vej.
           </p>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-5 max-w-[1100px] mx-auto">
-          {quotes.map((t) => (
-            <figure
-              key={t.by}
-              className="rounded-lg p-6 flex flex-col justify-between gap-6"
-              style={{ background: t.bg }}
-            >
-              <blockquote className="text-[15px] leading-[1.55]" style={{ color: t.fg, fontWeight: 400 }}>
-                {t.q}
-              </blockquote>
-              <figcaption className="text-[12px]" style={{ color: t.sub }}>
-                {t.by}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+        </Reveal>
+
+        <Reveal delay={80}>
+          <MobileCarousel count={quotes.length} className="max-w-[1100px] mx-auto">
+            {quotes.map((t) => (
+              <figure
+                key={t.by}
+                className="shrink-0 w-[82%] sm:w-auto rounded-lg p-6 flex flex-col justify-between gap-6 min-h-[230px]"
+                style={{ background: t.bg }}
+              >
+                <blockquote className="text-[15px] leading-[1.55]" style={{ color: t.fg, fontWeight: 400 }}>
+                  {t.q}
+                </blockquote>
+                <figcaption className="text-[12px]" style={{ color: t.sub }}>
+                  {t.by}
+                </figcaption>
+              </figure>
+            ))}
+          </MobileCarousel>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-/* ─── 7. Vi køber for at eje — rosa, foto venstre, stats m. teal streg ─────── */
+/* ─── 7. Vi køber for at eje — tekst+tal før foto på mobil ─────────────────── */
 function Trovaerdighed() {
   return (
     <section className="scroll-mt-20" style={{ background: 'var(--fp-rose)' }}>
       <div className="grid lg:grid-cols-2 items-center">
-        <div className="order-last lg:order-first py-14 lg:py-20 pr-6 lg:pr-0">
-          <div className="lg:max-w-[620px]">
+        <Reveal className="fp-photo order-last lg:order-first pb-12 lg:py-20">
+          <div className="lg:max-w-[620px] overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/frontpage/stairs.jpg"
@@ -420,10 +483,10 @@ function Trovaerdighed() {
               className="w-full aspect-[4/5] object-cover"
             />
           </div>
-        </div>
+        </Reveal>
 
-        <div className="px-6 sm:px-10 lg:px-16 py-14 lg:py-20 max-w-[560px] space-y-8">
-          <div className="space-y-4">
+        <div className="px-6 sm:px-10 lg:px-16 pt-16 pb-10 lg:py-20 max-w-[560px] space-y-8">
+          <Reveal className="space-y-4">
             <p className="fp-kicker">Tryghed og erfaring</p>
             <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">Vi køber for at eje</h2>
             <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
@@ -431,11 +494,11 @@ function Trovaerdighed() {
               lejemål. Vi køber ikke for at presse et hurtigt videresalg igennem — vi
               køber for at eje, udleje og drive boliger ordentligt.
             </p>
-          </div>
+          </Reveal>
           <div className="space-y-7">
-            <Counter target={87} suffix="+" label="boliger købt siden 2020" />
-            <Counter target={218} label="lejemål i drift" />
-            <Counter target={2.5} decimals={1} suffix=" mio. kr." label="sparet i mæglersalær" />
+            <Counter target={87} suffix="+" label="boliger købt siden 2020" delay={0} />
+            <Counter target={218} label="lejemål i drift" delay={110} />
+            <Counter target={2.5} decimals={1} suffix=" mio. kr." label="sparet i mæglersalær" delay={220} />
           </div>
         </div>
       </div>
@@ -448,11 +511,13 @@ function Counter({
   suffix = '',
   decimals = 0,
   label,
+  delay = 0,
 }: {
   target: number;
   suffix?: string;
   decimals?: number;
   label: string;
+  delay?: number;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [value, setValue] = useState(0);
@@ -461,13 +526,21 @@ function Counter({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setValue(target);
+      return;
+    }
     const obs = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting || startedRef.current) return;
         startedRef.current = true;
-        const t0 = performance.now();
+        const t0 = performance.now() + delay;
         const dur = 1400;
         function tick(now: number) {
+          if (now < t0) {
+            requestAnimationFrame(tick);
+            return;
+          }
           const p = Math.min(1, (now - t0) / dur);
           const eased = 1 - Math.pow(1 - p, 4);
           setValue(target * eased);
@@ -479,23 +552,25 @@ function Counter({
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [target]);
+  }, [target, delay]);
 
   const shown = decimals > 0
     ? value.toLocaleString('da-DK', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
     : Math.round(value).toString();
 
   return (
-    <div ref={ref} className="pl-4" style={{ borderLeft: '3px solid var(--fp-accent-bar)' }}>
-      <div className="text-[32px] leading-tight tabular-nums" style={{ fontWeight: 400, color: 'var(--fp-ink)' }}>
-        {shown}{suffix}
+    <Reveal delay={delay}>
+      <div ref={ref} className="pl-4" style={{ borderLeft: '3px solid var(--fp-accent-bar)' }}>
+        <div className="text-[32px] leading-tight tabular-nums" style={{ fontWeight: 400, color: 'var(--fp-ink)' }}>
+          {shown}{suffix}
+        </div>
+        <div className="text-[12.5px] mt-0.5" style={{ color: 'var(--fp-muted)' }}>{label}</div>
       </div>
-      <div className="text-[12.5px] mt-0.5" style={{ color: 'var(--fp-muted)' }}>{label}</div>
-    </div>
+    </Reveal>
   );
 }
 
-/* ─── 8. FAQ — 2 kolonner, divider-liste (ingen kort) ──────────────────────── */
+/* ─── 8. FAQ ───────────────────────────────────────────────────────────────── */
 function Faq() {
   const items = [
     {
@@ -527,12 +602,12 @@ function Faq() {
 
   return (
     <section id="faq" className="px-6 sm:px-10 py-16 sm:py-24 scroll-mt-20" style={{ background: 'var(--fp-faq)' }}>
-      <div className="max-w-[1240px] mx-auto grid lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-5 space-y-4">
+      <div className="max-w-[1240px] mx-auto grid lg:grid-cols-12 gap-8 lg:gap-10">
+        <Reveal className="lg:col-span-5 space-y-4">
           <p className="fp-kicker">Spørgsmål og svar</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.25] max-w-[340px]">Det spørger andre om</h2>
-        </div>
-        <div className="lg:col-span-7 lg:max-w-[560px]">
+        </Reveal>
+        <Reveal delay={80} className="lg:col-span-7 lg:max-w-[560px]">
           {items.map((item, i) => {
             const open = openIdx === i;
             return (
@@ -541,7 +616,7 @@ function Faq() {
                   type="button"
                   onClick={() => setOpenIdx(open ? null : i)}
                   aria-expanded={open}
-                  className="w-full py-4.5 flex items-center justify-between gap-4 text-left"
+                  className="w-full flex items-center justify-between gap-4 text-left"
                   style={{ paddingTop: 18, paddingBottom: 18 }}
                 >
                   <span className="text-[14.5px]" style={{ fontWeight: 600, color: 'var(--fp-ink)' }}>{item.q}</span>
@@ -579,46 +654,53 @@ function Faq() {
             );
           })}
           <div className="border-t" style={{ borderColor: 'rgba(28,43,43,0.15)' }} />
-        </div>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-/* ─── 9. Kom i gang — mørk petroleum m. hvid adresse-bar ───────────────────── */
+/* ─── 9. Kom i gang ────────────────────────────────────────────────────────── */
 function FinalCta() {
   return (
     <section className="px-6 sm:px-10 py-20 sm:py-28" style={{ background: 'var(--fp-green)' }}>
-      <div className="max-w-[880px] mx-auto text-center space-y-5">
+      <Reveal className="max-w-[880px] mx-auto text-center space-y-5">
         <p className="fp-kicker" style={{ color: 'rgba(255,255,255,0.65)' }}>Kom i gang</p>
         <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-white text-balance">
           Hvad kan din bolig frigøre for dig?
         </h2>
-        <p className="text-[13.5px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.78)' }}>
-          Start med din adresse og få et første indblik i dine muligheder.
-          <br />
-          Det er gratis, diskret og helt uforpligtende.
+        <p className="text-[13.5px] leading-[1.7] max-w-[420px] mx-auto" style={{ color: 'rgba(255,255,255,0.78)' }}>
+          Start med din adresse og få et første indblik i dine muligheder. Det er gratis,
+          diskret og helt uforpligtende.
         </p>
         <div className="max-w-[440px] mx-auto pt-2">
           <AddressCta id="fp-address-bottom" variant="bar" />
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-1 pt-4 text-[12.5px] text-white/85">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-y-1.5 gap-x-10 pt-4 text-[12.5px] text-white/85">
           <span><strong className="text-white" style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</span>
           <span><strong className="text-white" style={{ fontWeight: 600 }}>Bliv boende</strong> som lejer</span>
           <span><strong className="text-white" style={{ fontWeight: 600 }}>Ingen</strong> mæglersalær</span>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
 
-/* ─── 10. Footer ───────────────────────────────────────────────────────────── */
+/* ─── 10. Footer — centreret og stablet på mobil ───────────────────────────── */
 function FooterBar() {
   return (
-    <footer className="px-6 sm:px-10 py-5 border-t" style={{ background: 'var(--fp-green)', borderColor: 'rgba(255,255,255,0.15)' }}>
-      <div className="max-w-[1240px] mx-auto flex flex-wrap items-center justify-between gap-3 text-[12px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
-        <div>© 365ejendom · Boligselskabet Sommerhave ApS · Naestved · CVR 41763736</div>
-        <div className="flex gap-8">
+    <footer className="px-6 sm:px-10 py-6 border-t" style={{ background: 'var(--fp-green)', borderColor: 'rgba(255,255,255,0.15)' }}>
+      <div
+        className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center sm:justify-between gap-4 text-[12px] text-center sm:text-left"
+        style={{ color: 'rgba(255,255,255,0.75)' }}
+      >
+        <div className="leading-relaxed">
+          © 365ejendom <span className="hidden sm:inline">·</span><br className="sm:hidden" />
+          Boligselskabet Sommerhave ApS <span className="hidden sm:inline">·</span><br className="sm:hidden" />
+          Naestved <span className="hidden sm:inline">·</span><br className="sm:hidden" />
+          CVR 41763736
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
           <a href="https://365ejendom.dk/privatlivspolitik" className="hover:text-white transition-colors">Privatliv</a>
           <a href="https://365ejendom.dk" className="hover:text-white transition-colors">365ejendom.dk</a>
         </div>
@@ -627,17 +709,28 @@ function FooterBar() {
   );
 }
 
-/* ─── Sticky CTA — turkis m. map-pin, øverst til højre ved scroll ──────────── */
+/* ─── Sticky CTA (designer-note: "Tjek din pris knap bliver sticky ved
+       scroll. Ved klik linker den op til adressefeltet i hero.") ──────────── */
 function StickyCta() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    let raf = 0;
     function onScroll() {
-      setVisible(window.scrollY > 700);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        // Skjul igen ved bunden, hvor adressefeltet allerede er synligt
+        const nearBottom =
+          window.innerHeight + window.scrollY > document.body.scrollHeight - 900;
+        setVisible(window.scrollY > 700 && !nearBottom);
+      });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
@@ -645,18 +738,24 @@ function StickyCta() {
       href="#hero-adresse"
       onClick={(e) => {
         e.preventDefault();
-        document.getElementById('hero-adresse')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => document.getElementById('fp-address')?.focus(), 600);
+        const target =
+          document.getElementById('hero-adresse') ??
+          document.getElementById('hero-adresse-desktop');
+        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          (document.getElementById('fp-address') ??
+            document.getElementById('fp-address-desktop'))?.focus();
+        }, 600);
       }}
-      className="fixed top-4 right-4 sm:right-6 z-50 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13.5px] shadow-[0_10px_28px_-8px_rgba(15,71,73,0.45)]"
+      className="fixed bottom-5 right-4 sm:bottom-auto sm:top-24 sm:right-6 z-30 inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[13.5px] shadow-[0_12px_30px_-8px_rgba(15,71,73,0.5)]"
       style={{
         background: 'var(--fp-cta)',
         color: '#123f41',
         fontWeight: 500,
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(-10px)',
+        transform: visible ? 'translateY(0)' : 'translateY(10px)',
         pointerEvents: visible ? 'auto' : 'none',
-        transition: 'opacity 250ms cubic-bezier(0.23,1,0.32,1), transform 250ms cubic-bezier(0.23,1,0.32,1)',
+        transition: 'opacity 280ms cubic-bezier(0.23,1,0.32,1), transform 280ms cubic-bezier(0.23,1,0.32,1)',
       }}
     >
       <MapPin size={16} weight="regular" />

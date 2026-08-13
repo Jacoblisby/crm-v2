@@ -68,7 +68,60 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
           text-transform: uppercase;
           color: #3a4746;
         }
+
+        /* ── Scroll-reveal ────────────────────────────────────────────────
+           Rolig fade + lille løft. Kun opacity/transform, så det kører på
+           GPU'en og aldrig trigger layout. One-shot: .is-in fjernes aldrig. */
+        .fp-root .fp-reveal {
+          opacity: 0;
+          transform: translateY(20px);
+          transition:
+            opacity 700ms cubic-bezier(0.23, 1, 0.32, 1),
+            transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
+          will-change: opacity, transform;
+        }
+        .fp-root .fp-reveal.is-in {
+          opacity: 1;
+          transform: none;
+          will-change: auto;
+        }
+
+        /* Skjul scrollbar på mobil-karrusellerne (snap-scroll) */
+        .fp-root .fp-scroller {
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        .fp-root .fp-scroller::-webkit-scrollbar { display: none; }
+        .fp-root .fp-scroller > * { scroll-snap-align: start; }
+        @media (min-width: 640px) {
+          .fp-root .fp-scroller { scroll-snap-type: none; }
+        }
+
+        /* Blødt zoom-ind på sektionsfotos når de kommer i syne */
+        .fp-root .fp-photo img {
+          transform: scale(1.06);
+          transition: transform 1200ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .fp-root .fp-photo.is-in img { transform: scale(1); }
+
+        @media (prefers-reduced-motion: reduce) {
+          .fp-root .fp-reveal,
+          .fp-root .fp-photo img {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+          }
+        }
       `}</style>
+      {/* Uden JavaScript skal alt indhold være synligt fra start */}
+      <noscript>
+        <style>{`
+          .fp-root .fp-reveal { opacity: 1 !important; transform: none !important; }
+          .fp-root .fp-photo img { transform: none !important; }
+        `}</style>
+      </noscript>
     </FunnelV2Provider>
   );
 }

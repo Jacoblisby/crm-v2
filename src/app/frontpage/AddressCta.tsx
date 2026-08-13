@@ -113,7 +113,7 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
 
   const inputRow = (
     <div className="flex items-stretch bg-white rounded-lg overflow-hidden">
-      <div className="flex items-center pl-4 pr-1" style={{ color: '#6b7776' }}>
+      <div className="flex items-center pl-3.5 sm:pl-4 pr-0.5 sm:pr-1 shrink-0" style={{ color: '#6b7776' }}>
         <MapPinIcon />
       </div>
       <label htmlFor={id ?? 'fp-address'} className="sr-only">Adresse</label>
@@ -133,7 +133,7 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
         onClick={() => {
           if (results[0]) selectAddress(results[0]);
         }}
-        className="shrink-0 m-1 px-4 sm:px-5 rounded-md text-[13.5px] inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-transform active:scale-[0.98]"
+        className="shrink-0 m-1 px-3.5 sm:px-5 rounded-md text-[13px] sm:text-[13.5px] inline-flex items-center gap-1.5 sm:gap-2 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed transition-transform active:scale-[0.98]"
         style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
       >
         {isLoading ? (
@@ -144,7 +144,10 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
         ) : (
           <>
             Tjek din pris
-            <ArrowIcon />
+            {/* Pilen fylder for meget på 375 px — der har feltet brug for pladsen */}
+            <span className="hidden sm:inline">
+              <ArrowIcon />
+            </span>
           </>
         )}
       </button>
@@ -163,8 +166,9 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
           }}
         >
           {inputRow}
-          {/* Trust-line — inde i pladen, hvid tekst (som i designet) */}
-          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-1 text-[12.5px] text-white/90">
+          {/* Trust-line — inde i pladen, hvid tekst. Stablet og centreret på
+              mobil (som i mobil-framen), på række på desktop. */}
+          <div className="flex flex-col items-center sm:flex-row sm:flex-wrap sm:justify-between gap-x-6 gap-y-1.5 px-1 text-[12.5px] text-white/90 text-center">
             <span><strong className="text-white" style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</span>
             <span><strong className="text-white" style={{ fontWeight: 600 }}>Bliv boende</strong> som lejer</span>
             <span><strong className="text-white" style={{ fontWeight: 600 }}>Ingen</strong> mæglersalær</span>
