@@ -69,6 +69,135 @@ export function Reveal({
   );
 }
 
+/**
+ * Sikkerhedsnet for reveals.
+ *
+ * IntersectionObserver fyrer ikke altid — fx hvis fanen aldrig har været
+ * synlig, eller i indlejrede browser-miljøer. Uden et net ville teksten så
+ * blive stående usynlig. Denne ene timer (én for hele siden, ikke én pr.
+ * element) tjekker selv hvad der er i viewporten og afslører det.
+ * Den slukker sig selv, så snart alt er afsløret.
+ */
+export function RevealBackstop() {
+  useEffect(() => {
+    let tries = 0;
+    const id = setInterval(() => {
+      const hidden = document.querySelectorAll<HTMLElement>('.fp-reveal:not(.is-in)');
+      if (hidden.length === 0 || ++tries > 40) {
+        clearInterval(id);
+        return;
+      }
+      const vh = window.innerHeight || 0;
+      hidden.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < vh * 0.95 && r.bottom > 0) el.classList.add('is-in');
+      });
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
+  return null;
+}
+
+/**
+ * Parallax-gruppe: børn med `data-drift` (px) og `data-tilt` (grader) glider
+ * og vipper let, mens containeren passerer gennem viewporten. Forskellige
+ * drift-værdier giver forskellige tempi — det er dét, der får elementerne til
+ * at føles svævende frem for limet fast.
+ *
+ * Bevidst IKKE bygget på scroll-events: de fyrer ikke pålideligt i alle
+ * miljøer (bl.a. når siden scrolles programmatisk). I stedet kører en rAF-
+ * løkke, som IntersectionObserver kun tænder mens containeren er synlig — så
+ * koster den intet resten af tiden.
+ *
+ * Transformen skrives direkte til DOM'en. Gik vi gennem React-state, ville
+ * hele sektionen gen-rendere 60 gange i sekundet.
+ */
+export function useParallaxGroup<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const items = Array.from(el.querySelectorAll<HTMLElement>('[data-drift]'));
+    if (items.length === 0) return;
+
+    /** Beregn og skriv transformen én gang. */
+    function render() {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const p = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
+      const t = (p - 0.5) * 2; // −1 → +1 hen over passagen
+      for (const it of items) {
+        const drift = parseFloat(it.dataset.drift || '0');
+        const tilt = parseFloat(it.dataset.tilt || '0');
+        it.style.transform =
+          `translate3d(0, ${(-t * drift).toFixed(2)}px, 0) rotate(${(t * tilt).toFixed(2)}deg)`;
+      }
+    }
+
+    let raf = 0;
+    let running = false;
+    let rafProven = false;
+
+    function loop() {
+      // Første gang rAF rent faktisk kalder os, ved vi at den virker her —
+      // så kan backstop-pollen slukkes helt.
+      if (!rafProven) {
+        rafProven = true;
+        clearInterval(poll);
+      }
+      render();
+      if (running) raf = requestAnimationFrame(loop);
+    }
+    function start() {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(loop);
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+
+    function inView() {
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.top < (window.innerHeight || 0) + 120 && r.bottom > -120;
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { rootMargin: '120px 0px' },
+    );
+    io.observe(el);
+
+    // Backstop. requestAnimationFrame sættes på pause i baggrundsfaner, og
+    // IntersectionObserver fyrer ikke altid. Derfor tegner vi ALTID mindst
+    // én gang pr. tick her — så badges står korrekt, uanset hvad, og rAF
+    // sørger blot for at det bliver flydende når siden faktisk er fremme.
+    render();
+    const poll: ReturnType<typeof setInterval> = setInterval(() => {
+      if (inView()) {
+        render();
+        start();
+      } else {
+        stop();
+      }
+    }, 400);
+
+    return () => {
+      stop();
+      io.disconnect();
+      clearInterval(poll);
+    };
+  }, []);
+
+  return ref;
+}
+
 /** True når siden er scrollet forbi `offset` px. */
 export function useScrolled(offset = 24) {
   const [scrolled, setScrolled] = useState(false);

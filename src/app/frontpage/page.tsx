@@ -34,7 +34,7 @@ import {
   HouseLine,
 } from '@phosphor-icons/react';
 import { AddressCta } from './AddressCta';
-import { Reveal, useScrolled, MobileCarousel } from './Motion';
+import { Reveal, useScrolled, MobileCarousel, useParallaxGroup, RevealBackstop } from './Motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +72,7 @@ export default function Frontpage() {
       <FinalCta />
       <FooterBar />
       <StickyCta />
+      <RevealBackstop />
     </div>
   );
 }
@@ -284,7 +285,7 @@ function DirekteSalg() {
             {cards.map((c) => (
               <div
                 key={c.title}
-                className="shrink-0 w-[82%] sm:w-auto rounded-xl px-7 py-8 text-center space-y-2.5"
+                className="fp-lift shrink-0 w-[82%] sm:w-auto rounded-xl px-7 py-8 text-center space-y-2.5"
                 style={{ background: 'var(--fp-mint-card)' }}
               >
                 <c.icon size={26} weight="thin" color="var(--fp-green)" className="mx-auto" />
@@ -305,22 +306,9 @@ function BlivBoende() {
     <section id="bliv-boende" className="scroll-mt-20" style={{ background: 'var(--fp-rose)' }}>
       <div className="grid lg:grid-cols-2 items-center">
         {/* Foto — bleeder til venstre kant på desktop, fuld bredde på mobil */}
-        <Reveal className="fp-photo relative order-last lg:order-first pb-12 lg:py-20 lg:pr-0">
-          <div className="relative lg:max-w-[620px] overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/frontpage/entre.jpg"
-              alt="Lys entré i skandinavisk lejlighed"
-              className="w-full aspect-[4/5] object-cover"
-            />
-            {/* Badges: kun desktop — på 390 px dækker de motivet */}
-            <div className="hidden lg:block">
-              <DarkBadge icon={Coins} title="Friværdi frigivet" sub="Eksempel: 2.250.000 kr." className="top-[33%] left-[13%]" />
-              <DarkBadge icon={HouseLine} title="Samme adresse" sub="Mulighed for at blive boende" className="top-[53%] left-[35%]" />
-              <DarkBadge icon={FileText} title="Klar aftale" sub="Pris, husleje og vilkår gennemgås først" className="top-[70%] left-[9%]" />
-            </div>
-          </div>
-        </Reveal>
+        <div className="order-last lg:order-first pb-12 lg:py-20 lg:pr-0">
+          <DoorPhotoWithBadges />
+        </div>
 
         <Reveal className="px-6 sm:px-10 lg:px-16 pt-16 pb-10 lg:py-20 max-w-[560px]">
           <div className="space-y-5">
@@ -343,38 +331,77 @@ function BlivBoende() {
   );
 }
 
-function DarkBadge({
-  icon: Icon,
-  title,
-  sub,
-  className,
-}: {
-  icon: React.ComponentType<{ size?: number; weight?: 'thin' | 'regular'; color?: string }>;
-  title: string;
-  sub: string;
-  className?: string;
-}) {
+/**
+ * Fotoet med de tre flydende badges.
+ *
+ * To ting gør dem levende uden at blive urolige:
+ *   1. Parallax — hver badge får sin egen drift-faktor, så de glider i
+ *      forskellige tempi mens fotoet passerer. Det er dét, der får dem til at
+ *      "svæve" frem for at sidde limet på billedet.
+ *   2. En ganske lille vippen (max ±1,2°) koblet til samme scroll-progress.
+ *
+ * Alt sker i én transform pr. badge (kun translate/rotate → compositor).
+ * Badges har FAST bredde og højde, så de tre bokse er identiske uanset
+ * tekstlængde.
+ */
+const DOOR_BADGES = [
+  // Mobil: alle tre i venstre side — højre hjørne skal holdes frit til den
+  // sticky "Tjek din pris"-knap, ellers lægger de sig oven i hinanden.
+  { icon: Coins, title: 'Friværdi frigivet', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2 },
+  { icon: HouseLine, title: 'Samme adresse', sub: 'Mulighed for at blive boende', pos: 'top-[40%] left-[11%] lg:top-[53%] lg:left-[35%]', drift: 14, tilt: 0.9 },
+  { icon: FileText, title: 'Klar aftale', sub: 'Pris, husleje og vilkår gennemgås først', pos: 'top-[64%] left-[6%] lg:top-[70%] lg:left-[9%]', drift: 26, tilt: -0.7 },
+] as const;
+
+function DoorPhotoWithBadges() {
+  const ref = useParallaxGroup<HTMLDivElement>();
+
   return (
-    <div
-      className={`absolute rounded-lg px-3.5 py-2.5 flex items-center gap-3 max-w-[240px] ${className ?? ''}`}
-      style={{
-        // Samme glas-flade som nav og adressefelt (designerens fælles spec)
-        background: FP_GLASS.background,
-        backdropFilter: FP_GLASS.blur,
-        WebkitBackdropFilter: FP_GLASS.blur,
-      }}
-    >
-      <span
-        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-        style={{ background: 'var(--fp-mint-card)' }}
-      >
-        <Icon size={16} weight="regular" color="var(--fp-green)" />
-      </span>
-      <span>
-        <span className="block text-[12.5px] text-white" style={{ fontWeight: 600 }}>{title}</span>
-        <span className="block text-[11.5px] leading-snug text-white/80">{sub}</span>
-      </span>
-    </div>
+    <Reveal className="fp-photo relative">
+      <div ref={ref} className="relative lg:max-w-[620px] overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/frontpage/entre.jpg"
+          alt="Lys entré i skandinavisk lejlighed"
+          className="w-full aspect-[4/5] object-cover"
+        />
+        {DOOR_BADGES.map((b, i) => (
+          <div
+            key={b.title}
+            className={`fp-badge absolute ${b.pos}`}
+            data-drift={b.drift}
+            data-tilt={b.tilt}
+            style={{ transitionDelay: `${i * 130}ms` }}
+          >
+            <div
+              /* Fast bredde OG højde — ellers bliver boksene forskellige,
+                 fordi kun nogle af underteksterne ombrydes til to linjer */
+              className="fp-badge-box rounded-lg px-3 sm:px-3.5 flex items-center gap-2.5 sm:gap-3 w-[200px] sm:w-[238px] h-[68px] sm:h-[72px]"
+              style={{
+                // Samme glas-flade som nav og adressefelt (designerens fælles spec)
+                background: FP_GLASS.background,
+                backdropFilter: FP_GLASS.blur,
+                WebkitBackdropFilter: FP_GLASS.blur,
+              }}
+            >
+              <span
+                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: 'var(--fp-mint-card)' }}
+              >
+                <b.icon size={16} weight="regular" color="var(--fp-green)" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[12px] sm:text-[12.5px] text-white" style={{ fontWeight: 600 }}>
+                  {b.title}
+                </span>
+                <span className="block text-[11px] sm:text-[11.5px] leading-snug text-white/80">
+                  {b.sub}
+                </span>
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Reveal>
   );
 }
 
@@ -411,7 +438,7 @@ function SaadanVirkerDet() {
             {steps.map((s, i) => (
               <Reveal key={s.title} delay={i * 90} className="space-y-2.5">
                 <div
-                  className="w-11 h-11 rounded-full lg:rounded-lg flex items-center justify-center"
+                  className="fp-pop w-11 h-11 rounded-full lg:rounded-lg flex items-center justify-center"
                   style={{ background: 'var(--fp-green)' }}
                 >
                   <s.icon size={20} weight="thin" color="#fff" />
@@ -469,7 +496,7 @@ function Erfaringer() {
             {quotes.map((t) => (
               <figure
                 key={t.by}
-                className="shrink-0 w-[82%] sm:w-auto rounded-lg p-6 flex flex-col justify-between gap-6 min-h-[230px]"
+                className="fp-lift shrink-0 w-[82%] sm:w-auto rounded-lg p-6 flex flex-col justify-between gap-6 min-h-[230px]"
                 style={{ background: t.bg }}
               >
                 <blockquote className="text-[15px] leading-[1.55]" style={{ color: t.fg, fontWeight: 400 }}>
@@ -578,7 +605,12 @@ function Counter({
 
   return (
     <Reveal delay={delay}>
-      <div ref={ref} className="pl-4" style={{ borderLeft: '3px solid var(--fp-accent-bar)' }}>
+      <div ref={ref} className="relative pl-4">
+        {/* Stregen vokser op fra bunden når blokken afsløres */}
+        <span
+          className="fp-bar absolute left-0 top-0 bottom-0 w-[3px] rounded-full"
+          style={{ background: 'var(--fp-accent-bar)' }}
+        />
         <div className="text-[32px] leading-tight tabular-nums" style={{ fontWeight: 400, color: 'var(--fp-ink)' }}>
           {shown}{suffix}
         </div>
@@ -634,7 +666,7 @@ function Faq() {
                   type="button"
                   onClick={() => setOpenIdx(open ? null : i)}
                   aria-expanded={open}
-                  className="w-full flex items-center justify-between gap-4 text-left"
+                  className="fp-row w-full flex items-center justify-between gap-4 text-left"
                   style={{ paddingTop: 18, paddingBottom: 18 }}
                 >
                   <span className="text-[14.5px]" style={{ fontWeight: 600, color: 'var(--fp-ink)' }}>{item.q}</span>
@@ -765,7 +797,7 @@ function StickyCta() {
             document.getElementById('fp-address-desktop'))?.focus();
         }, 600);
       }}
-      className="fixed bottom-5 right-4 sm:bottom-auto sm:top-24 sm:right-6 z-30 inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[13.5px] shadow-[0_12px_30px_-8px_rgba(15,71,73,0.5)]"
+      className="fixed bottom-5 right-4 sm:bottom-auto sm:top-24 sm:right-6 z-40 inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[13.5px] shadow-[0_12px_30px_-8px_rgba(15,71,73,0.55)]"
       style={{
         background: 'var(--fp-cta)',
         color: '#123f41',

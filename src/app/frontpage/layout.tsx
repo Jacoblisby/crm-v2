@@ -106,9 +106,70 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
         }
         .fp-root .fp-photo.is-in img { transform: scale(1); }
 
+        /* ── Dør-badges ───────────────────────────────────────────────────
+           Parallax-hooken ejer transform på .fp-badge og skriver den hver
+           frame — derfor må entréen KUN røre opacity her. Selve "poppet"
+           lægges på den indre glasboks, som hooken ikke rører. */
+        .fp-root .fp-badge {
+          opacity: 0;
+          transition: opacity 620ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .fp-root .fp-photo.is-in .fp-badge { opacity: 1; }
+
+        .fp-root .fp-badge-box {
+          transform: scale(0.92);
+          transition: transform 620ms cubic-bezier(0.34, 1.45, 0.5, 1);
+        }
+        .fp-root .fp-photo.is-in .fp-badge-box { transform: scale(1); }
+
+        /* ── Highlight ved berøring/hover ─────────────────────────────────
+           Løfter kortet en anelse og strammer skyggen. Kun transform +
+           box-shadow, og kun hvor der faktisk ER en mus. */
+        @media (hover: hover) {
+          .fp-root .fp-lift {
+            transition:
+              transform 260ms cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 260ms cubic-bezier(0.23, 1, 0.32, 1);
+          }
+          .fp-root .fp-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 38px -18px rgba(20, 45, 45, 0.42);
+          }
+          .fp-root .fp-row:hover {
+            background: rgba(255, 255, 255, 0.45);
+          }
+        }
+        .fp-root .fp-row {
+          transition: background-color 220ms ease;
+          margin-inline: -12px;
+          padding-inline: 12px;
+          border-radius: 8px;
+        }
+        .fp-root .fp-lift:active { transform: translateY(-1px) scale(0.995); }
+
+        /* Accent-stregen ved tallene vokser op, når blokken kommer i syne */
+        .fp-root .fp-bar {
+          transform: scaleY(0);
+          transform-origin: bottom;
+          transition: transform 760ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .fp-root .fp-reveal.is-in .fp-bar { transform: scaleY(1); }
+
+        /* Trin-ikonet popper ganske let, når trinnet afsløres */
+        .fp-root .fp-pop {
+          transform: scale(0.86);
+          transition: transform 560ms cubic-bezier(0.34, 1.4, 0.5, 1);
+        }
+        .fp-root .fp-reveal.is-in .fp-pop { transform: scale(1); }
+
         @media (prefers-reduced-motion: reduce) {
           .fp-root .fp-reveal,
-          .fp-root .fp-photo img {
+          .fp-root .fp-photo img,
+          .fp-root .fp-badge,
+          .fp-root .fp-badge-box,
+          .fp-root .fp-bar,
+          .fp-root .fp-pop,
+          .fp-root .fp-lift {
             opacity: 1 !important;
             transform: none !important;
             transition: none !important;
