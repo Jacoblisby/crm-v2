@@ -160,9 +160,11 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
         <div
           className="rounded-xl px-4 sm:px-6 pt-4 sm:pt-5 pb-3.5 space-y-3"
           style={{
-            background: 'rgba(73,70,66,0.55)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
+            // Designerens fælles glas-spec (Make-fil v44): søgefeltet, nav'en
+            // og de flydende chips bruger PRÆCIS samme flade.
+            background: 'rgba(0,0,0,0.30)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
           }}
         >
           {inputRow}

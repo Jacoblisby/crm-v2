@@ -38,6 +38,18 @@ import { Reveal, useScrolled, MobileCarousel } from './Motion';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Glas-effekten. Designeren landede på ÉN fælles værdi efter seks forsøg
+ * (Make-fil v39→v44) og skriver det eksplicit:
+ *   "Headeren bruger nu præcis samme effekt som søgefeltet og de flydende
+ *    chips — blur(20px) med rgba(0,0,0,0.30) baggrund."
+ * Derfor deler nav, adresse-plade og badges nøjagtig samme flade.
+ */
+export const FP_GLASS = {
+  background: 'rgba(0,0,0,0.30)',
+  blur: 'blur(20px)',
+} as const;
+
 const NAV_LINKS = [
   { label: 'Bliv boende', href: '#bliv-boende' },
   { label: 'Sådan virker det', href: '#saadan-virker-det' },
@@ -83,11 +95,14 @@ function Nav() {
         <div
           className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-5 sm:pl-7 pr-2 py-2"
           style={{
-            background: scrolled ? 'rgba(78,83,81,0.72)' : 'rgba(105,110,108,0.5)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-            boxShadow: scrolled ? '0 8px 28px -14px rgba(20,45,45,0.5)' : 'none',
-            transition: 'background-color 320ms ease, box-shadow 320ms ease',
+            // Designerens endelige spec (Make-fil, version 44, efter 6 forsøg):
+            // "Headeren bruger nu præcis samme effekt som søgefeltet og de
+            //  flydende chips — blur(20px) med rgba(0,0,0,0.30) baggrund."
+            background: FP_GLASS.background,
+            backdropFilter: FP_GLASS.blur,
+            WebkitBackdropFilter: FP_GLASS.blur,
+            boxShadow: scrolled ? '0 8px 28px -16px rgba(20,45,45,0.45)' : 'none',
+            transition: 'box-shadow 320ms ease',
           }}
         >
           <a href="#" className="flex items-baseline gap-1.5 text-white">
@@ -143,9 +158,11 @@ function Nav() {
         <div
           className="relative rounded-xl px-6 pt-5 pb-12"
           style={{
-            background: 'rgba(72,66,60,0.66)',
-            backdropFilter: 'blur(26px)',
-            WebkitBackdropFilter: 'blur(26px)',
+            // Lidt tættere end den fælles flade — panelet dækker hele skærmen
+            // og skal bære læsbar hvid tekst (jf. mobilmenu-framen)
+            background: 'rgba(0,0,0,0.42)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             transform: open ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.98)',
             transition: 'transform 300ms cubic-bezier(0.23,1,0.32,1)',
           }}
@@ -341,9 +358,10 @@ function DarkBadge({
     <div
       className={`absolute rounded-lg px-3.5 py-2.5 flex items-center gap-3 max-w-[240px] ${className ?? ''}`}
       style={{
-        background: 'rgba(48,45,41,0.62)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
+        // Samme glas-flade som nav og adressefelt (designerens fælles spec)
+        background: FP_GLASS.background,
+        backdropFilter: FP_GLASS.blur,
+        WebkitBackdropFilter: FP_GLASS.blur,
       }}
     >
       <span
