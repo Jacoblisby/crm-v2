@@ -339,17 +339,29 @@ function BlivBoende() {
  *      forskellige tempi mens fotoet passerer. Det er dét, der får dem til at
  *      "svæve" frem for at sidde limet på billedet.
  *   2. En ganske lille vippen (max ±1,2°) koblet til samme scroll-progress.
+ *   3. Et vedvarende svæv — hver badge vugger langsomt op og ned, også når
+ *      siden står stille. Det er dét, prototypen gør, og det er grunden til
+ *      at boksene føles som om de ligger FORAN billedet.
  *
- * Alt sker i én transform pr. badge (kun translate/rotate → compositor).
+ * De tre bevægelser kan ikke dele samme element: parallax skriver transform
+ * hver frame, svævet er en uendelig keyframe, og entréen skalerer. Derfor ét
+ * lag hver — .fp-badge (parallax) > .fp-badge-float (svæv) > .fp-badge-box
+ * (entré + highlight). Alle tre er ren translate/rotate/scale → compositor.
+ *
  * Badges har FAST bredde og højde, så de tre bokse er identiske uanset
  * tekstlængde.
+ *
+ * Svæve-tallene er valgt så perioderne IKKE går op i hinanden (5,4 / 6,8 /
+ * 6,1 s). Ellers ville de tre bokse synkronisere efter få sekunder og vippe
+ * i takt som en enhed — det ser mekanisk ud. Negativ delay starter hver
+ * badge midt i sin egen cyklus, så de er ude af fase fra første frame.
  */
 const DOOR_BADGES = [
   // Mobil: alle tre i venstre side — højre hjørne skal holdes frit til den
   // sticky "Tjek din pris"-knap, ellers lægger de sig oven i hinanden.
-  { icon: Coins, title: 'Friværdi frigivet', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2 },
-  { icon: HouseLine, title: 'Samme adresse', sub: 'Mulighed for at blive boende', pos: 'top-[40%] left-[11%] lg:top-[53%] lg:left-[35%]', drift: 14, tilt: 0.9 },
-  { icon: FileText, title: 'Klar aftale', sub: 'Pris, husleje og vilkår gennemgås først', pos: 'top-[64%] left-[6%] lg:top-[70%] lg:left-[9%]', drift: 26, tilt: -0.7 },
+  { icon: Coins, title: 'Friværdi frigivet', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2, amp: 7, dur: 5.4, phase: -0.9 },
+  { icon: HouseLine, title: 'Samme adresse', sub: 'Mulighed for at blive boende', pos: 'top-[40%] left-[11%] lg:top-[53%] lg:left-[35%]', drift: 14, tilt: 0.9, amp: 5, dur: 6.8, phase: -3.2 },
+  { icon: FileText, title: 'Klar aftale', sub: 'Pris, husleje og vilkår gennemgås først', pos: 'top-[64%] left-[6%] lg:top-[70%] lg:left-[9%]', drift: 26, tilt: -0.7, amp: 6.5, dur: 6.1, phase: -5.1 },
 ] as const;
 
 function DoorPhotoWithBadges() {
@@ -373,30 +385,41 @@ function DoorPhotoWithBadges() {
             style={{ transitionDelay: `${i * 130}ms` }}
           >
             <div
-              /* Fast bredde OG højde — ellers bliver boksene forskellige,
-                 fordi kun nogle af underteksterne ombrydes til to linjer */
-              className="fp-badge-box rounded-lg px-3 sm:px-3.5 flex items-center gap-2.5 sm:gap-3 w-[200px] sm:w-[238px] h-[68px] sm:h-[72px]"
-              style={{
-                // Samme glas-flade som nav og adressefelt (designerens fælles spec)
-                background: FP_GLASS.background,
-                backdropFilter: FP_GLASS.blur,
-                WebkitBackdropFilter: FP_GLASS.blur,
-              }}
+              className="fp-badge-float"
+              style={
+                {
+                  '--fp-float-amp': `${b.amp}px`,
+                  '--fp-float-dur': `${b.dur}s`,
+                  '--fp-float-delay': `${b.phase}s`,
+                } as React.CSSProperties
+              }
             >
-              <span
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                style={{ background: 'var(--fp-mint-card)' }}
+              <div
+                /* Fast bredde OG højde — ellers bliver boksene forskellige,
+                   fordi kun nogle af underteksterne ombrydes til to linjer */
+                className="fp-badge-box rounded-lg px-3 sm:px-3.5 flex items-center gap-2.5 sm:gap-3 w-[200px] sm:w-[238px] h-[68px] sm:h-[72px]"
+                style={{
+                  // Samme glas-flade som nav og adressefelt (designerens fælles spec)
+                  background: FP_GLASS.background,
+                  backdropFilter: FP_GLASS.blur,
+                  WebkitBackdropFilter: FP_GLASS.blur,
+                }}
               >
-                <b.icon size={16} weight="regular" color="var(--fp-green)" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[12px] sm:text-[12.5px] text-white" style={{ fontWeight: 600 }}>
-                  {b.title}
+                <span
+                  className="fp-badge-icon w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--fp-mint-card)' }}
+                >
+                  <b.icon size={16} weight="regular" color="var(--fp-green)" />
                 </span>
-                <span className="block text-[11px] sm:text-[11.5px] leading-snug text-white/80">
-                  {b.sub}
+                <span className="min-w-0">
+                  <span className="block text-[12px] sm:text-[12.5px] text-white" style={{ fontWeight: 600 }}>
+                    {b.title}
+                  </span>
+                  <span className="block text-[11px] sm:text-[11.5px] leading-snug text-white/80">
+                    {b.sub}
+                  </span>
                 </span>
-              </span>
+              </div>
             </div>
           </div>
         ))}
@@ -436,15 +459,17 @@ function SaadanVirkerDet() {
 
           <div className="space-y-8 max-w-[460px]">
             {steps.map((s, i) => (
-              <Reveal key={s.title} delay={i * 90} className="space-y-2.5">
-                <div
-                  className="fp-pop w-11 h-11 rounded-full lg:rounded-lg flex items-center justify-center"
-                  style={{ background: 'var(--fp-green)' }}
-                >
-                  <s.icon size={20} weight="thin" color="#fff" />
+              <Reveal key={s.title} delay={i * 90}>
+                {/* Selve hover-fladen ligger INDE i Reveal — reveal'en ejer
+                    transform på sit eget element, så trinnet ville ellers
+                    slås med entré-animationen om samme property. */}
+                <div className="fp-step space-y-2.5">
+                  <div className="fp-pop fp-step-icon w-11 h-11 rounded-full lg:rounded-lg flex items-center justify-center">
+                    <s.icon size={20} weight="thin" color="#fff" />
+                  </div>
+                  <h3 className="fp-step-title text-[17px]">{s.title}</h3>
+                  <p className="fp-step-body text-[13.5px] leading-[1.6]">{s.body}</p>
                 </div>
-                <h3 className="text-[17px]" style={{ fontWeight: 600, color: 'var(--fp-ink)' }}>{s.title}</h3>
-                <p className="text-[13.5px] leading-[1.6]" style={{ color: 'var(--fp-muted)' }}>{s.body}</p>
               </Reveal>
             ))}
           </div>

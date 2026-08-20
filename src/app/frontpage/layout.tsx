@@ -118,9 +118,95 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
 
         .fp-root .fp-badge-box {
           transform: scale(0.92);
-          transition: transform 620ms cubic-bezier(0.34, 1.45, 0.5, 1);
+          transition:
+            transform 620ms cubic-bezier(0.34, 1.45, 0.5, 1),
+            box-shadow 240ms cubic-bezier(0.23, 1, 0.32, 1);
+          position: relative;
+          overflow: hidden;
         }
         .fp-root .fp-photo.is-in .fp-badge-box { transform: scale(1); }
+
+        /* Det vedvarende svæv. Eget lag, så det aldrig kolliderer med
+           parallaxens transform ovenover eller entré-scale nedenunder.
+           Amplitude/tempo/fase sættes pr. badge via CSS-variabler. */
+        @keyframes fp-float {
+          from { transform: translate3d(0, calc(var(--fp-float-amp) * 0.5), 0); }
+          50%  { transform: translate3d(0, calc(var(--fp-float-amp) * -0.5), 0); }
+          to   { transform: translate3d(0, calc(var(--fp-float-amp) * 0.5), 0); }
+        }
+        .fp-root .fp-badge-float {
+          animation: fp-float var(--fp-float-dur, 6s) ease-in-out infinite;
+          animation-delay: var(--fp-float-delay, 0s);
+          will-change: transform;
+        }
+
+        /* Highlight på badge ved hover: glasset lysner, og der tændes en
+           tynd hvid kant. Overlay frem for at ændre background, fordi
+           glas-fladen sættes inline fra den fælles FP_GLASS-spec. */
+        .fp-root .fp-badge-box::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background: rgba(255, 255, 255, 0.11);
+          opacity: 0;
+          transition: opacity 240ms cubic-bezier(0.23, 1, 0.32, 1);
+          pointer-events: none;
+        }
+        .fp-root .fp-badge-icon {
+          transition: transform 300ms cubic-bezier(0.34, 1.4, 0.5, 1);
+        }
+        @media (hover: hover) {
+          .fp-root .fp-badge-box:hover::after { opacity: 1; }
+          .fp-root .fp-badge-box:hover {
+            box-shadow:
+              0 0 0 1px rgba(255, 255, 255, 0.3),
+              0 20px 40px -20px rgba(0, 0, 0, 0.6);
+          }
+          .fp-root .fp-badge-box:hover .fp-badge-icon { transform: scale(1.1); }
+        }
+
+        /* ── Trin i "Sådan virker det" ────────────────────────────────────
+           Hele trinnet er hover-flade: baggrunden lysner mod hvid oven på
+           den mint-grønne sektion, ikonet bliver mørkere og løfter sig, og
+           overskriften skifter til brand-grøn. Negativ margin, så tinten
+           får luft uden at flytte teksten i det almindelige flow. */
+        .fp-root .fp-step {
+          margin-inline: -16px;
+          padding: 14px 16px;
+          border-radius: 12px;
+          transition:
+            background-color 260ms cubic-bezier(0.23, 1, 0.32, 1),
+            box-shadow 260ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .fp-root .fp-step-icon { background: var(--fp-green); }
+        .fp-root .fp-step-title { font-weight: 600; color: var(--fp-ink); }
+        .fp-root .fp-step-body { color: var(--fp-muted); }
+        .fp-root .fp-step-title { transition: color 240ms ease; }
+        /* Ikonet er OGSÅ .fp-pop, som ejer transform til entréen længere nede
+           i filen. Derfor højere specificitet her (0,3,0), og hover-skaleringen
+           lægges på den selvstændige scale-property i stedet for transform —
+           så de to kan have hver sit tempo uden at overskrive hinanden.
+           Entréen må gerne tage 560 ms; hover skal svare på 260. */
+        .fp-root .fp-step .fp-step-icon {
+          transition:
+            transform 560ms cubic-bezier(0.34, 1.4, 0.5, 1),
+            scale 260ms cubic-bezier(0.34, 1.4, 0.5, 1),
+            background-color 240ms ease,
+            box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        @media (hover: hover) {
+          .fp-root .fp-step:hover {
+            background: rgba(255, 255, 255, 0.52);
+            box-shadow: 0 14px 34px -22px rgba(20, 45, 45, 0.45);
+          }
+          .fp-root .fp-step:hover .fp-step-title { color: var(--fp-green); }
+          .fp-root .fp-step:hover .fp-step-icon {
+            background: var(--fp-green-deep);
+            box-shadow: 0 10px 22px -10px rgba(15, 71, 73, 0.6);
+            scale: 1.08;
+          }
+        }
 
         /* ── Highlight ved berøring/hover ─────────────────────────────────
            Løfter kortet en anelse og strammer skyggen. Kun transform +
@@ -166,14 +252,24 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
           .fp-root .fp-reveal,
           .fp-root .fp-photo img,
           .fp-root .fp-badge,
+          .fp-root .fp-badge-float,
           .fp-root .fp-badge-box,
+          .fp-root .fp-badge-icon,
           .fp-root .fp-bar,
           .fp-root .fp-pop,
+          .fp-root .fp-step,
+          .fp-root .fp-step .fp-step-icon,
           .fp-root .fp-lift {
             opacity: 1 !important;
             transform: none !important;
             transition: none !important;
           }
+          /* Svævet er en uendelig keyframe — den skal slukkes, ikke bare
+             fryses, ellers kører den videre bag transform: none. */
+          .fp-root .fp-badge-float { animation: none !important; }
+          /* Hover-highlight må gerne blive — det er farve, ikke bevægelse —
+             men skaleringen af ikonet ryger. */
+          .fp-root .fp-step:hover .fp-step-icon { scale: 1 !important; }
         }
       `}</style>
       {/* Uden JavaScript skal alt indhold være synligt fra start */}
