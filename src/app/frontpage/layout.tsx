@@ -128,11 +128,13 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
 
         /* Det vedvarende svæv. Eget lag, så det aldrig kolliderer med
            parallaxens transform ovenover eller entré-scale nedenunder.
-           Amplitude/tempo/fase sættes pr. badge via CSS-variabler. */
+           Kurven er 1:1 med prototypens y: [0, -10, 0] — boksen letter fra
+           sin hvileposition og lander igen, den svinger IKKE symmetrisk
+           omkring den. Amplitude/tempo/fase sættes pr. badge. */
         @keyframes fp-float {
-          from { transform: translate3d(0, calc(var(--fp-float-amp) * 0.5), 0); }
-          50%  { transform: translate3d(0, calc(var(--fp-float-amp) * -0.5), 0); }
-          to   { transform: translate3d(0, calc(var(--fp-float-amp) * 0.5), 0); }
+          from { transform: translate3d(0, 0, 0); }
+          50%  { transform: translate3d(0, calc(var(--fp-float-amp) * -1), 0); }
+          to   { transform: translate3d(0, 0, 0); }
         }
         .fp-root .fp-badge-float {
           animation: fp-float var(--fp-float-dur, 6s) ease-in-out infinite;

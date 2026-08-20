@@ -351,17 +351,24 @@ function BlivBoende() {
  * Badges har FAST bredde og højde, så de tre bokse er identiske uanset
  * tekstlængde.
  *
- * Svæve-tallene er valgt så perioderne IKKE går op i hinanden (5,4 / 6,8 /
- * 6,1 s). Ellers ville de tre bokse synkronisere efter få sekunder og vippe
- * i takt som en enhed — det ser mekanisk ud. Negativ delay starter hver
- * badge midt i sin egen cyklus, så de er ude af fase fra første frame.
+ * Svæve-tallene er IKKE gættet — de er hentet direkte fra designerens
+ * Make-prototype (App.tsx, DifferentieringSection):
+ *
+ *   animate={{ y: [0, -10, 0] }}
+ *   transition={{ duration: 3.5, ease: "easeInOut", repeat: Infinity,
+ *                 delay: 0 | 0.6 | 1.2 }}
+ *
+ * Altså: alle tre har SAMME tempo (3,5 s) og samme udslag (10 px opad fra
+ * hvilepositionen — ikke ±5 omkring den). Forskellen ligger kun i en
+ * trappet forsinkelse på 0 / 0,6 / 1,2 s. framer-motions "easeInOut" er
+ * cubic-bezier(0.42, 0, 0.58, 1), hvilket er præcis CSS' ease-in-out.
  */
 const DOOR_BADGES = [
   // Mobil: alle tre i venstre side — højre hjørne skal holdes frit til den
   // sticky "Tjek din pris"-knap, ellers lægger de sig oven i hinanden.
-  { icon: Coins, title: 'Friværdi frigivet', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2, amp: 7, dur: 5.4, phase: -0.9 },
-  { icon: HouseLine, title: 'Samme adresse', sub: 'Mulighed for at blive boende', pos: 'top-[40%] left-[11%] lg:top-[53%] lg:left-[35%]', drift: 14, tilt: 0.9, amp: 5, dur: 6.8, phase: -3.2 },
-  { icon: FileText, title: 'Klar aftale', sub: 'Pris, husleje og vilkår gennemgås først', pos: 'top-[64%] left-[6%] lg:top-[70%] lg:left-[9%]', drift: 26, tilt: -0.7, amp: 6.5, dur: 6.1, phase: -5.1 },
+  { icon: Coins, title: 'Friværdi frigivet', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2, amp: 10, dur: 3.5, phase: 0 },
+  { icon: HouseLine, title: 'Samme adresse', sub: 'Mulighed for at blive boende', pos: 'top-[40%] left-[11%] lg:top-[53%] lg:left-[35%]', drift: 14, tilt: 0.9, amp: 10, dur: 3.5, phase: 0.6 },
+  { icon: FileText, title: 'Klar aftale', sub: 'Pris, husleje og vilkår gennemgås først', pos: 'top-[64%] left-[6%] lg:top-[70%] lg:left-[9%]', drift: 26, tilt: -0.7, amp: 10, dur: 3.5, phase: 1.2 },
 ] as const;
 
 function DoorPhotoWithBadges() {
