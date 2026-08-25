@@ -5,6 +5,13 @@ import { db } from '@/lib/db/client';
 import { leads, leadCommunications, properties } from '@/lib/db/schema';
 import type { FunnelState } from './types';
 import { computeEstimate, type StandLevel } from '@/lib/services/price-engine';
+import {
+  OFFER_EXAMPLE,
+  OFFER_EXAMPLE_NET,
+  OFFER_EXAMPLE_SAVED,
+  NO_AUTO_OFFER,
+  fmtKr,
+} from '@/lib/services/offer-example';
 
 export interface SubmitResult {
   ok: boolean;
@@ -451,7 +458,9 @@ async function sendNotificationEmails(
     adminSubject,
   );
 
-  const customerSubject = `Dit foreløbige tilbud: ${offer} kr — ${state.fullAddress}`;
+  // Emnelinjen indeholdt før tilbuddet i kroner. Sælgeren får ikke længere
+  // et auto-beregnet tal — hverken på skærmen eller her.
+  const customerSubject = `Vi er i gang med din bolig — ${state.fullAddress}`;
   const html = customerEmailHtml(state, estimate, photoCount);
   const customerResult = await sendResendEmail(apiKey, {
     from,
@@ -533,12 +542,6 @@ function customerEmailHtml(
 ): string {
   const firstName = state.fullName.split(' ')[0] || 'der';
   const fmt = (n: number) => n.toLocaleString('da-DK');
-  const offer = fmt(estimate.netForkortet.finalOffer);
-  const market = fmt(estimate.marketEstimate);
-  const discount = fmt(estimate.netForkortet.minusMarketDiscount);
-  const broker = fmt(estimate.netForkortet.minusBrokerSavings);
-  const ownership = fmt(estimate.netForkortet.minusOwnershipCosts);
-  const ourMargin = estimate.netForkortet.minusOurMargin;
   // Filter comparables til ±8% af ækvivalent mægler-pris — kun dem der reelt
   // er sammenlignelige med vores tilbud netto.
   const equivalentBrokerPrice =
@@ -588,35 +591,39 @@ function customerEmailHtml(
   <div style="padding:32px 24px 16px;text-align:center;">
     <p style="margin:0;color:#64748b;font-size:14px;">Hej ${escapeHtml(firstName)},</p>
     <p style="margin:8px 0 0;color:#475569;font-size:15px;line-height:1.5;">
-      Tak fordi du brugte vores boligberegner. Her er dit foreløbige tilbud baseret på
-      <strong>${estimate.sampleSize} sammenlignelige tinglyste handler</strong>${estimate.sameEfCount > 0 ? `, heraf <strong>${estimate.sameEfCount} i din ejerforening</strong>` : ''}:
+      Tak fordi du brugte vores boligberegner. Vi har modtaget dine oplysninger om boligen.
     </p>
   </div>
 
-  <!-- Price hero -->
+  <!-- Hero: ingen auto-pris — mægleren vender tilbage -->
   <div style="margin:0 24px 24px;padding:32px 20px;background:#0f172a;border-radius:12px;text-align:center;">
-    <div style="color:#94a3b8;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Vi byder</div>
-    <div style="color:#ffffff;font-size:48px;font-weight:bold;margin:8px 0;letter-spacing:-1px;">${offer} kr</div>
-    <div style="color:#cbd5e1;font-size:13px;">${escapeHtml(state.fullAddress)}</div>
-    <div style="color:#94a3b8;font-size:12px;margin-top:8px;font-style:italic;">Bindende tilbud gives efter gratis besigtigelse</div>
+    <div style="color:#94a3b8;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Din vurdering</div>
+    <div style="color:#ffffff;font-size:22px;font-weight:bold;margin:10px 0 8px;line-height:1.35;">${escapeHtml(NO_AUTO_OFFER.heading)}</div>
+    <div style="color:#cbd5e1;font-size:14px;line-height:1.55;">${escapeHtml(NO_AUTO_OFFER.body)}</div>
+    <div style="color:#94a3b8;font-size:12px;margin-top:14px;">${escapeHtml(state.fullAddress)}</div>
   </div>
 
-  <!-- Hvad du sparer -->
+  <!-- Regneeksempel: samme tal som paa /salg-v4's estimat-skaerm -->
   <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;padding:20px;">
-    <h3 style="margin:0 0 12px;font-size:14px;font-weight:600;color:#0f172a;">
-      Hvad du sparer ved at sælge til os
+    <h3 style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0f172a;">
+      Sådan regner vi
     </h3>
+    <p style="margin:0 0 12px;font-size:12px;color:#64748b;line-height:1.5;">
+      Her er princippet på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
+      Tallene er et eksempel og altså ikke et tilbud på din bolig.
+    </p>
     <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;vertical-align:top;width:24px;"><span style="color:#0f172a;font-size:16px;font-weight:bold;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Mæglersalær</strong> <span style="color:#0f172a;float:right;font-weight:600;">${broker} kr</span><br><span style="color:#94a3b8;font-size:11px;">Vi tager intet salær. Du beholder ~70.000 kr.</span></td></tr>
-      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#0f172a;font-size:16px;font-weight:bold;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Markedsafslag</strong> <span style="color:#0f172a;float:right;font-weight:600;">${discount} kr</span><br><span style="color:#94a3b8;font-size:11px;">Slutprisen via mægler er typisk 6% under listeprisen.</span></td></tr>
-      <tr><td style="padding:8px 0;vertical-align:top;"><span style="color:#0f172a;font-size:16px;font-weight:bold;">✓</span></td><td style="padding:8px 0;font-size:13px;"><strong>Drift i salgsperioden</strong> <span style="color:#0f172a;float:right;font-weight:600;">${ownership} kr</span><br><span style="color:#94a3b8;font-size:11px;">Du betaler ikke ejerudgifter mens boligen står til salg (3 mdr).</span></td></tr>
+      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Listepris hos mægler</strong><br><span style="color:#94a3b8;font-size:11px;">Prisen boligen sættes til salg for.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">${fmtKr(OFFER_EXAMPLE.listPrice)} kr</td></tr>
+      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Mæglersalær</strong><br><span style="color:#94a3b8;font-size:11px;">Typisk 5-7 % af salgsprisen. Det betaler du ikke til os.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">− ${fmtKr(OFFER_EXAMPLE.brokerFee)} kr</td></tr>
+      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Markedsafslag</strong><br><span style="color:#94a3b8;font-size:11px;">Slutprisen ligger ofte 6-8 % under listeprisen.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">− ${fmtKr(OFFER_EXAMPLE.marketDiscount)} kr</td></tr>
+      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Drift i salgsperioden</strong><br><span style="color:#94a3b8;font-size:11px;">Ca. 3 måneders ejerudgifter, mens boligen står til salg.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">− ${fmtKr(OFFER_EXAMPLE.ownershipCosts)} kr</td></tr>
+      <tr><td style="padding:10px 0;font-size:13px;font-weight:600;color:#0f172a;">Tilbage til dig</td><td style="padding:10px 0;text-align:right;font-size:16px;font-weight:bold;color:#0f172a;">${fmtKr(OFFER_EXAMPLE_NET)} kr</td></tr>
     </table>
     <div style="margin:12px 0 0;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
-      <table style="width:100%;border-collapse:collapse;">
-        <tr><td style="font-size:13px;color:#0f172a;font-weight:600;">Vores tilbud svarer til at sælge for</td><td style="text-align:right;font-size:16px;color:#0f172a;font-weight:bold;">${fmt(estimate.netForkortet.finalOffer + estimate.netForkortet.minusBrokerSavings + estimate.netForkortet.minusMarketDiscount + estimate.netForkortet.minusOwnershipCosts)} kr</td></tr>
-      </table>
-      <p style="margin:4px 0 0;font-size:11px;color:#475569;">
-        …hvis du var gået via mægler. Vores ${offer} kr kontant plus de tre poster du sparer ovenfor.
+      <p style="margin:0;font-size:12px;color:#475569;line-height:1.55;">
+        I eksemplet forsvinder <strong>${fmtKr(OFFER_EXAMPLE_SAVED)} kr</strong> undervejs i et mæglersalg.
+        Et kontanttilbud fra os skal måle sig med de ${fmtKr(OFFER_EXAMPLE_NET)} kr, du reelt står tilbage med
+        — ikke med listeprisen.
       </p>
     </div>
     <p style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">
@@ -628,7 +635,7 @@ function customerEmailHtml(
   <!-- Comparables -->
   <div style="margin:0 24px 24px;">
     <div style="font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
-      Sammenlignelige handler vi brugte
+      Lokale handler i dit område
     </div>
     <table style="width:100%;border-collapse:collapse;">
       ${compsHtml}
@@ -643,7 +650,7 @@ function customerEmailHtml(
   <div style="margin:0 24px 24px;padding:20px;background:#0f172a;border-radius:8px;color:white;">
     <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">Næste skridt</div>
     <p style="margin:0 0 12px;font-size:13px;color:#cbd5e1;line-height:1.5;">
-      Jeg ringer dig op indenfor 24 timer på <strong style="color:white;">${escapeHtml(state.phone)}</strong> for at aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen giver jeg et endeligt bindende tilbud.
+      En af vores mæglere kontakter dig inden for 24 timer på <strong style="color:white;">${escapeHtml(state.phone)}</strong> med et estimat på boligen, og vi kan samtidig aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen giver vi et endeligt bindende tilbud.
     </p>
     <p style="margin:0;font-size:13px;color:#cbd5e1;">
       Ring direkte: <a href="tel:+4561789071" style="color:#ffffff;text-decoration:none;font-weight:600;">+45 61 78 90 71</a><br>

@@ -48,6 +48,33 @@ export function UdgifterV4() {
 
   return (
     <div className="space-y-5">
+      {/* Udfyld senere — ligger ØVERST, så man ikke først skal scrolle
+          gennem fire kort for at opdage, at man kan springe dem over. */}
+      <label
+        className="flex items-start gap-3 rounded-[10px] px-5 py-4 cursor-pointer select-none"
+        style={{
+          background: state.costsLater ? V4.mint : '#fff',
+          border: `1px solid ${state.costsLater ? 'transparent' : V4.border}`,
+          transition: 'background 160ms ease, border-color 160ms ease',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={state.costsLater}
+          onChange={(e) => update({ costsLater: e.target.checked })}
+          className="mt-0.5 w-4 h-4 shrink-0 cursor-pointer"
+          style={{ accentColor: V4.green }}
+        />
+        <span>
+          <span className="block text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>
+            Jeg udfylder udgifterne senere
+          </span>
+          <span className="block text-[12.5px] mt-0.5" style={{ color: V4.muted }}>
+            Så går vi videre uden tallene, og vi henter dem i stedet ved besigtigelsen.
+          </span>
+        </span>
+      </label>
+
       {/* Vigtigste udgifter */}
       <Card className="p-6 space-y-4">
         <div className="space-y-1.5">

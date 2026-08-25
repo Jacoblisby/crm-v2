@@ -15,7 +15,6 @@ import { BekraeftV4 } from './screens/BekraeftV4';
 import { KontaktV4 } from './screens/KontaktV4';
 import { HvornaarV4 } from './screens/HvornaarV4';
 import { EfterSalgV4 } from './screens/EfterSalgV4';
-import { NyBoligV4 } from './screens/NyBoligV4';
 import { StandV4 } from './screens/StandV4';
 import { DetaljerV4 } from './screens/DetaljerV4';
 import { UdgifterV4 } from './screens/UdgifterV4';
@@ -49,7 +48,9 @@ export function Funnel() {
     if (screen.id === 'efter_salg') return !!state.afterSaleRaw;
     if (screen.id === 'stand')
       return !!(state.kitchenStand && state.bathroomStand && state.livingRoomStand);
-    if (screen.id === 'udgifter') return state.costFaellesudgifter > 0;
+    // "Udfylder senere" er et bevidst valg — så skal kravet om fællesudgift væk,
+    // ellers sidder man fast bag en knap der aldrig bliver aktiv.
+    if (screen.id === 'udgifter') return state.costsLater || state.costFaellesudgifter > 0;
     return true;
   })();
 
@@ -57,7 +58,7 @@ export function Funnel() {
     ? screen.id === 'kontakt'
       ? 'Navn, email og telefon'
       : screen.id === 'udgifter'
-        ? 'Fællesudgift skal udfyldes'
+        ? 'Udfyld fællesudgift — eller sæt flueben i "udfylder senere"'
         : screen.id === 'stand'
           ? 'Vurder alle tre områder'
           : 'Vælg en mulighed'
@@ -95,7 +96,6 @@ export function Funnel() {
               {screen.id === 'kontakt' && <KontaktV4 />}
               {screen.id === 'hvornaar' && <HvornaarV4 />}
               {screen.id === 'efter_salg' && <EfterSalgV4 />}
-              {screen.id === 'ny_bolig' && <NyBoligV4 />}
               {screen.id === 'stand' && <StandV4 />}
               {screen.id === 'detaljer' && <DetaljerV4 />}
               {screen.id === 'udgifter' && <UdgifterV4 />}

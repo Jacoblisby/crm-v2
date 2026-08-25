@@ -1,14 +1,23 @@
 'use client';
 
 /**
- * EstimatV4 — "Dit foreløbige kontanttilbud" (Figma: 04_Estimat + expanded).
+ * EstimatV4 — sidste skærm i sælger-flowet (Figma: 04_Estimat + expanded).
+ *
+ * Layoutet er designerens, men INDHOLDET af prisboksen er skiftet: sælgeren
+ * får ikke længere et auto-beregnet tilbud at se. I stedet står der, at vi
+ * ikke kunne beregne et tilbud automatisk, og at en mægler vender tilbage
+ * inden for 24 timer. Sammenligningen bliver derfor et regneeksempel på en
+ * bolig til 1.000.000 kr, så konceptet stadig kan forstås — tallene bor i
+ * lib/services/offer-example.ts, fordi mailen bruger de samme.
+ *
+ * Estimatet beregnes STADIG server-side og følger med i admin-mailen og på
+ * leadet; det er kun den kundevendte visning, der er fjernet.
  *
  * Ét stort hvidt card på beige:
- *   mint prisboks (hus-ikon, adresse, STORT mørkt tal, "Efter en gratis
- *   besigtigelse…", "Baseret på lokale handler") → SAMMENLIGNING (divider-
- *   liste m. minus-fortegn, Listepris ved mægler) → mint "estimeret forskel"
- *   → mint "Vores kontanttilbud" → disclaimer.
- * Separat card: "Se handlerne bag vurderingen" (expandable tabel).
+ *   mint boks (hus-ikon, adresse, besked om manuel vurdering) →
+ *   REGNEEKSEMPEL (divider-liste m. minus-fortegn, Tilbage til dig) →
+ *   mint "forsvinder undervejs" → mint "Kontanttilbud i eksemplet" → bemærk.
+ * Separat card: "Se lokale handler i dit område" (expandable tabel).
  * Mørkt card: "Næste skridt" m. turkis Ring-knap + Send e-mail / Book møde.
  *
  * SUBMIT ved mount: submitFunnelAction opretter lead + sender emails og
@@ -20,6 +29,13 @@ import { submitFunnelAction } from '../../salg/submit-action';
 import type { computeEstimate } from '@/lib/services/price-engine';
 import { V4, EASE, Card } from '../primitives';
 import { V4Header } from '../Funnel';
+import {
+  OFFER_EXAMPLE,
+  OFFER_EXAMPLE_NET,
+  OFFER_EXAMPLE_SAVED,
+  NO_AUTO_OFFER,
+  fmtKr,
+} from '@/lib/services/offer-example';
 
 const SUBMIT_KEY = 'salg.v4.submitted';
 const ESTIMATE_CACHE_KEY = 'salg.v4.estimate';
@@ -85,27 +101,21 @@ export function EstimatV4() {
     })();
   }, [state]);
 
-  const bud = estimate
-    ? estimate.netForkortet.finalOffer
-    : state.kvm
-      ? Math.round(state.kvm * 14000 * 0.85)
-      : 945000;
+  // Sælgeren får IKKE længere et auto-beregnet tal. Estimatet regnes stadig
+  // server-side og følger med i admin-mailen og på leadet, så mægleren har
+  // modellens bud i hånden — det er kun den kundevendte visning, der er væk.
+  const ex = OFFER_EXAMPLE;
+  const listepris = ex.listPrice;
+  const maeglerSalaer = ex.brokerFee;
+  const markedAfslag = ex.marketDiscount;
+  const driftSalg = ex.ownershipCosts;
+  const forskel = OFFER_EXAMPLE_SAVED;
 
-  const maeglerSalaer = 70000;
-  const markedAfslag = estimate ? estimate.netForkortet.minusMarketDiscount : Math.round(bud * 0.07);
-  const driftSalg = estimate
-    ? estimate.netForkortet.minusOwnershipCosts
-    : Math.max(1, Math.round(((state.costFaellesudgifter || 24000) / 12) * 3));
-  const listepris = bud + maeglerSalaer + markedAfslag + driftSalg;
-  const forskel = listepris - bud;
+  // Uden et tilbud at spejle i giver det ikke mening at filtrere handlerne
+  // omkring en pris — vi viser dem, motoren fandt i området.
+  const comparables = (estimate?.comparables ?? []).filter((c) => !c.isCurrentListing);
 
-  const comparables = (estimate?.comparables ?? []).filter((c) => {
-    const ratio = c.price / listepris;
-    return ratio >= 0.9 && ratio <= 1.1;
-  });
-
-  const fmt = (n: number) => n.toLocaleString('da-DK');
-  const isCalculating = submit.status === 'sending' && !estimate;
+  const fmt = fmtKr;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: V4.beige }}>
@@ -117,10 +127,10 @@ export function EstimatV4() {
           <Card className="p-6 sm:p-10 space-y-7">
             <div className="text-center space-y-2">
               <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: V4.soft, fontWeight: 500 }}>
-                Dit foreløbige tilbud
+                Din vurdering
               </div>
               <h1 className="text-[24px] sm:text-[30px] leading-tight" style={{ color: V4.ink, fontWeight: 500 }}>
-                Dit foreløbige kontanttilbud
+                Vi er i gang med din bolig
               </h1>
             </div>
 
@@ -135,28 +145,17 @@ export function EstimatV4() {
                 <div className="text-[13.5px]" style={{ color: V4.ink }}>{state.fullAddress || '—'}</div>
               </div>
               <div className="border-t" style={{ borderColor: 'rgba(28,43,43,0.15)' }} />
-              <div
-                className="text-[42px] sm:text-[56px] leading-none tabular-nums"
-                style={{
-                  color: V4.ink,
-                  fontWeight: 400,
-                  filter: isCalculating ? 'blur(8px)' : 'none',
-                  opacity: isCalculating ? 0.6 : 1,
-                  transition: `filter 200ms ${EASE}, opacity 200ms ${EASE}`,
-                }}
-              >
-                {fmt(bud)} kr.
+              <div className="text-[21px] sm:text-[25px] leading-snug text-balance" style={{ color: V4.ink, fontWeight: 500 }}>
+                {NO_AUTO_OFFER.heading}
               </div>
-              <div className="text-[13px]" style={{ color: V4.muted }}>
-                {isCalculating
-                  ? 'Beregner ud fra tinglyste handler i dit område…'
-                  : 'Efter en gratis besigtigelse kan vi give et endeligt tilbud.'}
+              <div className="text-[13.5px] leading-[1.6] max-w-sm mx-auto" style={{ color: V4.muted }}>
+                {NO_AUTO_OFFER.body}
               </div>
               <div className="border-t" style={{ borderColor: 'rgba(28,43,43,0.15)' }} />
               <div className="space-y-0.5">
-                <div className="text-[13px]" style={{ color: V4.ink, fontWeight: 600 }}>Baseret på lokale handler</div>
+                <div className="text-[13px]" style={{ color: V4.ink, fontWeight: 600 }}>Du hører fra os inden for 24 timer</div>
                 <div className="text-[12.5px]" style={{ color: V4.muted }}>
-                  Vi har sammenlignet med tinglyste salg i området.
+                  Vi har dine oplysninger — du behøver ikke gøre mere.
                 </div>
               </div>
             </div>
@@ -164,13 +163,14 @@ export function EstimatV4() {
             {/* Sammenligning */}
             <div className="text-center space-y-2 pt-2">
               <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: V4.soft, fontWeight: 500 }}>
-                Sammenligning
+                Regneeksempel
               </div>
               <h2 className="text-[20px] sm:text-[23px]" style={{ color: V4.ink, fontWeight: 500 }}>
-                Sammenlignet med et klassisk salg
+                Sådan regner vi
               </h2>
               <p className="text-[13px]" style={{ color: V4.muted }}>
-                Her viser vi forskellen på kontant salg til os og et typisk salg via mægler.
+                Her er princippet på en bolig til {fmt(OFFER_EXAMPLE.listPrice)} kr. Tallene er et
+                eksempel og altså ikke et tilbud på din bolig.
               </p>
             </div>
 
@@ -178,8 +178,17 @@ export function EstimatV4() {
               <div className="text-[11px] tracking-[0.14em] uppercase pb-3" style={{ color: V4.soft, fontWeight: 500 }}>
                 Typiske udgifter ved mæglersalg
               </div>
+              <div className="py-3.5 border-t" style={{ borderColor: V4.border }}>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-[14.5px]" style={{ color: V4.ink, fontWeight: 600 }}>Listepris hos mægler</span>
+                  <span className="text-[14.5px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 500 }}>{fmt(listepris)} kr.</span>
+                </div>
+                <div className="text-[12.5px] mt-1 leading-relaxed pr-16" style={{ color: V4.muted }}>
+                  Udgangspunktet i eksemplet — prisen boligen sættes til salg for.
+                </div>
+              </div>
               {[
-                ['Mæglersalær', `-${fmt(maeglerSalaer)} kr.`, 'Typisk 5–7% af salgsprisen. Det betaler du ikke til 365 Ejendomme.'],
+                ['Mæglersalær', `− ${fmt(maeglerSalaer)} kr.`, 'Typisk 5–7% af salgsprisen. Det betaler du ikke til 365 Ejendomme.'],
                 ['Markedsafslag', `− ${fmt(markedAfslag)} kr.`, 'Den endelige salgspris ligger ofte 6-8% under listeprisen. Her regner vi med et typisk markedsafslag.'],
                 ['Drift i salgsperioden', `− ${fmt(driftSalg)} kr.`, 'Ca. 3 måneders ejerudgifter, mens boligen står til salg.'],
               ].map(([t, n, sub]) => (
@@ -193,11 +202,11 @@ export function EstimatV4() {
               ))}
               <div className="py-4 border-t-2" style={{ borderColor: '#c9cfcc' }}>
                 <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-[15px]" style={{ color: V4.ink, fontWeight: 600 }}>Listepris ved mægler</span>
-                  <span className="text-[15px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 600 }}>{fmt(listepris)} kr.</span>
+                  <span className="text-[15px]" style={{ color: V4.ink, fontWeight: 600 }}>Tilbage til dig</span>
+                  <span className="text-[15px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 600 }}>{fmt(OFFER_EXAMPLE_NET)} kr.</span>
                 </div>
                 <div className="text-[12.5px] mt-1" style={{ color: V4.muted }}>
-                  For at ende med samme beløb i hånden, skal listeprisen være cirka dette niveau.
+                  Det er dét beløb, et kontanttilbud fra os skal måle sig med — ikke listeprisen.
                 </div>
               </div>
             </div>
@@ -205,10 +214,10 @@ export function EstimatV4() {
             {/* Forskel */}
             <div className="rounded-[10px] px-5 py-4" style={{ background: V4.mint }}>
               <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>
-                {fmt(forskel)} kr. i estimeret forskel
+                {fmt(forskel)} kr. forsvinder undervejs i eksemplet
               </div>
               <div className="text-[12.5px] mt-0.5" style={{ color: V4.muted }}>
-                Uden mæglersalær, lang salgsperiode eller bankforbehold.
+                Sælger du kontant til os, er der hverken mæglersalær, lang salgsperiode eller bankforbehold.
               </div>
             </div>
 
@@ -222,12 +231,12 @@ export function EstimatV4() {
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>Vores kontanttilbud</div>
-                  <div className="text-[12.5px]" style={{ color: V4.muted }}>Uden mægler, fremvisninger og ventetid.</div>
+                  <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>Kontanttilbud i eksemplet</div>
+                  <div className="text-[12.5px]" style={{ color: V4.muted }}>Samme beløb i hånden — uden mægler, fremvisninger og ventetid.</div>
                 </div>
               </div>
               <div className="text-[20px] sm:text-[24px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 500 }}>
-                {fmt(bud)} kr.
+                {fmt(OFFER_EXAMPLE_NET)} kr.
               </div>
             </div>
 
@@ -237,7 +246,7 @@ export function EstimatV4() {
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-                Tilbud sendt på {state.email}
+                Bekræftelse sendt på {state.email}
               </p>
             )}
             {submit.status === 'error' && (
@@ -246,7 +255,8 @@ export function EstimatV4() {
               </p>
             )}
             <p className="text-[12.5px]" style={{ color: V4.muted }}>
-              <strong style={{ color: V4.ink }}>Disclaimer:</strong> Tilbuddet er foreløbigt. Email-bekræftelse sendes.
+              <strong style={{ color: V4.ink }}>Bemærk:</strong> Regneeksemplet ovenfor er en illustration af,
+              hvordan vi regner — ikke et tilbud på din bolig. Dit estimat kommer fra en mægler inden for 24 timer.
             </p>
           </Card>
 
@@ -259,7 +269,7 @@ export function EstimatV4() {
               disabled={comparables.length === 0}
             >
               <span className="text-[14.5px]" style={{ color: comparables.length ? V4.greenDeep : V4.soft, fontWeight: 600 }}>
-                Se handlerne bag vurderingen
+                Se lokale handler i dit område
               </span>
               {comparables.length > 0 && (
                 <svg
@@ -277,7 +287,7 @@ export function EstimatV4() {
               )}
             </button>
             <p className="text-[13px] mt-1.5" style={{ color: V4.muted }}>
-              Dit foreløbige tilbud er baseret på offentlige boligdata og lokale tinglyste handler.
+              Mægleren tager udgangspunkt i offentlige boligdata og tinglyste handler som disse.
             </p>
             <div
               className="grid"
@@ -308,7 +318,7 @@ export function EstimatV4() {
           <div className="rounded-[10px] px-6 sm:px-10 py-8 text-center space-y-4" style={{ background: '#2d5f60' }}>
             <div className="text-[19px] text-white" style={{ fontWeight: 500 }}>Næste skridt</div>
             <p className="text-[13.5px] max-w-md mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Vi kan gennemgå tilbuddet og aftale en gratis besigtigelse, hvis du ønsker at gå videre.
+              En mægler vender tilbage med et estimat inden for 24 timer. Vil du hellere tale med os med det samme, er du velkommen til at ringe.
             </p>
             <div className="max-w-md mx-auto space-y-2.5 pt-1">
               <a

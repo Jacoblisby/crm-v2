@@ -171,12 +171,16 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
       if (
         patch.notes !== undefined ||
         patch.smokeFree !== undefined ||
-        patch.econNotes !== undefined
+        patch.econNotes !== undefined ||
+        patch.costsLater !== undefined
       ) {
         next.standNote = [
           next.notes,
           next.smokeFree ? `Røgfri: ${next.smokeFree}` : '',
           next.econNotes ? `Økonomiske forhold: ${next.econNotes}` : '',
+          // Mægleren skal kunne se at tallene mangler med vilje — ellers
+          // ligner det bare et halvt udfyldt lead.
+          next.costsLater ? 'UDGIFTER: sælger udfylder senere — indhent ved besigtigelse' : '',
         ]
           .filter(Boolean)
           .join(' · ');

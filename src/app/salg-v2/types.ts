@@ -116,6 +116,14 @@ export interface FunnelStateV2 extends V1State {
   hasEjerforeningGaeld: boolean;
   /** Beløb skyldig til ejerforeningen (kr, engangsbeløb). */
   ejerforeningGaeldKr: number;
+
+  /**
+   * "Jeg udfylder udgifterne senere" — sælger kan komme videre uden at have
+   * tal på fællesudgift m.m. Slår kravet om fællesudgift fra i Funnel'ens
+   * canProceed, og skrives ind i lead-noten så mægleren ved, at tallene
+   * mangler og skal indhentes ved besigtigelsen.
+   */
+  costsLater: boolean;
 }
 
 export const initialStateV2: FunnelStateV2 = {
@@ -143,6 +151,7 @@ export const initialStateV2: FunnelStateV2 = {
   roofCondition: null,
   hasEjerforeningGaeld: false,
   ejerforeningGaeldKr: 0,
+  costsLater: false,
 };
 
 // 13-screen array — pure function, recomputed when state changes for conditional

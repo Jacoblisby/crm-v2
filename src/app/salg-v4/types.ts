@@ -6,7 +6,6 @@
  *
  * Trin (fra framesene 01_Adresse strin 1 → 04_Estimat):
  *   Adresse  1/4 Bekræft · 2/4 Dine oplysninger · 3/4 Hvornår · 4/4 Efter salget
- *            (+ ekstra: Ny bolig — "IKKE DESIGNET" i filen, holdes i samme sprog)
  *   Boligen  1/2 Boligens stand (alle rum som chips) · 2/2 Sidste detaljer
  *   Udgifter 1/2 Boligens udgifter · 2/2 Særlige forhold
  *   Estimat  Dit foreløbige kontanttilbud
@@ -36,9 +35,12 @@ export interface V4ScreenDef {
   counter: string;
 }
 
-export function getScreensV4(state: FunnelStateV2): V4ScreenDef[] {
-  const harNyBolig = state.afterSaleRaw === 'Vil leje en anden bolig';
-  const adresseTotal = harNyBolig ? 5 : 4;
+export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
+  // Fast længde: adresse-delen er ALTID 4 trin. Tidligere skød vi et
+  // "Ny bolig"-trin ind, hvis man svarede "Vil leje en anden bolig" på
+  // "Hvad skal du efter salget?" — det er fjernet, så alle går direkte
+  // videre til Boligens stand.
+  const adresseTotal = 4;
 
   const screens: V4ScreenDef[] = [
     {
@@ -75,16 +77,6 @@ export function getScreensV4(state: FunnelStateV2): V4ScreenDef[] {
     },
   ];
 
-  if (harNyBolig) {
-    screens.push({
-      id: 'ny_bolig',
-      stage: 'adresse',
-      kicker: 'Din næste bolig',
-      title: 'Hvad leder du efter?',
-      sub: 'Fortæl os, hvad der er vigtigt i din næste bolig. Så kan vi undersøge, om vi har en lejebolig, der passer til dine behov.',
-      counter: `Adresse 5 / ${adresseTotal}`,
-    });
-  }
 
   screens.push(
     {
