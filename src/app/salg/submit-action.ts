@@ -606,10 +606,10 @@ function customerEmailHtml(
   <!-- Regneeksempel: samme tal som paa /salg-v4's estimat-skaerm -->
   <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;padding:20px;">
     <h3 style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0f172a;">
-      Sådan regner vi
+      Vores pris vs. ejendomsmægler
     </h3>
     <p style="margin:0 0 12px;font-size:12px;color:#64748b;line-height:1.5;">
-      Her er princippet på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
+      Sådan ser forskellen ud på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
       Tallene er et eksempel og altså ikke et tilbud på din bolig.
     </p>
     <table style="width:100%;border-collapse:collapse;">

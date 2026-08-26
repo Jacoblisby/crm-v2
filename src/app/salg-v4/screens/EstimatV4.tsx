@@ -6,8 +6,9 @@
  * Layoutet er designerens, men INDHOLDET af prisboksen er skiftet: sælgeren
  * får ikke længere et auto-beregnet tilbud at se. I stedet står der, at vi
  * ikke kunne beregne et tilbud automatisk, og at en mægler vender tilbage
- * inden for 24 timer. Sammenligningen bliver derfor et regneeksempel på en
- * bolig til 1.000.000 kr, så konceptet stadig kan forstås — tallene bor i
+ * inden for 24 timer. Sammenligningen ("Vores pris vs. ejendomsmægler")
+ * bliver derfor et regneeksempel på en bolig til 1.000.000 kr, så
+ * konceptet stadig kan forstås — tallene bor i
  * lib/services/offer-example.ts, fordi mailen bruger de samme.
  *
  * Estimatet beregnes STADIG server-side og følger med i admin-mailen og på
@@ -165,11 +166,11 @@ export function EstimatV4() {
                 Regneeksempel
               </div>
               <h2 className="text-[20px] sm:text-[23px]" style={{ color: V4.ink, fontWeight: 500 }}>
-                Sådan regner vi
+                Vores pris vs. ejendomsmægler
               </h2>
               <p className="text-[13px]" style={{ color: V4.muted }}>
-                Her er princippet på en bolig til {fmt(OFFER_EXAMPLE.listPrice)} kr. Tallene er et
-                eksempel og altså ikke et tilbud på din bolig.
+                Sådan ser forskellen ud på en bolig til {fmt(OFFER_EXAMPLE.listPrice)} kr. Tallene er
+                et eksempel og altså ikke et tilbud på din bolig.
               </p>
             </div>
 
