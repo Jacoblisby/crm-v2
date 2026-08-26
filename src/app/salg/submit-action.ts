@@ -616,35 +616,35 @@ function customerEmailHtml(
       <tr>
         <td style="width:46%;"></td>
         <td style="width:27%;padding:0 6px 6px;text-align:right;font-size:12px;font-weight:600;color:#64748b;">Ejendomsmægler</td>
-        <td style="width:27%;padding:0 8px 6px;text-align:right;font-size:12px;font-weight:bold;color:#0f4749;background:#c8dfdd;">365 Ejendomme</td>
+        <td style="width:27%;padding:0 8px 6px;text-align:right;font-size:12px;font-weight:bold;color:#0f4749;background:#e8dfde;">365 Ejendomme</td>
       </tr>
       <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Pris på boligen</strong><br><span style="color:#94a3b8;font-size:11px;">Det beløb, boligen sættes til salg for.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.listPrice)} kr</td>
-        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Pris på boligen</strong><br><span style="color:#94a3b8;font-size:11px;">Det beløb, boligen sættes til salg for.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.listPrice)} kr</td>
+        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
       </tr>
       <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Mæglersalær</strong><br><span style="color:#94a3b8;font-size:11px;">Typisk 5-7 % af salgsprisen.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.brokerFee)} kr</td>
-        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">0 kr</td>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Mæglersalær</strong><br><span style="color:#94a3b8;font-size:11px;">Typisk 5-7 % af salgsprisen.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.brokerFee)} kr</td>
+        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">0 kr</td>
       </tr>
       <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Markedsafslag</strong><br><span style="color:#94a3b8;font-size:11px;">Slutprisen ligger ofte 6-8 % under listeprisen.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.marketDiscount)} kr</td>
-        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">0 kr</td>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Markedsafslag</strong><br><span style="color:#94a3b8;font-size:11px;">Slutprisen ligger ofte 6-8 % under listeprisen.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.marketDiscount)} kr</td>
+        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">0 kr</td>
       </tr>
       <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Drift i salgsperioden</strong><br><span style="color:#94a3b8;font-size:11px;">Ca. 3 måneders ejerudgifter imens.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.ownershipCosts)} kr</td>
-        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">0 kr</td>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Drift i salgsperioden</strong><br><span style="color:#94a3b8;font-size:11px;">Ca. 3 måneders ejerudgifter imens.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.ownershipCosts)} kr</td>
+        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">0 kr</td>
       </tr>
       <tr>
-        <td style="padding:12px 8px 12px 0;border-top:2px solid #c9cfcc;font-size:14px;"><strong>Tilbage til dig</strong><br><span style="color:#94a3b8;font-size:11px;">Det du reelt står med bagefter.</span></td>
-        <td style="padding:12px 6px;border-top:2px solid #c9cfcc;text-align:right;font-size:15px;font-weight:600;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE_NET)} kr</td>
-        <td style="padding:12px 8px;text-align:right;font-size:18px;font-weight:bold;color:#0f4749;background:#c8dfdd;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
+        <td style="padding:12px 8px 12px 0;border-top:2px solid rgba(28,43,43,0.26);font-size:14px;"><strong>Tilbage til dig</strong><br><span style="color:#94a3b8;font-size:11px;">Det du reelt står med bagefter.</span></td>
+        <td style="padding:12px 6px;border-top:2px solid rgba(28,43,43,0.26);text-align:right;font-size:15px;font-weight:600;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE_NET)} kr</td>
+        <td style="padding:12px 8px;border-top:2px solid rgba(28,43,43,0.26);text-align:right;font-size:18px;font-weight:bold;color:#0f4749;background:#e8dfde;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
       </tr>
     </table>
-    <div style="margin:14px 0 0;padding:14px;background:#c8dfdd;border-radius:6px;text-align:center;">
+    <div style="margin:14px 0 0;padding:14px;background:#e8dfde;border-radius:6px;text-align:center;">
       <p style="margin:0 0 4px;font-size:19px;font-weight:bold;color:#0f4749;">
         + ${fmtKr(OFFER_EXAMPLE_GAIN)} kr mere til dig
       </p>
@@ -687,7 +687,7 @@ function customerEmailHtml(
   </div>
 
   <!-- Trust signals -->
-  <div style="padding:16px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+  <div style="padding:16px 24px;background:#f8fafc;border-top:1px solid rgba(28,43,43,0.12);text-align:center;">
     <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">
       Hvad du får når du sælger til os
     </div>
@@ -700,7 +700,7 @@ function customerEmailHtml(
   </div>
 
   <!-- Footer -->
-  <div style="padding:24px;text-align:center;border-top:1px solid #e2e8f0;">
+  <div style="padding:24px;text-align:center;border-top:1px solid rgba(28,43,43,0.12);">
     <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
       Bedste hilsner,<br>
       <strong style="color:#475569;">Jacob Lisby</strong> · 365 Ejendomme

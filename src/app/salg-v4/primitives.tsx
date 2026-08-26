@@ -17,6 +17,16 @@ export const V4 = {
   selected: '#317779',    // valgt række (teal fyld, fra "trin 3 valgt"-framen)
   mint: '#cce0dc',        // mint header-bar + prisboks
   mintSoft: '#e7f0ed',
+  /**
+   * Varm rose — den ENESTE flade i designerens palet, der ikke er grøn.
+   * Hun bruger den som hel sektionsbaggrund på forsiden (hero + "Bliv
+   * boende"), så den er lige så meget brand som mint. Bruges her til at
+   * fremhæve vores kolonne, så estimat-skærmen ikke bliver ensfarvet grøn.
+   */
+  rose: '#e8dfde',
+  /** Skillestreg der læses ens på hvid OG på rose — derfor gennemsigtig. */
+  rule: 'rgba(28,43,43,0.12)',
+  ruleStrong: 'rgba(28,43,43,0.26)',
   beige: '#f5f2f1',       // skærm-baggrund ("Beige 3")
   cta: '#83ebeb',         // turkis (Ring-knap på estimat)
   prevBtn: '#c9d9d6',     // "Forrige"-knap

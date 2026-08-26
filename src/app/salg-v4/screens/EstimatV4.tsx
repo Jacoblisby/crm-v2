@@ -178,10 +178,14 @@ export function EstimatV4() {
                 holder kolonnerne linje af sig selv, og skærmlæsere kobler
                 tal til den rigtige overskrift.
 
-                Vores kolonne er bevidst det eneste farvede: mint bund hele
-                vejen ned, uden at række-stregerne skærer igennem den, så den
-                læses som ét sammenhængende panel og ikke som fem celler.
-                Mæglerens tal står dæmpede — kontrasten gør arbejdet. */}
+                Vores kolonne er bevidst det eneste farvede — og den er ROSE,
+                ikke mint: skærmen har allerede en mint boks ovenfor, og tre
+                grønne flader i træk gør siden ensfarvet. Rose er designerens
+                egen sektionsfarve fra forsiden, så den er lige så meget brand.
+
+                Stregerne løber gennem ALLE tre kolonner. De er gennemsigtig
+                blæk frem for en fast grå, så den samme streg læses ens på
+                hvid og på rose og altså virkelig ser gennemgående ud. */}
             <div>
               <table className="w-full border-collapse">
                 <caption className="sr-only">
@@ -203,7 +207,7 @@ export function EstimatV4() {
                         første talrække og virker som en flade, ikke en celle */}
                     <th
                       className="text-right align-bottom pt-4 pb-3 px-2 sm:px-5 rounded-t-[14px]"
-                      style={{ background: V4.mint }}
+                      style={{ background: V4.rose }}
                     >
                       <span
                         className="text-[10px] sm:text-[11px] block leading-tight uppercase"
@@ -222,7 +226,7 @@ export function EstimatV4() {
                     ['Drift i salgsperioden', 'Ca. 3 måneders ejerudgifter imens.', `− ${fmt(driftSalg)}`, 'Ingen', true],
                   ].map(([label, sub, maegler, os, erIngen]) => (
                     <tr key={label as string}>
-                      <td className="py-4 pr-3 sm:pr-5 border-t align-top" style={{ borderColor: V4.border }}>
+                      <td className="py-4 pr-3 sm:pr-5 border-t align-top" style={{ borderColor: V4.rule }}>
                         <span className="text-[13px] sm:text-[15px] block leading-tight" style={{ color: V4.ink, fontWeight: 600 }}>
                           {label}
                         </span>
@@ -232,15 +236,15 @@ export function EstimatV4() {
                       </td>
                       <td
                         className="py-4 px-1.5 sm:px-4 border-t text-right align-top text-[13px] sm:text-[15.5px] tabular-nums whitespace-nowrap"
-                        style={{ borderColor: V4.border, color: V4.soft, fontWeight: 500 }}
+                        style={{ borderColor: V4.rule, color: V4.soft, fontWeight: 500 }}
                       >
                         {maegler}<span className="hidden sm:inline"> kr.</span>
                       </td>
-                      {/* Ingen border-t her — stregen ville skære panelet i stykker */}
                       <td
-                        className="py-4 px-2 sm:px-5 text-right align-top text-[13px] sm:text-[15.5px] tabular-nums whitespace-nowrap"
+                        className="py-4 px-2 sm:px-5 border-t text-right align-top text-[13px] sm:text-[15.5px] tabular-nums whitespace-nowrap"
                         style={{
-                          background: V4.mint,
+                          background: V4.rose,
+                          borderColor: V4.rule,
                           color: erIngen ? V4.greenDeep : V4.ink,
                           fontWeight: erIngen ? 600 : 500,
                         }}
@@ -252,7 +256,7 @@ export function EstimatV4() {
                   ))}
                   {/* Bundlinjen — dét hele handler om */}
                   <tr>
-                    <td className="pt-5 pb-6 pr-3 sm:pr-5 border-t-2 align-top" style={{ borderColor: '#bcc7c4' }}>
+                    <td className="pt-5 pb-6 pr-3 sm:pr-5 border-t-2 align-top" style={{ borderColor: V4.ruleStrong }}>
                       <span className="text-[14px] sm:text-[16px] block leading-tight" style={{ color: V4.ink, fontWeight: 700 }}>
                         Tilbage til dig
                       </span>
@@ -262,13 +266,13 @@ export function EstimatV4() {
                     </td>
                     <td
                       className="pt-5 pb-6 px-1.5 sm:px-4 border-t-2 text-right align-top text-[14px] sm:text-[17px] tabular-nums whitespace-nowrap"
-                      style={{ borderColor: '#bcc7c4', color: V4.soft, fontWeight: 600 }}
+                      style={{ borderColor: V4.ruleStrong, color: V4.soft, fontWeight: 600 }}
                     >
                       {fmt(OFFER_EXAMPLE_NET)}<span className="hidden sm:inline"> kr.</span>
                     </td>
                     <td
-                      className="pt-5 pb-6 px-2 sm:px-5 text-right align-top rounded-b-[14px]"
-                      style={{ background: V4.mint }}
+                      className="pt-5 pb-6 px-2 sm:px-5 border-t-2 text-right align-top rounded-b-[14px]"
+                      style={{ background: V4.rose, borderColor: V4.ruleStrong }}
                     >
                       <span
                         className="block text-[17px] sm:text-[26px] leading-none tabular-nums whitespace-nowrap"
@@ -286,7 +290,7 @@ export function EstimatV4() {
             </div>
 
             {/* Gevinsten — pointen, som sin egen sætning */}
-            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.mint }}>
+            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.rose }}>
               <span className="inline-flex w-9 h-9 rounded-full items-center justify-center mb-3" style={{ background: V4.green }}>
                 <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6L9 17l-5-5" />
