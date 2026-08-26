@@ -612,21 +612,46 @@ function customerEmailHtml(
       Sådan ser forskellen ud på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
       Tallene er et eksempel og altså ikke et tilbud på din bolig.
     </p>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Listepris hos mægler</strong><br><span style="color:#94a3b8;font-size:11px;">Prisen boligen sættes til salg for.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">${fmtKr(OFFER_EXAMPLE.listPrice)} kr</td></tr>
-      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Mæglersalær</strong><br><span style="color:#94a3b8;font-size:11px;">Typisk 5-7 % af salgsprisen. Det betaler du ikke til os.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">− ${fmtKr(OFFER_EXAMPLE.brokerFee)} kr</td></tr>
-      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Markedsafslag</strong><br><span style="color:#94a3b8;font-size:11px;">Slutprisen ligger ofte 6-8 % under listeprisen.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">− ${fmtKr(OFFER_EXAMPLE.marketDiscount)} kr</td></tr>
-      <tr><td style="padding:8px 0;font-size:13px;border-bottom:1px solid #f1f5f9;"><strong>Drift i salgsperioden</strong><br><span style="color:#94a3b8;font-size:11px;">Ca. 3 måneders ejerudgifter, mens boligen står til salg.</span></td><td style="padding:8px 0;text-align:right;font-size:13px;font-weight:600;border-bottom:1px solid #f1f5f9;">− ${fmtKr(OFFER_EXAMPLE.ownershipCosts)} kr</td></tr>
-      <tr><td style="padding:10px 0;font-size:13px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">Tilbage til dig</td><td style="padding:10px 0;text-align:right;font-size:16px;font-weight:bold;color:#0f172a;border-bottom:1px solid #f1f5f9;">${fmtKr(OFFER_EXAMPLE_NET)} kr</td></tr>
-      <tr><td style="padding:10px 0;font-size:13px;font-weight:600;color:#0f172a;"><strong>Vores bud i eksemplet</strong><br><span style="color:#94a3b8;font-size:11px;">Vi byder dét, boligen realistisk ville blive solgt for.</span></td><td style="padding:10px 0;text-align:right;font-size:16px;font-weight:bold;color:#0f172a;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td></tr>
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+      <tr>
+        <td style="width:46%;"></td>
+        <td style="width:27%;padding:0 6px 6px;text-align:right;font-size:12px;font-weight:600;color:#64748b;">Ejendomsmægler</td>
+        <td style="width:27%;padding:0 8px 6px;text-align:right;font-size:12px;font-weight:bold;color:#0f4749;background:#c8dfdd;">365 Ejendomme</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Pris på boligen</strong><br><span style="color:#94a3b8;font-size:11px;">Det beløb, boligen sættes til salg for.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.listPrice)} kr</td>
+        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Mæglersalær</strong><br><span style="color:#94a3b8;font-size:11px;">Typisk 5-7 % af salgsprisen.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.brokerFee)} kr</td>
+        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">0 kr</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Markedsafslag</strong><br><span style="color:#94a3b8;font-size:11px;">Slutprisen ligger ofte 6-8 % under listeprisen.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.marketDiscount)} kr</td>
+        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">0 kr</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 8px 10px 0;border-top:1px solid #e2e8f0;font-size:13px;"><strong>Drift i salgsperioden</strong><br><span style="color:#94a3b8;font-size:11px;">Ca. 3 måneders ejerudgifter imens.</span></td>
+        <td style="padding:10px 6px;border-top:1px solid #e2e8f0;text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.ownershipCosts)} kr</td>
+        <td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#c8dfdd;white-space:nowrap;">0 kr</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 8px 12px 0;border-top:2px solid #c9cfcc;font-size:14px;"><strong>Tilbage til dig</strong><br><span style="color:#94a3b8;font-size:11px;">Det du reelt står med bagefter.</span></td>
+        <td style="padding:12px 6px;border-top:2px solid #c9cfcc;text-align:right;font-size:15px;font-weight:600;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE_NET)} kr</td>
+        <td style="padding:12px 8px;text-align:right;font-size:18px;font-weight:bold;color:#0f4749;background:#c8dfdd;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
+      </tr>
     </table>
-    <div style="margin:12px 0 0;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
-      <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:#0f172a;">
+    <div style="margin:14px 0 0;padding:14px;background:#c8dfdd;border-radius:6px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:19px;font-weight:bold;color:#0f4749;">
         + ${fmtKr(OFFER_EXAMPLE_GAIN)} kr mere til dig
       </p>
       <p style="margin:0;font-size:12px;color:#475569;line-height:1.55;">
-        Sammenlignet med de ${fmtKr(OFFER_EXAMPLE_NET)} kr, mæglervejen ville give i eksemplet.
-        Oveni slipper du for fremvisninger, bankforbehold og cirka tre måneders ventetid.
+        Mæglerens pris er højere på papiret — men efter salær, markedsafslag og ventetid
+        står du med mindre. Oveni slipper du for fremvisninger, bankforbehold og cirka
+        tre måneders salgsperiode.
       </p>
     </div>
     <p style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">

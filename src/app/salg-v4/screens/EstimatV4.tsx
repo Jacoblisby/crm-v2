@@ -174,72 +174,99 @@ export function EstimatV4() {
               </p>
             </div>
 
-            <div>
-              <div className="text-[11px] tracking-[0.14em] uppercase pb-3" style={{ color: V4.soft, fontWeight: 500 }}>
-                Typiske udgifter ved mæglersalg
-              </div>
-              <div className="py-3.5 border-t" style={{ borderColor: V4.border }}>
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-[14.5px]" style={{ color: V4.ink, fontWeight: 600 }}>Listepris hos mægler</span>
-                  <span className="text-[14.5px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 500 }}>{fmt(listepris)} kr.</span>
-                </div>
-                <div className="text-[12.5px] mt-1 leading-relaxed pr-16" style={{ color: V4.muted }}>
-                  Udgangspunktet i eksemplet — prisen boligen sættes til salg for.
-                </div>
-              </div>
-              {[
-                ['Mæglersalær', `− ${fmt(maeglerSalaer)} kr.`, 'Typisk 5–7% af salgsprisen. Det betaler du ikke til 365 Ejendomme.'],
-                ['Markedsafslag', `− ${fmt(markedAfslag)} kr.`, 'Den endelige salgspris ligger ofte 6-8% under listeprisen. Her regner vi med et typisk markedsafslag.'],
-                ['Drift i salgsperioden', `− ${fmt(driftSalg)} kr.`, 'Ca. 3 måneders ejerudgifter, mens boligen står til salg.'],
-              ].map(([t, n, sub]) => (
-                <div key={t} className="py-3.5 border-t" style={{ borderColor: V4.border }}>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-[14.5px]" style={{ color: V4.ink, fontWeight: 600 }}>{t}</span>
-                    <span className="text-[14.5px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 500 }}>{n}</span>
-                  </div>
-                  <div className="text-[12.5px] mt-1 leading-relaxed pr-16" style={{ color: V4.muted }}>{sub}</div>
-                </div>
-              ))}
-              <div className="py-4 border-t-2" style={{ borderColor: '#c9cfcc' }}>
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-[15px]" style={{ color: V4.ink, fontWeight: 600 }}>Tilbage til dig</span>
-                  <span className="text-[15px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 600 }}>{fmt(OFFER_EXAMPLE_NET)} kr.</span>
-                </div>
-                <div className="text-[12.5px] mt-1" style={{ color: V4.muted }}>
-                  Det er dét, der reelt er tilbage efter et mæglersalg — ikke listeprisen.
-                </div>
-              </div>
-            </div>
-
-            {/* Vores bud — det tal sælger skal huske */}
-            <div className="rounded-[10px] px-5 py-4 flex items-center justify-between gap-4" style={{ background: V4.mint }}>
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: V4.green }}>
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="6" width="20" height="12" rx="2" />
-                    <circle cx="12" cy="12" r="2.5" />
-                  </svg>
-                </span>
-                <div className="min-w-0">
-                  <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>Vores bud i eksemplet</div>
-                  <div className="text-[12.5px]" style={{ color: V4.muted }}>
-                    Vi byder dét, boligen realistisk ville blive solgt for — du slipper bare for salær og ventetid.
-                  </div>
-                </div>
-              </div>
-              <div className="text-[20px] sm:text-[24px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 500 }}>
-                {fmt(OFFER_EXAMPLE.ourOffer)} kr.
-              </div>
+            {/* Side om side. En rigtig <table>, fordi det ER tabeldata — så
+                holder kolonnerne linje af sig selv, og skærmlæsere kobler
+                tal til den rigtige overskrift.
+                Vores kolonne har mint bund hele vejen ned, så øjet med det
+                samme ser hvilken af de to der er den gode. */}
+            <div className="overflow-x-auto -mx-1 px-1">
+              <table className="w-full border-collapse">
+                <caption className="sr-only">
+                  Sammenligning af salg via ejendomsmægler og kontantsalg til 365 Ejendomme
+                </caption>
+                <thead>
+                  <tr>
+                    <th className="text-left align-bottom pb-2.5" />
+                    <th className="text-right align-bottom pb-2.5 px-1.5 sm:px-3">
+                      <span className="text-[10.5px] sm:text-[12.5px] block leading-tight" style={{ color: V4.muted, fontWeight: 600 }}>
+                        Ejendomsmægler
+                      </span>
+                    </th>
+                    <th
+                      className="text-right align-bottom pb-2.5 px-1.5 sm:px-3 rounded-t-[10px]"
+                      style={{ background: V4.mint }}
+                    >
+                      <span className="text-[10.5px] sm:text-[12.5px] block leading-tight" style={{ color: V4.greenDeep, fontWeight: 700 }}>
+                        365 Ejendomme
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Pris på boligen', 'Det beløb, boligen sættes til salg for.', fmt(listepris), fmt(OFFER_EXAMPLE.ourOffer)],
+                    ['Mæglersalær', 'Typisk 5–7 % af salgsprisen.', `− ${fmt(maeglerSalaer)}`, '0'],
+                    ['Markedsafslag', 'Slutprisen ligger ofte 6–8 % under listeprisen.', `− ${fmt(markedAfslag)}`, '0'],
+                    ['Drift i salgsperioden', 'Ca. 3 måneders ejerudgifter imens.', `− ${fmt(driftSalg)}`, '0'],
+                  ].map(([label, sub, maegler, os]) => (
+                    <tr key={label}>
+                      <td className="py-3 pr-3 border-t align-top" style={{ borderColor: V4.border }}>
+                        <span className="text-[12.5px] sm:text-[14.5px] block leading-tight" style={{ color: V4.ink, fontWeight: 600 }}>{label}</span>
+                        <span className="hidden sm:block text-[12.5px] mt-0.5 leading-snug" style={{ color: V4.muted }}>{sub}</span>
+                      </td>
+                      <td
+                        className="py-3 px-1.5 sm:px-3 border-t text-right align-top text-[12px] sm:text-[14.5px] tabular-nums whitespace-nowrap"
+                        style={{ borderColor: V4.border, color: V4.muted }}
+                      >
+                        {maegler}<span className="hidden sm:inline"> kr.</span>
+                      </td>
+                      <td
+                        className="py-3 px-1.5 sm:px-3 text-right align-top text-[12px] sm:text-[14.5px] tabular-nums whitespace-nowrap"
+                        style={{ background: V4.mint, color: V4.ink, fontWeight: 500 }}
+                      >
+                        {os}<span className="hidden sm:inline"> kr.</span>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Bundlinjen — dét hele handler om */}
+                  <tr>
+                    <td className="py-4 pr-3 border-t-2 align-top" style={{ borderColor: '#c9cfcc' }}>
+                      <span className="text-[14px] sm:text-[15px] block" style={{ color: V4.ink, fontWeight: 700 }}>Tilbage til dig</span>
+                      <span className="hidden sm:block text-[12.5px] mt-0.5 leading-snug" style={{ color: V4.muted }}>
+                        Det du reelt står med bagefter.
+                      </span>
+                    </td>
+                    <td
+                      className="py-4 px-1.5 sm:px-3 border-t-2 text-right align-top text-[13px] sm:text-[16px] tabular-nums whitespace-nowrap"
+                      style={{ borderColor: '#c9cfcc', color: V4.muted, fontWeight: 600 }}
+                    >
+                      {fmt(OFFER_EXAMPLE_NET)}<span className="hidden sm:inline"> kr.</span>
+                    </td>
+                    <td
+                      className="py-4 px-1.5 sm:px-3 text-right align-top text-[15px] sm:text-[20px] tabular-nums whitespace-nowrap rounded-b-[10px]"
+                      style={{ background: V4.mint, color: V4.greenDeep, fontWeight: 700 }}
+                    >
+                      {fmt(OFFER_EXAMPLE.ourOffer)}<span className="hidden sm:inline"> kr.</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              {/* Enheden står kun her på mobil — i cellerne kostede den den
+                  plads, label-kolonnen havde brug for. */}
+              <p className="sm:hidden text-[11px] pt-2 text-right" style={{ color: V4.soft }}>
+                Alle beløb i kr.
+              </p>
             </div>
 
             {/* Gevinsten — pointen med hele eksemplet */}
-            <div className="rounded-[10px] px-5 py-4" style={{ background: V4.mint }}>
-              <div className="text-[16px]" style={{ color: V4.greenDeep, fontWeight: 600 }}>
+            <div className="rounded-[10px] px-5 py-4 text-center" style={{ background: V4.mint }}>
+              <div className="text-[19px] sm:text-[22px]" style={{ color: V4.greenDeep, fontWeight: 700 }}>
                 + {fmt(OFFER_EXAMPLE_GAIN)} kr. mere til dig
               </div>
-              <div className="text-[12.5px] mt-1 leading-relaxed" style={{ color: V4.muted }}>
-                Sammenlignet med de {fmt(OFFER_EXAMPLE_NET)} kr., mæglervejen ville give i eksemplet.
-                Oveni slipper du for fremvisninger, bankforbehold og cirka tre måneders ventetid.
+              <div className="text-[12.5px] mt-1.5 leading-relaxed max-w-md mx-auto" style={{ color: V4.muted }}>
+                Mæglerens pris er højere på papiret — men efter salær, markedsafslag og
+                ventetid står du med mindre. Oveni slipper du for fremvisninger,
+                bankforbehold og cirka tre måneders salgsperiode.
               </div>
             </div>
 
