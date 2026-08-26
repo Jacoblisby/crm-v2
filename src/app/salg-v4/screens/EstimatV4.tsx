@@ -32,7 +32,7 @@ import { V4Header } from '../Funnel';
 import {
   OFFER_EXAMPLE,
   OFFER_EXAMPLE_NET,
-  OFFER_EXAMPLE_SAVED,
+  OFFER_EXAMPLE_GAIN,
   NO_AUTO_OFFER,
   fmtKr,
 } from '@/lib/services/offer-example';
@@ -109,7 +109,6 @@ export function EstimatV4() {
   const maeglerSalaer = ex.brokerFee;
   const markedAfslag = ex.marketDiscount;
   const driftSalg = ex.ownershipCosts;
-  const forskel = OFFER_EXAMPLE_SAVED;
 
   // Uden et tilbud at spejle i giver det ikke mening at filtrere handlerne
   // omkring en pris — vi viser dem, motoren fandt i området.
@@ -206,22 +205,12 @@ export function EstimatV4() {
                   <span className="text-[15px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 600 }}>{fmt(OFFER_EXAMPLE_NET)} kr.</span>
                 </div>
                 <div className="text-[12.5px] mt-1" style={{ color: V4.muted }}>
-                  Det er dét beløb, et kontanttilbud fra os skal måle sig med — ikke listeprisen.
+                  Det er dét, der reelt er tilbage efter et mæglersalg — ikke listeprisen.
                 </div>
               </div>
             </div>
 
-            {/* Forskel */}
-            <div className="rounded-[10px] px-5 py-4" style={{ background: V4.mint }}>
-              <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>
-                {fmt(forskel)} kr. forsvinder undervejs i eksemplet
-              </div>
-              <div className="text-[12.5px] mt-0.5" style={{ color: V4.muted }}>
-                Sælger du kontant til os, er der hverken mæglersalær, lang salgsperiode eller bankforbehold.
-              </div>
-            </div>
-
-            {/* Vores kontanttilbud */}
+            {/* Vores bud — det tal sælger skal huske */}
             <div className="rounded-[10px] px-5 py-4 flex items-center justify-between gap-4" style={{ background: V4.mint }}>
               <div className="flex items-center gap-3 min-w-0">
                 <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: V4.green }}>
@@ -231,12 +220,25 @@ export function EstimatV4() {
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>Kontanttilbud i eksemplet</div>
-                  <div className="text-[12.5px]" style={{ color: V4.muted }}>Samme beløb i hånden — uden mægler, fremvisninger og ventetid.</div>
+                  <div className="text-[14px]" style={{ color: V4.ink, fontWeight: 600 }}>Vores bud i eksemplet</div>
+                  <div className="text-[12.5px]" style={{ color: V4.muted }}>
+                    Vi byder dét, boligen realistisk ville blive solgt for — du slipper bare for salær og ventetid.
+                  </div>
                 </div>
               </div>
               <div className="text-[20px] sm:text-[24px] tabular-nums shrink-0" style={{ color: V4.ink, fontWeight: 500 }}>
-                {fmt(OFFER_EXAMPLE_NET)} kr.
+                {fmt(OFFER_EXAMPLE.ourOffer)} kr.
+              </div>
+            </div>
+
+            {/* Gevinsten — pointen med hele eksemplet */}
+            <div className="rounded-[10px] px-5 py-4" style={{ background: V4.mint }}>
+              <div className="text-[16px]" style={{ color: V4.greenDeep, fontWeight: 600 }}>
+                + {fmt(OFFER_EXAMPLE_GAIN)} kr. mere til dig
+              </div>
+              <div className="text-[12.5px] mt-1 leading-relaxed" style={{ color: V4.muted }}>
+                Sammenlignet med de {fmt(OFFER_EXAMPLE_NET)} kr., mæglervejen ville give i eksemplet.
+                Oveni slipper du for fremvisninger, bankforbehold og cirka tre måneders ventetid.
               </div>
             </div>
 

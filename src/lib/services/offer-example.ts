@@ -25,20 +25,33 @@ export const OFFER_EXAMPLE = {
   marketDiscount: 70_000,
   /** Ejerudgifter mens boligen står til salg (ca. 3 mdr.). */
   ownershipCosts: 6_000,
+  /**
+   * Vores bud i eksemplet.
+   *
+   * Bemærk sammenhængen: markedsafslaget siger, at boligen realistisk
+   * SÆLGES for 930.000 og ikke for de 1.000.000, den er sat til. Vores bud
+   * er derfor ikke en overbetaling — det er den pris, boligen reelt er
+   * værd. Sælgeren beholder blot salær og drift, som ellers forsvandt.
+   *
+   * Det er dét, der gør argumentet ærligt: vi vinder ikke ved at byde
+   * lavt, men ved at eje og udleje boligen bagefter.
+   */
+  ourOffer: 930_000,
 } as const;
 
-/**
- * Hvad sælger reelt står tilbage med efter et mæglersalg til listeprisen —
- * og dermed det niveau, vores kontanttilbud sigter mod. 854.000 kr.
- */
+/** Hvad sælger reelt står tilbage med efter et mæglersalg. 854.000 kr. */
 export const OFFER_EXAMPLE_NET =
   OFFER_EXAMPLE.listPrice -
   OFFER_EXAMPLE.brokerFee -
   OFFER_EXAMPLE.marketDiscount -
   OFFER_EXAMPLE.ownershipCosts;
 
-/** Summen af de tre poster sælger sparer. */
-export const OFFER_EXAMPLE_SAVED = OFFER_EXAMPLE.listPrice - OFFER_EXAMPLE_NET;
+/**
+ * Hvor meget MERE sælger står med ved at sælge kontant til os frem for at
+ * gå mæglervejen. 930.000 − 854.000 = 76.000 kr. Det er hele pointen med
+ * eksemplet, og derfor det tal, der skal fremhæves.
+ */
+export const OFFER_EXAMPLE_GAIN = OFFER_EXAMPLE.ourOffer - OFFER_EXAMPLE_NET;
 
 /** Ensartet kr-formattering på tværs af skærm og mail. */
 export const fmtKr = (n: number) => n.toLocaleString('da-DK');
