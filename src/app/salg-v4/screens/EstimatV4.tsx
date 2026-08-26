@@ -289,8 +289,11 @@ export function EstimatV4() {
               </p>
             </div>
 
-            {/* Gevinsten — pointen, som sin egen sætning */}
-            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.rose }}>
+            {/* Gevinsten — pointen, som sin egen sætning.
+                Grøn, ikke rose: rose er sammenligningens farve (vores kolonne
+                i tabellen), mens konklusionen skal stå i brand-grøn. De to
+                farver skiftevis giver også skærmen rytme. */}
+            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.mint }}>
               <span className="inline-flex w-9 h-9 rounded-full items-center justify-center mb-3" style={{ background: V4.green }}>
                 <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6L9 17l-5-5" />
@@ -302,7 +305,7 @@ export function EstimatV4() {
               <div className="text-[14px] sm:text-[15px] mt-2" style={{ color: V4.ink, fontWeight: 600 }}>
                 mere til dig i eksemplet
               </div>
-              <div className="text-[12.5px] mt-3 leading-relaxed max-w-sm mx-auto text-balance" style={{ color: V4.muted }}>
+              <div className="text-[12.5px] mt-3 leading-relaxed max-w-sm mx-auto text-balance" style={{ color: '#41625f' }}>
                 Mæglerens pris er højere på papiret — men efter salær, markedsafslag og
                 ventetid står du med mindre. Oveni slipper du for fremvisninger,
                 bankforbehold og cirka tre måneders salgsperiode.

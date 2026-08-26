@@ -5,13 +5,7 @@ import { db } from '@/lib/db/client';
 import { leads, leadCommunications, properties } from '@/lib/db/schema';
 import type { FunnelState } from './types';
 import { computeEstimate, type StandLevel } from '@/lib/services/price-engine';
-import {
-  OFFER_EXAMPLE,
-  OFFER_EXAMPLE_NET,
-  OFFER_EXAMPLE_GAIN,
-  NO_AUTO_OFFER,
-  fmtKr,
-} from '@/lib/services/offer-example';
+import { customerEmailHtml, escapeHtml } from '@/lib/services/customer-email';
 
 export interface SubmitResult {
   ok: boolean;
@@ -461,7 +455,15 @@ async function sendNotificationEmails(
   // Emnelinjen indeholdt før tilbuddet i kroner. Sælgeren får ikke længere
   // et auto-beregnet tal — hverken på skærmen eller her.
   const customerSubject = `Vi er i gang med din bolig — ${state.fullAddress}`;
-  const html = customerEmailHtml(state, estimate, photoCount);
+  const html = customerEmailHtml({
+    firstName: state.fullName.split(' ')[0] || 'der',
+    fullAddress: state.fullAddress,
+    phone: state.phone,
+    // Kun rigtige handler — ikke boligens egen aktive annonce
+    comparables: estimate.comparables
+      .filter((c) => !c.isCurrentListing)
+      .map((c) => ({ address: c.address, kvm: c.kvm, price: c.price, date: c.date })),
+  });
   const customerResult = await sendResendEmail(apiKey, {
     from,
     to: state.email,
@@ -535,196 +537,7 @@ async function logEmailEvent(
   }
 }
 
-function customerEmailHtml(
-  state: FunnelState,
-  estimate: Awaited<ReturnType<typeof computeEstimate>>,
-  photoCount: number,
-): string {
-  const firstName = state.fullName.split(' ')[0] || 'der';
-  const fmt = (n: number) => n.toLocaleString('da-DK');
-  // Filter comparables til ±8% af ækvivalent mægler-pris — kun dem der reelt
-  // er sammenlignelige med vores tilbud netto.
-  const equivalentBrokerPrice =
-    estimate.netForkortet.finalOffer +
-    estimate.netForkortet.minusBrokerSavings +
-    estimate.netForkortet.minusMarketDiscount +
-    estimate.netForkortet.minusOwnershipCosts;
-  const compsHtml = estimate.comparables
-    .filter((c) => !c.isCurrentListing)
-    .filter((c) => {
-      const ratio = c.price / equivalentBrokerPrice;
-      return ratio >= 0.92 && ratio <= 1.08;
-    })
-    .slice(0, 5)
-    .map(
-      (c) => `
-        <tr>
-          <td style="padding:6px 0;font-size:13px;">
-            <strong>${escapeHtml(c.address)}</strong> · ${c.kvm}m²
-            ${c.weight >= 3 ? '<span style="background:#0f172a;color:white;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:6px;">Samme EF</span>' : ''}
-          </td>
-          <td style="padding:6px 0;text-align:right;font-size:13px;">
-            <strong>${fmt(c.price)} kr</strong>
-            <span style="color:#64748b;font-size:11px;">· ${c.date?.slice(0, 7) ?? ''}</span>
-          </td>
-        </tr>
-      `,
-    )
-    .join('');
 
-  return `<!DOCTYPE html>
-<html lang="da">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dit foreløbige tilbud</title>
-</head>
-<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;">
-<div style="max-width:600px;margin:0 auto;background:white;">
-
-  <!-- Header -->
-  <div style="padding:20px;border-bottom:1px solid #e2e8f0;">
-    <div style="font-size:14px;color:#64748b;font-weight:bold;">365 EJENDOMME</div>
-  </div>
-
-  <!-- Hero -->
-  <div style="padding:32px 24px 16px;text-align:center;">
-    <p style="margin:0;color:#64748b;font-size:14px;">Hej ${escapeHtml(firstName)},</p>
-    <p style="margin:8px 0 0;color:#475569;font-size:15px;line-height:1.5;">
-      Tak fordi du brugte vores boligberegner. Vi har modtaget dine oplysninger om boligen.
-    </p>
-  </div>
-
-  <!-- Hero: ingen auto-pris — mægleren vender tilbage -->
-  <div style="margin:0 24px 24px;padding:32px 20px;background:#0f172a;border-radius:12px;text-align:center;">
-    <div style="color:#94a3b8;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Din vurdering</div>
-    <div style="color:#ffffff;font-size:22px;font-weight:bold;margin:10px 0 8px;line-height:1.35;">${escapeHtml(NO_AUTO_OFFER.heading)}</div>
-    <div style="color:#cbd5e1;font-size:14px;line-height:1.55;">${escapeHtml(NO_AUTO_OFFER.body)}</div>
-    <div style="color:#94a3b8;font-size:12px;margin-top:14px;">${escapeHtml(state.fullAddress)}</div>
-  </div>
-
-  <!-- Regneeksempel: samme tal som paa /salg-v4's estimat-skaerm -->
-  <div style="margin:0 24px 24px;border:1px solid #e2e8f0;border-radius:8px;padding:20px;">
-    <h3 style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0f172a;">
-      Vores pris vs. ejendomsmægler
-    </h3>
-    <p style="margin:0 0 12px;font-size:12px;color:#64748b;line-height:1.5;">
-      Sådan ser forskellen ud på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
-      Tallene er et eksempel og altså ikke et tilbud på din bolig.
-    </p>
-    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
-      <tr>
-        <td style="width:46%;"></td>
-        <td style="width:27%;padding:0 6px 6px;text-align:right;font-size:12px;font-weight:600;color:#64748b;">Ejendomsmægler</td>
-        <td style="width:27%;padding:0 8px 6px;text-align:right;font-size:12px;font-weight:bold;color:#0f4749;background:#e8dfde;">365 Ejendomme</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Pris på boligen</strong><br><span style="color:#94a3b8;font-size:11px;">Det beløb, boligen sættes til salg for.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.listPrice)} kr</td>
-        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Mæglersalær</strong><br><span style="color:#94a3b8;font-size:11px;">Typisk 5-7 % af salgsprisen.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.brokerFee)} kr</td>
-        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">0 kr</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Markedsafslag</strong><br><span style="color:#94a3b8;font-size:11px;">Slutprisen ligger ofte 6-8 % under listeprisen.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.marketDiscount)} kr</td>
-        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">0 kr</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 8px 10px 0;border-top:1px solid rgba(28,43,43,0.12);font-size:13px;"><strong>Drift i salgsperioden</strong><br><span style="color:#94a3b8;font-size:11px;">Ca. 3 måneders ejerudgifter imens.</span></td>
-        <td style="padding:10px 6px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;color:#64748b;white-space:nowrap;">− ${fmtKr(OFFER_EXAMPLE.ownershipCosts)} kr</td>
-        <td style="padding:10px 8px;border-top:1px solid rgba(28,43,43,0.12);text-align:right;font-size:13px;font-weight:600;color:#0f172a;background:#e8dfde;white-space:nowrap;">0 kr</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 8px 12px 0;border-top:2px solid rgba(28,43,43,0.26);font-size:14px;"><strong>Tilbage til dig</strong><br><span style="color:#94a3b8;font-size:11px;">Det du reelt står med bagefter.</span></td>
-        <td style="padding:12px 6px;border-top:2px solid rgba(28,43,43,0.26);text-align:right;font-size:15px;font-weight:600;color:#64748b;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE_NET)} kr</td>
-        <td style="padding:12px 8px;border-top:2px solid rgba(28,43,43,0.26);text-align:right;font-size:18px;font-weight:bold;color:#0f4749;background:#e8dfde;white-space:nowrap;">${fmtKr(OFFER_EXAMPLE.ourOffer)} kr</td>
-      </tr>
-    </table>
-    <div style="margin:14px 0 0;padding:14px;background:#e8dfde;border-radius:6px;text-align:center;">
-      <p style="margin:0 0 4px;font-size:19px;font-weight:bold;color:#0f4749;">
-        + ${fmtKr(OFFER_EXAMPLE_GAIN)} kr mere til dig
-      </p>
-      <p style="margin:0;font-size:12px;color:#475569;line-height:1.55;">
-        Mæglerens pris er højere på papiret — men efter salær, markedsafslag og ventetid
-        står du med mindre. Oveni slipper du for fremvisninger, bankforbehold og cirka
-        tre måneders salgsperiode.
-      </p>
-    </div>
-    <p style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9;font-size:12px;color:#64748b;">
-      Vi betaler kontant. Ingen ventetid, mæglersalær eller bank-forbehold.
-    </p>
-  </div>
-
-  ${compsHtml ? `
-  <!-- Comparables -->
-  <div style="margin:0 24px 24px;">
-    <div style="font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
-      Lokale handler i dit område
-    </div>
-    <table style="width:100%;border-collapse:collapse;">
-      ${compsHtml}
-    </table>
-    <div style="font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic;">
-      ${estimate.sampleSize} handler total · vi vægter samme ejerforening højest · data fra Vurderingsstyrelsen
-    </div>
-  </div>
-  ` : ''}
-
-  <!-- Next steps -->
-  <div style="margin:0 24px 24px;padding:20px;background:#0f172a;border-radius:8px;color:white;">
-    <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">Næste skridt</div>
-    <p style="margin:0 0 12px;font-size:13px;color:#cbd5e1;line-height:1.5;">
-      En af vores mæglere kontakter dig inden for 24 timer på <strong style="color:white;">${escapeHtml(state.phone)}</strong> med et estimat på boligen, og vi kan samtidig aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen giver vi et endeligt bindende tilbud.
-    </p>
-    <p style="margin:0;font-size:13px;color:#cbd5e1;">
-      Ring direkte: <a href="tel:+4561789071" style="color:#ffffff;text-decoration:none;font-weight:600;">+45 61 78 90 71</a><br>
-      Email: <a href="mailto:administration@365ejendom.dk" style="color:#ffffff;text-decoration:none;font-weight:600;">administration@365ejendom.dk</a>
-    </p>
-  </div>
-
-  <!-- Trust signals -->
-  <div style="padding:16px 24px;background:#f8fafc;border-top:1px solid rgba(28,43,43,0.12);text-align:center;">
-    <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">
-      Hvad du får når du sælger til os
-    </div>
-    <div style="font-size:12px;color:#475569;line-height:1.6;">
-      Kontant betaling, ingen bank-forbehold<br>
-      Vi har købt 87+ ejerlejligheder siden 2024<br>
-      Du sparer typisk 70.000 kr i mæglersalær<br>
-      Du vælger selv overtagelsesdato (14 dage til 6 mdr — som det passer dig)
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <div style="padding:24px;text-align:center;border-top:1px solid rgba(28,43,43,0.12);">
-    <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
-      Bedste hilsner,<br>
-      <strong style="color:#475569;">Jacob Lisby</strong> · 365 Ejendomme
-    </p>
-    <p style="margin:12px 0 0;font-size:11px;color:#cbd5e1;">
-      Du modtog denne email fordi du brugte vores boligberegner. Vi gemmer ikke dine data uden samtykke. Skriv til
-      <a href="mailto:administration@365ejendom.dk" style="color:#94a3b8;">administration@365ejendom.dk</a>
-      hvis du vil have dem slettet.
-    </p>
-  </div>
-
-</div>
-</body>
-</html>`;
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function labelTimeframe(v: NonNullable<FunnelState['sellTimeframe']>): string {
   return {
