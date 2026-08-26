@@ -58,6 +58,38 @@ const NAV_LINKS = [
   { label: 'Tjek din pris', href: '#hero-adresse' },
 ];
 
+/**
+ * Adressefeltet findes TO gange i DOM'en — én mobil-variant og én desktop —
+ * og den ene er altid skjult med `lg:hidden` / `hidden lg:block`.
+ *
+ * getElementById returnerer den skjulte lige så villigt som den synlige, så
+ * `getElementById('hero-adresse') ?? getElementById('hero-adresse-desktop')`
+ * ramte ALTID mobil-varianten. På desktop betød det scrollIntoView() og
+ * focus() på et display:none-element — altså ingenting. Det var derfor
+ * "Tjek din pris" ikke gjorde noget på store skærme.
+ *
+ * getClientRects().length er den pålidelige test: den er 0 for både
+ * display:none og for elementer med en skjult forfader.
+ */
+function firstVisible(...ids: string[]): HTMLElement | null {
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el && el.getClientRects().length > 0) return el;
+  }
+  return null;
+}
+
+/** Scroll til adressefeltet og sæt markøren i det — uanset skærmstørrelse. */
+function goToAddressField() {
+  firstVisible('hero-adresse', 'hero-adresse-desktop')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
+  setTimeout(() => {
+    (firstVisible('fp-address', 'fp-address-desktop') as HTMLInputElement | null)?.focus();
+  }, 600);
+}
+
 export default function Frontpage() {
   return (
     <div>
@@ -113,7 +145,19 @@ function Nav() {
 
           <nav className="hidden lg:flex items-center gap-9 text-[13.5px] text-white" style={{ fontWeight: 400 }}>
             {NAV_LINKS.map((l) => (
-              <a key={l.label} href={l.href} className="hover:opacity-75 transition-opacity">
+              <a
+                key={l.label}
+                href={l.href}
+                onClick={
+                  l.href === '#hero-adresse'
+                    ? (e) => {
+                        e.preventDefault();
+                        goToAddressField();
+                      }
+                    : undefined
+                }
+                className="hover:opacity-75 transition-opacity"
+              >
                 {l.label}
               </a>
             ))}
@@ -183,7 +227,15 @@ function Nav() {
               <a
                 key={l.label}
                 href={l.href}
-                onClick={() => setOpen(false)}
+                onClick={(e) => {
+                  setOpen(false);
+                  if (l.href === '#hero-adresse') {
+                    e.preventDefault();
+                    // Menuen skal være lukket, før vi scroller — ellers
+                    // ligger overlayet stadig over adressefeltet.
+                    setTimeout(goToAddressField, 60);
+                  }
+                }}
                 className="text-[19px] text-white"
                 style={{ fontWeight: 400 }}
               >
@@ -820,14 +872,7 @@ function StickyCta() {
       href="#hero-adresse"
       onClick={(e) => {
         e.preventDefault();
-        const target =
-          document.getElementById('hero-adresse') ??
-          document.getElementById('hero-adresse-desktop');
-        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => {
-          (document.getElementById('fp-address') ??
-            document.getElementById('fp-address-desktop'))?.focus();
-        }, 600);
+        goToAddressField();
       }}
       className="fixed bottom-5 right-4 sm:bottom-auto sm:top-24 sm:right-6 z-40 inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[13.5px] shadow-[0_12px_30px_-8px_rgba(15,71,73,0.55)]"
       style={{

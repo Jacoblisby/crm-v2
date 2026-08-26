@@ -177,26 +177,38 @@ export function EstimatV4() {
             {/* Side om side. En rigtig <table>, fordi det ER tabeldata — så
                 holder kolonnerne linje af sig selv, og skærmlæsere kobler
                 tal til den rigtige overskrift.
-                Vores kolonne har mint bund hele vejen ned, så øjet med det
-                samme ser hvilken af de to der er den gode. */}
-            <div className="overflow-x-auto -mx-1 px-1">
+
+                Vores kolonne er bevidst det eneste farvede: mint bund hele
+                vejen ned, uden at række-stregerne skærer igennem den, så den
+                læses som ét sammenhængende panel og ikke som fem celler.
+                Mæglerens tal står dæmpede — kontrasten gør arbejdet. */}
+            <div>
               <table className="w-full border-collapse">
                 <caption className="sr-only">
                   Sammenligning af salg via ejendomsmægler og kontantsalg til 365 Ejendomme
                 </caption>
                 <thead>
                   <tr>
-                    <th className="text-left align-bottom pb-2.5" />
-                    <th className="text-right align-bottom pb-2.5 px-1.5 sm:px-3">
-                      <span className="text-[10.5px] sm:text-[12.5px] block leading-tight" style={{ color: V4.muted, fontWeight: 600 }}>
-                        Ejendomsmægler
+                    <th className="text-left align-bottom pb-3" />
+                    <th className="text-right align-bottom pb-3 px-1.5 sm:px-4">
+                      <span
+                        className="text-[10px] sm:text-[11px] block leading-tight uppercase"
+                        style={{ color: V4.soft, fontWeight: 600, letterSpacing: '0.1em' }}
+                      >
+                        <span className="sm:hidden">Mægler</span>
+                        <span className="hidden sm:inline">Ejendomsmægler</span>
                       </span>
                     </th>
+                    {/* Ekstra luft foroven, så mint-panelet begynder over
+                        første talrække og virker som en flade, ikke en celle */}
                     <th
-                      className="text-right align-bottom pb-2.5 px-1.5 sm:px-3 rounded-t-[10px]"
+                      className="text-right align-bottom pt-4 pb-3 px-2 sm:px-5 rounded-t-[14px]"
                       style={{ background: V4.mint }}
                     >
-                      <span className="text-[10.5px] sm:text-[12.5px] block leading-tight" style={{ color: V4.greenDeep, fontWeight: 700 }}>
+                      <span
+                        className="text-[10px] sm:text-[11px] block leading-tight uppercase"
+                        style={{ color: V4.greenDeep, fontWeight: 700, letterSpacing: '0.1em' }}
+                      >
                         365 Ejendomme
                       </span>
                     </th>
@@ -204,66 +216,89 @@ export function EstimatV4() {
                 </thead>
                 <tbody>
                   {[
-                    ['Pris på boligen', 'Det beløb, boligen sættes til salg for.', fmt(listepris), fmt(OFFER_EXAMPLE.ourOffer)],
-                    ['Mæglersalær', 'Typisk 5–7 % af salgsprisen.', `− ${fmt(maeglerSalaer)}`, '0'],
-                    ['Markedsafslag', 'Slutprisen ligger ofte 6–8 % under listeprisen.', `− ${fmt(markedAfslag)}`, '0'],
-                    ['Drift i salgsperioden', 'Ca. 3 måneders ejerudgifter imens.', `− ${fmt(driftSalg)}`, '0'],
-                  ].map(([label, sub, maegler, os]) => (
-                    <tr key={label}>
-                      <td className="py-3 pr-3 border-t align-top" style={{ borderColor: V4.border }}>
-                        <span className="text-[12.5px] sm:text-[14.5px] block leading-tight" style={{ color: V4.ink, fontWeight: 600 }}>{label}</span>
-                        <span className="hidden sm:block text-[12.5px] mt-0.5 leading-snug" style={{ color: V4.muted }}>{sub}</span>
+                    ['Pris på boligen', 'Det beløb, boligen sættes til salg for.', fmt(listepris), fmt(OFFER_EXAMPLE.ourOffer), false],
+                    ['Mæglersalær', 'Typisk 5–7 % af salgsprisen.', `− ${fmt(maeglerSalaer)}`, 'Ingen', true],
+                    ['Markedsafslag', 'Slutprisen ligger ofte 6–8 % under listeprisen.', `− ${fmt(markedAfslag)}`, 'Ingen', true],
+                    ['Drift i salgsperioden', 'Ca. 3 måneders ejerudgifter imens.', `− ${fmt(driftSalg)}`, 'Ingen', true],
+                  ].map(([label, sub, maegler, os, erIngen]) => (
+                    <tr key={label as string}>
+                      <td className="py-4 pr-3 sm:pr-5 border-t align-top" style={{ borderColor: V4.border }}>
+                        <span className="text-[13px] sm:text-[15px] block leading-tight" style={{ color: V4.ink, fontWeight: 600 }}>
+                          {label}
+                        </span>
+                        <span className="hidden sm:block text-[12.5px] mt-1 leading-snug" style={{ color: V4.muted }}>
+                          {sub}
+                        </span>
                       </td>
                       <td
-                        className="py-3 px-1.5 sm:px-3 border-t text-right align-top text-[12px] sm:text-[14.5px] tabular-nums whitespace-nowrap"
-                        style={{ borderColor: V4.border, color: V4.muted }}
+                        className="py-4 px-1.5 sm:px-4 border-t text-right align-top text-[13px] sm:text-[15.5px] tabular-nums whitespace-nowrap"
+                        style={{ borderColor: V4.border, color: V4.soft, fontWeight: 500 }}
                       >
                         {maegler}<span className="hidden sm:inline"> kr.</span>
                       </td>
+                      {/* Ingen border-t her — stregen ville skære panelet i stykker */}
                       <td
-                        className="py-3 px-1.5 sm:px-3 text-right align-top text-[12px] sm:text-[14.5px] tabular-nums whitespace-nowrap"
-                        style={{ background: V4.mint, color: V4.ink, fontWeight: 500 }}
+                        className="py-4 px-2 sm:px-5 text-right align-top text-[13px] sm:text-[15.5px] tabular-nums whitespace-nowrap"
+                        style={{
+                          background: V4.mint,
+                          color: erIngen ? V4.greenDeep : V4.ink,
+                          fontWeight: erIngen ? 600 : 500,
+                        }}
                       >
-                        {os}<span className="hidden sm:inline"> kr.</span>
+                        {os}
+                        {!erIngen && <span className="hidden sm:inline"> kr.</span>}
                       </td>
                     </tr>
                   ))}
                   {/* Bundlinjen — dét hele handler om */}
                   <tr>
-                    <td className="py-4 pr-3 border-t-2 align-top" style={{ borderColor: '#c9cfcc' }}>
-                      <span className="text-[14px] sm:text-[15px] block" style={{ color: V4.ink, fontWeight: 700 }}>Tilbage til dig</span>
-                      <span className="hidden sm:block text-[12.5px] mt-0.5 leading-snug" style={{ color: V4.muted }}>
+                    <td className="pt-5 pb-6 pr-3 sm:pr-5 border-t-2 align-top" style={{ borderColor: '#bcc7c4' }}>
+                      <span className="text-[14px] sm:text-[16px] block leading-tight" style={{ color: V4.ink, fontWeight: 700 }}>
+                        Tilbage til dig
+                      </span>
+                      <span className="hidden sm:block text-[12.5px] mt-1 leading-snug" style={{ color: V4.muted }}>
                         Det du reelt står med bagefter.
                       </span>
                     </td>
                     <td
-                      className="py-4 px-1.5 sm:px-3 border-t-2 text-right align-top text-[13px] sm:text-[16px] tabular-nums whitespace-nowrap"
-                      style={{ borderColor: '#c9cfcc', color: V4.muted, fontWeight: 600 }}
+                      className="pt-5 pb-6 px-1.5 sm:px-4 border-t-2 text-right align-top text-[14px] sm:text-[17px] tabular-nums whitespace-nowrap"
+                      style={{ borderColor: '#bcc7c4', color: V4.soft, fontWeight: 600 }}
                     >
                       {fmt(OFFER_EXAMPLE_NET)}<span className="hidden sm:inline"> kr.</span>
                     </td>
                     <td
-                      className="py-4 px-1.5 sm:px-3 text-right align-top text-[15px] sm:text-[20px] tabular-nums whitespace-nowrap rounded-b-[10px]"
-                      style={{ background: V4.mint, color: V4.greenDeep, fontWeight: 700 }}
+                      className="pt-5 pb-6 px-2 sm:px-5 text-right align-top rounded-b-[14px]"
+                      style={{ background: V4.mint }}
                     >
-                      {fmt(OFFER_EXAMPLE.ourOffer)}<span className="hidden sm:inline"> kr.</span>
+                      <span
+                        className="block text-[17px] sm:text-[26px] leading-none tabular-nums whitespace-nowrap"
+                        style={{ color: V4.greenDeep, fontWeight: 700 }}
+                      >
+                        {fmt(OFFER_EXAMPLE.ourOffer)}<span className="hidden sm:inline"> kr.</span>
+                      </span>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              {/* Enheden står kun her på mobil — i cellerne kostede den den
-                  plads, label-kolonnen havde brug for. */}
-              <p className="sm:hidden text-[11px] pt-2 text-right" style={{ color: V4.soft }}>
+              <p className="sm:hidden text-[11px] pt-2.5 text-right" style={{ color: V4.soft }}>
                 Alle beløb i kr.
               </p>
             </div>
 
-            {/* Gevinsten — pointen med hele eksemplet */}
-            <div className="rounded-[10px] px-5 py-4 text-center" style={{ background: V4.mint }}>
-              <div className="text-[19px] sm:text-[22px]" style={{ color: V4.greenDeep, fontWeight: 700 }}>
-                + {fmt(OFFER_EXAMPLE_GAIN)} kr. mere til dig
+            {/* Gevinsten — pointen, som sin egen sætning */}
+            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.mint }}>
+              <span className="inline-flex w-9 h-9 rounded-full items-center justify-center mb-3" style={{ background: V4.green }}>
+                <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </span>
+              <div className="text-[24px] sm:text-[30px] leading-none tabular-nums" style={{ color: V4.greenDeep, fontWeight: 700 }}>
+                + {fmt(OFFER_EXAMPLE_GAIN)} kr.
               </div>
-              <div className="text-[12.5px] mt-1.5 leading-relaxed max-w-md mx-auto" style={{ color: V4.muted }}>
+              <div className="text-[14px] sm:text-[15px] mt-2" style={{ color: V4.ink, fontWeight: 600 }}>
+                mere til dig i eksemplet
+              </div>
+              <div className="text-[12.5px] mt-3 leading-relaxed max-w-sm mx-auto text-balance" style={{ color: V4.muted }}>
                 Mæglerens pris er højere på papiret — men efter salær, markedsafslag og
                 ventetid står du med mindre. Oveni slipper du for fremvisninger,
                 bankforbehold og cirka tre måneders salgsperiode.
