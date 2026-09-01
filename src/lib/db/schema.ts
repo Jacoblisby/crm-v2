@@ -62,10 +62,45 @@ export const housingAssociations = pgTable(
     postalCode: text('postal_code'),
     city: text('city'),
     notes: text('notes'),
+
+    // ── Opkøbs-tragt ────────────────────────────────────────────────────
+    // Flyttet ind fra "Ejerforeninger breve Status"-arket. Tallene lå før i
+    // hånden i et regneark, hvor de blev forældede uden at nogen opdagede
+    // det: "vi ejer" stod til 42, mens det reelle tal var 69.
+
+    /** Samlet antal enheder i foreningen (BBR). */
+    unitCount: integer('unit_count'),
+    /** Mindste/største lejlighedsstørrelse — til at vurdere om foreningen
+     *  overhovedet rammer det, vi køber. */
+    kvmFrom: integer('kvm_from'),
+    kvmTo: integer('kvm_to'),
+    /**
+     * Hvor langt vi er med foreningen.
+     *   'maalgruppe'  — vi vil købe her, breve er sendt eller på vej
+     *   'undersoeges' — ikke besluttet endnu
+     *   'fravalgt'    — for dyr, for lille by, enheder for store
+     */
+    status: text('status').notNull().default('undersoeges'),
+    /** Hvorfor den er fravalgt eller under undersøgelse (fra arkets kolonne). */
+    statusReason: text('status_reason'),
+    /** Antal brevrunder sendt til foreningen. */
+    letterRounds: integer('letter_rounds').notNull().default(0),
+    /** Hvor mange enheder i foreningen vi ejer. */
+    ownedCount: integer('owned_count').notNull().default(0),
+    /**
+     * Hvornår unitCount/ownedCount sidst blev genberegnet fra kilden.
+     * Findes fordi regnearket manglede præcis dette: "vi ejer 42" var
+     * 27 forkert, og ingen kunne se hvor gammelt tallet var.
+     */
+    dataUpdatedAt: timestamp('data_updated_at', { withTimezone: true }),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('housing_associations_name_idx').on(t.name)],
+  (t) => [
+    uniqueIndex('housing_associations_name_idx').on(t.name),
+    index('housing_associations_status_idx').on(t.status),
+  ],
 );
 
 export const properties = pgTable(
