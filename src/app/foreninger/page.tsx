@@ -8,9 +8,9 @@
  * hen. Kildemarksvænget giver 20 %, Benløseparken 0,5 %, og Benløseparken er
  * den, der fylder mest i portoen.
  */
-import { desc, sql } from 'drizzle-orm';
+import { and, desc, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { housingAssociations } from '@/lib/db/schema';
+import { housingAssociations, leads } from '@/lib/db/schema';
 import { MainHeader } from '@/components/MainHeader';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +37,17 @@ export default async function ForeningerPage() {
     dbFejl = err instanceof Error ? err.message : String(err);
   }
 
-  return <ForeningerView raekker={raekker} dbFejl={dbFejl} />;
+  // Leads fra boligberegneren — tragtens næstsidste niveau
+  let beregnerLeads = 0;
+  try {
+    const [r] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(leads)
+      .where(and(isNull(leads.deletedAt), sql`${leads.source} LIKE 'boligberegner%'`));
+    beregnerLeads = r?.n ?? 0;
+  } catch {}
+
+  return <ForeningerView raekker={raekker} dbFejl={dbFejl} beregnerLeads={beregnerLeads} />;
 }
 
 async function hentForeninger() {
@@ -71,24 +81,119 @@ async function hentForeninger() {
 
 type Raekke = Awaited<ReturnType<typeof hentForeninger>>[number];
 
-function ForeningerView({ raekker, dbFejl }: { raekker: Raekke[]; dbFejl: string | null }) {
+function ForeningerView({
+  raekker, dbFejl, beregnerLeads,
+}: { raekker: Raekke[]; dbFejl: string | null; beregnerLeads: number }) {
   const maal = raekker.filter((r) => r.status === 'maalgruppe');
   const enheder = maal.reduce((s, r) => s + (r.unitCount ?? 0), 0);
   const ejet = maal.reduce((s, r) => s + r.ownedCount, 0);
   const senest = raekker.map((r) => r.dataUpdatedAt).filter(Boolean).sort().pop() ?? null;
+
+  const alleEnheder = raekker.reduce((s, r) => s + (r.unitCount ?? 0), 0);
+  const brevEnheder = raekker
+    .filter((r) => r.letterRounds > 0)
+    .reduce((s, r) => s + (r.unitCount ?? 0), 0);
+
+  /**
+   * Tragten. Hvert niveau er en indsnævring af det forrige.
+   *
+   * `maalt: false` betyder, at tallet ikke kan udregnes fra data endnu — og
+   * det vises som et hul frem for at blive skjult. Tragten fungerer dermed
+   * også som et kort over, hvad der mangler at blive registreret: kan et
+   * niveau ikke måles, kan man heller ikke styre efter det.
+   */
+  const trin: { navn: string; antal: number | null; note: string; maalt: boolean }[] = [
+    { navn: 'Enheder i alle foreninger', antal: alleEnheder, maalt: true,
+      note: `${raekker.length} foreninger i registret` },
+    { navn: 'I foreninger vi vil købe i', antal: enheder, maalt: true,
+      note: `${maal.length} foreninger med status målgruppe` },
+    { navn: 'I størrelsen vi køber (20–80 kvm)', antal: null, maalt: false,
+      note: 'Kræver kvm pr. lejlighed — haves kun for dem vi ejer' },
+    { navn: 'Har fået brev', antal: brevEnheder, maalt: true,
+      note: 'Enheder i foreninger med mindst én brevrunde' },
+    { navn: 'Har brugt boligberegneren', antal: beregnerLeads, maalt: true,
+      note: beregnerLeads === 0 ? 'Ingen endnu — beregneren er lige gået i luften' : 'Leads fra beregneren' },
+    { navn: 'Købt', antal: ejet, maalt: true,
+      note: 'Købt gennem den hidtidige proces, ikke gennem beregneren' },
+  ];
+  const top = trin[0].antal || 1;
 
   return (
     <div className="min-h-screen bg-slate-50">
       <MainHeader />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <header className="mb-6">
-          <h1 className="text-2xl font-semibold text-slate-900">Ejerforeninger</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">Opkøbs-tragt</h1>
           <p className="text-sm text-slate-500 mt-1">
             {raekker.length} foreninger · {maal.length} i målgruppen med {enheder.toLocaleString('da-DK')} enheder,
             hvoraf vi ejer {ejet} ({enheder ? ((100 * ejet) / enheder).toFixed(1) : '0'} %)
             · tal opdateret {fmtDato(senest as Date | null)}
           </p>
         </header>
+
+        {/* ── Tragten ─────────────────────────────────────────────────
+            Selve pointen med siden: indsnævringen fra alle enheder ned til
+            dem vi har købt. Tabellen nedenfor er detaljen bag. */}
+        {!dbFejl && raekker.length > 0 && (
+          <section className="bg-white rounded-lg border border-slate-200 p-5 sm:p-6 mb-6">
+            <div className="flex items-baseline justify-between flex-wrap gap-2 mb-5">
+              <h2 className="font-semibold text-slate-900">Opkøbs-tragten</h2>
+              <p className="text-xs text-slate-500">
+                Hvert trin er en indsnævring af det forrige · procent viser frafald
+              </p>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {trin.map((t, i) => {
+                const forrige = i > 0 ? trin.slice(0, i).reverse().find((x) => x.antal !== null) : null;
+                const andelAfTop = t.antal !== null ? (100 * t.antal) / top : 0;
+                const andelAfForrige =
+                  t.antal !== null && forrige?.antal ? (100 * t.antal) / forrige.antal : null;
+                return (
+                  <div key={t.navn} className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-6 text-[11px] font-semibold text-slate-400 tabular-nums">{i + 1}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-3 mb-1">
+                        <span className="text-sm font-medium text-slate-900 truncate">{t.navn}</span>
+                        <span className="text-sm tabular-nums font-semibold text-slate-900 shrink-0">
+                          {t.maalt ? (t.antal ?? 0).toLocaleString('da-DK') : '—'}
+                        </span>
+                      </div>
+                      {/* Bjælken er bredden i forhold til øverste trin */}
+                      <div className="h-6 rounded bg-slate-100 overflow-hidden relative">
+                        {t.maalt ? (
+                          <div
+                            className="h-full rounded transition-all"
+                            style={{
+                              width: `${Math.max(andelAfTop, t.antal ? 1.5 : 0)}%`,
+                              background: i === trin.length - 1 ? '#145d5f' : '#7fb0aa',
+                            }}
+                          />
+                        ) : (
+                          <div className="h-full w-full rounded border border-dashed border-slate-300 bg-slate-50" />
+                        )}
+                      </div>
+                      <div className="flex items-baseline justify-between gap-3 mt-1">
+                        <span className={`text-xs ${t.maalt ? 'text-slate-500' : 'text-amber-700'}`}>
+                          {t.maalt ? t.note : `Ikke målt — ${t.note}`}
+                        </span>
+                        {andelAfForrige !== null && (
+                          <span className="text-xs tabular-nums text-slate-400 shrink-0">
+                            {andelAfForrige.toFixed(1)} % af forrige
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-slate-500 mt-5 pt-4 border-t border-slate-100 max-w-2xl leading-relaxed">
+              De {ejet} købte kom gennem den hidtidige proces — brev, opkald og personlig kontakt —
+              ikke gennem boligberegneren, som først lige er sat i luften. Trin 5 er derfor nul i dag,
+              og det er dét tal, brev- og mailflowet skal flytte.
+            </p>
+          </section>
+        )}
 
         {dbFejl ? (
           <div className="bg-white rounded-lg border border-amber-300 p-6">
