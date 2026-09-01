@@ -102,7 +102,11 @@ function ForeningerView({
    * også som et kort over, hvad der mangler at blive registreret: kan et
    * niveau ikke måles, kan man heller ikke styre efter det.
    */
-  const trin: { navn: string; antal: number | null; note: string; maalt: boolean }[] = [
+  const trin: {
+    navn: string; antal: number | null; note: string; maalt: boolean;
+    /** Hvilket trin procenten skal måles mod. Udeladt = trinnet lige over. */
+    basisTrin?: number;
+  }[] = [
     { navn: 'Enheder i alle foreninger', antal: alleEnheder, maalt: true,
       note: `${raekker.length} foreninger i registret` },
     { navn: 'I foreninger vi vil købe i', antal: enheder, maalt: true,
@@ -112,9 +116,14 @@ function ForeningerView({
     { navn: 'Har fået brev', antal: brevEnheder, maalt: true,
       note: 'Enheder i foreninger med mindst én brevrunde' },
     { navn: 'Har brugt boligberegneren', antal: beregnerLeads, maalt: true,
-      note: beregnerLeads === 0 ? 'Ingen endnu — beregneren er lige gået i luften' : 'Leads fra beregneren' },
-    { navn: 'Købt', antal: ejet, maalt: true,
-      note: 'Købt gennem den hidtidige proces, ikke gennem beregneren' },
+      note: beregnerLeads === 0
+        ? 'Ingen endnu — beregneren er lige gået i luften'
+        : 'OBS: tallet indeholder testindsendelser fra udviklingen' },
+    // Måles mod trin 2, ikke mod trin 5: de købte kom IKKE gennem beregneren,
+    // så "procent af forrige" ville sammenligne to urelaterede tal — og gav
+    // 197 %, hvilket er tydeligt forkert.
+    { navn: 'Købt', antal: ejet, maalt: true, basisTrin: 1,
+      note: 'Købt gennem brev og opkald — ikke gennem beregneren' },
   ];
   const top = trin[0].antal || 1;
 
@@ -144,10 +153,15 @@ function ForeningerView({
             </div>
             <div className="flex flex-col gap-2.5">
               {trin.map((t, i) => {
-                const forrige = i > 0 ? trin.slice(0, i).reverse().find((x) => x.antal !== null) : null;
+                const basis =
+                  t.basisTrin !== undefined
+                    ? trin[t.basisTrin]
+                    : i > 0
+                      ? trin.slice(0, i).reverse().find((x) => x.antal !== null)
+                      : null;
                 const andelAfTop = t.antal !== null ? (100 * t.antal) / top : 0;
-                const andelAfForrige =
-                  t.antal !== null && forrige?.antal ? (100 * t.antal) / forrige.antal : null;
+                const andelAfBasis =
+                  t.antal !== null && basis?.antal ? (100 * t.antal) / basis.antal : null;
                 return (
                   <div key={t.navn} className="flex items-center gap-3 sm:gap-4">
                     <div className="w-6 text-[11px] font-semibold text-slate-400 tabular-nums">{i + 1}</div>
@@ -176,9 +190,10 @@ function ForeningerView({
                         <span className={`text-xs ${t.maalt ? 'text-slate-500' : 'text-amber-700'}`}>
                           {t.maalt ? t.note : `Ikke målt — ${t.note}`}
                         </span>
-                        {andelAfForrige !== null && (
+                        {andelAfBasis !== null && basis && (
                           <span className="text-xs tabular-nums text-slate-400 shrink-0">
-                            {andelAfForrige.toFixed(1)} % af forrige
+                            {andelAfBasis.toFixed(1)} % af{' '}
+                            {t.basisTrin !== undefined ? `«${basis.navn.toLowerCase()}»` : 'forrige'}
                           </span>
                         )}
                       </div>
