@@ -40,6 +40,27 @@ const MIGRATIONS: Record<string, () => Promise<void>> = {
         WHERE slug = 'tilbud-afgivet' AND (sla_days IS NULL OR sla_days = 0);
     `);
   },
+  '0007_foreninger_tragt': async () => {
+    // Opkøbs-tragten flyttet fra regnearket "Ejerforeninger breve Status".
+    // ownedCount og unitCount genberegnes af /api/admin/seed-foreninger ved
+    // hver kørsel; data_updated_at viser hvor gamle tallene er — netop dét
+    // regnearket manglede, da "vi ejer 42" var 27 for lavt.
+    await db.execute(sql`
+      ALTER TABLE "housing_associations"
+      ADD COLUMN IF NOT EXISTS "unit_count" integer,
+      ADD COLUMN IF NOT EXISTS "kvm_from" integer,
+      ADD COLUMN IF NOT EXISTS "kvm_to" integer,
+      ADD COLUMN IF NOT EXISTS "status" text NOT NULL DEFAULT 'undersoeges',
+      ADD COLUMN IF NOT EXISTS "status_reason" text,
+      ADD COLUMN IF NOT EXISTS "letter_rounds" integer NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "owned_count" integer NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "data_updated_at" timestamp with time zone
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS "housing_associations_status_idx"
+        ON "housing_associations" ("status")
+    `);
+  },
 };
 
 export async function POST(req: NextRequest) {

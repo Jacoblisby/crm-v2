@@ -27,7 +27,21 @@ function fmtDato(d: Date | null) {
 }
 
 export default async function ForeningerPage() {
-  const raekker = await db
+  // Kolonnerne kommer fra migrering 0007. Kører siden før den er kørt, fejler
+  // forespørgslen — og en 500-side siger ingenting om hvad man skal gøre.
+  let raekker: Awaited<ReturnType<typeof hentForeninger>> = [];
+  let dbFejl: string | null = null;
+  try {
+    raekker = await hentForeninger();
+  } catch (err) {
+    dbFejl = err instanceof Error ? err.message : String(err);
+  }
+
+  return <ForeningerView raekker={raekker} dbFejl={dbFejl} />;
+}
+
+async function hentForeninger() {
+  return db
     .select({
       id: housingAssociations.id,
       name: housingAssociations.name,
@@ -53,6 +67,11 @@ export default async function ForeningerPage() {
       THEN 100.0 * ${housingAssociations.ownedCount} / ${housingAssociations.unitCount}
       ELSE -1 END`));
 
+}
+
+type Raekke = Awaited<ReturnType<typeof hentForeninger>>[number];
+
+function ForeningerView({ raekker, dbFejl }: { raekker: Raekke[]; dbFejl: string | null }) {
   const maal = raekker.filter((r) => r.status === 'maalgruppe');
   const enheder = maal.reduce((s, r) => s + (r.unitCount ?? 0), 0);
   const ejet = maal.reduce((s, r) => s + r.ownedCount, 0);
@@ -71,7 +90,16 @@ export default async function ForeningerPage() {
           </p>
         </header>
 
-        {raekker.length === 0 ? (
+        {dbFejl ? (
+          <div className="bg-white rounded-lg border border-amber-300 p-6">
+            <h2 className="font-semibold text-slate-900 mb-1">Databasen mangler kolonnerne</h2>
+            <p className="text-sm text-slate-600 mb-3">
+              Kør migrering <code className="bg-slate-100 px-1.5 py-0.5 rounded">0007_foreninger_tragt</code> og
+              derefter <code className="bg-slate-100 px-1.5 py-0.5 rounded">/api/admin/seed-foreninger</code>.
+            </p>
+            <pre className="text-xs bg-slate-50 border border-slate-200 rounded p-3 overflow-x-auto text-slate-600">{dbFejl}</pre>
+          </div>
+        ) : raekker.length === 0 ? (
           <div className="bg-white rounded-lg border border-slate-200 p-8 text-center">
             <p className="text-slate-600 text-sm">
               Ingen foreninger indlæst endnu. Kør <code className="bg-slate-100 px-1.5 py-0.5 rounded">POST /api/admin/seed-foreninger</code> for
