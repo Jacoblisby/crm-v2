@@ -88,6 +88,30 @@ function ForeningerView({
   const ejet = maal.reduce((s, r) => s + r.ownedCount, 0);
   const senest = raekker.map((r) => r.dataUpdatedAt).filter(Boolean).sort().pop() ?? null;
 
+  /**
+   * Trin 3 kunne ikke måles, fordi kvm pr. lejlighed kun findes for de 105 vi
+   * ejer (Resights-eksporten). De 2.093 BFE i de øvrige foreninger er bare
+   * tal — ingen adresse, ingen kvm.
+   *
+   * Men hver forening har et kvm-SPÆND for hele ejendommen, og det rækker
+   * længere end ingenting: ligger hele spændet inde i 20-80, kvalificerer
+   * hver eneste lejlighed i huset. Krydser spændet grænsen, ved vi det ikke.
+   *
+   * Det giver et gulv frem for en tankestreg: «mindst N», med resten markeret
+   * som uafklaret. Et gulv kan man handle på — en tankestreg kan man ikke.
+   */
+  const KVM_FRA = 20;
+  const KVM_TIL = 80;
+  const heltIndenfor = (r: Raekke) =>
+    r.kvmFrom !== null && r.kvmTo !== null && r.kvmFrom >= KVM_FRA && r.kvmTo <= KVM_TIL;
+  const heltUdenfor = (r: Raekke) =>
+    r.kvmFrom !== null && r.kvmTo !== null && (r.kvmTo < KVM_FRA || r.kvmFrom > KVM_TIL);
+
+  const kvmSikre = maal.filter(heltIndenfor);
+  const kvmUafklarede = maal.filter((r) => !heltIndenfor(r) && !heltUdenfor(r));
+  const kvmSikreEnheder = kvmSikre.reduce((s, r) => s + (r.unitCount ?? 0), 0);
+  const kvmUafklaredeEnheder = kvmUafklarede.reduce((s, r) => s + (r.unitCount ?? 0), 0);
+
   const alleEnheder = raekker.reduce((s, r) => s + (r.unitCount ?? 0), 0);
   const brevEnheder = raekker
     .filter((r) => r.letterRounds > 0)
@@ -105,13 +129,21 @@ function ForeningerView({
     navn: string; antal: number | null; note: string; maalt: boolean;
     /** Hvilket trin procenten skal måles mod. Udeladt = trinnet lige over. */
     basisTrin?: number;
+    /**
+     * Enheder der MÅSKE hører til trinnet, men som data ikke kan afgøre.
+     * Vises som skraveret forlængelse af bjælken, og gør `antal` til et gulv.
+     */
+    usikre?: number;
   }[] = [
     { navn: 'Enheder i alle foreninger', antal: alleEnheder, maalt: true,
       note: `${raekker.length} foreninger i registret` },
     { navn: 'I foreninger vi vil købe i', antal: enheder, maalt: true,
       note: `${maal.length} foreninger med status målgruppe` },
-    { navn: 'I størrelsen vi køber (20–80 kvm)', antal: null, maalt: false,
-      note: 'Kræver kvm pr. lejlighed — haves kun for dem vi ejer' },
+    { navn: 'I størrelsen vi køber (20–80 kvm)', antal: kvmSikreEnheder, maalt: true,
+      usikre: kvmUafklaredeEnheder,
+      note: `${kvmSikre.length} foreninger hvor hele kvm-spændet ligger i 20–80 · `
+        + `${kvmUafklarede.length} foreninger (${kvmUafklaredeEnheder.toLocaleString('da-DK')} enheder) `
+        + 'krydser grænsen — kræver kvm pr. lejlighed' },
     { navn: 'Har fået brev', antal: brevEnheder, maalt: true,
       note: 'Enheder i foreninger med mindst én brevrunde' },
     { navn: 'Har brugt boligberegneren', antal: beregnerLeads, maalt: true,
@@ -166,19 +198,42 @@ function ForeningerView({
                       <div className="flex items-baseline justify-between gap-3 mb-1">
                         <span className="text-sm font-medium text-slate-900 truncate">{t.navn}</span>
                         <span className="text-sm tabular-nums font-semibold text-slate-900 shrink-0">
-                          {t.maalt ? (t.antal ?? 0).toLocaleString('da-DK') : '—'}
+                          {t.maalt ? (
+                            <>
+                              {t.usikre ? <span className="text-slate-400 font-normal">mindst </span> : null}
+                              {(t.antal ?? 0).toLocaleString('da-DK')}
+                            </>
+                          ) : (
+                            '—'
+                          )}
                         </span>
                       </div>
                       {/* Bjælken er bredden i forhold til øverste trin */}
                       <div className="h-6 rounded bg-slate-100 overflow-hidden relative">
                         {t.maalt ? (
-                          <div
-                            className="h-full rounded transition-all"
-                            style={{
-                              width: `${Math.max(andelAfTop, t.antal ? 1.5 : 0)}%`,
-                              background: i === trin.length - 1 ? '#145d5f' : '#7fb0aa',
-                            }}
-                          />
+                          // Det sikre gulv i fuld farve, det uafklarede skraveret
+                          // ved siden af. Skraveringen siger «kan række hertil»
+                          // uden at påstå at den gør.
+                          <div className="flex h-full">
+                            <div
+                              className="h-full rounded transition-all"
+                              style={{
+                                width: `${Math.max(andelAfTop, t.antal ? 1.5 : 0)}%`,
+                                background: i === trin.length - 1 ? '#145d5f' : '#7fb0aa',
+                              }}
+                            />
+                            {t.usikre ? (
+                              <div
+                                className="h-full rounded transition-all"
+                                title={`${t.usikre.toLocaleString('da-DK')} enheder hvor kvm-spændet krydser grænsen`}
+                                style={{
+                                  width: `${(100 * t.usikre) / top}%`,
+                                  background:
+                                    'repeating-linear-gradient(45deg,#cfe0dd 0 5px,#eef4f3 5px 10px)',
+                                }}
+                              />
+                            ) : null}
+                          </div>
                         ) : (
                           <div className="h-full w-full rounded border border-dashed border-slate-300 bg-slate-50" />
                         )}
@@ -189,7 +244,7 @@ function ForeningerView({
                         </span>
                         {andelAfBasis !== null && basis && (
                           <span className="text-xs tabular-nums text-slate-400 shrink-0">
-                            {andelAfBasis.toFixed(1)} % af{' '}
+                            {t.usikre ? 'mindst ' : ''}{andelAfBasis.toFixed(1)} % af{' '}
                             {t.basisTrin !== undefined ? `«${basis.navn.toLowerCase()}»` : 'forrige'}
                           </span>
                         )}
@@ -201,8 +256,12 @@ function ForeningerView({
             </div>
             <p className="text-xs text-slate-500 mt-5 pt-4 border-t border-slate-100 max-w-2xl leading-relaxed">
               De {ejet} købte kom gennem den hidtidige proces — brev, opkald og personlig kontakt —
-              ikke gennem boligberegneren, som først lige er sat i luften. Trin 5 er derfor nul i dag,
-              og det er dét tal, brev- og mailflowet skal flytte.
+              ikke gennem boligberegneren, som først lige er sat i luften. Trin 5 er derfor reelt
+              tomt, og det er dét tal, brev- og mailflowet skal flytte. Trin 3 viser et gulv:{' '}
+              {kvmSikreEnheder.toLocaleString('da-DK')} enheder ligger i foreninger hvor hele
+              kvm-spændet er 20–80, så hver lejlighed tæller. Det skraverede felt er de{' '}
+              {kvmUafklaredeEnheder.toLocaleString('da-DK')} enheder i foreninger hvor spændet
+              krydser grænsen — dem kan kun kvm pr. lejlighed afgøre.
             </p>
           </section>
         )}
