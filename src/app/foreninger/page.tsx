@@ -186,7 +186,11 @@ function ForeningerView({
                   t.basisTrin !== undefined
                     ? trin[t.basisTrin]
                     : i > 0
-                      ? trin.slice(0, i).reverse().find((x) => x.antal !== null)
+                      ? // Et trin der kun er et GULV (har `usikre`) duer ikke som
+                        // nævner: brevene gik til alle 2.037, ikke kun til de 538
+                        // vi kan bekræfte størrelsen på, og «378 % af forrige» er
+                        // ikke frafald — det er en forkert nævner.
+                        trin.slice(0, i).reverse().find((x) => x.antal !== null && !x.usikre)
                       : null;
                 const andelAfTop = t.antal !== null ? (100 * t.antal) / top : 0;
                 const andelAfBasis =
