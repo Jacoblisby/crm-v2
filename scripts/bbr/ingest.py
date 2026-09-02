@@ -101,6 +101,10 @@ def laes_ejendom(sti):
             # teksten gør: alt der ikke starter med "Bolig" er kontor, værksted,
             # garage, kælder eller lignende — og skal ikke tælle som lejlighed.
             'erBolig': anv.startswith('Bolig'),
+            # BBR fører også lejligheder der endnu ikke findes: «Projekteret»
+            # og «Under opførelse», med 0 kvm og tom anvendelse. De må hverken
+            # tælle som boliger eller som garager — de er ikke bygget endnu.
+            'erOpfoert': _tekst(r[ix['status']]).startswith('Opført') if ix['status'] is not None else True,
             'kvm': kvm if isinstance(kvm, (int, float)) else None,
             'kvmBeboelse': r[ix['kvmbeb']] if ix['kvmbeb'] is not None else None,
             'vaerelser': r[ix['vaer']] if ix['vaer'] is not None else None,
@@ -144,24 +148,27 @@ def main():
         set_bfe.add(e['bfe'])
         ejendomme.append(e)
 
-    print(f"\n{'ejendom':40} {'BFE':>9} {'enh':>4} {'bolig':>6} {'andet':>6} "
+    print(f"\n{'ejendom':40} {'BFE':>9} {'enh':>4} {'bolig':>6} {'andet':>6} {'ubygget':>7} "
           f"{'i 20-80':>8} {'i 30-80':>8}  spænd")
-    print('-' * 104)
-    sum_ = dict(enh=0, bolig=0, andet=0, m20=0, m30=0)
+    print('-' * 112)
+    sum_ = dict(enh=0, bolig=0, andet=0, ubygget=0, m20=0, m30=0)
     for e in ejendomme:
-        b = [u for u in e['enheder'] if u['erBolig'] and u['kvm']]
-        a = [u for u in e['enheder'] if not u['erBolig']]
+        b = [u for u in e['enheder'] if u['erBolig'] and u['erOpfoert'] and u['kvm']]
+        a = [u for u in e['enheder'] if not u['erBolig'] and u['erOpfoert']]
+        ub = [u for u in e['enheder'] if not u['erOpfoert']]
         m20 = sum(1 for u in b if KVM_FRA <= u['kvm'] <= KVM_TIL)
         m30 = sum(1 for u in b if 30 <= u['kvm'] <= KVM_TIL)
         sp = f"{min(u['kvm'] for u in b):g}-{max(u['kvm'] for u in b):g}" if b else '—'
         navn = (e['link'].split('/')[-2] if e['link'].count('/') > 3 else e['fil'])[:40]
         print(f"{navn:40} {str(e['bfe']):>9} {len(e['enheder']):4} {len(b):6} "
-              f"{len(a):6} {m20:8} {m30:8}  {sp}")
+              f"{len(a):6} {len(ub):7} {m20:8} {m30:8}  {sp}")
         sum_['enh'] += len(e['enheder']); sum_['bolig'] += len(b)
-        sum_['andet'] += len(a); sum_['m20'] += m20; sum_['m30'] += m30
-    print('-' * 104)
+        sum_['andet'] += len(a); sum_['ubygget'] += len(ub)
+        sum_['m20'] += m20; sum_['m30'] += m30
+    print('-' * 112)
     print(f"{'I ALT — ' + str(len(ejendomme)) + ' ejendomme':40} {'':>9} "
-          f"{sum_['enh']:4} {sum_['bolig']:6} {sum_['andet']:6} {sum_['m20']:8} {sum_['m30']:8}")
+          f"{sum_['enh']:4} {sum_['bolig']:6} {sum_['andet']:6} {sum_['ubygget']:7} "
+          f"{sum_['m20']:8} {sum_['m30']:8}")
 
     if ud:
         alle = [u for e in ejendomme for u in e['enheder']]
