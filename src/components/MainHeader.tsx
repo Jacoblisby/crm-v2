@@ -3,6 +3,19 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+/**
+ * Menupunkterne ét sted. Tilføjes en side uden at komme herind, findes den
+ * kun af den der kender adressen — sådan gik det for /foreninger.
+ */
+const NAV = [
+  { href: '/', label: 'Inbox' },
+  { href: '/pipeline', label: 'Pipeline' },
+  { href: '/foreninger', label: 'Foreninger' },
+  { href: '/buy-list', label: 'Buy List' },
+  { href: '/on-market', label: 'On-market' },
+  { href: '/off-market', label: 'Off-market' },
+] as const;
+
 export function MainHeader() {
   const pathname = usePathname();
   // Auto-skjul CRM-nav på public funnel-routes + design-prototyper
@@ -18,21 +31,26 @@ export function MainHeader() {
           365 <span className="text-slate-400">Ejendomme</span>
         </Link>
         <nav className="flex gap-1 text-sm overflow-x-auto -mx-2 px-2">
-          <Link href="/" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
-            Inbox
-          </Link>
-          <Link href="/pipeline" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
-            Pipeline
-          </Link>
-          <Link href="/buy-list" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
-            Buy List
-          </Link>
-          <Link href="/on-market" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
-            On-market
-          </Link>
-          <Link href="/off-market" className="px-3 py-1.5 rounded hover:bg-slate-100 whitespace-nowrap">
-            Off-market
-          </Link>
+          {NAV.map((n) => {
+            // Præcis match for forsiden, præfiks for resten — ellers ville "/"
+            // stå aktiv på alle sider.
+            const aktiv = n.href === '/' ? pathname === '/' : pathname?.startsWith(n.href);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                aria-current={aktiv ? 'page' : undefined}
+                className={
+                  'px-3 py-1.5 rounded whitespace-nowrap transition-colors ' +
+                  (aktiv
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')
+                }
+              >
+                {n.label}
+              </Link>
+            );
+          })}
         </nav>
         <div className="ml-auto text-xs text-slate-500 hidden sm:block">v2 · read-only mirror</div>
       </div>
