@@ -1,0 +1,37 @@
+{
+  "_note": "Kobling fra ejendommens BFE til foreningen i ejerforeninger-seed.json (feltet 'adresse'). Håndskrevet og verificeret ejendom for ejendom mod Resights-linket i hver BBR-fil. IKKE fuzzy match: flere foreninger deler vejnavn — der er to «Odensevej» (Stærmosegaard og Hybenparken), to «Bogensevej» (Stærmosegaard og Hegnsparken) og to «Farimagsvej» (E/F Farimagsvej og Nordre Farimagsvej). Et opslag på adresse ville blande dem sammen.",
+  "kobling": {
+    "2489057": "Benløseparken",
+    "7490010": "Søndermarksvej",
+    "2165262": "Lindbo",
+    "5381449": "Odensevej + Bogensevej",
+    "1353634": "Odensevej + Bogensevej",
+    "5380836": "Odensevej + Bogensevej",
+    "5380867": "Odensevej + Bogensevej",
+    "5380868": "Odensevej + Bogensevej",
+    "5380869": "Odensevej + Bogensevej",
+    "5380870": "Odensevej + Bogensevej",
+    "5381821": "Svendborgvej",
+    "5381975": "Svendborgvej",
+    "5381977": "Svendborgvej",
+    "5381978": "Svendborgvej",
+    "5381979": "Svendborgvej",
+    "5381969": "Bogensevej",
+    "5379654": "Lupin, Hvede, Erantis",
+    "5379777": "Kildemarksvej",
+    "5379781": "Kildemarksvej",
+    "5379782": "Kildemarksvej",
+    "5379783": "Kildemarksvej",
+    "5378924": "Farimagsvej",
+    "5381355": "Odensevej",
+    "5379965": "Nordre Farimagsvej",
+    "2556686": "Østervej 14",
+    "2146721": "Østerparken",
+    "5382946": "Sandholmsvej 15",
+    "5365477": "Nansensgade 14",
+    "8990143": "Ndr. Stationsvej 14"
+  },
+  "udenfor": {
+    "100007193": "Sct. Hansgade 41 — hører til DD-sagen, ikke opkøbs-tragten"
+  }
+}

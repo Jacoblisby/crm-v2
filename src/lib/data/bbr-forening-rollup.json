@@ -1,0 +1,292 @@
+{
+ "kilde": "Resights BBR-tabeller, 30 ejendomme",
+ "kvmFra": 20,
+ "kvmTil": 80,
+ "foreninger": [
+  {
+   "forening": "Benløseparken",
+   "foreningNavn": "Benløseparken",
+   "by": "Ringsted",
+   "status": "maalgruppe",
+   "registreretEnheder": 626,
+   "boliger": 624,
+   "erhverv": 7,
+   "ubygget": 0,
+   "iMaalgruppe": 348,
+   "iMaalgruppe30": 348,
+   "kvmMin": 33,
+   "kvmMax": 105,
+   "ejendomme": [
+    2489057
+   ]
+  },
+  {
+   "forening": "Lindbo",
+   "foreningNavn": "ejerforeningen Lindebo 1-29",
+   "by": "Taastrup",
+   "status": "maalgruppe",
+   "registreretEnheder": 180,
+   "boliger": 180,
+   "erhverv": 0,
+   "ubygget": 0,
+   "iMaalgruppe": 162,
+   "iMaalgruppe30": 162,
+   "kvmMin": 42,
+   "kvmMax": 82,
+   "ejendomme": [
+    2165262
+   ]
+  },
+  {
+   "forening": "Søndermarksvej",
+   "foreningNavn": "Byskovparken",
+   "by": "Slagelse",
+   "status": "maalgruppe",
+   "registreretEnheder": 480,
+   "boliger": 479,
+   "erhverv": 2,
+   "ubygget": 9,
+   "iMaalgruppe": 160,
+   "iMaalgruppe30": 160,
+   "kvmMin": 43,
+   "kvmMax": 111,
+   "ejendomme": [
+    7490010
+   ]
+  },
+  {
+   "forening": "Svendborgvej",
+   "foreningNavn": "Hegnsgården",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 148,
+   "boliger": 144,
+   "erhverv": 4,
+   "ubygget": 0,
+   "iMaalgruppe": 144,
+   "iMaalgruppe30": 144,
+   "kvmMin": 60,
+   "kvmMax": 69,
+   "ejendomme": [
+    5381821,
+    5381975,
+    5381977,
+    5381978,
+    5381979
+   ]
+  },
+  {
+   "forening": "Odensevej + Bogensevej",
+   "foreningNavn": "Stærmosegaard",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 165,
+   "boliger": 165,
+   "erhverv": 0,
+   "ubygget": 0,
+   "iMaalgruppe": 81,
+   "iMaalgruppe30": 81,
+   "kvmMin": 30,
+   "kvmMax": 98,
+   "ejendomme": [
+    1353634,
+    5380836,
+    5380867,
+    5380868,
+    5380869,
+    5380870,
+    5381449
+   ]
+  },
+  {
+   "forening": "Lupin, Hvede, Erantis",
+   "foreningNavn": "Ukendt · Lupin, Hvede, Erantis",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 81,
+   "boliger": 78,
+   "erhverv": 4,
+   "ubygget": 0,
+   "iMaalgruppe": 72,
+   "iMaalgruppe30": 72,
+   "kvmMin": 60,
+   "kvmMax": 85,
+   "ejendomme": [
+    5379654
+   ]
+  },
+  {
+   "forening": "Bogensevej",
+   "foreningNavn": "Hegnsparken",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 120,
+   "boliger": 120,
+   "erhverv": 2,
+   "ubygget": 0,
+   "iMaalgruppe": 55,
+   "iMaalgruppe30": 55,
+   "kvmMin": 48,
+   "kvmMax": 108,
+   "ejendomme": [
+    5381969
+   ]
+  },
+  {
+   "forening": "Farimagsvej",
+   "foreningNavn": "E/F Farimagsvej",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 55,
+   "boliger": 54,
+   "erhverv": 1,
+   "ubygget": 0,
+   "iMaalgruppe": 54,
+   "iMaalgruppe30": 54,
+   "kvmMin": 38,
+   "kvmMax": 57,
+   "ejendomme": [
+    5378924
+   ]
+  },
+  {
+   "forening": "Kildemarksvej",
+   "foreningNavn": "Kildemarksvænget",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 58,
+   "boliger": 48,
+   "erhverv": 10,
+   "ubygget": 0,
+   "iMaalgruppe": 48,
+   "iMaalgruppe30": 48,
+   "kvmMin": 49,
+   "kvmMax": 78,
+   "ejendomme": [
+    5379777,
+    5379781,
+    5379782,
+    5379783
+   ]
+  },
+  {
+   "forening": "Nordre Farimagsvej",
+   "foreningNavn": "Nordre Farimagsvej",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 36,
+   "boliger": 36,
+   "erhverv": 0,
+   "ubygget": 0,
+   "iMaalgruppe": 21,
+   "iMaalgruppe30": 21,
+   "kvmMin": 36,
+   "kvmMax": 139,
+   "ejendomme": [
+    5379965
+   ]
+  },
+  {
+   "forening": "Odensevej",
+   "foreningNavn": "Hybenparken",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 52,
+   "boliger": 36,
+   "erhverv": 16,
+   "ubygget": 0,
+   "iMaalgruppe": 20,
+   "iMaalgruppe30": 20,
+   "kvmMin": 45,
+   "kvmMax": 109,
+   "ejendomme": [
+    5381355
+   ]
+  },
+  {
+   "forening": "Ndr. Stationsvej 14",
+   "foreningNavn": "Ukendt (opdelt i ejerlejligheder)",
+   "by": "Slagelse",
+   "status": "undersoeges",
+   "registreretEnheder": 38,
+   "boliger": 38,
+   "erhverv": 4,
+   "ubygget": 0,
+   "iMaalgruppe": 20,
+   "iMaalgruppe30": 20,
+   "kvmMin": 50,
+   "kvmMax": 109,
+   "ejendomme": [
+    8990143
+   ]
+  },
+  {
+   "forening": "Nansensgade 14",
+   "foreningNavn": "Ukendt (opdelt i ejerlejligheder)",
+   "by": "Slagelse",
+   "status": "undersoeges",
+   "registreretEnheder": 18,
+   "boliger": 18,
+   "erhverv": 0,
+   "ubygget": 0,
+   "iMaalgruppe": 18,
+   "iMaalgruppe30": 18,
+   "kvmMin": 36,
+   "kvmMax": 57,
+   "ejendomme": [
+    5365477
+   ]
+  },
+  {
+   "forening": "Østervej 14",
+   "foreningNavn": "E/F Østervej 14 A-D",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 16,
+   "boliger": 16,
+   "erhverv": 4,
+   "ubygget": 0,
+   "iMaalgruppe": 16,
+   "iMaalgruppe30": 16,
+   "kvmMin": 50,
+   "kvmMax": 70,
+   "ejendomme": [
+    2556686
+   ]
+  },
+  {
+   "forening": "Østerparken",
+   "foreningNavn": "Ejerforeningen Østerparken",
+   "by": "Taastrup",
+   "status": "maalgruppe",
+   "registreretEnheder": 12,
+   "boliger": 12,
+   "erhverv": 0,
+   "ubygget": 0,
+   "iMaalgruppe": 8,
+   "iMaalgruppe30": 8,
+   "kvmMin": 37,
+   "kvmMax": 107,
+   "ejendomme": [
+    2146721
+   ]
+  },
+  {
+   "forening": "Sandholmsvej 15",
+   "foreningNavn": "E/F Sandholmsvej",
+   "by": "Næstved",
+   "status": "maalgruppe",
+   "registreretEnheder": 8,
+   "boliger": 8,
+   "erhverv": 0,
+   "ubygget": 0,
+   "iMaalgruppe": 8,
+   "iMaalgruppe30": 8,
+   "kvmMin": 65,
+   "kvmMax": 71,
+   "ejendomme": [
+    5382946
+   ]
+  }
+ ]
+}

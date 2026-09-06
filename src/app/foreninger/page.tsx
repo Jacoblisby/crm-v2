@@ -11,6 +11,7 @@
 import { and, desc, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { housingAssociations, leads } from '@/lib/db/schema';
+import bbrRollup from '@/lib/data/bbr-forening-rollup.json';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,28 +90,34 @@ function ForeningerView({
   const senest = raekker.map((r) => r.dataUpdatedAt).filter(Boolean).sort().pop() ?? null;
 
   /**
-   * Trin 3 kunne ikke måles, fordi kvm pr. lejlighed kun findes for de 105 vi
-   * ejer (Resights-eksporten). De 2.093 BFE i de øvrige foreninger er bare
-   * tal — ingen adresse, ingen kvm.
+   * Trin 3 måles nu. Det kunne det ikke før, fordi kvm pr. lejlighed kun
+   * fandtes for de 73 vi selv ejer — resten var BFE-numre uden areal. Vi
+   * hjalp os med foreningernes samlede kvm-SPÆND, men et spænd på 61-111
+   * siger intet om hvor mange af 626 lejligheder der ligger under 80, og
+   * spændene viste sig desuden at være forkerte i næsten hver eneste
+   * forening: Lindebo stod som 38-75 og er 42-82.
    *
-   * Men hver forening har et kvm-SPÆND for hele ejendommen, og det rækker
-   * længere end ingenting: ligger hele spændet inde i 20-80, kvalificerer
-   * hver eneste lejlighed i huset. Krydser spændet grænsen, ved vi det ikke.
+   * Nu kommer tallene fra BBR, én tabel pr. ejendom, samlet i
+   * bbr-forening-rollup.json. Se scripts/bbr/ for hvordan.
    *
-   * Det giver et gulv frem for en tankestreg: «mindst N», med resten markeret
-   * som uafklaret. Et gulv kan man handle på — en tankestreg kan man ikke.
+   * BBR skiller også lejligheder fra garager, kontorer og lagre. Registrets
+   * «enheder» er BFE-numre, og et BFE-nummer kan lige så godt være et
+   * p-anlæg: Hybenparken står som 52 enheder, men er 36 lejligheder og 16
+   * parkeringspladser.
    */
-  const KVM_FRA = 20;
-  const KVM_TIL = 80;
-  const heltIndenfor = (r: Raekke) =>
-    r.kvmFrom !== null && r.kvmTo !== null && r.kvmFrom >= KVM_FRA && r.kvmTo <= KVM_TIL;
-  const heltUdenfor = (r: Raekke) =>
-    r.kvmFrom !== null && r.kvmTo !== null && (r.kvmTo < KVM_FRA || r.kvmFrom > KVM_TIL);
+  const KVM_FRA = bbrRollup.kvmFra;
+  const KVM_TIL = bbrRollup.kvmTil;
 
-  const kvmSikre = maal.filter(heltIndenfor);
-  const kvmUafklarede = maal.filter((r) => !heltIndenfor(r) && !heltUdenfor(r));
-  const kvmSikreEnheder = kvmSikre.reduce((s, r) => s + (r.unitCount ?? 0), 0);
-  const kvmUafklaredeEnheder = kvmUafklarede.reduce((s, r) => s + (r.unitCount ?? 0), 0);
+  const bbrMaal = bbrRollup.foreninger.filter((f) => f.status === 'maalgruppe');
+  const bbrBoliger = bbrMaal.reduce((s, f) => s + f.boliger, 0);
+  const bbrErhverv = bbrMaal.reduce((s, f) => s + f.erhverv, 0);
+  const bbrUbygget = bbrMaal.reduce((s, f) => s + f.ubygget, 0);
+  const bbrIStoerrelsen = bbrMaal.reduce((s, f) => s + f.iMaalgruppe, 0);
+
+  /** Foreninger i målgruppen der endnu ikke er målt op via BBR. */
+  const bbrMaalte = new Set(bbrMaal.map((f) => f.foreningNavn));
+  const mangler = maal.filter((r) => !bbrMaalte.has(r.name));
+  const manglerEnheder = mangler.reduce((s, r) => s + (r.unitCount ?? 0), 0);
 
   const alleEnheder = raekker.reduce((s, r) => s + (r.unitCount ?? 0), 0);
   const brevEnheder = raekker
@@ -139,21 +146,31 @@ function ForeningerView({
       note: `${raekker.length} foreninger i registret` },
     { navn: 'I foreninger vi vil købe i', antal: enheder, maalt: true,
       note: `${maal.length} foreninger med status målgruppe` },
-    { navn: 'I størrelsen vi køber (20–80 kvm)', antal: kvmSikreEnheder, maalt: true,
-      usikre: kvmUafklaredeEnheder,
-      note: `${kvmSikre.length} foreninger hvor hele kvm-spændet ligger i 20–80 · `
-        + `${kvmUafklarede.length} foreninger (${kvmUafklaredeEnheder.toLocaleString('da-DK')} enheder) `
-        + 'krydser grænsen — kræver kvm pr. lejlighed' },
-    { navn: 'Har fået brev', antal: brevEnheder, maalt: true,
-      note: 'Enheder i foreninger med mindst én brevrunde' },
-    { navn: 'Har brugt boligberegneren', antal: beregnerLeads, maalt: true,
+    // Registrets «enheder» er BFE-numre, og et BFE-nummer kan være en garage.
+    // Uden dette trin tæller tragten p-anlæg som lejligheder — Hybenparkens
+    // 52 «enheder» er 36 lejligheder og 16 parkeringspladser.
+    { navn: 'Heraf boliger — ikke garage eller erhverv', antal: bbrBoliger, maalt: true,
+      note: `${bbrErhverv} garager, kontorer og lagre trukket fra`
+        + (bbrUbygget ? ` · ${bbrUbygget} endnu ikke bygget` : '')
+        + (mangler.length ? ` · OBS: ${mangler.length} foreninger mangler BBR` : '') },
+    { navn: `I størrelsen vi køber (${KVM_FRA}–${KVM_TIL} kvm)`, antal: bbrIStoerrelsen, maalt: true,
+      note: `Målt pr. lejlighed i BBR · ${bbrMaal.length} af ${maal.length} foreninger`
+        + (manglerEnheder ? ` · ${manglerEnheder.toLocaleString('da-DK')} enheder mangler` : '') },
+    // Brevene gik ud FØR vi kendte størrelserne, altså til alle i foreningen.
+    // Derfor måles trinnet mod trin 2 og ikke mod størrelsesfiltret — ellers
+    // ville det se ud som om vi havde sendt breve til flere end der findes.
+    { navn: 'Har fået brev', antal: brevEnheder, maalt: true, basisTrin: 1,
+      note: `Enheder i foreninger med mindst én brevrunde`
+        + (brevEnheder > bbrIStoerrelsen
+            ? ` · ${(brevEnheder - bbrIStoerrelsen).toLocaleString('da-DK')} af dem til lejligheder uden for størrelsen`
+            : '') },
+    { navn: 'Har brugt boligberegneren', antal: beregnerLeads, maalt: true, basisTrin: 3,
       note: beregnerLeads === 0
         ? 'Ingen endnu — beregneren er lige gået i luften'
         : 'OBS: tallet indeholder testindsendelser fra udviklingen' },
-    // Måles mod trin 2, ikke mod trin 5: de købte kom IKKE gennem beregneren,
-    // så "procent af forrige" ville sammenligne to urelaterede tal — og gav
-    // 197 %, hvilket er tydeligt forkert.
-    { navn: 'Købt', antal: ejet, maalt: true, basisTrin: 1,
+    // Måles mod størrelsen, ikke mod beregneren: de købte kom gennem brev og
+    // opkald, så «procent af forrige» ville sammenligne to urelaterede tal.
+    { navn: 'Købt', antal: ejet, maalt: true, basisTrin: 3,
       note: 'Købt gennem brev og opkald — ikke gennem beregneren' },
   ];
   const top = trin[0].antal || 1;
@@ -259,13 +276,21 @@ function ForeningerView({
               })}
             </div>
             <p className="text-xs text-slate-500 mt-5 pt-4 border-t border-slate-100 max-w-2xl leading-relaxed">
-              De {ejet} købte kom gennem den hidtidige proces — brev, opkald og personlig kontakt —
-              ikke gennem boligberegneren, som først lige er sat i luften. Trin 5 er derfor reelt
-              tomt, og det er dét tal, brev- og mailflowet skal flytte. Trin 3 viser et gulv:{' '}
-              {kvmSikreEnheder.toLocaleString('da-DK')} enheder ligger i foreninger hvor hele
-              kvm-spændet er 20–80, så hver lejlighed tæller. Det skraverede felt er de{' '}
-              {kvmUafklaredeEnheder.toLocaleString('da-DK')} enheder i foreninger hvor spændet
-              krydser grænsen — dem kan kun kvm pr. lejlighed afgøre.
+              De {ejet} købte kom gennem den hidtidige proces — brev, opkald og personlig
+              kontakt — ikke gennem boligberegneren, som først lige er sat i luften.
+              {' '}Størrelserne er nu talt lejlighed for lejlighed i BBR, ikke skønnet ud fra
+              foreningernes samlede kvm-spænd. De spænd var forkerte i næsten hver eneste
+              forening: Lindebo stod registreret som 38–75 kvm og er 42–82, så 18 lejligheder
+              ligger over grænsen.
+              {brevEnheder > bbrIStoerrelsen && (
+                <>
+                  {' '}Det tydeligste i tallene er afstanden mellem trin 4 og trin 5:
+                  {' '}{brevEnheder.toLocaleString('da-DK')} breve er sendt, men kun
+                  {' '}{bbrIStoerrelsen.toLocaleString('da-DK')} lejligheder er i den størrelse
+                  vi køber. Bogensevej 1 alene er 42 lejligheder på 83–86 kvm — to brevrunder
+                  til folk vi aldrig kunne købe af.
+                </>
+              )}
             </p>
           </section>
         )}
