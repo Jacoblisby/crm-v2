@@ -16,6 +16,9 @@
    "iMaalgruppe30": 348,
    "kvmMin": 33,
    "kvmMax": 105,
+   "maalEjerBor": 157,
+   "maalUdlejet": 172,
+   "maalTom": 19,
    "ejendomme": [
     2489057
    ]
@@ -33,6 +36,9 @@
    "iMaalgruppe30": 162,
    "kvmMin": 42,
    "kvmMax": 82,
+   "maalEjerBor": 110,
+   "maalUdlejet": 42,
+   "maalTom": 10,
    "ejendomme": [
     2165262
    ]
@@ -50,6 +56,9 @@
    "iMaalgruppe30": 160,
    "kvmMin": 43,
    "kvmMax": 111,
+   "maalEjerBor": 46,
+   "maalUdlejet": 107,
+   "maalTom": 7,
    "ejendomme": [
     7490010
    ]
@@ -67,6 +76,9 @@
    "iMaalgruppe30": 144,
    "kvmMin": 60,
    "kvmMax": 69,
+   "maalEjerBor": 58,
+   "maalUdlejet": 84,
+   "maalTom": 2,
    "ejendomme": [
     5381821,
     5381975,
@@ -88,6 +100,9 @@
    "iMaalgruppe30": 81,
    "kvmMin": 30,
    "kvmMax": 98,
+   "maalEjerBor": 36,
+   "maalUdlejet": 42,
+   "maalTom": 3,
    "ejendomme": [
     1353634,
     5380836,
@@ -111,6 +126,9 @@
    "iMaalgruppe30": 72,
    "kvmMin": 60,
    "kvmMax": 85,
+   "maalEjerBor": 28,
+   "maalUdlejet": 41,
+   "maalTom": 3,
    "ejendomme": [
     5379654
    ]
@@ -128,6 +146,9 @@
    "iMaalgruppe30": 55,
    "kvmMin": 48,
    "kvmMax": 108,
+   "maalEjerBor": 23,
+   "maalUdlejet": 30,
+   "maalTom": 2,
    "ejendomme": [
     5381969
    ]
@@ -145,6 +166,9 @@
    "iMaalgruppe30": 54,
    "kvmMin": 38,
    "kvmMax": 57,
+   "maalEjerBor": 11,
+   "maalUdlejet": 40,
+   "maalTom": 3,
    "ejendomme": [
     5378924
    ]
@@ -162,6 +186,9 @@
    "iMaalgruppe30": 48,
    "kvmMin": 49,
    "kvmMax": 78,
+   "maalEjerBor": 15,
+   "maalUdlejet": 31,
+   "maalTom": 2,
    "ejendomme": [
     5379777,
     5379781,
@@ -182,6 +209,9 @@
    "iMaalgruppe30": 21,
    "kvmMin": 36,
    "kvmMax": 139,
+   "maalEjerBor": 7,
+   "maalUdlejet": 14,
+   "maalTom": 0,
    "ejendomme": [
     5379965
    ]
@@ -199,6 +229,9 @@
    "iMaalgruppe30": 20,
    "kvmMin": 45,
    "kvmMax": 109,
+   "maalEjerBor": 8,
+   "maalUdlejet": 12,
+   "maalTom": 0,
    "ejendomme": [
     5381355
    ]
@@ -216,6 +249,9 @@
    "iMaalgruppe30": 20,
    "kvmMin": 50,
    "kvmMax": 109,
+   "maalEjerBor": 13,
+   "maalUdlejet": 6,
+   "maalTom": 1,
    "ejendomme": [
     8990143
    ]
@@ -233,6 +269,9 @@
    "iMaalgruppe30": 18,
    "kvmMin": 36,
    "kvmMax": 57,
+   "maalEjerBor": 7,
+   "maalUdlejet": 11,
+   "maalTom": 0,
    "ejendomme": [
     5365477
    ]
@@ -250,6 +289,9 @@
    "iMaalgruppe30": 16,
    "kvmMin": 50,
    "kvmMax": 70,
+   "maalEjerBor": 6,
+   "maalUdlejet": 9,
+   "maalTom": 1,
    "ejendomme": [
     2556686
    ]
@@ -267,6 +309,9 @@
    "iMaalgruppe30": 8,
    "kvmMin": 37,
    "kvmMax": 107,
+   "maalEjerBor": 2,
+   "maalUdlejet": 6,
+   "maalTom": 0,
    "ejendomme": [
     2146721
    ]
@@ -284,6 +329,9 @@
    "iMaalgruppe30": 8,
    "kvmMin": 65,
    "kvmMax": 71,
+   "maalEjerBor": 2,
+   "maalUdlejet": 6,
+   "maalTom": 0,
    "ejendomme": [
     5382946
    ]

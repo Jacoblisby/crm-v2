@@ -42,7 +42,14 @@ if ukendte:
         'Tilføj dem til bbr-forening-map.json — enten under "kobling" eller "udenfor".')
 
 g = defaultdict(lambda: dict(boliger=0, erhverv=0, ubygget=0, iMaalgruppe=0,
-                             iMaalgruppe30=0, kvmMin=None, kvmMax=None, ejendomme=[]))
+                             iMaalgruppe30=0, kvmMin=None, kvmMax=None,
+                             # Ejeren bor der selv / har lejet ud. To vidt
+                             # forskellige sælgere: beboeren skal flytte,
+                             # udlejeren skal regne. Tælles kun for de
+                             # lejligheder der ER i målgruppen — det er dem
+                             # der skal skrives til.
+                             maalEjerBor=0, maalUdlejet=0, maalTom=0,
+                             ejendomme=[]))
 
 for e in bbr['ejendomme']:
     navn = kobling.get(str(e['bfe']))
@@ -68,6 +75,13 @@ for u in bbr['enheder']:
     x['kvmMax'] = kvm if x['kvmMax'] is None else max(x['kvmMax'], kvm)
     if KVM_FRA <= kvm <= KVM_TIL:
         x['iMaalgruppe'] += 1
+        ude = u.get('udlejning') or ''
+        if ude.startswith('Benyttet'):
+            x['maalEjerBor'] += 1
+        elif ude.startswith('Udlejet'):
+            x['maalUdlejet'] += 1
+        else:
+            x['maalTom'] += 1
     if 30 <= kvm <= KVM_TIL:
         x['iMaalgruppe30'] += 1
 
@@ -104,4 +118,7 @@ print(f"  erhverv/garage : {sum(r['erhverv'] for r in maal)}")
 print(f"  ubygget        : {sum(r['ubygget'] for r in maal)}")
 print(f"  i {KVM_FRA}-{KVM_TIL} kvm    : {sum(r['iMaalgruppe'] for r in maal)}")
 print(f"  i 30-{KVM_TIL} kvm    : {sum(r['iMaalgruppe30'] for r in maal)}")
+print(f"    heraf udlejet : {sum(r['maalUdlejet'] for r in maal)}")
+print(f"    ejer bor der  : {sum(r['maalEjerBor'] for r in maal)}")
+print(f"    tom/ukendt    : {sum(r['maalTom'] for r in maal)}")
 print(f'skrevet: {os.path.relpath(sti, ROD)}')

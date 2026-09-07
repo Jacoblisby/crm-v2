@@ -76,6 +76,10 @@ def laes_ejendom(sti):
         'kvmbeb': _kol(h, 'Areal til beboelse'),
         'vaer':   _kol(h, 'Antal værelser'),
         'status': _kol(h, 'Status'),
+        # Fortæller om ejeren selv bor der. BBR's eget felt, ingen
+        # personoplysning: «Benyttet af ejeren», «Udlejet», «Ikke benyttet».
+        # Det skiller beboeren fra udlejeren — to helt forskellige sælgere.
+        'udlejning': _kol(h, 'Udlejningsforhold'),
     }
     if ix['vej'] is None:
         return None
@@ -109,6 +113,7 @@ def laes_ejendom(sti):
             'kvmBeboelse': r[ix['kvmbeb']] if ix['kvmbeb'] is not None else None,
             'vaerelser': r[ix['vaer']] if ix['vaer'] is not None else None,
             'status': _tekst(r[ix['status']]) if ix['status'] is not None else '',
+            'udlejning': _tekst(r[ix['udlejning']]) if ix['udlejning'] is not None else '',
         })
 
     return {
