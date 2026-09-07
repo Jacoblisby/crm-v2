@@ -84,6 +84,15 @@ def laes(sti):
             'handelspris': pris,
             'handelsdato': str(dato)[:10] if dato else None,
             'krPrKvm': round(pris / kvm) if pris and kvm else None,
+            # To felter der afgør om prisen overhovedet er en markedspris.
+            # Nordre Farimagsvej har to lejligheder registreret til 14,7 mio
+            # for 36 kvm — det er en portefølje på 12 ejendomme, hvor hele
+            # summen står på hver enkelt BFE. 408.090 kr/kvm er ikke en pris,
+            # det er en fordelingsfejl.
+            'handelAntalEjendomme': tal(f(r, 'Seneste handel (antal ejendomme)')),
+            'handelsmetode': f(r, 'Handelsmetode'),
+            'friHandel': (f(r, 'Handelsmetode') or '').startswith('Almindelig fri handel')
+                         and (tal(f(r, 'Seneste handel (antal ejendomme)')) or 1) == 1,
             'ejerType': f(r, 'Ejerskabstype'),
             'ejerAlder': tal(f(r, 'Primær ejer alder')),
             'ejerBorDer': bool(ejer_adr) and bolig_adr == ejer_adr,

@@ -13,13 +13,14 @@ håndskrevet. Se noten i den fil for hvorfor den ikke må gættes.
 BRUG:
     /opt/homebrew/bin/python3.12 scripts/bbr/rollup.py
 """
-import json, os
+import json, os, datetime as dt, statistics
 from collections import defaultdict
 
 ROD = os.path.join(os.path.dirname(__file__), '..', '..')
 DATA = os.path.join(ROD, 'src', 'lib', 'data')
 
 KVM_FRA, KVM_TIL = 20, 80
+I_DAG = dt.date.today()
 
 with open(os.path.join(DATA, 'bbr-enheder.json'), encoding='utf-8') as f:
     bbr = json.load(f)
@@ -27,6 +28,15 @@ with open(os.path.join(DATA, 'bbr-forening-map.json'), encoding='utf-8') as f:
     kort = json.load(f)
 with open(os.path.join(DATA, 'ejerforeninger-seed.json'), encoding='utf-8') as f:
     seed = json.load(f)
+
+# Ejerdata er nøglet på den enkelte lejligheds BFE, så koblingen til foreningen
+# sker gennem registrets egen BFE-liste — et opslag, ingen gætteri. Filen er
+# valgfri: er den ikke hentet endnu, springes ejerkolonnerne bare over.
+try:
+    with open(os.path.join(DATA, 'ejere.json'), encoding='utf-8') as f:
+        ejere = {e['bfe']: e for e in json.load(f)['enheder']}
+except FileNotFoundError:
+    ejere = {}
 
 kobling = kort['kobling']
 udenfor = kort['udenfor']
@@ -91,6 +101,39 @@ for navn, x in sorted(g.items(), key=lambda kv: -kv[1]['iMaalgruppe']):
     # Databasen gemmer foreningen under NAVN, ikke adresse — og seed-ruten
     # gør «Ukendt» entydig med adressen. Samme regel her, ellers kan siden
     # ikke slå op, og fejlen ville vise sig som «ikke målt» frem for som fejl.
+    # Ejerprofil for de af foreningens lejligheder der ER i målgruppen.
+    # Kun dem: en 110 kvm lejlighed skal ikke trække medianalderen med sig,
+    # når vi aldrig skriver til den.
+    ej = [ejere[b] for b in set(f['bfe']) if b in ejere]
+    ejM = [e for e in ej if e['erBolig'] and e['kvm'] and KVM_FRA <= e['kvm'] <= KVM_TIL]
+    # Markedspris kun på frie handler af én ejendom. Familieoverdragelser og
+    # porteføljehandler er også «priser», men ikke priser nogen ville betale.
+    def kvmpris(mdr):
+        graense = I_DAG - dt.timedelta(days=int(mdr * 30.44))
+        v = sorted(e['krPrKvm'] for e in ejM
+                   if e.get('friHandel') and e['krPrKvm'] and e['handelsdato']
+                   and dt.date.fromisoformat(e['handelsdato']) >= graense)
+        if not v:
+            return None
+        return {'antal': len(v),
+                'gns': round(statistics.mean(v)),
+                'median': v[len(v) // 2]}
+
+    aldre = sorted(e['ejerAlder'] for e in ejM if e['ejerAlder'])
+    priser = sorted(e['krPrKvm'] for e in ejM if e['krPrKvm'])
+    ejerprofil = {
+        'medDataIMaalgruppe': len(ejM),
+        'ejerBorDer': sum(1 for e in ejM if e['ejerBorDer']),
+        'selskaber': sum(1 for e in ejM if e['ejerType'] == 'Selskab'),
+        'reklamebeskyttet': sum(1 for e in ejM if e['reklamebeskyttet'] == 'Ja'),
+        'alderMedian': aldre[len(aldre) // 2] if aldre else None,
+        'alder60plus': sum(1 for a in aldre if a >= 60),
+        'alder70plus': sum(1 for a in aldre if a >= 70),
+        'krPrKvmMedian': priser[len(priser) // 2] if priser else None,
+        'kvmpris12mdr': kvmpris(12),
+        'kvmpris24mdr': kvmpris(24),
+    } if ejM else None
+
     db_navn = f['navn'] if f['navn'] and f['navn'] != 'Ukendt' else f"{f['navn'] or 'Ukendt'} · {f['adresse']}"
     ud.append({
         'forening': navn,
@@ -100,6 +143,7 @@ for navn, x in sorted(g.items(), key=lambda kv: -kv[1]['iMaalgruppe']):
         'registreretEnheder': len(f['bfe']) or f['enheder'] or 0,
         **{k: v for k, v in x.items() if k != 'ejendomme'},
         'ejendomme': sorted(x['ejendomme']),
+        'ejerprofil': ejerprofil,
     })
 
 sti = os.path.join(DATA, 'bbr-forening-rollup.json')
@@ -121,4 +165,17 @@ print(f"  i 30-{KVM_TIL} kvm    : {sum(r['iMaalgruppe30'] for r in maal)}")
 print(f"    heraf udlejet : {sum(r['maalUdlejet'] for r in maal)}")
 print(f"    ejer bor der  : {sum(r['maalEjerBor'] for r in maal)}")
 print(f"    tom/ukendt    : {sum(r['maalTom'] for r in maal)}")
+medEjer = [r for r in maal if r['ejerprofil']]
+if medEjer:
+    p = [r['ejerprofil'] for r in medEjer]
+    print(f"  ejerdata for  : {sum(x['medDataIMaalgruppe'] for x in p)} lejligheder "
+          f"i {len(medEjer)} foreninger")
+    print(f"    ejer bor der: {sum(x['ejerBorDer'] for x in p)}")
+    print(f"    selskaber   : {sum(x['selskaber'] for x in p)}")
+    print(f"    ejer 60+    : {sum(x['alder60plus'] for x in p)}   70+: {sum(x['alder70plus'] for x in p)}")
+    for mdr in (12, 24):
+        n = sum(x[f'kvmpris{mdr}mdr']['antal'] for x in p if x[f'kvmpris{mdr}mdr'])
+        vaegt = sum(x[f'kvmpris{mdr}mdr']['gns'] * x[f'kvmpris{mdr}mdr']['antal']
+                    for x in p if x[f'kvmpris{mdr}mdr'])
+        print(f'    kr/kvm {mdr} mdr: {round(vaegt / n):,} kr  ({n} frie handler)'.replace(',', '.'))
 print(f'skrevet: {os.path.relpath(sti, ROD)}')

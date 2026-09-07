@@ -21,7 +21,27 @@
    "maalTom": 19,
    "ejendomme": [
     2489057
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 348,
+    "ejerBorDer": 155,
+    "selskaber": 117,
+    "reklamebeskyttet": 96,
+    "alderMedian": 47,
+    "alder60plus": 57,
+    "alder70plus": 23,
+    "krPrKvmMedian": 13596,
+    "kvmpris12mdr": {
+     "antal": 27,
+     "gns": 18948,
+     "median": 18934
+    },
+    "kvmpris24mdr": {
+     "antal": 49,
+     "gns": 18104,
+     "median": 18033
+    }
+   }
   },
   {
    "forening": "Lindbo",
@@ -41,7 +61,27 @@
    "maalTom": 10,
    "ejendomme": [
     2165262
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 163,
+    "ejerBorDer": 109,
+    "selskaber": 9,
+    "reklamebeskyttet": 56,
+    "alderMedian": 49,
+    "alder60plus": 50,
+    "alder70plus": 25,
+    "krPrKvmMedian": 23571,
+    "kvmpris12mdr": {
+     "antal": 16,
+     "gns": 31900,
+     "median": 32536
+    },
+    "kvmpris24mdr": {
+     "antal": 30,
+     "gns": 29763,
+     "median": 29747
+    }
+   }
   },
   {
    "forening": "Søndermarksvej",
@@ -61,7 +101,27 @@
    "maalTom": 7,
    "ejendomme": [
     7490010
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 160,
+    "ejerBorDer": 44,
+    "selskaber": 52,
+    "reklamebeskyttet": 67,
+    "alderMedian": 53,
+    "alder60plus": 39,
+    "alder70plus": 18,
+    "krPrKvmMedian": 12791,
+    "kvmpris12mdr": {
+     "antal": 16,
+     "gns": 15509,
+     "median": 15116
+    },
+    "kvmpris24mdr": {
+     "antal": 30,
+     "gns": 15469,
+     "median": 15233
+    }
+   }
   },
   {
    "forening": "Svendborgvej",
@@ -85,7 +145,27 @@
     5381977,
     5381978,
     5381979
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 144,
+    "ejerBorDer": 54,
+    "selskaber": 56,
+    "reklamebeskyttet": 54,
+    "alderMedian": 56,
+    "alder60plus": 35,
+    "alder70plus": 18,
+    "krPrKvmMedian": 10746,
+    "kvmpris12mdr": {
+     "antal": 3,
+     "gns": 14473,
+     "median": 15582
+    },
+    "kvmpris24mdr": {
+     "antal": 10,
+     "gns": 13532,
+     "median": 13806
+    }
+   }
   },
   {
    "forening": "Odensevej + Bogensevej",
@@ -111,7 +191,27 @@
     5380869,
     5380870,
     5381449
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 81,
+    "ejerBorDer": 33,
+    "selskaber": 24,
+    "reklamebeskyttet": 32,
+    "alderMedian": 56,
+    "alder60plus": 20,
+    "alder70plus": 11,
+    "krPrKvmMedian": 11230,
+    "kvmpris12mdr": {
+     "antal": 3,
+     "gns": 16980,
+     "median": 17267
+    },
+    "kvmpris24mdr": {
+     "antal": 4,
+     "gns": 16585,
+     "median": 17267
+    }
+   }
   },
   {
    "forening": "Lupin, Hvede, Erantis",
@@ -131,7 +231,27 @@
    "maalTom": 3,
    "ejendomme": [
     5379654
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 72,
+    "ejerBorDer": 28,
+    "selskaber": 20,
+    "reklamebeskyttet": 27,
+    "alderMedian": 50,
+    "alder60plus": 20,
+    "alder70plus": 9,
+    "krPrKvmMedian": 12882,
+    "kvmpris12mdr": {
+     "antal": 8,
+     "gns": 16246,
+     "median": 16667
+    },
+    "kvmpris24mdr": {
+     "antal": 13,
+     "gns": 16209,
+     "median": 15833
+    }
+   }
   },
   {
    "forening": "Bogensevej",
@@ -151,7 +271,27 @@
    "maalTom": 2,
    "ejendomme": [
     5381969
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 55,
+    "ejerBorDer": 25,
+    "selskaber": 12,
+    "reklamebeskyttet": 23,
+    "alderMedian": 54,
+    "alder60plus": 17,
+    "alder70plus": 11,
+    "krPrKvmMedian": 9958,
+    "kvmpris12mdr": {
+     "antal": 3,
+     "gns": 15477,
+     "median": 14194
+    },
+    "kvmpris24mdr": {
+     "antal": 5,
+     "gns": 15096,
+     "median": 14194
+    }
+   }
   },
   {
    "forening": "Farimagsvej",
@@ -171,7 +311,27 @@
    "maalTom": 3,
    "ejendomme": [
     5378924
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 54,
+    "ejerBorDer": 10,
+    "selskaber": 22,
+    "reklamebeskyttet": 17,
+    "alderMedian": 49,
+    "alder60plus": 6,
+    "alder70plus": 2,
+    "krPrKvmMedian": 13690,
+    "kvmpris12mdr": {
+     "antal": 13,
+     "gns": 15553,
+     "median": 15192
+    },
+    "kvmpris24mdr": {
+     "antal": 20,
+     "gns": 15358,
+     "median": 15192
+    }
+   }
   },
   {
    "forening": "Kildemarksvej",
@@ -194,7 +354,27 @@
     5379781,
     5379782,
     5379783
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 48,
+    "ejerBorDer": 14,
+    "selskaber": 20,
+    "reklamebeskyttet": 20,
+    "alderMedian": 48,
+    "alder60plus": 5,
+    "alder70plus": 1,
+    "krPrKvmMedian": 11583,
+    "kvmpris12mdr": {
+     "antal": 1,
+     "gns": 16026,
+     "median": 16026
+    },
+    "kvmpris24mdr": {
+     "antal": 10,
+     "gns": 13509,
+     "median": 13250
+    }
+   }
   },
   {
    "forening": "Nordre Farimagsvej",
@@ -214,7 +394,27 @@
    "maalTom": 0,
    "ejendomme": [
     5379965
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 21,
+    "ejerBorDer": 6,
+    "selskaber": 6,
+    "reklamebeskyttet": 6,
+    "alderMedian": 58,
+    "alder60plus": 5,
+    "alder70plus": 0,
+    "krPrKvmMedian": 14306,
+    "kvmpris12mdr": {
+     "antal": 2,
+     "gns": 15902,
+     "median": 17361
+    },
+    "kvmpris24mdr": {
+     "antal": 4,
+     "gns": 15903,
+     "median": 16528
+    }
+   }
   },
   {
    "forening": "Odensevej",
@@ -234,7 +434,27 @@
    "maalTom": 0,
    "ejendomme": [
     5381355
-   ]
+   ],
+   "ejerprofil": {
+    "medDataIMaalgruppe": 20,
+    "ejerBorDer": 8,
+    "selskaber": 6,
+    "reklamebeskyttet": 5,
+    "alderMedian": 57,
+    "alder60plus": 5,
+    "alder70plus": 0,
+    "krPrKvmMedian": 13444,
+    "kvmpris12mdr": {
+     "antal": 1,
+     "gns": 16000,
+     "median": 16000
+    },
+    "kvmpris24mdr": {
+     "antal": 3,
+     "gns": 17559,
+     "median": 17787
+    }
+   }
   },
   {
    "forening": "Ndr. Stationsvej 14",
@@ -254,7 +474,8 @@
    "maalTom": 1,
    "ejendomme": [
     8990143
-   ]
+   ],
+   "ejerprofil": null
   },
   {
    "forening": "Nansensgade 14",
@@ -274,7 +495,8 @@
    "maalTom": 0,
    "ejendomme": [
     5365477
-   ]
+   ],
+   "ejerprofil": null
   },
   {
    "forening": "Østervej 14",
@@ -294,7 +516,8 @@
    "maalTom": 1,
    "ejendomme": [
     2556686
-   ]
+   ],
+   "ejerprofil": null
   },
   {
    "forening": "Østerparken",
@@ -314,7 +537,8 @@
    "maalTom": 0,
    "ejendomme": [
     2146721
-   ]
+   ],
+   "ejerprofil": null
   },
   {
    "forening": "Sandholmsvej 15",
@@ -334,7 +558,8 @@
    "maalTom": 0,
    "ejendomme": [
     5382946
-   ]
+   ],
+   "ejerprofil": null
   }
  ]
 }
