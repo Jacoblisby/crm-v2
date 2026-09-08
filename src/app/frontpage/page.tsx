@@ -874,15 +874,26 @@ function StickyCta() {
         e.preventDefault();
         goToAddressField();
       }}
-      className="fixed bottom-5 right-4 sm:bottom-auto sm:top-24 sm:right-6 z-40 inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[13.5px] shadow-[0_12px_30px_-8px_rgba(15,71,73,0.55)]"
+      /* Bunden på ALLE skærme. Før stod den «sm:top-24» på desktop, altså
+         96 px fra toppen — lige under den sticky nav, som selv har et
+         «Tjek din pris»-punkt. To ens knapper i samme hjørne, hvor den ene
+         dækkede for den anden.
+
+         Bunden løser tre ting på én gang: kollisionen med navigationen,
+         tommelfingerens rækkevidde på telefon, og retningen — knappen
+         kommer nedefra, og noget der kommer nedefra hører til i bunden. */
+      className="fp-press fixed bottom-5 right-4 sm:bottom-7 sm:right-6 z-40 inline-flex items-center gap-2 px-5 py-3 rounded-lg text-[13.5px] shadow-[0_12px_30px_-8px_rgba(15,71,73,0.55)]"
       style={{
         background: 'var(--fp-cta)',
         color: '#123f41',
         fontWeight: 500,
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(10px)',
+        // Ind og ud ad samme vej: nedefra. 14 px i stedet for 10 gør
+        // retningen tydelig nok til at aflæses, uden at det bliver et hop.
+        transform: visible ? 'translateY(0)' : 'translateY(14px)',
         pointerEvents: visible ? 'auto' : 'none',
-        transition: 'opacity 280ms cubic-bezier(0.23,1,0.32,1), transform 280ms cubic-bezier(0.23,1,0.32,1)',
+        transition:
+          'opacity 280ms var(--fp-out), transform 320ms var(--fp-settle)',
       }}
     >
       <MapPin size={16} weight="regular" />

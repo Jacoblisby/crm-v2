@@ -53,13 +53,38 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
           --fp-cta:        #83ebeb; /* turkis CTA-knap */
           --fp-ink:        #1c2b2b;
           --fp-muted:      #4d5a59;
+
+          /* Kraftig ease-out. Bevægelsen sker med det samme og lander blødt —
+             brugeren ser starten, ikke slutningen. */
+          --fp-out:    cubic-bezier(0.23, 1, 0.32, 1);
+          /* Kritisk dæmpet: rammer målet uden at skyde over. Bruges til alt
+             der kommer ind af sig selv. */
+          --fp-settle: cubic-bezier(0.32, 0.72, 0, 1);
+          /* Tryk skal mærkes med det samme, ikke animeres. */
+          --fp-press:  90ms cubic-bezier(0.4, 0, 0.6, 1);
           background: #ffffff;
           color: var(--fp-ink);
           font-weight: 400;
         }
-        .fp-root h1, .fp-root h2, .fp-root h3 {
+        /* Tracking skal følge størrelsen, ikke være ét tal for hele siden.
+           Store bogstaver ser for spredte ud, når de vokser; små tekster
+           bliver mere læselige med en anelse luft. Én fast værdi er derfor
+           forkert et sted — her var det -0,005em hele vejen, altså næsten
+           ingenting på en overskrift i 52 px. */
+        .fp-root h1 {
           font-weight: 400;
-          letter-spacing: -0.005em;
+          letter-spacing: -0.022em;
+          line-height: 1.08;
+          font-optical-sizing: auto;
+        }
+        .fp-root h2 {
+          font-weight: 400;
+          letter-spacing: -0.016em;
+          line-height: 1.15;
+        }
+        .fp-root h3 {
+          font-weight: 400;
+          letter-spacing: -0.008em;
         }
         .fp-root .fp-kicker {
           font-size: 12px;
@@ -119,7 +144,7 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
         .fp-root .fp-badge-box {
           transform: scale(0.92);
           transition:
-            transform 620ms cubic-bezier(0.34, 1.45, 0.5, 1),
+            transform 620ms var(--fp-settle),
             box-shadow 240ms cubic-bezier(0.23, 1, 0.32, 1);
           position: relative;
           overflow: hidden;
@@ -156,7 +181,7 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
           pointer-events: none;
         }
         .fp-root .fp-badge-icon {
-          transition: transform 300ms cubic-bezier(0.34, 1.4, 0.5, 1);
+          transition: transform 300ms var(--fp-settle);
         }
         @media (hover: hover) {
           .fp-root .fp-badge-box:hover::after { opacity: 1; }
@@ -192,8 +217,8 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
            Entréen må gerne tage 560 ms; hover skal svare på 260. */
         .fp-root .fp-step .fp-step-icon {
           transition:
-            transform 560ms cubic-bezier(0.34, 1.4, 0.5, 1),
-            scale 260ms cubic-bezier(0.34, 1.4, 0.5, 1),
+            transform 560ms var(--fp-settle),
+            scale 260ms var(--fp-settle),
             background-color 240ms ease,
             box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1);
         }
@@ -233,7 +258,46 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
           padding-inline: 12px;
           border-radius: 8px;
         }
-        .fp-root .fp-lift:active { transform: translateY(-1px) scale(0.995); }
+        /* ── Trykrespons ────────────────────────────────────────────────
+           Det største hul i v1: alt feedback lå på :hover, og hover findes
+           ikke på en telefon. På mobil kunne man trykke på hvad som helst
+           uden at siden reagerede, før den nye side kom.
+
+           Feedback skal ligge på tryk-NED, ikke på slip, og den skal være
+           øjeblikkelig — 90 ms, ikke de 260 ms som hover-overgangen bruger.
+           Skalaen er 0,97: nok til at mærkes, ikke nok til at hoppe.
+
+           :active dækker både mus og touch, og virker uden JavaScript. */
+        .fp-root .fp-press,
+        .fp-root .fp-lift,
+        .fp-root .fp-badge-box,
+        .fp-root .fp-step,
+        .fp-root button,
+        .fp-root a[role='button'] {
+          -webkit-tap-highlight-color: transparent;
+        }
+        .fp-root .fp-press:active,
+        .fp-root .fp-lift:active,
+        .fp-root button:active,
+        .fp-root a[role='button']:active {
+          scale: 0.97;
+          transition: scale var(--fp-press);
+        }
+        /* Kortene skal give mindre efter end knapperne — en stor flade der
+           krymper 3 % ser ud som om den falder sammen. */
+        .fp-root .fp-badge-box:active,
+        .fp-root .fp-step:active {
+          scale: 0.985;
+          transition: scale var(--fp-press);
+        }
+        /* Sætter man scale tilbage på slip, skal den lande blødt i stedet for
+           at snappe — det er vejen ud af trykket, ikke ind i det. */
+        .fp-root .fp-press,
+        .fp-root .fp-lift,
+        .fp-root button,
+        .fp-root a[role='button'] {
+          transition: scale 220ms var(--fp-out);
+        }
 
         /* Accent-stregen ved tallene vokser op, når blokken kommer i syne */
         .fp-root .fp-bar {
@@ -246,9 +310,35 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
         /* Trin-ikonet popper ganske let, når trinnet afsløres */
         .fp-root .fp-pop {
           transform: scale(0.86);
-          transition: transform 560ms cubic-bezier(0.34, 1.4, 0.5, 1);
+          transition: transform 560ms var(--fp-settle);
         }
         .fp-root .fp-reveal.is-in .fp-pop { transform: scale(1); }
+
+        /* ── Gennemsigtighed og kontrast ────────────────────────────────
+           Siden hviler på matteret glas. Beder brugeren om mindre
+           gennemsigtighed, er der ikke noget alternativ i v1 — man får bare
+           glasset alligevel. Her bliver fladerne faste i stedet. */
+        @media (prefers-reduced-transparency: reduce) {
+          .fp-root [style*='backdrop-filter'],
+          .fp-root .fp-glass {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(28, 43, 43, 0.14) !important;
+          }
+        }
+        @media (prefers-contrast: more) {
+          .fp-root {
+            --fp-muted: #2c3838;
+          }
+          .fp-root [style*='backdrop-filter'],
+          .fp-root .fp-glass {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(28, 43, 43, 0.55) !important;
+          }
+        }
 
         @media (prefers-reduced-motion: reduce) {
           .fp-root .fp-reveal,
@@ -272,6 +362,20 @@ export default function FrontpageLayout({ children }: { children: React.ReactNod
           /* Hover-highlight må gerne blive — det er farve, ikke bevægelse —
              men skaleringen af ikonet ryger. */
           .fp-root .fp-step:hover .fp-step-icon { scale: 1 !important; }
+
+          /* Reduceret bevægelse betyder blidere feedback, ikke ingen. Trykket
+             skal stadig kunne mærkes — men som lysstyrke frem for som
+             bevægelse i rummet, der er dét der giver ubehag. */
+          .fp-root .fp-press:active,
+          .fp-root .fp-lift:active,
+          .fp-root .fp-badge-box:active,
+          .fp-root .fp-step:active,
+          .fp-root button:active,
+          .fp-root a[role='button']:active {
+            scale: 1 !important;
+            opacity: 0.72;
+            transition: opacity 90ms ease !important;
+          }
         }
       `}</style>
       {/* Uden JavaScript skal alt indhold være synligt fra start */}
