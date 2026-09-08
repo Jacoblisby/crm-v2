@@ -130,6 +130,29 @@ export function BekraeftV4() {
         </button>
       </div>
 
+      {/*
+        Adressen kan pege på hele ejendommen frem for en enkelt lejlighed —
+        vælger man «Bogensevej 39» i stedet for «Bogensevej 39, 1. th», findes
+        der ingen ejerlejlighed at slå op, og BBR svarer tomt.
+
+        Før stod der bare «—» ud for boligareal og værelser. Sælgeren kunne gå
+        videre uden at vide, at estimatet manglede sit vigtigste tal, og
+        beregneren gav derfor ingen pris.
+
+        Her siges det ligeud, med den ene handling der løser det.
+      */}
+      {!state.kvm && (
+        <div
+          className="mx-6 mb-1 mt-1 rounded-lg px-4 py-3 text-[13.5px] leading-relaxed"
+          style={{ background: '#f7e9e4', border: '1px solid #d9b5a9', color: V4.ink }}
+        >
+          <strong style={{ color: '#a3452e' }}>Vi mangler boligens areal.</strong>{' '}
+          Adressen peger på hele ejendommen og ikke på din lejlighed. Gå tilbage og vælg
+          adressen med etage og dør — for eksempel «{state.fullAddress?.split(',')[0] || 'Vejnavn 1'}, 1. th» —
+          eller tryk «Ret detaljer» og skriv arealet selv.
+        </div>
+      )}
+
       {/* Rækker */}
       <div>
         {rows.map((r, i) => (
