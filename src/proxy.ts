@@ -16,12 +16,17 @@
  * besøgt af folk der roder rundt. To domæner er kun to overflader, hvis noget
  * håndhæver skellet.
  *
- * Omskrivningerne i next.config.ts sender roden på saelg til forsiden. Denne
- * fil gør resten: alt der ikke er en sælgerside, findes ikke på det domæne.
+ * Opdelingen går begge veje:
+ *   · en kunde på saelg kan ikke nå CRM'et  → 404
+ *   · en sælgerside kaldt på crm            → omdirigeres til saelg
+ *
+ * Uden den anden halvdel ville der være to adresser på samme side, og et
+ * trykt brev kunne ende med at pege på det interne værktøj.
  */
 import { NextRequest, NextResponse } from 'next/server';
 
 const SAELG = 'saelg.365ejendom.dk';
+const CRM = 'crm.365ejendom.dk';
 
 /** Det kunderne må se. Alt andet findes ikke på sælgerdomænet. */
 const KUNDESIDER = [
@@ -36,6 +41,29 @@ const ALTID_TILLADT = /^\/(_next\/|favicon\.ico|robots\.txt|sitemap\.xml|monitor
 
 export function proxy(req: NextRequest) {
   const vaert = req.headers.get('host')?.split(':')[0] ?? '';
+
+  // ── crm → saelg ────────────────────────────────────────────────────────
+  // Sælgersiderne hører ikke hjemme på backend-domænet. Uden det her ville
+  // der være to adresser på samme side, og et brev eller en QR-kode kunne
+  // ende med at pege på det interne værktøj.
+  //
+  // Midlertidig omdirigering (307), ikke permanent: browsere cacher en 301
+  // for evigt, og opsætningen er en dag gammel. Skift til 308, når det har
+  // stået et stykke tid.
+  if (vaert === CRM) {
+    const { pathname, search } = req.nextUrl;
+    const erSaelgerside = ['/frontpage', '/salg', '/tjek-din-pris', '/k/'].some(
+      (p) => pathname === p || pathname.startsWith(p),
+    );
+    if (erSaelgerside) {
+      // /frontpage er roden på sælgerdomænet, /salg-v4 hedder /tjek-din-pris.
+      const maal =
+        pathname === '/frontpage' ? '/' : pathname === '/salg-v4' ? '/tjek-din-pris' : pathname;
+      return NextResponse.redirect(`https://${SAELG}${maal}${search}`, 307);
+    }
+    return NextResponse.next();
+  }
+
   if (vaert !== SAELG) return NextResponse.next();
 
   const { pathname } = req.nextUrl;
