@@ -67,7 +67,22 @@ export function proxy(req: NextRequest) {
   if (vaert !== SAELG) return NextResponse.next();
 
   const { pathname } = req.nextUrl;
-  if (pathname === '/' || ALTID_TILLADT.test(pathname)) return NextResponse.next();
+
+  // Roden på sælgerdomænet ER forsiden.
+  //
+  // Det lå før som en rewrite i next.config.ts, og det virkede ikke: en
+  // rewrites()-liste havner i «afterFiles», som først kører EFTER at Next
+  // har slået siden op. «/» findes — det er CRM'ets indbakke — så
+  // omskrivningen kom aldrig i spil, og kunder på saelg.365ejendom.dk fik
+  // vores pipeline at se. Her rammer den før filsystemet.
+  if (pathname === '/') {
+    return NextResponse.rewrite(new URL('/frontpage', req.url));
+  }
+  if (pathname === '/tjek-din-pris') {
+    return NextResponse.rewrite(new URL('/salg-v4', req.url));
+  }
+
+  if (ALTID_TILLADT.test(pathname)) return NextResponse.next();
 
   // Server actions ligger på de sider de hører til, og skal kunne kaldes —
   // ellers kan boligberegneren ikke indsende.
