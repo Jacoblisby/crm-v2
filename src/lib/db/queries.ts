@@ -81,8 +81,16 @@ export async function listLeadsForPipeline() {
         ne(leads.stageSlug, 'arkiveret'),
         ne(leads.stageSlug, 'tabt'),
         isNull(leads.deletedAt),
-        // Boligberegner-leads har deres egen /off-market liste — ekskluder fra pipeline
-        sql`(${leads.source} IS NULL OR ${leads.source} NOT LIKE 'boligberegner%')`,
+        // Boligberegner-leads havde deres egen /off-market liste og blev derfor
+        // holdt ude af pipelinen. Det gav mening, da beregneren var ny og kun
+        // producerede testdata.
+        //
+        // Nu er den i luften, og et lead fra en sælger der selv har rakt ud er
+        // det VARMESTE vi har. Skjuler vi det i pipelinen, bliver det ikke
+        // ringet op — og hele brevkampagnen sigter mod at skabe præcis dem.
+        //
+        // De vises nu begge steder. /off-market er stadig listen med
+        // beregningsdetaljer; pipelinen er der hvor arbejdet foregår.
       ),
     )
     .orderBy(desc(leads.stageChangedAt));

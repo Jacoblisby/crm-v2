@@ -231,11 +231,39 @@ export async function submitFunnelAction(
     .select({ lead: leads })
     .from(leads)
     .where(and(isNull(leads.deletedAt), ne(leads.stageSlug, 'koebt'), ne(leads.stageSlug, 'arkiveret'), ne(leads.stageSlug, 'tabt')));
-  const existingLead = candidates.find((c) => {
+  const sammeSted = candidates.find((c) => {
     if (propertyId && c.lead.propertyId === propertyId) return true;
     if (c.lead.address && normalizeAddr(c.lead.address) === targetAddrKey) return true;
     return false;
   })?.lead;
+
+  /**
+   * Samme adresse er IKKE nok til at flette.
+   *
+   * Fletningen overskriver navn, email og telefon på det eksisterende lead.
+   * Matchede vi kun på adresse, ville enhver der indtaster en adresse hvor vi
+   * allerede har et lead, slette den persons kontaktoplysninger — uden
+   * revisionsspor, for opdateringen logger ikke de gamle værdier.
+   *
+   * Det skete under en test 8. sep 2026: en indsendelse på Kildemarksvej 133,
+   * 1. tv. overskrev en rigtig persons navn, mail og telefon. De var ikke til
+   * at hente tilbage fra databasen.
+   *
+   * En adresse siger noget om BOLIGEN. Kun mailen siger noget om PERSONEN.
+   * Derfor flettes der kun, når mailen er den samme; ellers oprettes et nyt
+   * lead, og de to bindes sammen med en note frem for at overskrive hinanden.
+   */
+  const sammeEmail =
+    sammeSted?.email && state.email &&
+    sammeSted.email.trim().toLowerCase() === state.email.trim().toLowerCase();
+
+  const existingLead = sammeEmail ? sammeSted : undefined;
+
+  // Er der et lead på adressen med en ANDEN person, skal mægleren vide det.
+  const andenPersonSammeSted =
+    sammeSted && !sammeEmail
+      ? `\n\nOBS: der findes i forvejen et lead på samme adresse — ${sammeSted.fullName ?? 'uden navn'}${sammeSted.email ? ` (${sammeSted.email})` : ''}. Afklar om det er samme bolig eller samme husstand.`
+      : '';
 
   let leadId: string;
   if (existingLead) {
@@ -316,7 +344,7 @@ export async function submitFunnelAction(
       bidStatus: 'afgivet',
       priority: hasFullData ? 2 : 1,
       source: state.utmSource ?? 'boligberegner',
-      notes,
+      notes: notes + andenPersonSammeSted,
       // Snapshot af alle afkast-inputs så vi kan re-køre kalkulationen i CRM
       afkastInputs: {
         rentMd: estimate.estimatedRentMd,

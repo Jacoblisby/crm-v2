@@ -84,7 +84,12 @@ export default async function LeadDetailPage({
         )}
         {tab === 'kommunikation' && (
           <div className="space-y-3">
-            <SendEmailForm leadId={lead.id} toEmail={lead.email} toName={lead.fullName} />
+            <SendEmailForm
+              leadId={lead.id}
+              toEmail={lead.email}
+              toName={lead.fullName}
+              address={lead.address}
+            />
             <KommunikationTab comms={comms} />
           </div>
         )}
@@ -364,6 +369,21 @@ function KommunikationTab({ comms }: { comms: LeadCommunication[] }) {
           </div>
           {c.subject && <div className="font-medium text-sm">{c.subject}</div>}
           {c.body && <div className="text-sm text-slate-700 mt-1 whitespace-pre-line line-clamp-4">{c.body}</div>}
+          {/* Kvitteringen fra Resend.
+              De automatiske mails skriver «SENDT · Resend id» ind i selve
+              brødteksten, men en manuelt sendt mail gemmer id'et i sin egen
+              kolonne — og den blev ikke vist. Man kunne altså ikke se, om en
+              mail rent faktisk gik igennem, kun at den var forsøgt. */}
+          {c.resendId && (
+            <div className="text-xs text-emerald-700 mt-1.5 font-mono">
+              ✅ afleveret til Resend · {c.resendId}
+            </div>
+          )}
+          {c.type === 'email' && c.direction === 'out' && !c.resendId && !c.body?.includes('SENDT') && (
+            <div className="text-xs text-amber-700 mt-1.5">
+              ⚠️ ingen kvittering fra Resend — mailen er måske ikke afsendt
+            </div>
+          )}
         </li>
       ))}
     </ul>

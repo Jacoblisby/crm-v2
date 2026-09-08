@@ -7,6 +7,8 @@ interface Props {
   leadId: string;
   toEmail: string | null;
   toName: string | null;
+  /** Boligens adresse — skabelonerne nævner den, så den skal med. */
+  address?: string | null;
 }
 
 const TEMPLATE_BUD = `Hej {NAVN}
@@ -39,7 +41,7 @@ Du kan altid ringe til mig på 61789071.
 Venlig hilsen
 Jacob`;
 
-export function SendEmailForm({ leadId, toEmail, toName }: Props) {
+export function SendEmailForm({ leadId, toEmail, toName, address }: Props) {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [pending, startTransition] = useTransition();
@@ -47,7 +49,26 @@ export function SendEmailForm({ leadId, toEmail, toName }: Props) {
   const [open, setOpen] = useState(false);
 
   function loadTemplate(template: string) {
-    const filled = template.replace('{NAVN}', toName?.split(' ')[0] || 'der');
+    /**
+     * Alle pladsholdere, og ALLE forekomster.
+     *
+     * Før blev kun {NAVN} erstattet, og kun første gang: .replace() med en
+     * streng rammer én forekomst. {ADRESSE} stod derfor bogstaveligt i begge
+     * skabeloner, så en mægler kunne sende «din lejlighed på {ADRESSE}» til
+     * en rigtig kunde.
+     *
+     * Mangler adressen, skrives «din bolig» — aldrig en tom parentes.
+     */
+    const filled = template
+      .replaceAll('{NAVN}', toName?.split(' ')[0] || 'der')
+      .replaceAll('{ADRESSE}', address?.trim() || 'din bolig');
+
+    // Fanger en pladsholder vi har glemt, før den når en kunde.
+    const glemt = filled.match(/\{[A-ZÆØÅ_]+\}/g);
+    if (glemt) {
+      console.warn('[email-skabelon] uerstattede pladsholdere:', glemt.join(', '));
+    }
+
     setBody(filled);
     if (!subject) setSubject('Vedrørende din bolig');
   }
