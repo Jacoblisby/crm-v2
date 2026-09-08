@@ -25,6 +25,16 @@
  */
 import QRCode from 'qrcode';
 
+/**
+ * Adressen der trykkes på brevene.
+ *
+ * Sælgerdomænet, ikke CRM'et. En modtager skal ikke sendes til vores interne
+ * værktøj, og roden er kortere end en sti: 27 tegn mod 35 for
+ * «crm.365ejendom.dk/frontpage». Færre tegn giver færre moduler i koden, og
+ * en grovere kode er lettere at skanne — især i 25 mm på foldet papir.
+ */
+export const QR_BASE_URL = 'https://saelg.365ejendom.dk';
+
 /** Brandets petroleum. Mørk nok til at skanne pålideligt på hvidt papir. */
 export const QR_BRAND_COLOR = '#145d5f';
 
@@ -87,7 +97,7 @@ export const QR_RECOMMENDED_PRINT_MM = 30;
  *
  * Uden kode peges der bare på forsiden.
  */
-export function letterUrl(base: string, kode?: string): string {
+export function letterUrl(base: string = QR_BASE_URL, kode?: string): string {
   const clean = base.replace(/\/+$/, '');
   return kode ? `${clean}/k/${kode}` : clean;
 }

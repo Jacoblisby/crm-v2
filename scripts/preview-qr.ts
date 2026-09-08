@@ -8,11 +8,11 @@
  * fin ud på en skærm i 400 px, kan sagtens fejle når den trykkes i 25 mm.
  *
  * Angiv evt. en anden adresse:
- *   npx tsx scripts/preview-qr.ts https://saelg.365ejendom.dk
+ *   npx tsx scripts/preview-qr.ts https://saelg.365ejendom.dk/k/a7f3
  */
-import { qrSvg, QR_BRAND_COLOR, QR_MIN_PRINT_MM, QR_RECOMMENDED_PRINT_MM } from '../src/lib/services/qr';
+import { qrSvg, QR_BASE_URL, QR_BRAND_COLOR, QR_MIN_PRINT_MM, QR_RECOMMENDED_PRINT_MM } from '../src/lib/services/qr';
 
-const url = process.argv[2] || 'https://crm.365ejendom.dk/frontpage';
+const url = process.argv[2] || QR_BASE_URL;
 
 const stoerrelser = [
   { mm: 20, note: 'For lille — tages med for at vise grænsen' },
