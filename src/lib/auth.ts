@@ -10,26 +10,35 @@
  *   RESEND_API_KEY        — fra resend.com dashboard
  *   ALLOWED_EMAILS        — komma-separeret whitelist
  *
- * better-auth opretter selv sine egne tabeller (user, session, verification, account)
- * ved første kald — ingen separat migration behøves.
+ * ── To fejl der holdt login nede ─────────────────────────────────────────
+ * 1. Adapteren fik en rå postgres.js-klient, som better-auth ikke understøtter.
+ *    Resultatet var «NOT_TAGGED_CALL: Query not called as a tagged template
+ *    literal» og 500 på hele /api/auth/*. Nu bruges drizzleAdapter oven på
+ *    projektets egen db-klient — ingen ny driver, én forbindelse.
+ * 2. Kommentaren her påstod, at better-auth selv oprettede sine tabeller ved
+ *    første kald. Det gør det ikke. De fire tabeller står nu i schema.ts og
+ *    oprettes af migrering 0008.
  */
 import { betterAuth } from 'better-auth';
 import { magicLink } from 'better-auth/plugins';
-import postgres from 'postgres';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { db } from './db/client';
+import { user, session, account, verification } from './db/schema';
 
 const allowedEmails = (process.env.ALLOWED_EMAILS || '')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
 
-const databaseUrl = process.env.DATABASE_URL;
-
-// Lazy: opret kun hvis DATABASE_URL findes (build-tid kan ikke kontakte DB)
-const dbInstance = databaseUrl ? postgres(databaseUrl, { max: 5 }) : null;
-
-export const auth = dbInstance
+// Lazy: kun hvis db-klienten findes (build-tid kan ikke kontakte databasen)
+export const auth = db
   ? betterAuth({
-      database: dbInstance,
+      database: drizzleAdapter(db, {
+        provider: 'pg',
+        // Tabellerne hedder det samme som better-auths standard, men skal
+        // alligevel nævnes — ellers leder adapteren efter dem i flertal.
+        schema: { user, session, account, verification },
+      }),
       secret: process.env.BETTER_AUTH_SECRET,
       baseURL: process.env.BETTER_AUTH_URL,
       plugins: [

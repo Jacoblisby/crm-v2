@@ -658,3 +658,66 @@ export type LearningSession = typeof learningSessions.$inferSelect;
 export type NewLearningSession = typeof learningSessions.$inferInsert;
 export type LearnedDefault = typeof learnedDefaults.$inferSelect;
 export type NewLearnedDefault = typeof learnedDefaults.$inferInsert;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BETTER AUTH
+   ══════════════════════════════════════════════════════════════════════════
+
+   Fire tabeller som better-auth kræver. De stod ikke her før, og kommentaren i
+   src/lib/auth.ts påstod at biblioteket selv oprettede dem ved første kald.
+   Det gør det ikke — derfor svarede /api/auth/* 500, og ingen kunne logge ind.
+
+   Navne og kolonner følger better-auths standard-skema præcist. Afviger de,
+   fejler adapteren på et felt ad gangen frem for med én tydelig besked.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+export const user = pgTable('user', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  image: text('image'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const session = pgTable('session', {
+  id: text('id').primaryKey(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+});
+
+export const account = pgTable('account', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Bærer magic-link-tokens. Uden den kan der ikke logges ind. */
+export const verification = pgTable('verification', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});

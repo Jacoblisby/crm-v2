@@ -40,6 +40,60 @@ const MIGRATIONS: Record<string, () => Promise<void>> = {
         WHERE slug = 'tilbud-afgivet' AND (sla_days IS NULL OR sla_days = 0);
     `);
   },
+  '0008_better_auth': async () => {
+    // De fire tabeller better-auth kræver. De fandtes ikke, og auth.ts påstod
+    // at biblioteket selv oprettede dem ved første kald — det gør det ikke.
+    // Uden dem svarer /api/auth/* 500, og ingen kan logge ind.
+    //
+    // Navne og kolonner følger better-auths standard-skema. «user» og
+    // «session» er reserverede ord i Postgres og skal derfor i anførselstegn.
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "user" (
+        id text PRIMARY KEY,
+        name text NOT NULL,
+        email text NOT NULL UNIQUE,
+        email_verified boolean NOT NULL DEFAULT false,
+        image text,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS "session" (
+        id text PRIMARY KEY,
+        expires_at timestamptz NOT NULL,
+        token text NOT NULL UNIQUE,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        ip_address text,
+        user_agent text,
+        user_id text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE
+      );
+      CREATE TABLE IF NOT EXISTS "account" (
+        id text PRIMARY KEY,
+        account_id text NOT NULL,
+        provider_id text NOT NULL,
+        user_id text NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+        access_token text,
+        refresh_token text,
+        id_token text,
+        access_token_expires_at timestamptz,
+        refresh_token_expires_at timestamptz,
+        scope text,
+        password text,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS "verification" (
+        id text PRIMARY KEY,
+        identifier text NOT NULL,
+        value text NOT NULL,
+        expires_at timestamptz NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS session_user_idx ON "session"(user_id);
+      CREATE INDEX IF NOT EXISTS verification_identifier_idx ON "verification"(identifier);
+    `);
+  },
   '0007_foreninger_tragt': async () => {
     // Opkøbs-tragten flyttet fra regnearket "Ejerforeninger breve Status".
     // ownedCount og unitCount genberegnes af /api/admin/seed-foreninger ved
