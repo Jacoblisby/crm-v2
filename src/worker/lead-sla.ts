@@ -25,7 +25,7 @@
  * `events`-række (`lead.sla_alerted`), og leads der allerede har en, springes
  * over. Én påmindelse pr. lead, og så er den ude af vejen.
  */
-import { and, eq, isNull, lt, sql } from 'drizzle-orm';
+import { and, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leads, leadCommunications, events } from '@/lib/db/schema';
 
@@ -39,6 +39,15 @@ import { leads, leadCommunications, events } from '@/lib/db/schema';
 export const SLA_HOURS = 18;
 
 const ALERT_EVENT = 'lead.sla_alerted';
+
+/**
+ * Stadier hvor ingen endnu har taget leadet op.
+ *
+ * «ny-lead» er startpunktet. «interesse» sættes automatisk af boligberegneren,
+ * ikke af et menneske — derfor hører det med her. Alle øvrige stadier flyttes
+ * i hånden og er i sig selv et bevis på, at nogen har set leadet.
+ */
+export const SLA_STADIER = ['ny-lead', 'interesse'] as const;
 
 export interface SlaBreach {
   id: string;
@@ -82,8 +91,20 @@ export function slaBreachQuery(hours = SLA_HOURS) {
         sql`${leads.source} LIKE 'boligberegner%'`,
         isNull(leads.deletedAt),
         lt(leads.createdAt, cutoff),
-        // Endnu ikke rørt: står stadig i første stadie
-        eq(leads.stageSlug, 'ny-lead'),
+        // Endnu ikke rørt af et menneske.
+        //
+        // Her stod før `= 'ny-lead'`, og det ramte forkert: indsendelsen ruter
+        // automatisk et lead til «interesse», så snart der er billeder eller
+        // driftudgifter med. Ingen har talt med dem — de har bare givet os mere.
+        // Resultatet var, at de BEDSTE leads var dem vagten ikke så.
+        //
+        // «interesse» er oven i købet sortOrder 40, altså efter «kontaktet» (20)
+        // og «mail-sendt» (30), så leadet springer forbi to stadier der begge
+        // betyder at nogen har handlet.
+        //
+        // De øvrige stadier sættes kun i hånden og betyder alle, at leadet er
+        // taget op — så dem skal der ikke rykkes for.
+        inArray(leads.stageSlug, SLA_STADIER),
         // Ingen menneskelig udgående kontakt. 'boligberegner' er automatikkens
         // egen kvitteringsmail og må ikke tælle med.
         sql`NOT EXISTS (
