@@ -72,7 +72,7 @@ export function OptionRowV4({
     <button
       type="button"
       onClick={onSelect}
-      className="w-full px-6 py-5 rounded-[10px] flex items-center justify-between gap-6 text-left transition-all active:scale-[0.995]"
+      className="w-full px-6 py-5 rounded-[10px] flex items-center justify-between gap-6 text-left transition-[background-color,border-color,box-shadow,scale] active:scale-[0.985]"
       style={{
         background: selected ? V4.selected : '#fff',
         boxShadow: V4.cardShadow,
@@ -106,7 +106,7 @@ export function ChipV4({
     <button
       type="button"
       onClick={onClick}
-      className="px-4 py-2 rounded-full text-[13.5px] border transition-all active:scale-[0.97]"
+      className="px-4 py-2 rounded-full text-[13.5px] border transition-[background-color,border-color,scale] active:scale-[0.96]"
       style={{
         borderColor: selected ? V4.green : '#d4d9d6',
         background: selected ? V4.green : '#fff',

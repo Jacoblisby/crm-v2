@@ -8,6 +8,7 @@
  *   - Bund: hvid bar m. tynd petroleum progress-streg ØVERST,
  *     "Forrige" (mint-grå) og "Næste" (petroleum) — kantede knapper.
  */
+import { useState } from 'react';
 import { useFunnelV2 } from '../salg-v2/FunnelV2Context';
 import { getScreensV4, V4_STAGE_LABELS, V4_STAGE_ORDER } from './types';
 import { V4, EASE } from './primitives';
@@ -23,6 +24,15 @@ import { EstimatV4 } from './screens/EstimatV4';
 
 export function Funnel() {
   const { state, nextScreen, prevScreen } = useFunnelV2();
+  /**
+   * Hvilken vej vi bevæger os. Skærmen kom før ind fra samme retning uanset
+   * om man gik frem eller tilbage — så «tilbage» så ud præcis som «videre»,
+   * og man mistede fornemmelsen af hvor i tragten man var.
+   *
+   * Apples regel: det der forsvinder én vej, skal komme tilbage samme vej.
+   * Frem = ind fra højre, tilbage = ind fra venstre.
+   */
+  const [dir, setDir] = useState<1 | -1>(1);
   const screens = getScreensV4(state);
   const localIdx = state.screenIdx - 1;
   const screen = screens[Math.min(localIdx, screens.length - 1)];
@@ -33,10 +43,12 @@ export function Funnel() {
   }
 
   function next() {
+    setDir(1);
     nextScreen();
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   function prev() {
+    setDir(-1);
     prevScreen();
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
@@ -73,7 +85,10 @@ export function Funnel() {
 
       <main className="flex-1">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-10 sm:py-14">
-          <div key={screen.id} className="grid lg:grid-cols-12 gap-10 lg:gap-16 v4-screen-enter">
+          <div
+            key={screen.id}
+            className={`grid lg:grid-cols-12 gap-10 lg:gap-16 ${dir === 1 ? 'v4-enter-frem' : 'v4-enter-tilbage'}`}
+          >
             {/* Venstre: kicker / titel / sub / counter */}
             <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-36 self-start">
               <div className="text-[12px] tracking-[0.18em] uppercase" style={{ color: V4.ink, fontWeight: 500 }}>
@@ -121,7 +136,7 @@ export function Funnel() {
           <button
             type="button"
             onClick={prev}
-            className="inline-flex items-center gap-2.5 px-6 py-3 rounded-md text-[14px] transition-all active:scale-[0.98]"
+            className="inline-flex items-center gap-2.5 px-6 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97]"
             style={{
               background: V4.prevBtn,
               color: V4.greenDeep,
@@ -145,7 +160,7 @@ export function Funnel() {
               type="button"
               onClick={next}
               disabled={!canProceed}
-              className="inline-flex items-center gap-2.5 px-7 py-3 rounded-md text-[14px] transition-all active:scale-[0.98] disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2.5 px-7 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97] disabled:cursor-not-allowed"
               style={{
                 background: canProceed ? V4.green : '#dcdad6',
                 color: canProceed ? '#fff' : V4.soft,
@@ -164,13 +179,31 @@ export function Funnel() {
       </footer>
 
       <style>{`
-        @keyframes v4-screen-fade {
-          0%   { opacity: 0; transform: translateY(8px); }
-          100% { opacity: 1; transform: translateY(0); }
+        /* Vandret frem for lodret: en tragt bevæger sig sidelæns gennem trin,
+           ikke op og ned. 14 px er nok til at retningen aflæses uden at det
+           bliver en rutsjetur. */
+        @keyframes v4-frem {
+          0%   { opacity: 0; transform: translateX(14px); }
+          100% { opacity: 1; transform: translateX(0); }
         }
-        .v4-screen-enter { animation: v4-screen-fade 240ms ${EASE} both; }
+        @keyframes v4-tilbage {
+          0%   { opacity: 0; transform: translateX(-14px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        .v4-enter-frem     { animation: v4-frem 260ms ${EASE} both; }
+        .v4-enter-tilbage  { animation: v4-tilbage 260ms ${EASE} both; }
+
+        /* Siden hviler på et matteret headerfelt. Beder brugeren om mindre
+           gennemsigtighed, skal der være et alternativ. */
+        @media (prefers-reduced-transparency: reduce) {
+          .v4-root [style*='backdrop-filter'] {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: #ffffff !important;
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
-          .v4-screen-enter { animation: none; }
+          .v4-enter-frem, .v4-enter-tilbage { animation: none; }
         }
       `}</style>
     </div>
