@@ -41,6 +41,26 @@ export default function SalgV4Layout({ children }: { children: React.ReactNode }
         .v4-root button, .v4-root [role='button'] { -webkit-tap-highlight-color: transparent; }
         .v4-root button:active { transition-duration: 90ms; }
 
+        /* Både startskærmen og flowet hviler på matterede felter. Reglen hører
+           derfor i layoutet — lå den i Funnel.tsx, gjaldt den ikke på
+           startskærmen, som er præcis der man møder glasset først. */
+        @media (prefers-reduced-transparency: reduce) {
+          .v4-root [style*='backdrop-filter'] {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(28, 43, 43, 0.12);
+          }
+        }
+        @media (prefers-contrast: more) {
+          .v4-root [style*='backdrop-filter'] {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(28, 43, 43, 0.5);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           /* Reduceret bevægelse betyder blidere feedback, ikke ingen:
              lysstyrke i stedet for bevægelse i rummet. */

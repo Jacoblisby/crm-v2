@@ -193,15 +193,6 @@ export function Funnel() {
         .v4-enter-frem     { animation: v4-frem 260ms ${EASE} both; }
         .v4-enter-tilbage  { animation: v4-tilbage 260ms ${EASE} both; }
 
-        /* Siden hviler på et matteret headerfelt. Beder brugeren om mindre
-           gennemsigtighed, skal der være et alternativ. */
-        @media (prefers-reduced-transparency: reduce) {
-          .v4-root [style*='backdrop-filter'] {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            background: #ffffff !important;
-          }
-        }
         @media (prefers-reduced-motion: reduce) {
           .v4-enter-frem, .v4-enter-tilbage { animation: none; }
         }
