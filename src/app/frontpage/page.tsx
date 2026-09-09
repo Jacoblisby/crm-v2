@@ -32,6 +32,7 @@ import {
   MapPin,
   Coins,
   HouseLine,
+  ArrowUpRight,
 } from '@phosphor-icons/react';
 import { AddressCta } from './AddressCta';
 import { Reveal, useScrolled, MobileCarousel, useParallaxGroup, RevealBackstop } from './Motion';
@@ -49,6 +50,18 @@ export const FP_GLASS = {
   background: 'rgba(0,0,0,0.30)',
   blur: 'blur(20px)',
 } as const;
+
+/**
+ * Vejen tilbage til udlejningssiden.
+ *
+ * Salgssiden er et sidespor: den handler om at SÆLGE sin bolig til os. Mange
+ * der lander her, leder efter noget at leje, og de skal kunne komme videre
+ * uden at gætte en adresse eller bruge tilbage-knappen.
+ *
+ * Den holdes adskilt fra NAV_LINKS, fordi alle dem er ankre på siden selv.
+ * Denne fører ud af domænet — og det skal ses, ikke gættes.
+ */
+const TILBAGE_TIL_LEJE = 'https://365ejendom.dk/';
 
 const NAV_LINKS = [
   { label: 'Bliv boende', href: '#bliv-boende' },
@@ -164,6 +177,16 @@ function Nav() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Ud af domænet — pilen siger det, så ingen tror det er et anker
+                som resten af menuen. */}
+            <a
+              href={TILBAGE_TIL_LEJE}
+              className="fp-press hidden md:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-[13.5px] text-white hover:opacity-75"
+              style={{ fontWeight: 400, transition: 'opacity 200ms var(--fp-out), scale 220ms var(--fp-out)' }}
+            >
+              Tilbage til Leje
+              <ArrowUpRight size={14} weight="regular" />
+            </a>
             {/* Telefon-pill: skjult på mobil (som i mobil-framen) */}
             <a
               href="tel:+4589876634"
@@ -242,6 +265,18 @@ function Nav() {
                 {l.label}
               </a>
             ))}
+            {/* Samme udgang som på desktop, og samme plads i rækkefølgen: sidste
+                menupunkt, før telefon-knappen. På en telefon er menuen det
+                eneste navigationspunkt — uden den her er der ingen vej tilbage. */}
+            <a
+              href={TILBAGE_TIL_LEJE}
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center gap-1.5 text-[19px] text-white"
+              style={{ fontWeight: 400, opacity: 0.85 }}
+            >
+              Tilbage til Leje
+              <ArrowUpRight size={17} weight="regular" />
+            </a>
             <a
               href="tel:+4589876634"
               className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[15px]"
