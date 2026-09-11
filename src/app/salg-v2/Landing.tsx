@@ -218,7 +218,7 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-10 flex flex-col sm:flex-row gap-4 justify-between text-[13px] text-[#5A6166]">
           <div>© 365 ejendomme · Boligselskabet Sommerhave ApS · Næstved · CVR 41763736</div>
           <div className="flex gap-6">
-            <a href="https://365ejendom.dk/privatlivspolitik" className="hover:opacity-70">Privatliv</a>
+            <a href="https://365ejendom.dk/privacy-policy/" className="hover:opacity-70">Privatliv</a>
             <a href="mailto:jacob@365ejendom.dk" className="hover:opacity-70">jacob@365ejendom.dk</a>
           </div>
         </div>

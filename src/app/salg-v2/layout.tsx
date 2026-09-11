@@ -32,7 +32,7 @@ export default function SalgV2Layout({ children }: { children: React.ReactNode }
             <div className="py-2">© 365 Ejendomme · Boligselskabet Sommerhave ApS · Næstved · CVR 41763736</div>
             <div className="flex gap-1">
               <Link
-                href="https://365ejendom.dk/privatlivspolitik"
+                href="https://365ejendom.dk/privacy-policy/"
                 className="inline-flex items-center min-h-[44px] px-3 hover:text-[#244949] rounded-full"
               >
                 Privatliv

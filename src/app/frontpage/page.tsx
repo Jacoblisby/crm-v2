@@ -870,7 +870,7 @@ function FooterBar() {
           CVR 41763736
         </div>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
-          <a href="https://365ejendom.dk/privatlivspolitik" className="hover:text-white transition-colors">Privatliv</a>
+          <a href="https://365ejendom.dk/privacy-policy/" className="hover:text-white transition-colors">Privatliv</a>
           <a href="https://365ejendom.dk" className="hover:text-white transition-colors">365ejendom.dk</a>
         </div>
       </div>

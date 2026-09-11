@@ -461,7 +461,7 @@ export function EstimatV4() {
         <div className="max-w-[1240px] mx-auto flex flex-wrap items-center justify-between gap-3 text-[12px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
           <div>© 365ejendom · Boligselskabet Sommerhave ApS · Naestved · CVR 41763736</div>
           <div className="flex gap-8">
-            <a href="https://365ejendom.dk/privatlivspolitik" className="hover:text-white transition-colors">Privatliv</a>
+            <a href="https://365ejendom.dk/privacy-policy/" className="hover:text-white transition-colors">Privatliv</a>
             <a href="https://365ejendom.dk" className="hover:text-white transition-colors">365ejendom.dk</a>
           </div>
         </div>

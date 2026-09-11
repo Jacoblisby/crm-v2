@@ -56,7 +56,7 @@ export default function SalgV3Layout({ children }: { children: React.ReactNode }
               © 365 Ejendomme · Boligselskabet Sommerhave ApS · Naestved · CVR 41763736
             </div>
             <div className="flex gap-6">
-              <Link href="https://365ejendom.dk/privatlivspolitik" className="hover:underline">Privatliv</Link>
+              <Link href="https://365ejendom.dk/privacy-policy/" className="hover:underline">Privatliv</Link>
               <Link href="https://365ejendom.dk" className="hover:underline">365ejendom.dk</Link>
             </div>
           </div>

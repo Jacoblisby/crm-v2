@@ -38,7 +38,7 @@ export default function SalgLayout({ children }: { children: React.ReactNode }) 
             <div className="py-2">© 365 Ejendomme · CVR 42 80 04 22</div>
             <div className="flex gap-1">
               <Link
-                href="https://365ejendom.dk/privatlivspolitik"
+                href="https://365ejendom.dk/privacy-policy/"
                 className="inline-flex items-center min-h-[44px] px-3 hover:text-brand-700 rounded-full transition-colors"
               >
                 Privatliv
