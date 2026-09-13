@@ -13,7 +13,11 @@ Tre ting, lært af første runde (11.09.2026):
 · Hvert flettefelt skrives som ét samlet tekststykke. Et felt, der er delt
   op i Word-filen («{{forn» + «avn}}»), kan en flettemotor ikke finde.
 """
+import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from docx import Document
 from docx.shared import Pt, Mm, RGBColor
@@ -22,7 +26,9 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
 VAULT = Path.home() / 'Desktop/Claude Vault/Projects/Brevkampagne ejerforeninger'
-QR = VAULT / 'QR saelg.365ejendom.dk.png'
+# Tryk-størrelse (500 px ≈ 480 dpi ved 26 mm). Den store 1200 px-udgave
+# ligger ved siden af til plakater og skærm, men gør Word-filen unødigt tung.
+QR = VAULT / 'QR saelg.365ejendom.dk (til brev).png'
 PETROL = RGBColor(0x14, 0x5D, 0x5F)
 TEKST = RGBColor(0x1F, 0x2A, 0x2B)
 GRAA = RGBColor(0x5B, 0x68, 0x68)
@@ -238,7 +244,37 @@ def byg(b):
     return ud
 
 
+def sider(docx: Path):
+    """Antal sider, målt ved at lade LibreOffice sætte filen op.
+
+    Brevet SKAL kunne være på én side. Det er ikke en smagssag: Resights
+    afregner pr. ark, og et brev, der løber over, får sin underskrift eller
+    sin fodnote på et løst stykke papir bagerst.
+
+    Returnerer None, hvis LibreOffice ikke er installeret — så er det
+    prøvetrykket fra Resights, der må fange det.
+    """
+    soffice = shutil.which('soffice')
+    if not soffice:
+        return None
+    with tempfile.TemporaryDirectory() as t:
+        subprocess.run([soffice, '--headless', '--convert-to', 'pdf', '--outdir', t, str(docx)],
+                       capture_output=True, timeout=180)
+        pdf = Path(t) / (docx.stem + '.pdf')
+        if not pdf.exists():
+            return None
+        return len(re.findall(rb'/Type\s*/Page[^s]', pdf.read_bytes()))
+
+
 if __name__ == '__main__':
     valg = sys.argv[1:] or list(BREVE)
+    fejl = 0
     for navn in valg:
-        print('Gemt:', byg(BREVE[navn]))
+        ud = byg(BREVE[navn])
+        n = sider(ud)
+        status = 'ikke målt (LibreOffice mangler)' if n is None else f'{n} side' + ('' if n == 1 else 'r')
+        print(f'Gemt: {ud.name}  —  {status}')
+        if n is not None and n != 1:
+            fejl += 1
+            print(f'  FEJL: {ud.name} fylder {n} sider. Brevet skal kunne være på én.')
+    sys.exit(1 if fejl else 0)
