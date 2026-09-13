@@ -43,6 +43,7 @@ BREVE = {
              ('. Kontant og direkte, uden mægler.', 0)],
             [('Du får dette brev, fordi vi allerede ejer lejligheder i din ejerforening. Vi kender '
               'bygningen og foreningen, så vi kan give dig et konkret bud hurtigt. ' + SAMMEN, 0)],
+            [('Skriv adressen på ', 0), ('saelg.365ejendom.dk', 1), (', så får du et foreløbigt bud med det samme.', 0)],
         ],
         'kolonne': 'Almindeligt salg',
         'tabel': [
@@ -56,14 +57,17 @@ BREVE = {
                       'Måske vil du have friværdien ud, men blive i dit hjem som lejer. Eller måske er det noget '
                       'helt tredje. Du bestemmer selv tidspunktet, i dag eller om et halvt år, og vi gennemgår '
                       'alle vilkår med dig, før du beslutter noget.'),
-        'boks_titel': 'Se dit bud på et par minutter',
-        'boks': [
-            [('Scan koden, eller gå ind på ', 0), ('saelg.365ejendom.dk', 1),
-             (' og skriv din adresse. Så får du et foreløbigt bud med det samme. Det er gratis og '
-              'forpligter dig ikke til noget.', 0)],
-            [('Vil du hellere tale med et menneske, så ring direkte til mig på ', 0), ('61 78 90 71', 1), ('.', 0)],
+        'boks_titel': 'Skriv din adresse, så får du et bud',
+        'trin': [
+            ('1. ', 'Scan koden med telefonen, eller gå ind på ', 'saelg.365ejendom.dk'),
+            ('2. ', 'Skriv adressen på din lejlighed', ''),
+            ('3. ', 'Du får et foreløbigt bud med det samme', ''),
         ],
-        'ps': ('Du behøver ikke have planer om at sælge for at scanne koden. Det kan være rart bare at vide, '
+        'boks': [
+            [('Det tager under to minutter, det er gratis, og det forpligter dig ikke til noget. Vil du hellere '
+              'tale med et menneske, så ring direkte til mig på ', 0), ('61 78 90 71', 1), ('.', 0)],
+        ],
+        'ps': ('Du behøver ikke have planer om at sælge for at skrive adressen ind. Det tager to minutter at se, '
                'hvad din lejlighed er værd i dag. Buddet er dit at tage stilling til, nu, senere eller aldrig.'),
     },
 
@@ -78,6 +82,7 @@ BREVE = {
              ('. Kontant og direkte, med eller uden lejer.', 0)],
             [('Du får dette brev, fordi vi allerede ejer og udlejer lejligheder i samme ejerforening. Vi kender '
               'bygningen, foreningen og lejeniveauet, så vi kan give dig et konkret bud hurtigt. ' + SAMMEN, 0)],
+            [('Skriv adressen på ', 0), ('saelg.365ejendom.dk', 1), (', så får du et foreløbigt bud med det samme.', 0)],
         ],
         'kolonne': 'Salg gennem mægler',
         'tabel': [
@@ -91,16 +96,19 @@ BREVE = {
                       'være udlejer, eller vil hellere bruge pengene på noget andet. Eller måske er det noget helt '
                       'tredje. Vi køber med eller uden lejer, og du bestemmer selv tidspunktet. Ejer du flere '
                       'lejligheder, giver vi gerne et samlet bud på dem alle.'),
-        'boks_titel': 'Få et bud',
-        'boks': [
-            [('Ring direkte til mig på ', 0), ('61 78 90 71', 1), (', eller skriv til ', 0),
-             ('administration@365ejendom.dk', 1), ('. Så regner vi på lejligheden, som den er i dag, med lejer '
-              'og lejekontrakt.', 0)],
-            [('Du kan også scanne koden eller gå ind på ', 0), ('saelg.365ejendom.dk', 1),
-             (' for et foreløbigt bud med det samme. Det er gratis og forpligter dig ikke til noget.', 0)],
+        'boks_titel': 'Skriv adressen, så får du et bud',
+        'trin': [
+            ('1. ', 'Scan koden med telefonen, eller gå ind på ', 'saelg.365ejendom.dk'),
+            ('2. ', 'Skriv adressen på lejligheden', ''),
+            ('3. ', 'Du får et foreløbigt bud med det samme', ''),
         ],
-        'ps': ('Du behøver ikke have planer om at sælge for at høre, hvad vi vil give. Det kan være rart bare at '
-               'vide, hvad lejligheden er værd i dag, også med lejer.'),
+        'boks': [
+            [('Det tager under to minutter, det er gratis, og det forpligter dig ikke til noget. Er lejligheden '
+              'udlejet, eller ejer du flere, så ring til mig på ', 0), ('61 78 90 71', 1),
+             (', så regner vi på det sammen.', 0)],
+        ],
+        'ps': ('Du behøver ikke have planer om at sælge for at skrive adressen ind. Det tager to minutter at se, '
+               'hvad lejligheden er værd i dag, også med lejer.'),
     },
 }
 
@@ -210,9 +218,13 @@ def byg(b):
     lås_bredder(bx, (Mm(134), Mm(32)))
     v, hq = bx.rows[0].cells
     p0 = v.paragraphs[0]; p0.paragraph_format.space_after = Pt(3)
-    r = p0.add_run(b['boks_titel']); r.bold = True; r.font.size = Pt(11.5); r.font.color.rgb = PETROL
+    r = p0.add_run(b['boks_titel']); r.bold = True; r.font.size = Pt(12.5); r.font.color.rgb = PETROL
+    for nr, tekst, fremhaev in b.get('trin', []):
+        dele = [(nr, 1), (tekst, 0)] + ([(fremhaev, 1)] if fremhaev else [])
+        afsnit(doc, dele, efter=1, container=v, linje=1.25)
     for i, dele in enumerate(b['boks']):
-        afsnit(doc, dele, efter=0 if i == len(b['boks']) - 1 else 4, container=v)
+        afsnit(doc, dele, efter=0 if i == len(b['boks']) - 1 else 4, foer=5 if i == 0 and b.get('trin') else 0,
+               container=v)
     hq.vertical_alignment = 1
     hq.paragraphs[0].add_run().add_picture(str(QR), width=Mm(26))
 
