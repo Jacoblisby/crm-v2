@@ -8,10 +8,12 @@
  * hen. Kildemarksvænget giver 20 %, Benløseparken 0,5 %, og Benløseparken er
  * den, der fylder mest i portoen.
  */
+import Link from 'next/link';
 import { and, desc, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { housingAssociations, leads } from '@/lib/db/schema';
 import bbrRollup from '@/lib/data/bbr-forening-rollup.json';
+import { handlerFor, noegletal } from '@/lib/handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -323,6 +325,8 @@ function ForeningerView({
                     <th className="text-right font-semibold px-3 py-3">Ejet</th>
                     <th className="text-right font-semibold px-3 py-3">Andel</th>
                     <th className="text-right font-semibold px-3 py-3">Kvm</th>
+                    <th className="text-right font-semibold px-3 py-3" title="Frie handler de sidste 12 måneder">Handler 12 mdr</th>
+                    <th className="text-right font-semibold px-3 py-3" title="Median kr/kvm, frie handler de sidste 12 måneder">Kr/kvm</th>
                     <th className="text-center font-semibold px-3 py-3">Breve</th>
                     <th className="text-left font-semibold px-4 py-3">Status</th>
                   </tr>
@@ -331,10 +335,15 @@ function ForeningerView({
                   {raekker.map((r) => {
                     const st = STATUS[r.status] ?? STATUS.undersoeges;
                     const andel = Number(r.andel) || 0;
+                    // Handler og kvm-pris: frie handler de sidste 12 måneder.
+                    // Detaljerne — de enkelte comps — ligger på foreningens side.
+                    const h12 = noegletal(handlerFor(r.name), 12);
                     return (
                       <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                         <td className="px-4 py-3">
-                          <div className="font-medium text-slate-900">{r.name}</div>
+                          <Link href={`/foreninger/${r.id}`} className="font-medium text-slate-900 hover:underline underline-offset-2">
+                            {r.name}
+                          </Link>
                           {r.street && <div className="text-xs text-slate-500">{r.street}</div>}
                         </td>
                         <td className="px-3 py-3 text-slate-600">{r.city ?? '—'}</td>
@@ -361,6 +370,18 @@ function ForeningerView({
                         <td className="px-3 py-3 text-right tabular-nums text-slate-500 whitespace-nowrap">
                           {r.kvmFrom && r.kvmTo ? `${r.kvmFrom}–${r.kvmTo}` : '—'}
                         </td>
+                        <td className="px-3 py-3 text-right tabular-nums text-slate-700">
+                          {h12.antal ? (
+                            <Link href={`/foreninger/${r.id}`} className="hover:underline underline-offset-2">
+                              {h12.antal}
+                            </Link>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 text-right tabular-nums font-medium text-slate-900 whitespace-nowrap">
+                          {h12.medianKrPrKvm !== null ? h12.medianKrPrKvm.toLocaleString('da-DK') : <span className="text-slate-300 font-normal">—</span>}
+                        </td>
                         <td className="px-3 py-3 text-center tabular-nums text-slate-600">
                           {r.letterRounds || '—'}
                         </td>
@@ -385,7 +406,8 @@ function ForeningerView({
         )}
 
         <p className="text-xs text-slate-500 mt-4 max-w-2xl leading-relaxed">
-          Andel er hvor stor en del af foreningen vi ejer. Tallet kommer fra en krydsning af
+          Handler og kr/kvm er frie handler de sidste 12 måneder ifølge Resights — klik på
+          foreningen for at se de enkelte handler. Andel er hvor stor en del af foreningen vi ejer. Tallet kommer fra en krydsning af
           foreningens BFE-numre mod porteføljen og genberegnes ved hver indlæsning — i modsætning
           til regnearket, hvor det blev vedligeholdt i hånden og nåede at blive 27 for lavt.
         </p>

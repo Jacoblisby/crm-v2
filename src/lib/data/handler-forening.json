@@ -1,0 +1,4389 @@
+{
+ "kilde": "Resights ejendomsudtræk — seneste handel pr. lejlighed",
+ "genereret": "2026-09-14",
+ "maaneder": 36,
+ "foreninger": {
+  "Hegnsgården": [
+   {
+    "bfe": 281274,
+    "adresse": "Svendborgvej 35, st.",
+    "kvm": 67,
+    "pris": 1100000,
+    "dato": "2026-08-11",
+    "krPrKvm": 16418,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283453,
+    "adresse": "Svendborgvej 269, st.",
+    "kvm": 67,
+    "pris": 1044000,
+    "dato": "2026-07-25",
+    "krPrKvm": 15582,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283461,
+    "adresse": "Svendborgvej 283, 1.",
+    "kvm": 67,
+    "pris": 765000,
+    "dato": "2025-12-16",
+    "krPrKvm": 11418,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283416,
+    "adresse": "Svendborgvej 135, st.",
+    "kvm": 60,
+    "pris": 876000,
+    "dato": "2025-10-01",
+    "krPrKvm": 14600,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 281288,
+    "adresse": "Svendborgvej 59, 1.",
+    "kvm": 67,
+    "pris": 925000,
+    "dato": "2025-06-27",
+    "krPrKvm": 13806,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281296,
+    "adresse": "Svendborgvej 73, st.",
+    "kvm": 67,
+    "pris": 950000,
+    "dato": "2025-06-01",
+    "krPrKvm": 14179,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281273,
+    "adresse": "Svendborgvej 33, st.",
+    "kvm": 69,
+    "pris": 820000,
+    "dato": "2025-05-12",
+    "krPrKvm": 11884,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283441,
+    "adresse": "Svendborgvej 249, 1.",
+    "kvm": 67,
+    "pris": 850000,
+    "dato": "2025-04-16",
+    "krPrKvm": 12687,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283409,
+    "adresse": "Svendborgvej 123, 1.",
+    "kvm": 67,
+    "pris": 870000,
+    "dato": "2025-01-08",
+    "krPrKvm": 12985,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281268,
+    "adresse": "Svendborgvej 23, 1.",
+    "kvm": 67,
+    "pris": 800000,
+    "dato": "2025-01-06",
+    "krPrKvm": 11940,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283454,
+    "adresse": "Svendborgvej 271, st.",
+    "kvm": 69,
+    "pris": 995000,
+    "dato": "2024-11-08",
+    "krPrKvm": 14420,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283475,
+    "adresse": "Svendborgvej 187, 1.",
+    "kvm": 67,
+    "pris": 870000,
+    "dato": "2024-08-06",
+    "krPrKvm": 12985,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281283,
+    "adresse": "Svendborgvej 51, 1.",
+    "kvm": 67,
+    "pris": 720000,
+    "dato": "2024-07-30",
+    "krPrKvm": 10746,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283485,
+    "adresse": "Svendborgvej 177, 1.",
+    "kvm": 69,
+    "pris": 730000,
+    "dato": "2024-06-26",
+    "krPrKvm": 10580,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283443,
+    "adresse": "Svendborgvej 253, 1.",
+    "kvm": 67,
+    "pris": 875000,
+    "dato": "2024-06-21",
+    "krPrKvm": 13060,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283467,
+    "adresse": "Svendborgvej 237, st.",
+    "kvm": 67,
+    "pris": 790000,
+    "dato": "2024-05-29",
+    "krPrKvm": 11791,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281297,
+    "adresse": "Svendborgvej 75, st.",
+    "kvm": 67,
+    "pris": 1050000,
+    "dato": "2024-05-09",
+    "krPrKvm": 15672,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281311,
+    "adresse": "Svendborgvej 13, st.",
+    "kvm": 67,
+    "pris": 840000,
+    "dato": "2024-04-23",
+    "krPrKvm": 12537,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283497,
+    "adresse": "Svendborgvej 199, st.",
+    "kvm": 60,
+    "pris": 750000,
+    "dato": "2024-04-22",
+    "krPrKvm": 12500,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281282,
+    "adresse": "Svendborgvej 49, 1.",
+    "kvm": 69,
+    "pris": 795000,
+    "dato": "2024-04-19",
+    "krPrKvm": 11522,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283457,
+    "adresse": "Svendborgvej 277, 1.",
+    "kvm": 60,
+    "pris": 740000,
+    "dato": "2024-03-20",
+    "krPrKvm": 12333,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281281,
+    "adresse": "Svendborgvej 47, st.",
+    "kvm": 69,
+    "pris": 995000,
+    "dato": "2024-03-05",
+    "krPrKvm": 14420,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283480,
+    "adresse": "Svendborgvej 167, st.",
+    "kvm": 67,
+    "pris": 1025000,
+    "dato": "2023-09-25",
+    "krPrKvm": 15299,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283481,
+    "adresse": "Svendborgvej 169, st.",
+    "kvm": 67,
+    "pris": 600000,
+    "dato": "2023-09-19",
+    "krPrKvm": 8955,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   }
+  ],
+  "Stærmosegaard": [
+   {
+    "bfe": 272737,
+    "adresse": "Odensevej 124, 1. tv",
+    "kvm": 75,
+    "pris": 1295000,
+    "dato": "2026-06-25",
+    "krPrKvm": 17267,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272363,
+    "adresse": "Odensevej 114, 1. tv",
+    "kvm": 72,
+    "pris": 1250000,
+    "dato": "2026-06-05",
+    "krPrKvm": 17361,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280856,
+    "adresse": "Odensevej 105, 2. th",
+    "kvm": 98,
+    "pris": 1000000,
+    "dato": "2026-05-06",
+    "krPrKvm": 10204,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281262,
+    "adresse": "Bogensevej 3, st. tv",
+    "kvm": 83,
+    "pris": 1450000,
+    "dato": "2026-04-28",
+    "krPrKvm": 17470,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281243,
+    "adresse": "Bogensevej 9, 1. th",
+    "kvm": 86,
+    "pris": 1680000,
+    "dato": "2026-04-13",
+    "krPrKvm": 19535,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281239,
+    "adresse": "Bogensevej 7, 2. th",
+    "kvm": 83,
+    "pris": 1050000,
+    "dato": "2026-04-01",
+    "krPrKvm": 12651,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280801,
+    "adresse": "Odensevej 109, st. tv",
+    "kvm": 84,
+    "pris": 1345000,
+    "dato": "2026-03-13",
+    "krPrKvm": 16012,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280838,
+    "adresse": "Odensevej 105, 1. mf",
+    "kvm": 30,
+    "pris": 1030000,
+    "dato": "2026-01-01",
+    "krPrKvm": 34333,
+    "metode": "Interessesammenfald",
+    "fri": false
+   },
+   {
+    "bfe": 281251,
+    "adresse": "Bogensevej 11, 2. tv",
+    "kvm": 83,
+    "pris": 1150000,
+    "dato": "2025-10-12",
+    "krPrKvm": 13855,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280821,
+    "adresse": "Odensevej 113, 1. th",
+    "kvm": 81,
+    "pris": 1155000,
+    "dato": "2025-10-09",
+    "krPrKvm": 14259,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280845,
+    "adresse": "Odensevej 119, 2. tv",
+    "kvm": 81,
+    "pris": 1275000,
+    "dato": "2025-10-03",
+    "krPrKvm": 15741,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272724,
+    "adresse": "Odensevej 120, st. th",
+    "kvm": 61,
+    "pris": 995000,
+    "dato": "2025-09-29",
+    "krPrKvm": 16311,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281227,
+    "adresse": "Bogensevej 5, st. tv",
+    "kvm": 83,
+    "pris": 1300000,
+    "dato": "2025-06-26",
+    "krPrKvm": 15663,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281260,
+    "adresse": "Bogensevej 1, 2. tv",
+    "kvm": 83,
+    "pris": 1000000,
+    "dato": "2025-05-22",
+    "krPrKvm": 12048,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272715,
+    "adresse": "Odensevej 116, 2. tv",
+    "kvm": 75,
+    "pris": 1155000,
+    "dato": "2025-05-07",
+    "krPrKvm": 15400,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280810,
+    "adresse": "Odensevej 111, st. th",
+    "kvm": 98,
+    "pris": 1375000,
+    "dato": "2025-04-28",
+    "krPrKvm": 14031,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280847,
+    "adresse": "Odensevej 121, st. tv",
+    "kvm": 84,
+    "pris": 1150000,
+    "dato": "2025-02-13",
+    "krPrKvm": 13690,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280828,
+    "adresse": "Odensevej 115, 1. th",
+    "kvm": 81,
+    "pris": 1285000,
+    "dato": "2025-02-04",
+    "krPrKvm": 15864,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280830,
+    "adresse": "Odensevej 115, 2. th",
+    "kvm": 81,
+    "pris": 1298000,
+    "dato": "2024-08-26",
+    "krPrKvm": 16025,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272359,
+    "adresse": "Odensevej 112, 2. tv",
+    "kvm": 75,
+    "pris": 1188400,
+    "dato": "2024-08-22",
+    "krPrKvm": 15845,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280835,
+    "adresse": "Odensevej 117, 1. mf",
+    "kvm": 30,
+    "pris": 600000,
+    "dato": "2024-08-01",
+    "krPrKvm": 20000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280802,
+    "adresse": "Odensevej 109, st. th",
+    "kvm": 81,
+    "pris": 998000,
+    "dato": "2024-07-15",
+    "krPrKvm": 12321,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272365,
+    "adresse": "Odensevej 118, 1. th",
+    "kvm": 77,
+    "pris": 975000,
+    "dato": "2024-07-04",
+    "krPrKvm": 12662,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281223,
+    "adresse": "Bogensevej 1, st. tv",
+    "kvm": 83,
+    "pris": 1245000,
+    "dato": "2024-06-27",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281258,
+    "adresse": "Bogensevej 13, 2. tv",
+    "kvm": 86,
+    "pris": 1150000,
+    "dato": "2024-06-05",
+    "krPrKvm": 13372,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272755,
+    "adresse": "Odensevej 110, 1. tv",
+    "kvm": 72,
+    "pris": 950000,
+    "dato": "2024-04-10",
+    "krPrKvm": 13194,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 281249,
+    "adresse": "Bogensevej 11, 1. tv",
+    "kvm": 83,
+    "pris": 1020000,
+    "dato": "2024-03-22",
+    "krPrKvm": 12289,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272727,
+    "adresse": "Odensevej 120, 2. tv",
+    "kvm": 75,
+    "pris": 1085000,
+    "dato": "2023-12-23",
+    "krPrKvm": 14467,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280846,
+    "adresse": "Odensevej 119, 2. th",
+    "kvm": 81,
+    "pris": 1115000,
+    "dato": "2023-10-06",
+    "krPrKvm": 13765,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ],
+  "Kildemarksvænget": [
+   {
+    "bfe": 284000,
+    "adresse": "Kildemarksvej 139, 1. tv",
+    "kvm": 78,
+    "pris": 1250000,
+    "dato": "2026-05-08",
+    "krPrKvm": 16026,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283995,
+    "adresse": "Kildemarksvej 143, 1. th",
+    "kvm": 78,
+    "pris": 1145000,
+    "dato": "2025-08-11",
+    "krPrKvm": 14679,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284030,
+    "adresse": "Kildemarksvej 151, 1. tv",
+    "kvm": 78,
+    "pris": 960000,
+    "dato": "2025-06-16",
+    "krPrKvm": 12308,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284010,
+    "adresse": "Kildemarksvej 149, 1. th",
+    "kvm": 78,
+    "pris": 1150000,
+    "dato": "2025-04-03",
+    "krPrKvm": 14744,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283991,
+    "adresse": "Kildemarksvej 137, st. tv",
+    "kvm": 60,
+    "pris": 795000,
+    "dato": "2025-03-28",
+    "krPrKvm": 13250,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283981,
+    "adresse": "Kildemarksvej 137, 1. tv",
+    "kvm": 60,
+    "pris": 785000,
+    "dato": "2025-03-21",
+    "krPrKvm": 13083,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283982,
+    "adresse": "Kildemarksvej 137, 1. th",
+    "kvm": 78,
+    "pris": 970000,
+    "dato": "2025-03-21",
+    "krPrKvm": 12436,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284025,
+    "adresse": "Kildemarksvej 155, 1. th",
+    "kvm": 78,
+    "pris": 1025000,
+    "dato": "2025-01-07",
+    "krPrKvm": 13141,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283979,
+    "adresse": "Kildemarksvej 133, st. tv",
+    "kvm": 78,
+    "pris": 930000,
+    "dato": "2024-11-19",
+    "krPrKvm": 11923,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284014,
+    "adresse": "Kildemarksvej 145, st. th",
+    "kvm": 60,
+    "pris": 810000,
+    "dato": "2024-09-11",
+    "krPrKvm": 13500,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284035,
+    "adresse": "Kildemarksvej 153, 1. th",
+    "kvm": 61,
+    "pris": 795000,
+    "dato": "2024-08-27",
+    "krPrKvm": 13033,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284020,
+    "adresse": "Kildemarksvej 147, 1. th",
+    "kvm": 61,
+    "pris": 803838,
+    "dato": "2024-05-13",
+    "krPrKvm": 13178,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283987,
+    "adresse": "Kildemarksvej 135, st. tv",
+    "kvm": 49,
+    "pris": 450000,
+    "dato": "2024-04-29",
+    "krPrKvm": 9184,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283984,
+    "adresse": "Kildemarksvej 133, st. th",
+    "kvm": 60,
+    "pris": 880000,
+    "dato": "2024-04-17",
+    "krPrKvm": 14667,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283992,
+    "adresse": "Kildemarksvej 139, st. tv",
+    "kvm": 78,
+    "pris": 965000,
+    "dato": "2023-11-13",
+    "krPrKvm": 12372,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ],
+  "Hybenparken": [
+   {
+    "bfe": 280768,
+    "adresse": "Odensevej 56, 1. th",
+    "kvm": 107,
+    "pris": 1395000,
+    "dato": "2026-02-25",
+    "krPrKvm": 13037,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280775,
+    "adresse": "Odensevej 50, 1. tv",
+    "kvm": 107,
+    "pris": 870000,
+    "dato": "2025-11-26",
+    "krPrKvm": 8131,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280793,
+    "adresse": "Odensevej 50, 2. th",
+    "kvm": 45,
+    "pris": 720000,
+    "dato": "2025-11-25",
+    "krPrKvm": 16000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274186,
+    "adresse": "Odensevej 54, st. mf",
+    "kvm": 45,
+    "pris": 850000,
+    "dato": "2025-08-13",
+    "krPrKvm": 18889,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274183,
+    "adresse": "Odensevej 52, 2. th",
+    "kvm": 107,
+    "pris": 1400000,
+    "dato": "2025-04-23",
+    "krPrKvm": 13084,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274174,
+    "adresse": "Odensevej 50, st. tv",
+    "kvm": 61,
+    "pris": 1085000,
+    "dato": "2024-12-20",
+    "krPrKvm": 17787,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280790,
+    "adresse": "Odensevej 50, 1. th",
+    "kvm": 45,
+    "pris": 751500,
+    "dato": "2024-08-14",
+    "krPrKvm": 16700,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274187,
+    "adresse": "Odensevej 54, st. th",
+    "kvm": 66,
+    "pris": 920000,
+    "dato": "2024-07-12",
+    "krPrKvm": 13939,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 280765,
+    "adresse": "Odensevej 56, st. th",
+    "kvm": 61,
+    "pris": 459000,
+    "dato": "2023-11-16",
+    "krPrKvm": 7525,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   }
+  ],
+  "Ukendt · Lupin, Hvede, Erantis": [
+   {
+    "bfe": 283588,
+    "adresse": "Erantisvej 12, 1. th",
+    "kvm": 75,
+    "pris": 1300000,
+    "dato": "2026-07-19",
+    "krPrKvm": 17333,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283556,
+    "adresse": "Erantisvej 14, 1. th",
+    "kvm": 72,
+    "pris": 975000,
+    "dato": "2026-07-10",
+    "krPrKvm": 13542,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283614,
+    "adresse": "Lupinvej 15, 1. tv",
+    "kvm": 72,
+    "pris": 1350000,
+    "dato": "2026-06-10",
+    "krPrKvm": 18750,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283595,
+    "adresse": "Hvedevænget 94, 1. th",
+    "kvm": 84,
+    "pris": 1470650,
+    "dato": "2026-03-27",
+    "krPrKvm": 17508,
+    "metode": "Interessesammenfald",
+    "fri": false
+   },
+   {
+    "bfe": 283955,
+    "adresse": "Lupinvej 17, st. tv",
+    "kvm": 72,
+    "pris": 1200000,
+    "dato": "2026-03-20",
+    "krPrKvm": 16667,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283584,
+    "adresse": "Hvedevænget 90, 2. th",
+    "kvm": 72,
+    "pris": 1350000,
+    "dato": "2026-02-12",
+    "krPrKvm": 18750,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283612,
+    "adresse": "Lupinvej 15, st. tv",
+    "kvm": 72,
+    "pris": 1070000,
+    "dato": "2026-02-10",
+    "krPrKvm": 14861,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283557,
+    "adresse": "Erantisvej 14, 2. tv",
+    "kvm": 72,
+    "pris": 1115000,
+    "dato": "2025-11-27",
+    "krPrKvm": 15486,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283597,
+    "adresse": "Hvedevænget 94, 2. th",
+    "kvm": 84,
+    "pris": 1125000,
+    "dato": "2025-09-26",
+    "krPrKvm": 13393,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283572,
+    "adresse": "Hvedevænget 88, st. tv",
+    "kvm": 72,
+    "pris": 1050000,
+    "dato": "2025-09-18",
+    "krPrKvm": 14583,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283585,
+    "adresse": "Hvedevænget 92, st. tv",
+    "kvm": 60,
+    "pris": 1115000,
+    "dato": "2025-08-26",
+    "krPrKvm": 18583,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283590,
+    "adresse": "Hvedevænget 92, 2. tv",
+    "kvm": 60,
+    "pris": 950000,
+    "dato": "2025-04-15",
+    "krPrKvm": 15833,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283596,
+    "adresse": "Hvedevænget 94, 2. tv",
+    "kvm": 62,
+    "pris": 975000,
+    "dato": "2025-02-23",
+    "krPrKvm": 15726,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283578,
+    "adresse": "Hvedevænget 88, 2. th",
+    "kvm": 75,
+    "pris": 1100000,
+    "dato": "2024-10-28",
+    "krPrKvm": 14667,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283603,
+    "adresse": "Lupinvej 11, 2. tv",
+    "kvm": 75,
+    "pris": 1195000,
+    "dato": "2024-10-07",
+    "krPrKvm": 15933,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283960,
+    "adresse": "Lupinvej 17, 2. tv",
+    "kvm": 72,
+    "pris": 950000,
+    "dato": "2024-06-18",
+    "krPrKvm": 13194,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283605,
+    "adresse": "Lupinvej 13, st. tv",
+    "kvm": 72,
+    "pris": 1098000,
+    "dato": "2024-04-11",
+    "krPrKvm": 15250,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283562,
+    "adresse": "Erantisvej 16, 1. th",
+    "kvm": 72,
+    "pris": 1195000,
+    "dato": "2024-02-14",
+    "krPrKvm": 16597,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283967,
+    "adresse": "Lupinvej 19, 2. th",
+    "kvm": 75,
+    "pris": 1195000,
+    "dato": "2023-12-13",
+    "krPrKvm": 15933,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283589,
+    "adresse": "Hvedevænget 92, 1. th",
+    "kvm": 85,
+    "pris": 1395000,
+    "dato": "2023-11-14",
+    "krPrKvm": 16412,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283591,
+    "adresse": "Hvedevænget 92, 2. th",
+    "kvm": 85,
+    "pris": 1255000,
+    "dato": "2023-11-09",
+    "krPrKvm": 14765,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 283561,
+    "adresse": "Erantisvej 16, 1. tv",
+    "kvm": 72,
+    "pris": 1215000,
+    "dato": "2023-10-07",
+    "krPrKvm": 16875,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ],
+  "Hegnsparken": [
+   {
+    "bfe": 282559,
+    "adresse": "Bogensevej 41, st. th",
+    "kvm": 76,
+    "pris": 1400000,
+    "dato": "2026-06-15",
+    "krPrKvm": 18421,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282524,
+    "adresse": "Bogensevej 53, 2. tv",
+    "kvm": 90,
+    "pris": 1295000,
+    "dato": "2026-05-23",
+    "krPrKvm": 14389,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282544,
+    "adresse": "Bogensevej 59, 2. tv",
+    "kvm": 62,
+    "pris": 880000,
+    "dato": "2026-04-01",
+    "krPrKvm": 14194,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282144,
+    "adresse": "Bogensevej 77, st. tv",
+    "kvm": 94,
+    "pris": 1260000,
+    "dato": "2026-02-03",
+    "krPrKvm": 13404,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282515,
+    "adresse": "Bogensevej 39, 1. tv",
+    "kvm": 108,
+    "pris": 1550000,
+    "dato": "2026-01-22",
+    "krPrKvm": 14352,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282564,
+    "adresse": "Bogensevej 65, 2. tv",
+    "kvm": 105,
+    "pris": 1455000,
+    "dato": "2026-01-22",
+    "krPrKvm": 13857,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282532,
+    "adresse": "Bogensevej 57, st. tv",
+    "kvm": 76,
+    "pris": 1050000,
+    "dato": "2025-11-13",
+    "krPrKvm": 13816,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282551,
+    "adresse": "Bogensevej 61, 2. tv",
+    "kvm": 105,
+    "pris": 1575000,
+    "dato": "2025-10-01",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282158,
+    "adresse": "Bogensevej 39, st. th",
+    "kvm": 94,
+    "pris": 1495000,
+    "dato": "2025-09-18",
+    "krPrKvm": 15904,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282133,
+    "adresse": "Bogensevej 73, 1. th",
+    "kvm": 90,
+    "pris": 1147000,
+    "dato": "2025-09-09",
+    "krPrKvm": 12744,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 282571,
+    "adresse": "Bogensevej 67, 2. tv",
+    "kvm": 62,
+    "pris": 935000,
+    "dato": "2025-07-27",
+    "krPrKvm": 15081,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282127,
+    "adresse": "Bogensevej 41, 1. tv",
+    "kvm": 90,
+    "pris": 1495000,
+    "dato": "2025-07-23",
+    "krPrKvm": 16611,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282142,
+    "adresse": "Bogensevej 75, 2. th",
+    "kvm": 90,
+    "pris": 1404000,
+    "dato": "2025-06-24",
+    "krPrKvm": 15600,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282146,
+    "adresse": "Bogensevej 77, 1. th",
+    "kvm": 108,
+    "pris": 1595000,
+    "dato": "2025-04-11",
+    "krPrKvm": 14769,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282554,
+    "adresse": "Bogensevej 63, 1. th",
+    "kvm": 63,
+    "pris": 880000,
+    "dato": "2025-02-13",
+    "krPrKvm": 13968,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282528,
+    "adresse": "Bogensevej 55, 1. th",
+    "kvm": 108,
+    "pris": 1610000,
+    "dato": "2025-01-31",
+    "krPrKvm": 14907,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282137,
+    "adresse": "Bogensevej 75, st. tv",
+    "kvm": 91,
+    "pris": 1365000,
+    "dato": "2024-09-05",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282534,
+    "adresse": "Bogensevej 57, 1. th",
+    "kvm": 76,
+    "pris": 1010000,
+    "dato": "2024-03-08",
+    "krPrKvm": 13289,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282540,
+    "adresse": "Bogensevej 59, st. th",
+    "kvm": 48,
+    "pris": 625000,
+    "dato": "2024-02-28",
+    "krPrKvm": 13021,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ],
+  "Benløseparken": [
+   {
+    "bfe": 278034,
+    "adresse": "Benløseparken 95, 2. th",
+    "kvm": 59,
+    "pris": 1075000,
+    "dato": "2026-08-20",
+    "krPrKvm": 18220,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272643,
+    "adresse": "Benløseparken 193, st. th",
+    "kvm": 59,
+    "pris": 1265000,
+    "dato": "2026-08-14",
+    "krPrKvm": 21441,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278051,
+    "adresse": "Benløseparken 101, 1. mf",
+    "kvm": 33,
+    "pris": 710000,
+    "dato": "2026-07-16",
+    "krPrKvm": 21515,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272611,
+    "adresse": "Benløseparken 181, 2. th",
+    "kvm": 59,
+    "pris": 1170000,
+    "dato": "2026-07-01",
+    "krPrKvm": 19831,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278434,
+    "adresse": "Benløseparken 113, 2. th",
+    "kvm": 59,
+    "pris": 1265000,
+    "dato": "2026-06-29",
+    "krPrKvm": 21441,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278488,
+    "adresse": "Benløseparken 131, 1. tv",
+    "kvm": 105,
+    "pris": 1830000,
+    "dato": "2026-06-26",
+    "krPrKvm": 17429,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278453,
+    "adresse": "Benløseparken 121, st. tv",
+    "kvm": 74,
+    "pris": 1240000,
+    "dato": "2026-06-18",
+    "krPrKvm": 16757,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272608,
+    "adresse": "Benløseparken 181, 1. tv",
+    "kvm": 105,
+    "pris": 1730000,
+    "dato": "2026-06-17",
+    "krPrKvm": 16476,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277541,
+    "adresse": "Benløseparken 47, st. th",
+    "kvm": 59,
+    "pris": 1185000,
+    "dato": "2026-06-15",
+    "krPrKvm": 20085,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278867,
+    "adresse": "Benløseparken 141, 1. mf",
+    "kvm": 33,
+    "pris": 567000,
+    "dato": "2026-06-04",
+    "krPrKvm": 17182,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272662,
+    "adresse": "Benløseparken 199, 1. tv",
+    "kvm": 103,
+    "pris": 1500000,
+    "dato": "2026-05-29",
+    "krPrKvm": 14563,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278907,
+    "adresse": "Benløseparken 153, 2. th",
+    "kvm": 59,
+    "pris": 1170000,
+    "dato": "2026-05-27",
+    "krPrKvm": 19831,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277064,
+    "adresse": "Benløseparken 5, st. th",
+    "kvm": 59,
+    "pris": 1180000,
+    "dato": "2026-05-21",
+    "krPrKvm": 20000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277977,
+    "adresse": "Benløseparken 77, 2. th",
+    "kvm": 59,
+    "pris": 1125000,
+    "dato": "2026-05-21",
+    "krPrKvm": 19068,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277965,
+    "adresse": "Benløseparken 73, 2. th",
+    "kvm": 59,
+    "pris": 1130000,
+    "dato": "2026-05-19",
+    "krPrKvm": 19153,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272601,
+    "adresse": "Benløseparken 179, st. th",
+    "kvm": 61,
+    "pris": 1155000,
+    "dato": "2026-05-15",
+    "krPrKvm": 18934,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278881,
+    "adresse": "Benløseparken 145, 1. th",
+    "kvm": 59,
+    "pris": 1110000,
+    "dato": "2026-05-13",
+    "krPrKvm": 18814,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277562,
+    "adresse": "Benløseparken 53, 2. tv",
+    "kvm": 103,
+    "pris": 1750000,
+    "dato": "2026-05-08",
+    "krPrKvm": 16990,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278417,
+    "adresse": "Benløseparken 109, st. tv",
+    "kvm": 103,
+    "pris": 1595000,
+    "dato": "2026-04-30",
+    "krPrKvm": 15485,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272663,
+    "adresse": "Benløseparken 199, 1. th",
+    "kvm": 61,
+    "pris": 1100000,
+    "dato": "2026-04-28",
+    "krPrKvm": 18033,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278905,
+    "adresse": "Benløseparken 153, 1. th",
+    "kvm": 59,
+    "pris": 1225000,
+    "dato": "2026-04-10",
+    "krPrKvm": 20763,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277605,
+    "adresse": "Benløseparken 67, 1. tv",
+    "kvm": 103,
+    "pris": 1825000,
+    "dato": "2026-04-10",
+    "krPrKvm": 17718,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277078,
+    "adresse": "Benløseparken 9, 1. th",
+    "kvm": 61,
+    "pris": 1020460,
+    "dato": "2026-03-30",
+    "krPrKvm": 16729,
+    "metode": "Almindelig fri handel særlige vilkår",
+    "fri": true
+   },
+   {
+    "bfe": 278925,
+    "adresse": "Benløseparken 159, 2. th",
+    "kvm": 61,
+    "pris": 1195000,
+    "dato": "2026-03-26",
+    "krPrKvm": 19590,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277571,
+    "adresse": "Benløseparken 57, st. th",
+    "kvm": 59,
+    "pris": 852000,
+    "dato": "2026-03-24",
+    "krPrKvm": 14441,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278041,
+    "adresse": "Benløseparken 99, st. tv",
+    "kvm": 103,
+    "pris": 1705000,
+    "dato": "2026-02-27",
+    "krPrKvm": 16553,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278936,
+    "adresse": "Benløseparken 163, 2. tv",
+    "kvm": 103,
+    "pris": 1785000,
+    "dato": "2026-02-17",
+    "krPrKvm": 17330,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278885,
+    "adresse": "Benløseparken 147, st. th",
+    "kvm": 59,
+    "pris": 1049000,
+    "dato": "2026-01-31",
+    "krPrKvm": 17780,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277608,
+    "adresse": "Benløseparken 67, 2. th",
+    "kvm": 59,
+    "pris": 1035000,
+    "dato": "2026-01-28",
+    "krPrKvm": 17542,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272622,
+    "adresse": "Benløseparken 185, 2. tv",
+    "kvm": 103,
+    "pris": 1480000,
+    "dato": "2026-01-20",
+    "krPrKvm": 14369,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277557,
+    "adresse": "Benløseparken 51, 2. th",
+    "kvm": 59,
+    "pris": 1145000,
+    "dato": "2026-01-11",
+    "krPrKvm": 19407,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277054,
+    "adresse": "Benløseparken 1, 2. tv",
+    "kvm": 74,
+    "pris": 1295000,
+    "dato": "2025-12-22",
+    "krPrKvm": 17500,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277051,
+    "adresse": "Benløseparken 1, 1. tv",
+    "kvm": 74,
+    "pris": 1245000,
+    "dato": "2025-12-16",
+    "krPrKvm": 16824,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278943,
+    "adresse": "Benløseparken 165, 2. th",
+    "kvm": 59,
+    "pris": 1050000,
+    "dato": "2025-12-12",
+    "krPrKvm": 17797,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278062,
+    "adresse": "Benløseparken 105, st. tv",
+    "kvm": 103,
+    "pris": 1750000,
+    "dato": "2025-11-28",
+    "krPrKvm": 16990,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277606,
+    "adresse": "Benløseparken 67, 1. th",
+    "kvm": 59,
+    "pris": 1095000,
+    "dato": "2025-11-20",
+    "krPrKvm": 18559,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278973,
+    "adresse": "Benløseparken 175, 2. th",
+    "kvm": 59,
+    "pris": 1095000,
+    "dato": "2025-11-07",
+    "krPrKvm": 18559,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272620,
+    "adresse": "Benløseparken 185, 1. tv",
+    "kvm": 103,
+    "pris": 1635000,
+    "dato": "2025-10-16",
+    "krPrKvm": 15874,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272650,
+    "adresse": "Benløseparken 195, 1. tv",
+    "kvm": 103,
+    "pris": 1650000,
+    "dato": "2025-10-16",
+    "krPrKvm": 16019,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278914,
+    "adresse": "Benløseparken 157, st. tv",
+    "kvm": 103,
+    "pris": 1455000,
+    "dato": "2025-10-11",
+    "krPrKvm": 14126,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277061,
+    "adresse": "Benløseparken 3, 2. tv",
+    "kvm": 103,
+    "pris": 1557000,
+    "dato": "2025-10-06",
+    "krPrKvm": 15117,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277099,
+    "adresse": "Benløseparken 17, st. tv",
+    "kvm": 103,
+    "pris": 1550000,
+    "dato": "2025-10-01",
+    "krPrKvm": 15049,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278038,
+    "adresse": "Benløseparken 97, 1. th",
+    "kvm": 59,
+    "pris": 1195000,
+    "dato": "2025-09-08",
+    "krPrKvm": 20254,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278427,
+    "adresse": "Benløseparken 111, 2. tv",
+    "kvm": 105,
+    "pris": 1698000,
+    "dato": "2025-08-19",
+    "krPrKvm": 16171,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278926,
+    "adresse": "Benløseparken 161, st. tv",
+    "kvm": 105,
+    "pris": 1395000,
+    "dato": "2025-08-15",
+    "krPrKvm": 13286,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278947,
+    "adresse": "Benløseparken 167, 1. th",
+    "kvm": 59,
+    "pris": 950000,
+    "dato": "2025-08-13",
+    "krPrKvm": 16102,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277525,
+    "adresse": "Benløseparken 41, 2. tv",
+    "kvm": 74,
+    "pris": 1110000,
+    "dato": "2025-08-13",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278476,
+    "adresse": "Benløseparken 127, 1. tv",
+    "kvm": 103,
+    "pris": 1680000,
+    "dato": "2025-08-07",
+    "krPrKvm": 16311,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277976,
+    "adresse": "Benløseparken 77, 2. tv",
+    "kvm": 103,
+    "pris": 1600000,
+    "dato": "2025-08-01",
+    "krPrKvm": 15534,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277598,
+    "adresse": "Benløseparken 65, st. th",
+    "kvm": 59,
+    "pris": 975000,
+    "dato": "2025-07-22",
+    "krPrKvm": 16525,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277052,
+    "adresse": "Benløseparken 1, 1. mf",
+    "kvm": 33,
+    "pris": 650000,
+    "dato": "2025-07-17",
+    "krPrKvm": 19697,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277107,
+    "adresse": "Benløseparken 19, 1. tv",
+    "kvm": 103,
+    "pris": 1675000,
+    "dato": "2025-06-18",
+    "krPrKvm": 16262,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278420,
+    "adresse": "Benløseparken 109, 1. th",
+    "kvm": 61,
+    "pris": 1145000,
+    "dato": "2025-06-06",
+    "krPrKvm": 18770,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277522,
+    "adresse": "Benløseparken 41, 1. tv",
+    "kvm": 74,
+    "pris": 1115000,
+    "dato": "2025-04-28",
+    "krPrKvm": 15068,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277104,
+    "adresse": "Benløseparken 17, 2. th",
+    "kvm": 59,
+    "pris": 1045000,
+    "dato": "2025-04-25",
+    "krPrKvm": 17712,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278448,
+    "adresse": "Benløseparken 119, st. th",
+    "kvm": 61,
+    "pris": 825000,
+    "dato": "2025-04-17",
+    "krPrKvm": 13525,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277086,
+    "adresse": "Benløseparken 11, 2. th",
+    "kvm": 59,
+    "pris": 832500,
+    "dato": "2025-04-15",
+    "krPrKvm": 14110,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278445,
+    "adresse": "Benløseparken 117, 2. tv",
+    "kvm": 103,
+    "pris": 1600000,
+    "dato": "2025-03-21",
+    "krPrKvm": 15534,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278949,
+    "adresse": "Benløseparken 167, 2. th",
+    "kvm": 59,
+    "pris": 1115000,
+    "dato": "2025-03-19",
+    "krPrKvm": 18898,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278058,
+    "adresse": "Benløseparken 103, 1. tv",
+    "kvm": 103,
+    "pris": 1650000,
+    "dato": "2025-03-18",
+    "krPrKvm": 16019,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278022,
+    "adresse": "Benløseparken 91, 2. th",
+    "kvm": 59,
+    "pris": 1015000,
+    "dato": "2025-03-08",
+    "krPrKvm": 17203,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278440,
+    "adresse": "Benløseparken 115, 2. th",
+    "kvm": 59,
+    "pris": 830000,
+    "dato": "2025-03-05",
+    "krPrKvm": 14068,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277072,
+    "adresse": "Benløseparken 7, 1. th",
+    "kvm": 59,
+    "pris": 925000,
+    "dato": "2025-02-21",
+    "krPrKvm": 15678,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277549,
+    "adresse": "Benløseparken 49, 1. th",
+    "kvm": 61,
+    "pris": 1195000,
+    "dato": "2025-02-21",
+    "krPrKvm": 19590,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277517,
+    "adresse": "Benløseparken 39, 2. tv",
+    "kvm": 103,
+    "pris": 1698000,
+    "dato": "2025-02-17",
+    "krPrKvm": 16485,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277526,
+    "adresse": "Benløseparken 41, 2. mf",
+    "kvm": 33,
+    "pris": 795000,
+    "dato": "2025-02-12",
+    "krPrKvm": 24091,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277116,
+    "adresse": "Benløseparken 21, 1. th",
+    "kvm": 57,
+    "pris": 999000,
+    "dato": "2025-02-10",
+    "krPrKvm": 17526,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277567,
+    "adresse": "Benløseparken 55, 1. th",
+    "kvm": 59,
+    "pris": 980000,
+    "dato": "2025-01-30",
+    "krPrKvm": 16610,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278970,
+    "adresse": "Benløseparken 175, 1. tv",
+    "kvm": 103,
+    "pris": 1670000,
+    "dato": "2025-01-22",
+    "krPrKvm": 16214,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278977,
+    "adresse": "Benløseparken 177, 1. th",
+    "kvm": 59,
+    "pris": 901000,
+    "dato": "2024-12-16",
+    "krPrKvm": 15271,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277137,
+    "adresse": "Benløseparken 27, 2. th",
+    "kvm": 59,
+    "pris": 1195000,
+    "dato": "2024-12-12",
+    "krPrKvm": 20254,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272640,
+    "adresse": "Benløseparken 191, 2. tv",
+    "kvm": 105,
+    "pris": 1575000,
+    "dato": "2024-12-05",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278929,
+    "adresse": "Benløseparken 161, 1. th",
+    "kvm": 59,
+    "pris": 900000,
+    "dato": "2024-11-21",
+    "krPrKvm": 15254,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278498,
+    "adresse": "Benløseparken 135, st. tv",
+    "kvm": 103,
+    "pris": 1650000,
+    "dato": "2024-11-14",
+    "krPrKvm": 16019,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277120,
+    "adresse": "Benløseparken 23, st. tv",
+    "kvm": 103,
+    "pris": 1300000,
+    "dato": "2024-10-24",
+    "krPrKvm": 12621,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277551,
+    "adresse": "Benløseparken 49, 2. th",
+    "kvm": 61,
+    "pris": 1075000,
+    "dato": "2024-10-01",
+    "krPrKvm": 17623,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277048,
+    "adresse": "Benløseparken 1, st. tv",
+    "kvm": 74,
+    "pris": 1250000,
+    "dato": "2024-09-30",
+    "krPrKvm": 16892,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278508,
+    "adresse": "Benløseparken 137, 2. tv",
+    "kvm": 103,
+    "pris": 1575000,
+    "dato": "2024-09-30",
+    "krPrKvm": 15291,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278057,
+    "adresse": "Benløseparken 103, st. th",
+    "kvm": 59,
+    "pris": 807500,
+    "dato": "2024-09-03",
+    "krPrKvm": 13686,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278874,
+    "adresse": "Benløseparken 143, 1. tv",
+    "kvm": 103,
+    "pris": 1940832,
+    "dato": "2024-09-01",
+    "krPrKvm": 18843,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278899,
+    "adresse": "Benløseparken 151, 1. th",
+    "kvm": 59,
+    "pris": 408000,
+    "dato": "2024-09-01",
+    "krPrKvm": 6915,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 277585,
+    "adresse": "Benløseparken 61, 1. tv",
+    "kvm": 74,
+    "pris": 1105000,
+    "dato": "2024-08-05",
+    "krPrKvm": 14932,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278471,
+    "adresse": "Benløseparken 125, 1. th",
+    "kvm": 59,
+    "pris": 900000,
+    "dato": "2024-07-29",
+    "krPrKvm": 15254,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277106,
+    "adresse": "Benløseparken 19, st. th",
+    "kvm": 61,
+    "pris": 895000,
+    "dato": "2024-07-24",
+    "krPrKvm": 14672,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278429,
+    "adresse": "Benløseparken 113, st. tv",
+    "kvm": 103,
+    "pris": 1605000,
+    "dato": "2024-07-16",
+    "krPrKvm": 15583,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277098,
+    "adresse": "Benløseparken 15, 2. th",
+    "kvm": 59,
+    "pris": 852500,
+    "dato": "2024-07-09",
+    "krPrKvm": 14449,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278872,
+    "adresse": "Benløseparken 143, st. tv",
+    "kvm": 103,
+    "pris": 1300000,
+    "dato": "2024-07-02",
+    "krPrKvm": 12621,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277956,
+    "adresse": "Benløseparken 71, 1. tv",
+    "kvm": 105,
+    "pris": 1700000,
+    "dato": "2024-07-01",
+    "krPrKvm": 16190,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278059,
+    "adresse": "Benløseparken 103, 1. th",
+    "kvm": 59,
+    "pris": 885000,
+    "dato": "2024-06-27",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278457,
+    "adresse": "Benløseparken 121, 1. mf",
+    "kvm": 33,
+    "pris": 725000,
+    "dato": "2024-06-26",
+    "krPrKvm": 21970,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 272616,
+    "adresse": "Benløseparken 183, 2. tv",
+    "kvm": 103,
+    "pris": 1475000,
+    "dato": "2024-06-12",
+    "krPrKvm": 14320,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278433,
+    "adresse": "Benløseparken 113, 2. tv",
+    "kvm": 103,
+    "pris": 1450000,
+    "dato": "2024-06-04",
+    "krPrKvm": 14078,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277545,
+    "adresse": "Benløseparken 47, 2. th",
+    "kvm": 59,
+    "pris": 845000,
+    "dato": "2024-05-24",
+    "krPrKvm": 14322,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278416,
+    "adresse": "Benløseparken 107, 2. th",
+    "kvm": 59,
+    "pris": 995000,
+    "dato": "2024-05-24",
+    "krPrKvm": 16864,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278510,
+    "adresse": "Benløseparken 139, st. tv",
+    "kvm": 103,
+    "pris": 1670000,
+    "dato": "2024-05-22",
+    "krPrKvm": 16214,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277974,
+    "adresse": "Benløseparken 77, 1. tv",
+    "kvm": 103,
+    "pris": 830000,
+    "dato": "2024-05-01",
+    "krPrKvm": 8058,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278887,
+    "adresse": "Benløseparken 147, 1. th",
+    "kvm": 59,
+    "pris": 960000,
+    "dato": "2024-04-23",
+    "krPrKvm": 16271,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278517,
+    "adresse": "Benløseparken 141, st. mf",
+    "kvm": 33,
+    "pris": 630000,
+    "dato": "2024-04-10",
+    "krPrKvm": 19091,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278499,
+    "adresse": "Benløseparken 135, st. th",
+    "kvm": 59,
+    "pris": 930000,
+    "dato": "2024-04-04",
+    "krPrKvm": 15763,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277578,
+    "adresse": "Benløseparken 59, 1. tv",
+    "kvm": 103,
+    "pris": 1650000,
+    "dato": "2024-03-29",
+    "krPrKvm": 16019,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278415,
+    "adresse": "Benløseparken 107, 2. tv",
+    "kvm": 103,
+    "pris": 1611250,
+    "dato": "2024-03-28",
+    "krPrKvm": 15643,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278481,
+    "adresse": "Benløseparken 129, st. th",
+    "kvm": 61,
+    "pris": 840000,
+    "dato": "2024-03-09",
+    "krPrKvm": 13770,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278428,
+    "adresse": "Benløseparken 111, 2. th",
+    "kvm": 59,
+    "pris": 885000,
+    "dato": "2024-02-26",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278467,
+    "adresse": "Benløseparken 123, 2. th",
+    "kvm": 59,
+    "pris": 860000,
+    "dato": "2024-02-20",
+    "krPrKvm": 14576,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278913,
+    "adresse": "Benløseparken 155, 2. th",
+    "kvm": 59,
+    "pris": 825000,
+    "dato": "2024-02-14",
+    "krPrKvm": 13983,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278011,
+    "adresse": "Benløseparken 89, st. tv",
+    "kvm": 103,
+    "pris": 1600000,
+    "dato": "2024-02-14",
+    "krPrKvm": 15534,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278940,
+    "adresse": "Benløseparken 165, 1. tv",
+    "kvm": 103,
+    "pris": 1650000,
+    "dato": "2024-02-02",
+    "krPrKvm": 16019,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277561,
+    "adresse": "Benløseparken 53, 1. th",
+    "kvm": 59,
+    "pris": 1000000,
+    "dato": "2024-02-01",
+    "krPrKvm": 16949,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278444,
+    "adresse": "Benløseparken 117, 1. th",
+    "kvm": 59,
+    "pris": 750000,
+    "dato": "2024-01-26",
+    "krPrKvm": 12712,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278019,
+    "adresse": "Benløseparken 91, 1. tv",
+    "kvm": 105,
+    "pris": 1350000,
+    "dato": "2024-01-23",
+    "krPrKvm": 12857,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278502,
+    "adresse": "Benløseparken 135, 2. tv",
+    "kvm": 103,
+    "pris": 1550000,
+    "dato": "2024-01-16",
+    "krPrKvm": 15049,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277118,
+    "adresse": "Benløseparken 21, 2. mf",
+    "kvm": 33,
+    "pris": 600000,
+    "dato": "2024-01-15",
+    "krPrKvm": 18182,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278908,
+    "adresse": "Benløseparken 155, st. tv",
+    "kvm": 103,
+    "pris": 1330000,
+    "dato": "2024-01-09",
+    "krPrKvm": 12913,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277149,
+    "adresse": "Benløseparken 31, 2. th",
+    "kvm": 59,
+    "pris": 1032500,
+    "dato": "2023-12-20",
+    "krPrKvm": 17500,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278906,
+    "adresse": "Benløseparken 153, 2. tv",
+    "kvm": 103,
+    "pris": 1415000,
+    "dato": "2023-11-20",
+    "krPrKvm": 13738,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278870,
+    "adresse": "Benløseparken 141, 2. mf",
+    "kvm": 33,
+    "pris": 459000,
+    "dato": "2023-11-16",
+    "krPrKvm": 13909,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 277583,
+    "adresse": "Benløseparken 61, st. mf",
+    "kvm": 33,
+    "pris": 238000,
+    "dato": "2023-11-14",
+    "krPrKvm": 7212,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278941,
+    "adresse": "Benløseparken 165, 1. th",
+    "kvm": 59,
+    "pris": 825000,
+    "dato": "2023-11-13",
+    "krPrKvm": 13983,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278053,
+    "adresse": "Benløseparken 101, 2. tv",
+    "kvm": 74,
+    "pris": 615500,
+    "dato": "2023-11-09",
+    "krPrKvm": 8318,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 278438,
+    "adresse": "Benløseparken 115, 1. th",
+    "kvm": 59,
+    "pris": 895000,
+    "dato": "2023-09-21",
+    "krPrKvm": 15169,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278501,
+    "adresse": "Benløseparken 135, 1. th",
+    "kvm": 59,
+    "pris": 750000,
+    "dato": "2023-09-21",
+    "krPrKvm": 12712,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 278456,
+    "adresse": "Benløseparken 121, 1. tv",
+    "kvm": 74,
+    "pris": 1150000,
+    "dato": "2023-09-20",
+    "krPrKvm": 15541,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 277991,
+    "adresse": "Benløseparken 81, 2. mf",
+    "kvm": 33,
+    "pris": 246500,
+    "dato": "2023-09-15",
+    "krPrKvm": 7470,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   }
+  ],
+  "Byskovparken": [
+   {
+    "bfe": 276101,
+    "adresse": "Byskov Alle 8, st. th",
+    "kvm": 107,
+    "pris": 1315000,
+    "dato": "2026-09-01",
+    "krPrKvm": 12290,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274736,
+    "adresse": "Byskov Alle 36, 3. th",
+    "kvm": 107,
+    "pris": 950000,
+    "dato": "2026-07-27",
+    "krPrKvm": 8879,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275196,
+    "adresse": "Søndermarksvej 23, 2. mf",
+    "kvm": 43,
+    "pris": 655000,
+    "dato": "2026-06-25",
+    "krPrKvm": 15233,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275167,
+    "adresse": "Søndermarksvej 29, 2. tv",
+    "kvm": 107,
+    "pris": 1250000,
+    "dato": "2026-05-22",
+    "krPrKvm": 11682,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275640,
+    "adresse": "Byskov Alle 18, 1. mf",
+    "kvm": 43,
+    "pris": 735000,
+    "dato": "2026-05-13",
+    "krPrKvm": 17093,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275584,
+    "adresse": "Søndermarksvej 15, st. th",
+    "kvm": 111,
+    "pris": 1575000,
+    "dato": "2026-05-07",
+    "krPrKvm": 14189,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275117,
+    "adresse": "Byskov Alle 30, 2. tv",
+    "kvm": 107,
+    "pris": 1050000,
+    "dato": "2026-04-21",
+    "krPrKvm": 9813,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274723,
+    "adresse": "Byskov Alle 38, 3. mf",
+    "kvm": 43,
+    "pris": 760000,
+    "dato": "2026-04-15",
+    "krPrKvm": 17674,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275638,
+    "adresse": "Byskov Alle 18, st. th",
+    "kvm": 107,
+    "pris": 1295000,
+    "dato": "2026-04-14",
+    "krPrKvm": 12103,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276543,
+    "adresse": "Søndermarksvej 33, 2. tv",
+    "kvm": 107,
+    "pris": 895000,
+    "dato": "2026-04-07",
+    "krPrKvm": 8364,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275145,
+    "adresse": "Byskov Alle 26, 3. th",
+    "kvm": 107,
+    "pris": 1050000,
+    "dato": "2026-04-05",
+    "krPrKvm": 9813,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276119,
+    "adresse": "Byskov Alle 6, 2. th",
+    "kvm": 107,
+    "pris": 1100000,
+    "dato": "2026-04-01",
+    "krPrKvm": 10280,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275142,
+    "adresse": "Byskov Alle 26, 2. mf",
+    "kvm": 43,
+    "pris": 635000,
+    "dato": "2026-03-31",
+    "krPrKvm": 14767,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274749,
+    "adresse": "Byskov Alle 34, 3. th",
+    "kvm": 107,
+    "pris": 965000,
+    "dato": "2026-03-27",
+    "krPrKvm": 9019,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275649,
+    "adresse": "Byskov Alle 16, st. tv",
+    "kvm": 91,
+    "pris": 910000,
+    "dato": "2026-03-24",
+    "krPrKvm": 10000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275671,
+    "adresse": "Byskov Alle 14, 2. tv",
+    "kvm": 107,
+    "pris": 999000,
+    "dato": "2026-03-13",
+    "krPrKvm": 9336,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276545,
+    "adresse": "Søndermarksvej 33, 3. mf",
+    "kvm": 43,
+    "pris": 750000,
+    "dato": "2026-03-12",
+    "krPrKvm": 17442,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276036,
+    "adresse": "Byskov Alle 10, 1. mf",
+    "kvm": 43,
+    "pris": 650000,
+    "dato": "2026-03-09",
+    "krPrKvm": 15116,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276077,
+    "adresse": "Søndermarksvej 5, 1. mf",
+    "kvm": 43,
+    "pris": 650000,
+    "dato": "2026-03-09",
+    "krPrKvm": 15116,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276481,
+    "adresse": "Søndermarksvej 25, 3. mf",
+    "kvm": 43,
+    "pris": 635000,
+    "dato": "2026-02-15",
+    "krPrKvm": 14767,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274748,
+    "adresse": "Byskov Alle 34, 2. tv",
+    "kvm": 111,
+    "pris": 1200000,
+    "dato": "2026-02-04",
+    "krPrKvm": 10811,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276039,
+    "adresse": "Søndermarksvej 25, st. mf",
+    "kvm": 43,
+    "pris": 505000,
+    "dato": "2026-02-02",
+    "krPrKvm": 11744,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275560,
+    "adresse": "Søndermarksvej 11, 1. mf",
+    "kvm": 43,
+    "pris": 675000,
+    "dato": "2026-02-01",
+    "krPrKvm": 15698,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276115,
+    "adresse": "Byskov Alle 6, 1. th",
+    "kvm": 107,
+    "pris": 1295000,
+    "dato": "2026-01-23",
+    "krPrKvm": 12103,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276533,
+    "adresse": "Søndermarksvej 35, 3. tv",
+    "kvm": 107,
+    "pris": 1100000,
+    "dato": "2026-01-05",
+    "krPrKvm": 10280,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276078,
+    "adresse": "Søndermarksvej 5, 1. tv",
+    "kvm": 107,
+    "pris": 1100000,
+    "dato": "2026-01-05",
+    "krPrKvm": 10280,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274757,
+    "adresse": "Søndermarksvej 29, st. th",
+    "kvm": 107,
+    "pris": 1240000,
+    "dato": "2025-12-29",
+    "krPrKvm": 11589,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276091,
+    "adresse": "Søndermarksvej 7, 1. tv",
+    "kvm": 111,
+    "pris": 945000,
+    "dato": "2025-12-16",
+    "krPrKvm": 8514,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275195,
+    "adresse": "Søndermarksvej 23, 2. th",
+    "kvm": 107,
+    "pris": 1070000,
+    "dato": "2025-12-09",
+    "krPrKvm": 10000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275139,
+    "adresse": "Byskov Alle 26, 1. mf",
+    "kvm": 43,
+    "pris": 372300,
+    "dato": "2025-12-01",
+    "krPrKvm": 8658,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 276490,
+    "adresse": "Byskov Alle 2, 3. th",
+    "kvm": 107,
+    "pris": 1285000,
+    "dato": "2025-11-27",
+    "krPrKvm": 12009,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275561,
+    "adresse": "Søndermarksvej 11, 1. tv",
+    "kvm": 107,
+    "pris": 1276000,
+    "dato": "2025-11-24",
+    "krPrKvm": 11925,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274741,
+    "adresse": "Byskov Alle 34, st. th",
+    "kvm": 111,
+    "pris": 1395000,
+    "dato": "2025-11-13",
+    "krPrKvm": 12568,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 276546,
+    "adresse": "Søndermarksvej 33, 3. tv",
+    "kvm": 107,
+    "pris": 800000,
+    "dato": "2025-11-10",
+    "krPrKvm": 7477,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274708,
+    "adresse": "Byskov Alle 40, 2. tv",
+    "kvm": 107,
+    "pris": 980000,
+    "dato": "2025-11-03",
+    "krPrKvm": 9159,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276113,
+    "adresse": "Byskov Alle 6, st. mf",
+    "kvm": 43,
+    "pris": 645000,
+    "dato": "2025-10-06",
+    "krPrKvm": 15000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274720,
+    "adresse": "Byskov Alle 38, 2. mf",
+    "kvm": 43,
+    "pris": 640000,
+    "dato": "2025-10-01",
+    "krPrKvm": 14884,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274750,
+    "adresse": "Byskov Alle 34, 3. mf",
+    "kvm": 43,
+    "pris": 640000,
+    "dato": "2025-10-01",
+    "krPrKvm": 14884,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275657,
+    "adresse": "Byskov Alle 16, 2. mf",
+    "kvm": 43,
+    "pris": 610000,
+    "dato": "2025-10-01",
+    "krPrKvm": 14186,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276030,
+    "adresse": "Byskov Alle 12, 3. mf",
+    "kvm": 43,
+    "pris": 690000,
+    "dato": "2025-10-01",
+    "krPrKvm": 16047,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274735,
+    "adresse": "Søndermarksvej 29, st. tv",
+    "kvm": 91,
+    "pris": 1103000,
+    "dato": "2025-09-27",
+    "krPrKvm": 12121,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276487,
+    "adresse": "Byskov Alle 2, 2. th",
+    "kvm": 107,
+    "pris": 825000,
+    "dato": "2025-09-24",
+    "krPrKvm": 7710,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276068,
+    "adresse": "Søndermarksvej 3, 2. tv",
+    "kvm": 107,
+    "pris": 1200000,
+    "dato": "2025-09-19",
+    "krPrKvm": 11215,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275664,
+    "adresse": "Byskov Alle 14, st. mf",
+    "kvm": 43,
+    "pris": 795000,
+    "dato": "2025-09-17",
+    "krPrKvm": 18488,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275181,
+    "adresse": "Søndermarksvej 21, 1. tv",
+    "kvm": 107,
+    "pris": 870000,
+    "dato": "2025-09-15",
+    "krPrKvm": 8131,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275653,
+    "adresse": "Byskov Alle 16, 1. th",
+    "kvm": 107,
+    "pris": 1150000,
+    "dato": "2025-09-11",
+    "krPrKvm": 10748,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275663,
+    "adresse": "Søndermarksvej 27, 3. mf",
+    "kvm": 43,
+    "pris": 545000,
+    "dato": "2025-09-03",
+    "krPrKvm": 12674,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276511,
+    "adresse": "Søndermarksvej 37, 1. th",
+    "kvm": 107,
+    "pris": 995000,
+    "dato": "2025-09-01",
+    "krPrKvm": 9299,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 275188,
+    "adresse": "Søndermarksvej 23, st. tv",
+    "kvm": 91,
+    "pris": 1280000,
+    "dato": "2025-08-26",
+    "krPrKvm": 14066,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275159,
+    "adresse": "Søndermarksvej 17, 3. th",
+    "kvm": 111,
+    "pris": 700000,
+    "dato": "2025-08-22",
+    "krPrKvm": 6306,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 275632,
+    "adresse": "Byskov Alle 20, 2. tv",
+    "kvm": 107,
+    "pris": 1095000,
+    "dato": "2025-07-30",
+    "krPrKvm": 10234,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275121,
+    "adresse": "Byskov Alle 28, st. tv",
+    "kvm": 91,
+    "pris": 925000,
+    "dato": "2025-07-08",
+    "krPrKvm": 10165,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275199,
+    "adresse": "Søndermarksvej 23, 3. mf",
+    "kvm": 43,
+    "pris": 530000,
+    "dato": "2025-06-16",
+    "krPrKvm": 12326,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275666,
+    "adresse": "Byskov Alle 14, 1. th",
+    "kvm": 107,
+    "pris": 1000000,
+    "dato": "2025-06-15",
+    "krPrKvm": 9346,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 276044,
+    "adresse": "Byskov Alle 10, 3. tv",
+    "kvm": 107,
+    "pris": 950000,
+    "dato": "2025-05-28",
+    "krPrKvm": 8879,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274752,
+    "adresse": "Byskov Alle 32, st. tv",
+    "kvm": 95,
+    "pris": 1200000,
+    "dato": "2025-05-23",
+    "krPrKvm": 12632,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276046,
+    "adresse": "Søndermarksvej 1, st. mf",
+    "kvm": 43,
+    "pris": 670000,
+    "dato": "2025-05-15",
+    "krPrKvm": 15581,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276056,
+    "adresse": "Søndermarksvej 1, 3. mf",
+    "kvm": 43,
+    "pris": 660000,
+    "dato": "2025-05-15",
+    "krPrKvm": 15349,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276074,
+    "adresse": "Søndermarksvej 5, st. mf",
+    "kvm": 43,
+    "pris": 770000,
+    "dato": "2025-05-15",
+    "krPrKvm": 17907,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276503,
+    "adresse": "Søndermarksvej 39, 2. tv",
+    "kvm": 111,
+    "pris": 1445000,
+    "dato": "2025-05-01",
+    "krPrKvm": 13018,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275641,
+    "adresse": "Søndermarksvej 27, 2. tv",
+    "kvm": 107,
+    "pris": 1000000,
+    "dato": "2025-04-23",
+    "krPrKvm": 9346,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276055,
+    "adresse": "Søndermarksvej 1, 3. th",
+    "kvm": 111,
+    "pris": 1170000,
+    "dato": "2025-04-07",
+    "krPrKvm": 10541,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275114,
+    "adresse": "Byskov Alle 30, 1. tv",
+    "kvm": 107,
+    "pris": 1145000,
+    "dato": "2025-04-02",
+    "krPrKvm": 10701,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276517,
+    "adresse": "Søndermarksvej 31, 2. th",
+    "kvm": 107,
+    "pris": 1005000,
+    "dato": "2025-04-01",
+    "krPrKvm": 9393,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275147,
+    "adresse": "Byskov Alle 26, 3. tv",
+    "kvm": 111,
+    "pris": 1335000,
+    "dato": "2025-03-26",
+    "krPrKvm": 12027,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276028,
+    "adresse": "Søndermarksvej 25, st. tv",
+    "kvm": 95,
+    "pris": 950000,
+    "dato": "2025-03-25",
+    "krPrKvm": 10000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275650,
+    "adresse": "Byskov Alle 16, st. mf",
+    "kvm": 43,
+    "pris": 720000,
+    "dato": "2025-03-21",
+    "krPrKvm": 16744,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274726,
+    "adresse": "Byskov Alle 36, st. tv",
+    "kvm": 91,
+    "pris": 1150000,
+    "dato": "2025-03-19",
+    "krPrKvm": 12637,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275191,
+    "adresse": "Søndermarksvej 23, st. th",
+    "kvm": 111,
+    "pris": 1250000,
+    "dato": "2025-03-09",
+    "krPrKvm": 11261,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275623,
+    "adresse": "Byskov Alle 20, st. tv",
+    "kvm": 91,
+    "pris": 995000,
+    "dato": "2025-03-02",
+    "krPrKvm": 10934,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274730,
+    "adresse": "Byskov Alle 36, 1. mf",
+    "kvm": 43,
+    "pris": 382500,
+    "dato": "2025-03-01",
+    "krPrKvm": 8895,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 276501,
+    "adresse": "Søndermarksvej 39, 2. th",
+    "kvm": 107,
+    "pris": 985000,
+    "dato": "2025-02-27",
+    "krPrKvm": 9206,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276504,
+    "adresse": "Søndermarksvej 39, 3. th",
+    "kvm": 107,
+    "pris": 910000,
+    "dato": "2025-02-26",
+    "krPrKvm": 8505,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274751,
+    "adresse": "Byskov Alle 34, 3. tv",
+    "kvm": 111,
+    "pris": 1050000,
+    "dato": "2025-02-26",
+    "krPrKvm": 9459,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276079,
+    "adresse": "Søndermarksvej 5, 2. th",
+    "kvm": 107,
+    "pris": 925000,
+    "dato": "2025-02-14",
+    "krPrKvm": 8645,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274754,
+    "adresse": "Byskov Alle 32, st. th",
+    "kvm": 107,
+    "pris": 1100000,
+    "dato": "2025-02-03",
+    "krPrKvm": 10280,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274702,
+    "adresse": "Søndermarksvej 31, 3. th",
+    "kvm": 107,
+    "pris": 980000,
+    "dato": "2025-01-13",
+    "krPrKvm": 9159,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276047,
+    "adresse": "Søndermarksvej 1, st. th",
+    "kvm": 107,
+    "pris": 1150000,
+    "dato": "2025-01-10",
+    "krPrKvm": 10748,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276061,
+    "adresse": "Søndermarksvej 31, 1. th",
+    "kvm": 107,
+    "pris": 925000,
+    "dato": "2024-12-24",
+    "krPrKvm": 8645,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276527,
+    "adresse": "Søndermarksvej 35, 2. th",
+    "kvm": 107,
+    "pris": 1300000,
+    "dato": "2024-12-09",
+    "krPrKvm": 12150,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274760,
+    "adresse": "Byskov Alle 32, 2. mf",
+    "kvm": 43,
+    "pris": 698000,
+    "dato": "2024-11-29",
+    "krPrKvm": 16233,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275183,
+    "adresse": "Søndermarksvej 21, 2. mf",
+    "kvm": 43,
+    "pris": 692000,
+    "dato": "2024-11-27",
+    "krPrKvm": 16093,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276034,
+    "adresse": "Byskov Alle 10, st. th",
+    "kvm": 107,
+    "pris": 899995,
+    "dato": "2024-11-22",
+    "krPrKvm": 8411,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 275169,
+    "adresse": "Søndermarksvej 19, 2. th",
+    "kvm": 107,
+    "pris": 1200000,
+    "dato": "2024-11-17",
+    "krPrKvm": 11215,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275597,
+    "adresse": "Byskov Alle 24A, st. mf",
+    "kvm": 43,
+    "pris": 695000,
+    "dato": "2024-10-29",
+    "krPrKvm": 16163,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275673,
+    "adresse": "Byskov Alle 14, 3. mf",
+    "kvm": 43,
+    "pris": 650000,
+    "dato": "2024-10-22",
+    "krPrKvm": 15116,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275109,
+    "adresse": "Byskov Alle 30, st. mf",
+    "kvm": 43,
+    "pris": 625000,
+    "dato": "2024-10-14",
+    "krPrKvm": 14535,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275190,
+    "adresse": "Søndermarksvej 23, st. mf",
+    "kvm": 43,
+    "pris": 625000,
+    "dato": "2024-10-14",
+    "krPrKvm": 14535,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276522,
+    "adresse": "Søndermarksvej 35, st. mf",
+    "kvm": 43,
+    "pris": 755000,
+    "dato": "2024-10-03",
+    "krPrKvm": 17558,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276120,
+    "adresse": "Byskov Alle 6, 2. mf",
+    "kvm": 43,
+    "pris": 498200,
+    "dato": "2024-10-01",
+    "krPrKvm": 11586,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 274701,
+    "adresse": "Søndermarksvej 31, st. tv",
+    "kvm": 91,
+    "pris": 950000,
+    "dato": "2024-09-25",
+    "krPrKvm": 10440,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275203,
+    "adresse": "Søndermarksvej 9, st. mf",
+    "kvm": 43,
+    "pris": 650000,
+    "dato": "2024-09-23",
+    "krPrKvm": 15116,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276528,
+    "adresse": "Søndermarksvej 31, 2. mf",
+    "kvm": 43,
+    "pris": 650000,
+    "dato": "2024-08-16",
+    "krPrKvm": 15116,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275647,
+    "adresse": "Byskov Alle 18, 3. mf",
+    "kvm": 43,
+    "pris": 595000,
+    "dato": "2024-08-04",
+    "krPrKvm": 13837,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276542,
+    "adresse": "Søndermarksvej 33, 2. mf",
+    "kvm": 43,
+    "pris": 730000,
+    "dato": "2024-07-12",
+    "krPrKvm": 16977,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275570,
+    "adresse": "Søndermarksvej 13, st. mf",
+    "kvm": 43,
+    "pris": 800000,
+    "dato": "2024-07-01",
+    "krPrKvm": 18605,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275670,
+    "adresse": "Byskov Alle 14, 2. mf",
+    "kvm": 43,
+    "pris": 700000,
+    "dato": "2024-06-28",
+    "krPrKvm": 16279,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275654,
+    "adresse": "Byskov Alle 16, 1. mf",
+    "kvm": 43,
+    "pris": 780000,
+    "dato": "2024-06-26",
+    "krPrKvm": 18140,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276114,
+    "adresse": "Byskov Alle 6, st. th",
+    "kvm": 107,
+    "pris": 1025000,
+    "dato": "2024-06-21",
+    "krPrKvm": 9579,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276531,
+    "adresse": "Søndermarksvej 35, 3. th",
+    "kvm": 107,
+    "pris": 1075000,
+    "dato": "2024-05-01",
+    "krPrKvm": 10047,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 274740,
+    "adresse": "Byskov Alle 34, st. mf",
+    "kvm": 43,
+    "pris": 1100000,
+    "dato": "2024-04-24",
+    "krPrKvm": 25581,
+    "metode": "Interessesammenfald",
+    "fri": false
+   },
+   {
+    "bfe": 275617,
+    "adresse": "Byskov Alle 22, 2. mf",
+    "kvm": 43,
+    "pris": 1100000,
+    "dato": "2024-04-24",
+    "krPrKvm": 25581,
+    "metode": "Interessesammenfald",
+    "fri": false
+   },
+   {
+    "bfe": 275162,
+    "adresse": "Søndermarksvej 19, st. tv",
+    "kvm": 91,
+    "pris": 1152500,
+    "dato": "2024-04-08",
+    "krPrKvm": 12665,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275211,
+    "adresse": "Søndermarksvej 27, st. tv",
+    "kvm": 91,
+    "pris": 995000,
+    "dato": "2024-04-04",
+    "krPrKvm": 10934,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275217,
+    "adresse": "Søndermarksvej 11, st. th",
+    "kvm": 107,
+    "pris": 1195000,
+    "dato": "2024-03-12",
+    "krPrKvm": 11168,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276526,
+    "adresse": "Søndermarksvej 35, 1. tv",
+    "kvm": 107,
+    "pris": 1100000,
+    "dato": "2024-03-03",
+    "krPrKvm": 10280,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275613,
+    "adresse": "Byskov Alle 22, 1. th",
+    "kvm": 107,
+    "pris": 1350000,
+    "dato": "2024-02-22",
+    "krPrKvm": 12617,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276498,
+    "adresse": "Søndermarksvej 39, 1. th",
+    "kvm": 107,
+    "pris": 1125000,
+    "dato": "2024-02-21",
+    "krPrKvm": 10514,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 274704,
+    "adresse": "Byskov Alle 40, 1. mf",
+    "kvm": 43,
+    "pris": 795000,
+    "dato": "2024-02-15",
+    "krPrKvm": 18488,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275175,
+    "adresse": "Søndermarksvej 21, st. tv",
+    "kvm": 91,
+    "pris": 950000,
+    "dato": "2024-01-25",
+    "krPrKvm": 10440,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276102,
+    "adresse": "Byskov Alle 8, 1. th",
+    "kvm": 111,
+    "pris": 1080000,
+    "dato": "2024-01-09",
+    "krPrKvm": 9730,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276492,
+    "adresse": "Søndermarksvej 25, 3. tv",
+    "kvm": 107,
+    "pris": 1360000,
+    "dato": "2023-12-29",
+    "krPrKvm": 12710,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276038,
+    "adresse": "Byskov Alle 10, 2. th",
+    "kvm": 111,
+    "pris": 1145000,
+    "dato": "2023-12-15",
+    "krPrKvm": 10315,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 276088,
+    "adresse": "Søndermarksvej 7, st. th",
+    "kvm": 111,
+    "pris": 1200000,
+    "dato": "2023-12-15",
+    "krPrKvm": 10811,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275128,
+    "adresse": "Byskov Alle 28, 2. th",
+    "kvm": 107,
+    "pris": 1100000,
+    "dato": "2023-12-01",
+    "krPrKvm": 10280,
+    "metode": "Anden overdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 275591,
+    "adresse": "Søndermarksvej 15, 2. tv",
+    "kvm": 111,
+    "pris": 1425000,
+    "dato": "2023-11-28",
+    "krPrKvm": 12838,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275643,
+    "adresse": "Byskov Alle 18, 2. th",
+    "kvm": 111,
+    "pris": 1350000,
+    "dato": "2023-10-20",
+    "krPrKvm": 12162,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 275135,
+    "adresse": "Byskov Alle 26, st. tv",
+    "kvm": 91,
+    "pris": 970000,
+    "dato": "2023-10-12",
+    "krPrKvm": 10659,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 276051,
+    "adresse": "Søndermarksvej 1, 1. tv",
+    "kvm": 107,
+    "pris": 1250000,
+    "dato": "2023-10-09",
+    "krPrKvm": 11682,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   }
+  ],
+  "ejerforeningen Lindebo 1-29": [
+   {
+    "bfe": 231934,
+    "adresse": "Lindebo 25, 2. 156",
+    "kvm": 79,
+    "pris": 2825000,
+    "dato": "2026-07-17",
+    "krPrKvm": 35759,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231981,
+    "adresse": "Lindebo 5, 2. 36",
+    "kvm": 79,
+    "pris": 2700000,
+    "dato": "2026-07-07",
+    "krPrKvm": 34177,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231945,
+    "adresse": "Lindebo 27, 2. 166",
+    "kvm": 42,
+    "pris": 1250000,
+    "dato": "2026-06-17",
+    "krPrKvm": 29762,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231577,
+    "adresse": "Lindebo 3, st. 14",
+    "kvm": 42,
+    "pris": 1300000,
+    "dato": "2026-06-16",
+    "krPrKvm": 30952,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232038,
+    "adresse": "Lindebo 15, st. 88",
+    "kvm": 79,
+    "pris": 2825000,
+    "dato": "2026-06-09",
+    "krPrKvm": 35759,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232011,
+    "adresse": "Lindebo 11, st. 63",
+    "kvm": 42,
+    "pris": 1375000,
+    "dato": "2026-05-18",
+    "krPrKvm": 32738,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232031,
+    "adresse": "Lindebo 13, 2. 81",
+    "kvm": 79,
+    "pris": 2395000,
+    "dato": "2026-05-06",
+    "krPrKvm": 30316,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231579,
+    "adresse": "Lindebo 23, 2. 141",
+    "kvm": 79,
+    "pris": 2600000,
+    "dato": "2026-04-21",
+    "krPrKvm": 32911,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231970,
+    "adresse": "Lindebo 5, st. 26",
+    "kvm": 42,
+    "pris": 1366500,
+    "dato": "2026-03-25",
+    "krPrKvm": 32536,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231538,
+    "adresse": "Lindebo 17, 1. 104",
+    "kvm": 79,
+    "pris": 2600000,
+    "dato": "2026-03-02",
+    "krPrKvm": 32911,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231964,
+    "adresse": "Lindebo 3, 1. 20",
+    "kvm": 79,
+    "pris": 2750000,
+    "dato": "2026-02-24",
+    "krPrKvm": 34810,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231567,
+    "adresse": "Lindebo 21, 2. 130",
+    "kvm": 42,
+    "pris": 1250000,
+    "dato": "2026-02-18",
+    "krPrKvm": 29762,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231578,
+    "adresse": "Lindebo 23, 1. 140",
+    "kvm": 79,
+    "pris": 2095000,
+    "dato": "2026-01-29",
+    "krPrKvm": 26519,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 231996,
+    "adresse": "Lindebo 1, 1. 5",
+    "kvm": 82,
+    "pris": 2525000,
+    "dato": "2026-01-28",
+    "krPrKvm": 30793,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231586,
+    "adresse": "Lindebo 25, st. 148",
+    "kvm": 79,
+    "pris": 2525000,
+    "dato": "2026-01-20",
+    "krPrKvm": 31962,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232021,
+    "adresse": "Lindebo 11, 2. 72",
+    "kvm": 79,
+    "pris": 2400000,
+    "dato": "2025-11-11",
+    "krPrKvm": 30380,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231944,
+    "adresse": "Lindebo 27, 2. 165",
+    "kvm": 79,
+    "pris": 2150000,
+    "dato": "2025-09-25",
+    "krPrKvm": 27215,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231998,
+    "adresse": "Lindebo 9, st. 51",
+    "kvm": 42,
+    "pris": 1195000,
+    "dato": "2025-09-22",
+    "krPrKvm": 28452,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232016,
+    "adresse": "Lindebo 11, 1. 68",
+    "kvm": 79,
+    "pris": 2300000,
+    "dato": "2025-08-29",
+    "krPrKvm": 29114,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231580,
+    "adresse": "Lindebo 23, 2. 142",
+    "kvm": 42,
+    "pris": 1175000,
+    "dato": "2025-08-28",
+    "krPrKvm": 27976,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231946,
+    "adresse": "Lindebo 27, 2. 167",
+    "kvm": 42,
+    "pris": 1120000,
+    "dato": "2025-07-29",
+    "krPrKvm": 26667,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231533,
+    "adresse": "Lindebo 1, 2. 10",
+    "kvm": 42,
+    "pris": 1100000,
+    "dato": "2025-07-22",
+    "krPrKvm": 26190,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232022,
+    "adresse": "Lindebo 13, st. 73",
+    "kvm": 79,
+    "pris": 2350000,
+    "dato": "2025-07-18",
+    "krPrKvm": 29747,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231564,
+    "adresse": "Lindebo 21, 1. 128",
+    "kvm": 79,
+    "pris": 2200000,
+    "dato": "2025-06-30",
+    "krPrKvm": 27848,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231932,
+    "adresse": "Lindebo 25, 2. 154",
+    "kvm": 42,
+    "pris": 1130000,
+    "dato": "2025-03-19",
+    "krPrKvm": 26905,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231566,
+    "adresse": "Lindebo 3, st. 13",
+    "kvm": 79,
+    "pris": 2240000,
+    "dato": "2025-03-18",
+    "krPrKvm": 28354,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231552,
+    "adresse": "Lindebo 19, 2. 117",
+    "kvm": 79,
+    "pris": 2145000,
+    "dato": "2025-03-10",
+    "krPrKvm": 27152,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231551,
+    "adresse": "Lindebo 19, 1. 116",
+    "kvm": 82,
+    "pris": 1925000,
+    "dato": "2025-01-30",
+    "krPrKvm": 23476,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231952,
+    "adresse": "Lindebo 29, st. 172",
+    "kvm": 82,
+    "pris": 2250000,
+    "dato": "2025-01-20",
+    "krPrKvm": 27439,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 231991,
+    "adresse": "Lindebo 7, 2. 45",
+    "kvm": 79,
+    "pris": 2245000,
+    "dato": "2025-01-20",
+    "krPrKvm": 28418,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231570,
+    "adresse": "Lindebo 23, st. 133",
+    "kvm": 79,
+    "pris": 1700000,
+    "dato": "2025-01-01",
+    "krPrKvm": 21519,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 231573,
+    "adresse": "Lindebo 23, st. 136",
+    "kvm": 79,
+    "pris": 2160000,
+    "dato": "2024-12-29",
+    "krPrKvm": 27342,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231536,
+    "adresse": "Lindebo 17, 1. 102",
+    "kvm": 42,
+    "pris": 1050000,
+    "dato": "2024-12-27",
+    "krPrKvm": 25000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231962,
+    "adresse": "Lindebo 3, 1. 19",
+    "kvm": 42,
+    "pris": 1175000,
+    "dato": "2024-11-06",
+    "krPrKvm": 27976,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231546,
+    "adresse": "Lindebo 19, st. 111",
+    "kvm": 42,
+    "pris": 1000000,
+    "dato": "2024-10-13",
+    "krPrKvm": 23810,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231582,
+    "adresse": "Lindebo 23, 2. 144",
+    "kvm": 79,
+    "pris": 2350000,
+    "dato": "2024-06-28",
+    "krPrKvm": 29747,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231574,
+    "adresse": "Lindebo 23, 1. 137",
+    "kvm": 79,
+    "pris": 2200000,
+    "dato": "2024-06-20",
+    "krPrKvm": 27848,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231990,
+    "adresse": "Lindebo 7, 1. 44",
+    "kvm": 79,
+    "pris": 2000000,
+    "dato": "2024-06-17",
+    "krPrKvm": 25316,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232033,
+    "adresse": "Lindebo 13, 2. 83",
+    "kvm": 42,
+    "pris": 1165000,
+    "dato": "2024-05-28",
+    "krPrKvm": 27738,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231976,
+    "adresse": "Lindebo 5, 1. 31",
+    "kvm": 42,
+    "pris": 1230000,
+    "dato": "2024-04-12",
+    "krPrKvm": 29286,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232008,
+    "adresse": "Lindebo 9, 2. 60",
+    "kvm": 82,
+    "pris": 2050000,
+    "dato": "2024-02-22",
+    "krPrKvm": 25000,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 232028,
+    "adresse": "Lindebo 13, 1. 79",
+    "kvm": 42,
+    "pris": 1175000,
+    "dato": "2024-02-08",
+    "krPrKvm": 27976,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231927,
+    "adresse": "Lindebo 3, st. 15",
+    "kvm": 42,
+    "pris": 975000,
+    "dato": "2023-12-20",
+    "krPrKvm": 23214,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 231951,
+    "adresse": "Lindebo 29, st. 171",
+    "kvm": 42,
+    "pris": 433500,
+    "dato": "2023-11-30",
+    "krPrKvm": 10321,
+    "metode": "Familieoverdragelse",
+    "fri": false
+   },
+   {
+    "bfe": 232000,
+    "adresse": "Lindebo 9, 1. 53",
+    "kvm": 79,
+    "pris": 2080000,
+    "dato": "2023-09-27",
+    "krPrKvm": 26329,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ],
+  "E/F Farimagsvej": [
+   {
+    "bfe": 282660,
+    "adresse": "Farimagsvej 21, 2. 4",
+    "kvm": 52,
+    "pris": 895000,
+    "dato": "2026-04-30",
+    "krPrKvm": 17212,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282641,
+    "adresse": "Farimagsvej 21, st. 4",
+    "kvm": 52,
+    "pris": 790000,
+    "dato": "2026-03-06",
+    "krPrKvm": 15192,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282647,
+    "adresse": "Farimagsvej 21, 1. 1",
+    "kvm": 48,
+    "pris": 721300,
+    "dato": "2026-01-12",
+    "krPrKvm": 15027,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282637,
+    "adresse": "Farimagsvej 21, st. 1",
+    "kvm": 48,
+    "pris": 730000,
+    "dato": "2025-12-03",
+    "krPrKvm": 15208,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282618,
+    "adresse": "Farimagsvej 19, 1. 1",
+    "kvm": 48,
+    "pris": 810000,
+    "dato": "2025-12-03",
+    "krPrKvm": 16875,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282669,
+    "adresse": "Farimagsvej 19, st. 7",
+    "kvm": 57,
+    "pris": 800000,
+    "dato": "2025-12-02",
+    "krPrKvm": 14035,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282657,
+    "adresse": "Farimagsvej 21, 2. 1",
+    "kvm": 48,
+    "pris": 800000,
+    "dato": "2025-11-27",
+    "krPrKvm": 16667,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282645,
+    "adresse": "Farimagsvej 21, st. 9",
+    "kvm": 38,
+    "pris": 720000,
+    "dato": "2025-11-25",
+    "krPrKvm": 18947,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282632,
+    "adresse": "Farimagsvej 19, 2. 5",
+    "kvm": 52,
+    "pris": 785000,
+    "dato": "2025-11-05",
+    "krPrKvm": 15096,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282638,
+    "adresse": "Farimagsvej 21, st. 2",
+    "kvm": 42,
+    "pris": 550000,
+    "dato": "2025-10-16",
+    "krPrKvm": 13095,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282620,
+    "adresse": "Farimagsvej 19, 1. 3",
+    "kvm": 42,
+    "pris": 675000,
+    "dato": "2025-10-16",
+    "krPrKvm": 16071,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282665,
+    "adresse": "Farimagsvej 21, 2. 9",
+    "kvm": 38,
+    "pris": 550000,
+    "dato": "2025-09-26",
+    "krPrKvm": 14474,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282648,
+    "adresse": "Farimagsvej 21, 1. 2",
+    "kvm": 42,
+    "pris": 600000,
+    "dato": "2025-09-10",
+    "krPrKvm": 14286,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282661,
+    "adresse": "Farimagsvej 19, st. 5",
+    "kvm": 52,
+    "pris": 770000,
+    "dato": "2025-04-26",
+    "krPrKvm": 14808,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282668,
+    "adresse": "Farimagsvej 19, st. 6",
+    "kvm": 38,
+    "pris": 625000,
+    "dato": "2025-04-23",
+    "krPrKvm": 16447,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282671,
+    "adresse": "Farimagsvej 19, st. 10",
+    "kvm": 48,
+    "pris": 750000,
+    "dato": "2025-02-14",
+    "krPrKvm": 15625,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282629,
+    "adresse": "Farimagsvej 19, 2. 2",
+    "kvm": 42,
+    "pris": 595000,
+    "dato": "2025-01-23",
+    "krPrKvm": 14167,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282625,
+    "adresse": "Farimagsvej 19, 1. 9",
+    "kvm": 38,
+    "pris": 600000,
+    "dato": "2024-12-04",
+    "krPrKvm": 15789,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282626,
+    "adresse": "Farimagsvej 19, 1. 10",
+    "kvm": 48,
+    "pris": 725000,
+    "dato": "2024-12-03",
+    "krPrKvm": 15104,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282655,
+    "adresse": "Farimagsvej 21, 1. 9",
+    "kvm": 38,
+    "pris": 495000,
+    "dato": "2024-10-31",
+    "krPrKvm": 13026,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282650,
+    "adresse": "Farimagsvej 19, st. 4",
+    "kvm": 52,
+    "pris": 897000,
+    "dato": "2024-04-18",
+    "krPrKvm": 17250,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 282653,
+    "adresse": "Farimagsvej 21, 1. 6",
+    "kvm": 38,
+    "pris": 500000,
+    "dato": "2024-03-20",
+    "krPrKvm": 13158,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ],
+  "Nordre Farimagsvej": [
+   {
+    "bfe": 284066,
+    "adresse": "Nordre Farimagsvej 13B, st. 15",
+    "kvm": 36,
+    "pris": 520000,
+    "dato": "2026-06-29",
+    "krPrKvm": 14444,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284063,
+    "adresse": "Nordre Farimagsvej 13A, 2. 36",
+    "kvm": 84,
+    "pris": 1600000,
+    "dato": "2025-12-01",
+    "krPrKvm": 19048,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284430,
+    "adresse": "Nordre Farimagsvej 13C, 2. 11",
+    "kvm": 36,
+    "pris": 625000,
+    "dato": "2025-09-26",
+    "krPrKvm": 17361,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284436,
+    "adresse": "Nordre Farimagsvej 13A, 1. 32",
+    "kvm": 84,
+    "pris": 1395000,
+    "dato": "2025-08-15",
+    "krPrKvm": 16607,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284065,
+    "adresse": "Nordre Farimagsvej 13B, st. 14",
+    "kvm": 36,
+    "pris": 550000,
+    "dato": "2025-04-14",
+    "krPrKvm": 15278,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284061,
+    "adresse": "Nordre Farimagsvej 13A, 2. 34",
+    "kvm": 36,
+    "pris": 595000,
+    "dato": "2024-11-02",
+    "krPrKvm": 16528,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284431,
+    "adresse": "Nordre Farimagsvej 13C, 2. 12",
+    "kvm": 88,
+    "pris": 1495000,
+    "dato": "2024-07-30",
+    "krPrKvm": 16989,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284414,
+    "adresse": "Nordre Farimagsvej 13B, 1. 20",
+    "kvm": 84,
+    "pris": 1450000,
+    "dato": "2024-06-21",
+    "krPrKvm": 17262,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   },
+   {
+    "bfe": 284420,
+    "adresse": "Nordre Farimagsvej 13C, st. 2",
+    "kvm": 36,
+    "pris": 400000,
+    "dato": "2024-03-08",
+    "krPrKvm": 11111,
+    "metode": "Almindelig fri handel",
+    "fri": true
+   }
+  ]
+ }
+}
