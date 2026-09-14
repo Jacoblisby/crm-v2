@@ -11,8 +11,14 @@ Det betyder to ting, man skal vide, når man læser tallene:
 · En lejlighed, der er handlet to gange på et år, tæller kun med den sidste.
 · Ejernavne er ikke med — de gemmes bevidst ikke (se ejere.py).
 
-Vi gemmer 36 måneder tilbage, så siden både kan vise 12 og 24 måneder og
-lidt kontekst bagud. Handler ældre end det er ikke comps, det er historie.
+Alle handler gemmes, uanset alder. Siden viser kun de seneste 36 måneder
+som comps — ældre handler er historie — men de ældre skal med alligevel,
+fordi vores egne køb måles mod markedet PÅ KØBSTIDSPUNKTET, og de første
+køb er fra 2020.
+
+Vores egne køb mærkes «vores». En lejlighed, vi har ejet og solgt igen,
+står med privat ejer i udtrækket; dens seneste handel er køberens, ikke
+vores, og den mærkes derfor ikke.
 
 Kør:  python3 scripts/bbr/handler.py
 """
@@ -22,14 +28,14 @@ import os
 
 DATA = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'lib', 'data')
 I_DAG = dt.date.today()
-MDR = 36
+VIS_MDR = 36  # hvor langt tilbage siden viser comps
 
 with open(os.path.join(DATA, 'ejerforeninger-seed.json'), encoding='utf-8') as f:
     seed = json.load(f)
 with open(os.path.join(DATA, 'ejere.json'), encoding='utf-8') as f:
     ejere = {e['bfe']: e for e in json.load(f)['enheder']}
 
-graense = I_DAG - dt.timedelta(days=int(MDR * 30.44))
+egne = {int(x['bfe']) for x in seed['ejede']}
 ud = {}
 for f in seed['foreninger']:
     # Samme navneregel som seed-ruten og rollup.py: databasen kender
@@ -40,8 +46,7 @@ for f in seed['foreninger']:
         e = ejere.get(bfe)
         if not e or not e['erBolig'] or not e.get('handelsdato') or not e.get('handelspris'):
             continue
-        if dt.date.fromisoformat(e['handelsdato']) < graense:
-            continue
+        vores = bfe in egne and e['ejerType'] == 'Selskab'
         # Adressen uden by og postnr — foreningen ligger ét sted.
         adr = ', '.join(e['adresse'].split(', ')[:2])
         handler.append({
@@ -55,6 +60,7 @@ for f in seed['foreninger']:
             # Fri handel af én ejendom. Familieoverdragelser og porteføljehandler
             # er også «priser», men ikke priser nogen fremmed ville betale.
             'fri': bool(e.get('friHandel')),
+            'vores': vores,
         })
     handler.sort(key=lambda h: h['dato'], reverse=True)
     if handler:
@@ -62,11 +68,11 @@ for f in seed['foreninger']:
 
 with open(os.path.join(DATA, 'handler-forening.json'), 'w', encoding='utf-8') as f:
     json.dump({'kilde': 'Resights ejendomsudtræk — seneste handel pr. lejlighed',
-               'genereret': I_DAG.isoformat(), 'maaneder': MDR, 'foreninger': ud},
+               'genereret': I_DAG.isoformat(), 'maaneder': VIS_MDR, 'foreninger': ud},
               f, ensure_ascii=False, indent=1)
 
 n = sum(len(v) for v in ud.values())
-print(f'{len(ud)} foreninger, {n} handler inden for {MDR} mdr')
+print(f'{len(ud)} foreninger, {n} handler i alt')
 for navn, h in sorted(ud.items(), key=lambda kv: -len(kv[1]))[:6]:
     et_aar = [x for x in h if x['fri'] and dt.date.fromisoformat(x['dato']) >= I_DAG - dt.timedelta(days=365)]
-    print(f'  {navn:32} {len(h):3} handler · {len(et_aar):3} frie sidste 12 mdr')
+    print(f'  {navn:32} {len(h):3} handler · {len(et_aar):3} frie sidste 12 mdr · {sum(x["vores"] for x in h):2} vores køb')

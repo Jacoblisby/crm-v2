@@ -13,7 +13,7 @@ import { and, desc, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { housingAssociations, leads } from '@/lib/db/schema';
 import bbrRollup from '@/lib/data/bbr-forening-rollup.json';
-import { handlerFor, noegletal } from '@/lib/handler';
+import { handlerFor, noegletal, voresKoeb, koebOpsummering, pct } from '@/lib/handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -327,6 +327,7 @@ function ForeningerView({
                     <th className="text-right font-semibold px-3 py-3">Kvm</th>
                     <th className="text-right font-semibold px-3 py-3" title="Frie handler de sidste 12 måneder">Handler 12 mdr</th>
                     <th className="text-right font-semibold px-3 py-3" title="Median kr/kvm, frie handler de sidste 12 måneder">Kr/kvm</th>
+                    <th className="text-right font-semibold px-3 py-3" title="Vores køb målt mod markedet på købstidspunktet (median)">Vores køb</th>
                     <th className="text-center font-semibold px-3 py-3">Breve</th>
                     <th className="text-left font-semibold px-4 py-3">Status</th>
                   </tr>
@@ -337,7 +338,9 @@ function ForeningerView({
                     const andel = Number(r.andel) || 0;
                     // Handler og kvm-pris: frie handler de sidste 12 måneder.
                     // Detaljerne — de enkelte comps — ligger på foreningens side.
-                    const h12 = noegletal(handlerFor(r.name), 12);
+                    const alle = handlerFor(r.name);
+                    const h12 = noegletal(alle, 12);
+                    const ops = koebOpsummering(voresKoeb(alle));
                     return (
                       <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                         <td className="px-4 py-3">
@@ -382,6 +385,18 @@ function ForeningerView({
                         <td className="px-3 py-3 text-right tabular-nums font-medium text-slate-900 whitespace-nowrap">
                           {h12.medianKrPrKvm !== null ? h12.medianKrPrKvm.toLocaleString('da-DK') : <span className="text-slate-300 font-normal">—</span>}
                         </td>
+                        <td className="px-3 py-3 text-right tabular-nums whitespace-nowrap">
+                          {ops.antal ? (
+                            <Link href={`/foreninger/${r.id}`} className="hover:underline underline-offset-2">
+                              <span className="text-slate-500">{ops.antal} · </span>
+                              <span className="font-semibold" style={{ color: ops.medianForskelPct === null ? '#94a3b8' : ops.medianForskelPct < 0 ? '#0f4749' : '#7a4a3d' }}>
+                                {pct(ops.medianForskelPct)}
+                              </span>
+                            </Link>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
                         <td className="px-3 py-3 text-center tabular-nums text-slate-600">
                           {r.letterRounds || '—'}
                         </td>
@@ -406,8 +421,9 @@ function ForeningerView({
         )}
 
         <p className="text-xs text-slate-500 mt-4 max-w-2xl leading-relaxed">
-          Handler og kr/kvm er frie handler de sidste 12 måneder ifølge Resights — klik på
-          foreningen for at se de enkelte handler. Andel er hvor stor en del af foreningen vi ejer. Tallet kommer fra en krydsning af
+          Handler og kr/kvm er frie handler de sidste 12 måneder ifølge Resights, uden vores egne
+          køb. Vores køb viser antal og median-forskel til markedet på købstidspunktet, målt mod
+          lejligheder i samme størrelse — negativ er under markedet. Klik på foreningen for at se de enkelte handler. Andel er hvor stor en del af foreningen vi ejer. Tallet kommer fra en krydsning af
           foreningens BFE-numre mod porteføljen og genberegnes ved hver indlæsning — i modsætning
           til regnearket, hvor det blev vedligeholdt i hånden og nåede at blive 27 for lavt.
         </p>

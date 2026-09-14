@@ -15,7 +15,10 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { housingAssociations } from '@/lib/db/schema';
 import bbrRollup from '@/lib/data/bbr-forening-rollup.json';
-import { handlerFor, noegletal, graense, kr, HANDLER_GENERERET, type Noegletal } from '@/lib/handler';
+import {
+  handlerFor, noegletal, graense, kr, pct, voresKoeb, koebOpsummering,
+  HANDLER_GENERERET, HANDLER_MAANEDER, type Noegletal,
+} from '@/lib/handler';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +30,11 @@ export default async function ForeningPage({ params }: { params: Promise<{ id: s
   const [f] = await db.select().from(housingAssociations).where(eq(housingAssociations.id, id)).limit(1);
   if (!f) notFound();
 
+  // Hele historikken bruges til at måle vores køb mod markedet dengang;
+  // comps-listen viser kun de seneste 36 måneder.
   const handler = handlerFor(f.name);
+  const gVis = graense(HANDLER_MAANEDER);
+  const comps = handler.filter((h) => h.dato >= gVis);
   const t12 = noegletal(handler, 12);
   const t24 = noegletal(handler, 24);
   const g12 = graense(12);
@@ -35,6 +42,8 @@ export default async function ForeningPage({ params }: { params: Promise<{ id: s
   const bbr = bbrRollup.foreninger.find((x) => x.foreningNavn === f.name);
   const KVM_FRA = bbrRollup.kvmFra;
   const KVM_TIL = bbrRollup.kvmTil;
+  const koeb = voresKoeb(handler);
+  const ops = koebOpsummering(koeb);
 
   // Kun frie handler i vores størrelse — det er dét, et bud skal måles mod.
   const iStoerrelsen12 = noegletal(
@@ -60,21 +69,100 @@ export default async function ForeningPage({ params }: { params: Promise<{ id: s
       </header>
 
       {/* ── Nøgletal ─────────────────────────────────────────────── */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <Kort titel="Sidste 12 måneder" t={t12} note="alle boliger i foreningen" />
         <Kort titel={`Sidste 12 mdr · ${KVM_FRA}–${KVM_TIL} kvm`} t={iStoerrelsen12} note="den størrelse vi køber" fremhaev />
         <Kort titel="Sidste 24 måneder" t={t24} note="alle boliger i foreningen" />
+        <div className="rounded-lg border p-4" style={{ background: '#145d5f', borderColor: '#145d5f', color: '#fff' }}>
+          <div className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: '#b9d6d3' }}>Vores køb</div>
+          <div className="mt-2 text-2xl font-semibold tabular-nums">
+            {ops.medianForskelPct !== null ? `${pct(ops.medianForskelPct)}` : '—'}
+          </div>
+          <div className="text-xs mt-0.5" style={{ color: '#d5e7e5' }}>
+            {ops.antal === 0
+              ? 'ingen køb i foreningen'
+              : ops.medianForskelPct !== null
+                ? `mod markedet på købstidspunktet · median af ${ops.antalMedForskel} køb`
+                : `${ops.antal} køb · for få handler at måle mod`}
+          </div>
+          <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+            <dt style={{ color: '#b9d6d3' }}>Antal køb</dt>
+            <dd className="text-right tabular-nums">{ops.antal}</dd>
+            <dt style={{ color: '#b9d6d3' }}>Vores median</dt>
+            <dd className="text-right tabular-nums">
+              {ops.medianKrPrKvm !== null ? `${ops.medianKrPrKvm.toLocaleString('da-DK')} kr/kvm` : '—'}
+            </dd>
+          </dl>
+          <div className="text-[11px] mt-2" style={{ color: '#b9d6d3' }}>negativ = under markedet</div>
+        </div>
       </section>
+
+      {/* ── Vores køb ─────────────────────────────────────────────
+          Hvert køb målt mod foreningens frie handler i de 12 måneder op til
+          købsdatoen. Det er den eneste rimelige sammenligning: markedet i
+          2021 siger intet om, hvad vi burde have givet i 2026. */}
+      {koeb.length > 0 && (
+        <section className="bg-white rounded-lg border border-slate-200 overflow-hidden mb-6">
+          <div className="flex items-baseline justify-between flex-wrap gap-2 px-4 py-3 border-b border-slate-200">
+            <h2 className="font-semibold text-slate-900">Vores køb</h2>
+            <p className="text-xs text-slate-500">Markedet er medianen af frie handler i samme størrelse (±20 % kvm) i månederne op til købet</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-[11px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                  <th className="text-left font-semibold px-4 py-2.5">Købt</th>
+                  <th className="text-left font-semibold px-3 py-2.5">Adresse</th>
+                  <th className="text-right font-semibold px-3 py-2.5">Kvm</th>
+                  <th className="text-right font-semibold px-3 py-2.5">Pris</th>
+                  <th className="text-right font-semibold px-3 py-2.5">Vores kr/kvm</th>
+                  <th className="text-right font-semibold px-3 py-2.5">Marked kr/kvm</th>
+                  <th className="text-right font-semibold px-4 py-2.5">Forskel</th>
+                </tr>
+              </thead>
+              <tbody>
+                {koeb.map((k) => (
+                  <tr key={k.bfe} className="border-b border-slate-100 last:border-0">
+                    <td className="px-4 py-2 whitespace-nowrap tabular-nums text-slate-700">{fmtDato(k.dato)}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-slate-900">{k.adresse}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{k.kvm}</td>
+                    <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{kr(k.pris)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums font-semibold text-slate-900">
+                      {k.krPrKvm.toLocaleString('da-DK')}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-slate-600 whitespace-nowrap">
+                      {k.markedKrPrKvm !== null ? (
+                        <>
+                          {k.markedKrPrKvm.toLocaleString('da-DK')}
+                          <span className="text-[11px] text-slate-400"> · {k.markedAntal} handler à {k.markedKvmFra}–{k.markedKvmTil} kvm{k.markedMdr > 12 ? ` / ${k.markedMdr} mdr` : ''}</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-300" title={`Kun ${k.markedAntal} frie handler à ${k.markedKvmFra}–${k.markedKvmTil} kvm i 36 mdr op til købet`}>for få handler</span>
+                      )}
+                    </td>
+                    <td
+                      className="px-4 py-2 text-right tabular-nums font-semibold whitespace-nowrap"
+                      style={{ color: k.forskelPct === null ? '#cbd5e1' : k.forskelPct < 0 ? '#0f4749' : '#7a4a3d' }}
+                    >
+                      {pct(k.forskelPct)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {/* ── Comps ────────────────────────────────────────────────── */}
       <section className="bg-white rounded-lg border border-slate-200 overflow-hidden">
         <div className="flex items-baseline justify-between flex-wrap gap-2 px-4 py-3 border-b border-slate-200">
           <h2 className="font-semibold text-slate-900">Handler</h2>
           <p className="text-xs text-slate-500">
-            Seneste handel pr. lejlighed · Resights, opdateret {fmtDato(HANDLER_GENERERET)}
+            Seneste {HANDLER_MAANEDER} måneder · seneste handel pr. lejlighed · Resights, opdateret {fmtDato(HANDLER_GENERERET)}
           </p>
         </div>
-        {handler.length === 0 ? (
+        {comps.length === 0 ? (
           <p className="px-4 py-8 text-sm text-slate-500 text-center">
             Ingen handler registreret for denne forening. Er den målt op i BBR og med i Resights-udtrækket?
           </p>
@@ -92,14 +180,14 @@ export default async function ForeningPage({ params }: { params: Promise<{ id: s
                 </tr>
               </thead>
               <tbody>
-                {handler.map((h, i) => {
+                {comps.map((h, i) => {
                   const inden12 = h.dato >= g12;
                   const inden24 = h.dato >= g24;
                   const iStr = h.kvm >= KVM_FRA && h.kvm <= KVM_TIL;
                   // Skillelinjer hvor 12 og 24 måneder slutter, så man kan se
                   // perioderne uden at regne på datoerne.
-                  const foerste24 = !inden12 && inden24 && (i === 0 || handler[i - 1].dato >= g12);
-                  const foersteAeldre = !inden24 && (i === 0 || handler[i - 1].dato >= g24);
+                  const foerste24 = !inden12 && inden24 && (i === 0 || comps[i - 1].dato >= g12);
+                  const foersteAeldre = !inden24 && (i === 0 || comps[i - 1].dato >= g24);
                   return (
                     <tr
                       key={h.bfe}
@@ -112,7 +200,15 @@ export default async function ForeningPage({ params }: { params: Promise<{ id: s
                         {foerste24 && <div className="text-[10px] uppercase tracking-wider text-slate-400">12–24 mdr</div>}
                         {foersteAeldre && <div className="text-[10px] uppercase tracking-wider text-slate-400">over 24 mdr</div>}
                       </td>
-                      <td className="px-3 py-2 whitespace-nowrap">{h.adresse}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        {h.adresse}
+                        {h.vores && (
+                          <span className="ml-2 inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded align-middle"
+                            style={{ background: '#145d5f', color: '#fff' }}>
+                            Vores køb
+                          </span>
+                        )}
+                      </td>
                       <td className={`px-3 py-2 text-right tabular-nums ${iStr && h.fri ? 'font-medium' : ''}`}>
                         {h.kvm}
                         {!iStr && <span className="text-slate-300"> ·</span>}
@@ -144,7 +240,9 @@ export default async function ForeningPage({ params }: { params: Promise<{ id: s
       </section>
 
       <p className="text-xs text-slate-500 mt-4 max-w-2xl leading-relaxed">
-        Nøgletallene bygger kun på frie handler af én ejendom. Familieoverdragelser og
+        Nøgletallene bygger kun på frie handler af én ejendom, og vores egne køb er holdt ude
+        af markedet — de er det, vi måler mod. Hvert køb måles mod lejligheder i samme størrelse
+        (±20 % kvm), fordi små og store lejligheder handles til vidt forskellige kvm-priser. Familieoverdragelser og
         porteføljehandler står i listen, gråtonet, men er ikke priser nogen fremmed ville
         betale. Kilden har seneste handel pr. lejlighed, så en lejlighed handlet to gange på
         et år tæller kun med den sidste. En prik efter kvadratmeterne markerer lejligheder
