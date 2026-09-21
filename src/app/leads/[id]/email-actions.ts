@@ -48,6 +48,10 @@ export async function sendLeadEmailAction(
     body: JSON.stringify({
       from,
       to: lead.email,
+      // Samme svaradresse som de automatiske mails. Uden den landede kundens
+      // svar i afsenderens almindelige indbakke i stedet for på leadets kort —
+      // /api/inbound-email fanger kun det, der sendes til INBOUND_REPLY_TO.
+      reply_to: process.env.INBOUND_REPLY_TO || 'administration@365ejendom.dk',
       subject,
       text: body,
     }),
