@@ -1,0 +1,815 @@
+{
+ "dato": "2026-09-21",
+ "beskrivelse": "Oprydning af pipelinen efter Jacobs beslutning 21.09.2026: kun seks leads bliver i Ny lead; Købt beholdes; resten arkiveres.",
+ "behold": [
+  "342d32f5-b2ce-4f44-a91d-0353922e7faa",
+  "6d8a7fa9-34ac-4c6f-8180-f82cd424895a",
+  "aff620ef-92e2-4509-acf0-263806f331e4",
+  "d2ee035f-0b88-41c7-aafe-c72718d75b9b",
+  "dba680fe-fc57-4477-9405-e02665d35b15",
+  "f5fe2a0c-8523-45b0-954b-8c07bd865b6a"
+ ],
+ "tilNyLead": [
+  "6d8a7fa9-34ac-4c6f-8180-f82cd424895a"
+ ],
+ "arkiver": [
+  {
+   "id": "91a0ab13-29d8-4a64-96d4-d561fadab5d4",
+   "navn": "John",
+   "adresse": "—",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "f782e91b-d904-4f89-81d9-96e412b4a786",
+   "navn": "Karen Marie",
+   "adresse": "Ringstedgade 88",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "7b222365-a71f-4ff5-ba3f-45b6f2d2f8f3",
+   "navn": "Janne Jønck",
+   "adresse": "Egensevej 5, 4840 Nørre Alslev",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1f2f9358-cb07-4a02-9547-ad453ad4ff5a",
+   "navn": "Anne-Lise Sørensen",
+   "adresse": "Bredgade 4, st",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "e6231c2e-3cd9-41e9-905a-bd98d991326e",
+   "navn": "Heidi Faigh Graversen",
+   "adresse": "Banevej 25, 4480 Store Fuglede",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "ef66fea2-425c-4f13-a804-dbc4488396d8",
+   "navn": "Morten Hansen",
+   "adresse": "Parkvej 8, 2. tv",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "2e5a354d-2185-45cc-b699-2de310081187",
+   "navn": "Test",
+   "adresse": "Svendborgvej 263, st, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "405930f0-98ad-46a4-a073-798390794f1a",
+   "navn": "Anette Jensen",
+   "adresse": "Odensevej 119, 2. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "cf957e40-434a-4f52-ac0d-e5aebd069c1d",
+   "navn": "Lise Lotte Askjær",
+   "adresse": "Benløseparken 185, 2. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "37063cbb-1475-4d14-81b0-6b559faafb7c",
+   "navn": "Vano",
+   "adresse": "Benløseparken 41, 2. tv, Benløse, 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "a331de49-8a06-4ab8-adf0-9f5e7c398897",
+   "navn": "Bede Ndinzemenshi",
+   "adresse": "Benløseparken 57, 2. tv, Benløse, 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "ccc013e5-08cd-47d3-9b5d-d5b6a3789215",
+   "navn": "Jonas Holm Damsgaard",
+   "adresse": "Lindebo 17, st. 99, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "3bc59b2b-a0b0-4834-945c-35431e0a8cba",
+   "navn": "Tugba",
+   "adresse": "Benløseparken 47, 2. tv, Benløse, 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "7d2d74c0-f792-468c-988e-dfcc89cfdf2c",
+   "navn": "Emma Gyldenkærne",
+   "adresse": "Lindebo 5, st. 26, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1bc793a8-164e-4ec7-a023-01193145f4f0",
+   "navn": "Christian Pedersen",
+   "adresse": "Lindebo 23, st. 136, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "329db3d8-5fc1-4125-a9ce-dbe34daf01a7",
+   "navn": "Mahmoud Fayad",
+   "adresse": "Benløseparken 169, 2. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "d3195e57-4f9b-469c-8e81-afb6715e77a5",
+   "navn": "Haris Waseem",
+   "adresse": "Lindebo 21, st. 121, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "3d50407f-8e72-4c42-95ca-72e71504699e",
+   "navn": "Ruhma hussain",
+   "adresse": "Benløseparken 51, st. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "8455f881-b66b-4102-a4bd-fea3b2a82c65",
+   "navn": "Minire Rrahimi",
+   "adresse": "Benløseparken 91, 1. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "b5b1fd8a-0138-4f0a-94e7-48688b238275",
+   "navn": "Jeppe kjølby",
+   "adresse": "Benløseparken 175, 2. th., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "5eb438b1-2f40-4156-982f-345f5c431b8e",
+   "navn": "Niclas Jensen",
+   "adresse": "Benløseparken 179 st. th.",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "854f47bb-dac8-46cb-b67e-443926f2c67d",
+   "navn": "Christian Kjær",
+   "adresse": "Svendborgvej 209, 1., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "10d57f64-807f-4f11-9685-375e9d90a75b",
+   "navn": "Preben Hansen",
+   "adresse": "Bogensevej 5, st. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "30e1c76d-bbf0-45a8-99ac-458aee076938",
+   "navn": "Melissa Bukvic",
+   "adresse": "Bogensevej 63, 1. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "c5e62809-9a3d-48dc-a292-96976f91e8a1",
+   "navn": "Anders Kofoed Jensen",
+   "adresse": "Svendborgvej 269, st., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "c219bf76-f38a-41f5-8afb-4ed72ce9cceb",
+   "navn": "Onur Simsek",
+   "adresse": "Benløseparken 47, st. th., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "f0f7a53b-bd1e-430d-95da-ab98b6b9eb14",
+   "navn": "Naveed Anwar",
+   "adresse": "Benløseparken 23, 1. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "00c2a921-73f7-4931-ab39-e412a35d903b",
+   "navn": "Henrik Flemming Larsen",
+   "adresse": "Benløseparken 9, 2. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "eb6021f2-85b8-4106-af36-10ff86f69049",
+   "navn": "Sinan",
+   "adresse": "Lindebo 13, 1. 77, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "a81baf2a-e912-45a5-ac49-9996a0fb9009",
+   "navn": "Nanna Brandrup",
+   "adresse": "Lindebo 19, 2. 117, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "bb582d71-2deb-4a19-b3dc-67b20b6ffa73",
+   "navn": "Thea Jensen",
+   "adresse": "Benløseparken 153, 2. th., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "abf1d464-8252-44b4-8baa-86ae6e9c149a",
+   "navn": "Hanne mørkeberg",
+   "adresse": "Odensevej 54, 1. mf., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "d488f396-691a-4446-9eb3-ccb129bc2aeb",
+   "navn": "Büsra Dag",
+   "adresse": "Lindebo 15, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "470485d1-c514-44f7-90ff-e46fc2d5e91c",
+   "navn": "Gaurav prasad Neupane",
+   "adresse": "Lindebo 13, 2. 81, 2630 Taastrup",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "ac7c07f7-4f6c-41a1-ba5a-6664a1b9df97",
+   "navn": "Mohamad El_yousef",
+   "adresse": "Bogensevej 63, 2. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "43c1ab6e-68d7-4d12-93f2-db6b76dcb68f",
+   "navn": "christina clausen",
+   "adresse": "Bogensevej 65, st. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "e6e16490-bba0-4fdf-a755-bb1901a93468",
+   "navn": "Birgit Breindahl",
+   "adresse": "Bogensevej 51, 1. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "efc6eece-1153-4d28-a27a-0f9155b0d9bd",
+   "navn": "Per Svendson",
+   "adresse": "Benløseparken 179, 2. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "ec69a65d-6bcc-4a88-be2c-743f81fbef20",
+   "navn": "Helle Winther",
+   "adresse": "Lupinvej 11, st. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "7367d1b1-89e1-49e2-9dcb-e9ea1e4197f9",
+   "navn": "Helle Winther",
+   "adresse": "Lupinvej 11, 1. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1ab200e1-70da-45ed-8ad7-e312ea71f2b3",
+   "navn": "Uj",
+   "adresse": "Benløseparken 191, st. tv., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "db137632-71f8-44bf-9a21-c80681124e19",
+   "navn": "Milena Hristova Bebova",
+   "adresse": "Benløseparken 167, 2. th., 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "d02843b7-5a8c-4ad9-9d7a-828679d4d78a",
+   "navn": "Mads Enøe",
+   "adresse": "Odensevej 50, st. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "7de06af4-2651-4c8d-b6a3-752c9089db8e",
+   "navn": "Bente Stennicke",
+   "adresse": "Bogensevej 39, 1. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "d1843d98-3c97-4b51-be4e-6de88e6615ba",
+   "navn": "Jette Nielsen",
+   "adresse": "Bogensevej 47, st. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "fd743c08-4a86-4c80-9b48-e855d622094e",
+   "navn": "Carsten Hansen",
+   "adresse": "Erantisvej 12, 2. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1850e4a2-9caa-488c-996c-982469b90d78",
+   "navn": "Wibe Larsen",
+   "adresse": "Lupinvej 17, 1. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "e29874da-df72-4154-a59c-471be9318435",
+   "navn": "Lola Lysgaard Trier",
+   "adresse": "Bogensevej 69, st. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "37e253b4-22d2-4a12-bb7c-007b8b03622a",
+   "navn": "Tove Herbing",
+   "adresse": "Bogensevej 53, 2. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "09a6d1b1-05cc-4fcd-ac43-0ea82e9bd52c",
+   "navn": "Pia Linke",
+   "adresse": "Bogensevej 67, 1. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "3dafb1b9-83db-4e9d-a7f5-f07651e37811",
+   "navn": "Mogens Nordstrøm Simonsen",
+   "adresse": "Bogensevej 53, 1. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "7752c4a8-98d1-44dc-a181-41dc432b22b7",
+   "navn": "hanne nielsen",
+   "adresse": "Farimagsvej 19, 1. 3, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "e88e9fc9-90f5-4f6f-a204-48a897c207f5",
+   "navn": "William Thiesen",
+   "adresse": "Svendborgvej 145, 1., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "8da0dca1-16c5-4f70-a64d-3b619c950471",
+   "navn": "B. Reinhardt",
+   "adresse": "Nørre Allé 60, 1. tv., 4400 Kalundborg",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "5a0abdaa-afca-4298-a938-619b864c8f06",
+   "navn": "Gert Torben Olsen",
+   "adresse": "Farimagsvej 19, st. 10, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "d6465ab1-d015-4e0d-b86e-cdc031ff82de",
+   "navn": "Anders Jensen",
+   "adresse": "Farimagsvej 21, st. 10, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "163aad86-fdcb-423e-9e92-3033f39c3153",
+   "navn": "Morten Rasmussen",
+   "adresse": "Odensevej 1, tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "5007bf8f-1a6a-4f0a-9f30-0db91ccad9dc",
+   "navn": "Dennis Jørgensen",
+   "adresse": "Nørre Allé 56, st. tv., 4400 Kalundborg",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "c9813c45-70ef-48a3-b8d9-a9cde8ab6c3c",
+   "navn": "Stefan Olin",
+   "adresse": "Svendborgvej 151, 1., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "322718ec-a104-4079-823c-f87a889226bc",
+   "navn": "Gitte Nielsen",
+   "adresse": "Svendborgvej 131, st., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "c6a56d07-9b32-43bf-a398-894c4ee7a81e",
+   "navn": "Søren From Hansen",
+   "adresse": "Blegdammen 36, 1. tv., 4400 Kalundborg",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "152be42a-fba5-448b-a462-ca25832cc840",
+   "navn": "Thomas Holst",
+   "adresse": "Blegdammen 36, st. th., 4400 Kalundborg",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "52190a6d-fae1-4ac3-85e0-23f6871f06ec",
+   "navn": "Kristian Jacobsen",
+   "adresse": "Svendborgvej 243, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "66b9b257-47e2-4dc6-bda2-16996916226b",
+   "navn": "Jens Alban Hansen",
+   "adresse": "Svendborgvej 271, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "5de785c8-1477-4439-bf3d-b80bbb727306",
+   "navn": "Hadi El Awad",
+   "adresse": "Benløseparken 127, 2. tv, Benløse, 4100 Ringsted",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "0f187db5-95a9-4b78-a263-9b37504d0acb",
+   "navn": "Dan Thomsen",
+   "adresse": "Odensevej 122, st. th., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "843e5c8b-6866-4f0f-a247-e8cc20e6d2bb",
+   "navn": "Martin Jørgensen",
+   "adresse": "Kildemarksvej 147, st. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "39121d8c-c6be-4394-8763-6b1421487de4",
+   "navn": "Mohamad El Yousef",
+   "adresse": "Bogensevej 63, 1. tv., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "51d8d7b6-88ca-4e26-9090-7068602f8b30",
+   "navn": "Jacob Lücking",
+   "adresse": "Svendborgvej 249, 1., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "a2016e74-2006-4ce0-9191-6b3df951864d",
+   "navn": "Martin Soelberg",
+   "adresse": "Svendborgvej 267, st., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "323261dc-a016-4181-b51f-292fffeb4cf8",
+   "navn": "Steen Toftebjerg",
+   "adresse": "Svendborgvej 35, st., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "c918665c-ebe8-4444-bb5f-e30e448f67cb",
+   "navn": "Kartek Holding ApS",
+   "adresse": "Svendborgvej 19, 1., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "d595d3f7-14ea-47e9-a35c-5714293bd44d",
+   "navn": "Thor Sørensen",
+   "adresse": "Svendborgvej 217, 1., 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "255b385d-3f15-49e1-90b9-d37f88d33a31",
+   "navn": "Rikke Eckermann",
+   "adresse": "Nørre Allé 60, st. th., 4400 Kalundborg",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "aff0b3e5-880d-488d-bde4-1b2768a9461a",
+   "navn": "Peter Nielsen",
+   "adresse": "Toldbodgade 7, 1",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "45b8da8d-02c1-4693-a952-2fe5556920b1",
+   "navn": "Sebastian Jacobsen",
+   "adresse": "Marievej 1, kl. th, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "e5784f04-55ac-4b76-afb5-673f34f2c16e",
+   "navn": "Sebastian Jacobsen",
+   "adresse": "Marievej 1, kl. th, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "8b0c7efc-0c7f-404f-8f15-751da734b34d",
+   "navn": "QA Demo",
+   "adresse": "Bogensevej 53, 2. th, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "554d6490-0ab8-417c-96df-f8a0d905cbff",
+   "navn": "Sebastian Jacobsen",
+   "adresse": "Marievej 1, kl. th, 4700 Næstved",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "932bf0a9-66df-4cc6-b86d-4e2a003544ae",
+   "navn": "Lise Lotte Askjær",
+   "adresse": "Hovedgaden 12, 1. tv",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "5f38e6a8-d02e-41b1-b3fd-aa3df3ccbcf4",
+   "navn": "Malgorzata nicpon",
+   "adresse": "Søndermarksvej 7, st. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "850c1e4e-e481-48fc-b495-346bba358462",
+   "navn": "John Hønningen",
+   "adresse": "Byskov Alle 20, 3. tv, 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "cf119158-988e-417d-81a7-78087ac1c5f3",
+   "navn": "Camilla Patricia Jensen",
+   "adresse": "Byskov Alle 2, 3. tv, 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "fb31ef0e-806f-415b-96ac-3d245fa03daf",
+   "navn": "shashi",
+   "adresse": "Byskov Alle 36, 1. tv, 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "29a6257f-c19e-4a7c-838e-c5dee0c46fc8",
+   "navn": "Michael Graver",
+   "adresse": "Søndermarksvej 23, st. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "ff223906-e395-4f41-90da-11513d369a56",
+   "navn": "Amira Ramic",
+   "adresse": "Søndermarksvej 1, 2. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "b5c83bfd-c1f9-48b2-8843-4477b79af74e",
+   "navn": "Sila Topcu",
+   "adresse": "Søndermarksvej 19, 2. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "51c3a575-a56d-4761-b52e-835e3b384452",
+   "navn": "Christine",
+   "adresse": "—",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "484a6ba6-ccc2-474b-816f-a0dcd5220bcc",
+   "navn": "Michael Lindholm",
+   "adresse": "Byskov Alle 8, 3. tv, 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "83c9ad2d-e6d0-4170-9f52-374c22e005e5",
+   "navn": "Christina Grejsen",
+   "adresse": "Søndermarksvej 1, st th",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "c48d9cab-246f-40bd-9bb6-461d65757b59",
+   "navn": "Wanny Lam",
+   "adresse": "Byskov Alle, 12 1 Th",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1b62a570-3d62-4889-a77a-13d284f5ac35",
+   "navn": "Saim Fahri Kerim",
+   "adresse": "—",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "082f3145-37dd-4343-96dc-126bea7a6f74",
+   "navn": "John Hønningen",
+   "adresse": "Byskov Allé 20, 3. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "72f59d31-83d4-4139-b9bb-63d92f045c16",
+   "navn": "Esen Deniz Köse",
+   "adresse": "Byskov Allé 16, 3. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "4239dd13-9fb9-4ca5-bb1f-790984a19ba8",
+   "navn": "Stella Diana Koed",
+   "adresse": "Byskov Allé 26, 2. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "4106952e-156d-4a7f-bffe-232724933e35",
+   "navn": "Stefan frank højland",
+   "adresse": "Byskov Allé 26, 3. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "21ffcbaa-de20-48cc-aa3f-97fa3151d272",
+   "navn": "Marcell Petersen",
+   "adresse": "Søndermarksvej 15, 2. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "37ca4798-30a6-4920-b3c2-f005cb6695bb",
+   "navn": "Ani",
+   "adresse": "Søndermarksvej 3, 2. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1d242c4a-9dc5-4725-a5e9-d9367ce02613",
+   "navn": "Nuri",
+   "adresse": "—",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "f2955474-f2c3-41f5-92ab-074f7168c36b",
+   "navn": "Samra",
+   "adresse": "Byskov Allé 10, 3. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "39a0f8d4-2d1d-4122-99f3-f57cba2ef04e",
+   "navn": "Jannie Olsen",
+   "adresse": "—",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "efd0449a-a229-46fd-a57b-7822687d60c9",
+   "navn": "Huseyin Cartilll",
+   "adresse": "Byskov Allé 30, st. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "06a7a8ac-9761-47dc-8bf9-3351277b439a",
+   "navn": "Thi tau lam",
+   "adresse": "—",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "6d788d65-eced-4057-bdff-3342805fc59e",
+   "navn": "Kim Illum",
+   "adresse": "Byskov Allé 32, 3. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "7422728b-691f-4932-a74b-544ae4073eef",
+   "navn": "Ksnd",
+   "adresse": "Benløseparken",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "cd39e2f0-b49a-4670-97ea-e27580b1a6a7",
+   "navn": "Oscar Opstrup Bindel",
+   "adresse": "Søndermarksvej 21, st. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "9a58fc4c-e136-4262-9fcf-267f4446cf1f",
+   "navn": "Nafiye Ballikaya",
+   "adresse": "Søndermarksvej 25, 1. th., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "ceed3e4d-057e-46d5-81a9-f1c59a5be858",
+   "navn": "Amel Avdagic",
+   "adresse": "Søndermarksvej 15, 2. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "1933c139-80fb-4e07-87f3-5fef5c4c00f2",
+   "navn": "Jakob Freije",
+   "adresse": "Søndermarksvej 1, 1. tv., 4200 Slagelse",
+   "stage": "Ny lead"
+  },
+  {
+   "id": "f8fb74f7-3d41-4555-a6cc-b19aef2d55b2",
+   "navn": "TEST Claude verificering",
+   "adresse": "Kildemarksvej 133, 1. tv, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "608827c3-7941-4043-8b42-fbd60f24d420",
+   "navn": "Jacob Lisby",
+   "adresse": "Sølvgade 10, 1, 7400 Herning",
+   "stage": "Interesse"
+  },
+  {
+   "id": "1b922b08-0d62-4926-acee-4aa1b9a3e55a",
+   "navn": "William Thiesen",
+   "adresse": "Islands Brygge 32B, 8. 884, 2300 København S",
+   "stage": "Interesse"
+  },
+  {
+   "id": "6e879c19-27bd-433b-b21c-b4703cb52b87",
+   "navn": "Jacob Fast Lisby",
+   "adresse": "Østerbrogade 158, 4. tv, 2100 København Ø",
+   "stage": "Interesse"
+  },
+  {
+   "id": "7dbbf3cd-05b5-4756-863c-e3ef39cdf7d7",
+   "navn": "Stephanie Barbon Ravn",
+   "adresse": "Ved Skoven 2, 4300 Holbæk",
+   "stage": "Interesse"
+  },
+  {
+   "id": "49f137cb-5e70-4e75-a6e8-fb22e98d19cd",
+   "navn": "Stephanie Barbon Ravn",
+   "adresse": "Thuja Alle 22, 2770 Kastrup",
+   "stage": "Interesse"
+  },
+  {
+   "id": "bdc94ebe-e186-4468-87b9-c3f8f8cb6368",
+   "navn": "Jacob Lisby",
+   "adresse": "Nansensgade 14, 2. 14, 4200 Slagelse",
+   "stage": "Interesse"
+  },
+  {
+   "id": "0ebb42a6-6644-4c17-85ea-35589e1f8cda",
+   "navn": "Jacob Lisby",
+   "adresse": "Svendborgvej 13, st, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "fa8b3523-d474-43e5-9e8c-a8bb56988157",
+   "navn": "QA Test Person",
+   "adresse": "Herlufsvej 10, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "4cc5994d-fc45-402c-bcbe-2bcd60c46b09",
+   "navn": "Jacob Lisby",
+   "adresse": "Nordre Farimagsvej 13B, st. 15, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "a89b4827-6adf-4011-846c-4b754496619a",
+   "navn": "Jacob Lisby",
+   "adresse": "Svendborgvej 53, 1, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "1125dcfd-3bd6-468a-8f83-a716dab32828",
+   "navn": "Christian Ankerhus",
+   "adresse": "Kildemarksvej 153, 1. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "003971b8-0ec6-49f4-9f29-119fa3d2bf47",
+   "navn": "Rebecka Alskog",
+   "adresse": "Svendborgvej 23, 1, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "9bb5941e-3755-4ad0-a6af-722bc7c90394",
+   "navn": "Jacob Lisby",
+   "adresse": "Odensevej 120, 1. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "0ba58c5f-24e5-4909-bcb0-d9c9ede42fc5",
+   "navn": "Jacob Lisby",
+   "adresse": "Odensevej 120, 1. tv, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "57387aa1-f0ff-4cb2-b41a-0d5692d4f27d",
+   "navn": "Jacob Lisby",
+   "adresse": "Svendborgvej 59, 1, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "f961847c-2a16-450e-9547-d458c7101e8f",
+   "navn": "Jacob Lisby",
+   "adresse": "Bogensevej 61, 1. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "14d75672-019f-499f-9702-177a605f4ffc",
+   "navn": "UX Test",
+   "adresse": "Bogensevej 53, 2. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "47b764ef-2ffa-4317-9fa1-12f72720ca12",
+   "navn": "UX Test",
+   "adresse": "Bogensevej 53, 2. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "88ff9be8-8812-4c97-92e8-eaaff100e7ce",
+   "navn": "Cap Test",
+   "adresse": "Bogensevej 53, 2. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "2eb0aa14-7259-4690-897a-e0bcd7f83c7f",
+   "navn": "Cap Test",
+   "adresse": "Bogensevej 53, 2. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "f384b55b-0a74-46cd-9b26-61a427b082aa",
+   "navn": "Jacob Lisby",
+   "adresse": "Bogensevej 61, 1. th, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "4afd071f-b8cb-4e2a-89ca-4c9faa581b95",
+   "navn": "Jacob Lisby",
+   "adresse": "Østervej 14A, 1. tv, 4700 Næstved",
+   "stage": "Interesse"
+  },
+  {
+   "id": "a4c9c1fc-08e6-4c1a-9f3b-f42b86aada13",
+   "navn": "Jacob Lisby",
+   "adresse": "Østervej 14A, 1. tv, 4700 Næstved",
+   "stage": "Interesse"
+  }
+ ]
+}
