@@ -117,8 +117,9 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
 
   <!-- Logo -->
   <tr><td style="padding:26px 32px 0;">
-    <span style="font-family:${FONT};font-size:21px;font-weight:600;color:${C.green};letter-spacing:-0.01em;">365</span>
-    <span style="font-family:${FONT};font-size:10px;font-weight:600;color:${C.ink};letter-spacing:0.2em;"> EJENDOM</span>
+    <!-- Absolut adresse: mailklienter kender ikke relative stier. Blokeres
+         billeder, står alt-teksten i stedet. -->
+    <img src="https://saelg.365ejendom.dk/brand/365-ejendomme.png" width="41" height="48" alt="365 Ejendomme" style="display:block;border:0;height:48px;width:auto;">
   </td></tr>
 
   <!-- Hilsen -->

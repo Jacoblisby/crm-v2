@@ -151,9 +151,19 @@ function Nav() {
             transition: 'box-shadow 320ms ease',
           }}
         >
-          <a href="#" className="flex items-baseline gap-1.5 text-white">
-            <span className="text-[24px] leading-none" style={{ fontWeight: 400 }}>365</span>
-            <span className="text-[11px] tracking-[0.2em]" style={{ fontWeight: 500 }}>EJENDOM</span>
+          {/* Logoet er stående (næsten kvadratisk), så «EJENDOMME» bliver lille i
+              en smal topbar. 56 px høj er det mindste, hvor rammen og ordet stadig kan læses;
+              topbaren bliver en anelse højere for det. Hvid variant, fordi
+              glasset er mørkt — originalen har sort tekst. */}
+          <a href="#" className="flex items-center" aria-label="365 Ejendomme — til toppen">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/365-ejendomme-hvid.png"
+              alt="365 Ejendomme"
+              width={48}
+              height={56}
+              className="h-[46px] sm:h-[56px] w-auto"
+            />
           </a>
 
           <nav className="hidden lg:flex items-center gap-9 text-[13.5px] text-white" style={{ fontWeight: 400 }}>

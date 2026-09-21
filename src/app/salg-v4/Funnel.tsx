@@ -208,9 +208,9 @@ export function V4Header({ stage }: { stage: 'adresse' | 'boligen' | 'udgifter' 
   return (
     <header className="sticky top-0 z-20 bg-white/95" style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 1px 0 rgba(28,43,43,0.06)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between gap-4">
-        <a href="/frontpage" className="flex items-baseline gap-1.5 shrink-0" style={{ color: V4.green }}>
-          <span className="text-[22px] leading-none" style={{ fontWeight: 500 }}>365</span>
-          <span className="text-[10.5px] tracking-[0.2em]" style={{ fontWeight: 500, color: V4.ink }}>EJENDOM</span>
+        <a href="/frontpage" className="flex items-center shrink-0" aria-label="365 Ejendomme — til forsiden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/365-ejendomme.png" alt="365 Ejendomme" width={38} height={44} className="h-[40px] sm:h-[44px] w-auto" />
         </a>
 
         {/* Nummererede stages — kun aktiv er mørk */}
