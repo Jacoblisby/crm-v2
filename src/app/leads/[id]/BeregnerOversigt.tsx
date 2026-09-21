@@ -285,7 +285,10 @@ export function BeregnerOversigt({
                     ['Anvendelse', bbr.bbr.anvendelse],
                     ['Status', bbr.bbr.status],
                     ['Udlejningsforhold', bbr.bbr.udlejning],
-                    ['BFE (lejlighed)', String(bbr.bbr.enhedBfe)],
+                    // BBR-udtrækket er pr. ejendom, og hvor det mangler lejlighedens
+                    // eget BFE, står ejendommens i begge felter. Ejerlejlighedens
+                    // BFE kommer derfor fra ejendomsregistret (properties).
+                    ['BFE (lejlighed)', property?.bfeNumber ?? (bbr.bbr.enhedBfe !== bbr.bbr.ejendomBfe ? String(bbr.bbr.enhedBfe) : null)],
                     ['BFE (ejendom)', String(bbr.bbr.ejendomBfe)],
                   ]}
                 />
