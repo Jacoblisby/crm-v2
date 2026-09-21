@@ -11,6 +11,13 @@ import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
 import { SendEmailForm } from './SendEmailForm';
 import { LeadActions } from './LeadActions';
 import { AfkastDebug } from '@/app/admin/afkast/AfkastDebug';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/db/client';
+import { housingAssociations } from '@/lib/db/schema';
+import { beregnerSvar } from '@/lib/beregner';
+import { bbrForAdresse } from '@/lib/bbr-lejlighed';
+import { handlerFor, graense } from '@/lib/handler';
+import { BeregnerOversigt, type Marked } from './BeregnerOversigt';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +85,7 @@ export default async function LeadDetailPage({
       </div>
 
       <div className="pt-2">
-        {tab === 'oversigt' && <OversigtTab lead={lead} property={property} />}
+        {tab === 'oversigt' && <Oversigt lead={lead} property={property} />}
         {tab === 'afkast' && lead.afkastInputs && (
           <AfkastTab lead={lead} />
         )}
@@ -98,6 +105,62 @@ export default async function LeadDetailPage({
       </div>
     </div>
   );
+}
+
+/**
+ * Beregner-leads får et kort opbygget som beregnerens trin, med BBR og
+ * Resights ved siden af. Alle andre leads beholder den generiske feltliste.
+ */
+async function Oversigt({ lead, property }: { lead: Lead; property: Property }) {
+  const svar = beregnerSvar(lead);
+  if (!svar) return <OversigtTab lead={lead} property={property} />;
+
+  const bbr = bbrForAdresse(lead.address, lead.postalCode);
+  const kvm = bbr?.bbr.kvm ?? lead.kvm;
+
+  let foreningId: string | null = null;
+  if (bbr?.forening) {
+    const [f] = await db
+      .select({ id: housingAssociations.id })
+      .from(housingAssociations)
+      .where(eq(housingAssociations.name, bbr.forening))
+      .limit(1)
+      .catch(() => []);
+    foreningId = f?.id ?? null;
+  }
+
+  return (
+    <BeregnerOversigt
+      lead={lead}
+      property={property}
+      svar={svar}
+      bbr={bbr}
+      marked={bbr?.forening && kvm ? markedISammeStoerrelse(bbr.forening, kvm) : null}
+      foreningId={foreningId}
+    />
+  );
+}
+
+/**
+ * Median kr/kvm for frie handler af lejligheder i samme størrelse (±20 %)
+ * i foreningen — 12 måneder, ellers 24. Samme regel som «Vores køb» på
+ * foreningssiden, så tallene kan sammenlignes. Vores egne køb tæller ikke.
+ */
+function markedISammeStoerrelse(forening: string, kvm: number): Marked | null {
+  const kvmFra = Math.round(kvm * 0.8);
+  const kvmTil = Math.round(kvm * 1.2);
+  const kandidater = handlerFor(forening).filter(
+    (h) => !h.vores && h.fri && h.krPrKvm > 0 && h.kvm >= kvmFra && h.kvm <= kvmTil,
+  );
+  for (const maaneder of [12, 24]) {
+    const v = kandidater.filter((h) => h.dato >= graense(maaneder)).map((h) => h.krPrKvm).sort((a, b) => a - b);
+    if (v.length >= 3) {
+      const m = Math.floor(v.length / 2);
+      const median = v.length % 2 ? v[m] : Math.round((v[m - 1] + v[m]) / 2);
+      return { medianKrPrKvm: median, antal: v.length, maaneder, kvmFra, kvmTil };
+    }
+  }
+  return null;
 }
 
 function AfkastTab({ lead }: { lead: Lead }) {

@@ -6,6 +6,14 @@ import { leads, leadCommunications, properties } from '@/lib/db/schema';
 import type { FunnelState } from './types';
 import { computeEstimate, type StandLevel } from '@/lib/services/price-engine';
 import { customerEmailHtml, escapeHtml } from '@/lib/services/customer-email';
+import {
+  svarFraState,
+  labelTidshorisont as labelTimeframe,
+  labelGrund as labelReason,
+  labelEfterSalget as labelAfterSale,
+  labelJaNej as labelYesNo,
+  type V4Ekstra,
+} from '@/lib/beregner';
 
 export interface SubmitResult {
   ok: boolean;
@@ -148,6 +156,15 @@ export async function submitFunnelAction(
         : state.chosenOvertagelseMaaneder === 3
           ? '3 mdr (standard)'
           : '6 mdr (lang)';
+
+  // Alle svar, struktureret. v4 sender sin egen (udvidede) state herind, så
+  // felter som boligtype, røgfri og de enkelte driftsposter er med — de har
+  // ingen kolonne og gik før tabt eller endte kun i noteteksten.
+  const v4 = state as FunnelState & V4Ekstra;
+  const beregner = svarFraState(v4, {
+    bud: adjustedFinalOffer,
+    markedsestimat: estimate.marketEstimate,
+  });
 
   const notes = [
     `📐 BOLIGBEREGNER LEAD`,
@@ -316,6 +333,7 @@ export async function submitFunnelAction(
           heatCost,
           heatPaidViaAssoc: state.heatPaidViaAssoc,
           faelleslaanCanPrepay: state.faelleslaanCanPrepay,
+          beregner,
         },
         updatedAt: new Date(),
       })
@@ -332,7 +350,9 @@ export async function submitFunnelAction(
       address: state.fullAddress,
       postalCode: state.postalCode,
       city: state.city,
-      propertyType: 'Ejerlejlighed',
+      // Sælgers valg på bekræft-skærmen. Var før hardkodet, så en andelsbolig
+      // eller et rækkehus stod som ejerlejlighed i CRM'et.
+      propertyType: v4.bekraeftBoligtype || 'Ejerlejlighed',
       kvm: state.kvm,
       rooms: state.rooms ? String(state.rooms) : null,
       yearBuilt: state.yearBuilt,
@@ -373,6 +393,7 @@ export async function submitFunnelAction(
         heatCost,
         heatPaidViaAssoc: state.heatPaidViaAssoc,
         faelleslaanCanPrepay: state.faelleslaanCanPrepay,
+        beregner,
       },
     })
     .returning({ id: leads.id });
@@ -563,37 +584,4 @@ async function logEmailEvent(
     // Logging må aldrig crashe submit-flowet
     console.error('[boligberegner] kunne ikke logge email-event:', err);
   }
-}
-
-
-
-function labelTimeframe(v: NonNullable<FunnelState['sellTimeframe']>): string {
-  return {
-    under1: 'Under 1 mdr',
-    '1to3': '1-3 mdr',
-    '3to6': '3-6 mdr',
-    '6plus': '6+ mdr',
-    unsure: 'Ved ikke endnu',
-  }[v];
-}
-function labelReason(v: NonNullable<FunnelState['sellReason']>): string {
-  return {
-    flytter: 'Flytter',
-    arv: 'Arv / dødsbo',
-    skilsmisse: 'Skilsmisse',
-    okonomi: 'Økonomi',
-    investering: 'Investering',
-    andet: 'Andet',
-  }[v];
-}
-function labelAfterSale(v: NonNullable<FunnelState['afterSale']>): string {
-  return {
-    flytter_ud: 'Flytter ud helt',
-    lejer_andet: 'Vil leje noget andet',
-    blive_boende_lejer: 'Vil blive boende som lejer (sale-leaseback)',
-    ved_ikke: 'Ved ikke endnu',
-  }[v];
-}
-function labelYesNo(v: NonNullable<FunnelState['isOver65']>): string {
-  return { ja: 'Ja', nej: 'Nej', usikker: 'Vil ikke svare / usikker' }[v];
 }

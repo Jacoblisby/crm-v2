@@ -19,6 +19,7 @@
  *   G. On-market kandidater (4700 Næstved scrape)
  *   H. Auth (better-auth tabeller)
  */
+import type { BeregnerSvar } from '@/lib/beregner';
 import {
   pgTable,
   uuid,
@@ -261,6 +262,9 @@ export const leads = pgTable(
       ejerforeningHaeftelseKr?: number;       // tinglyst sikkerhed (separat)
       ejerforeningGaeldRestgaeld?: number;    // andel af EF's restgæld
       hasEjerforeningGaeld?: boolean;
+      // Alle beregnerens svar, struktureret (fra 21.09.2026). Ældre leads har
+      // dem kun som fritekst i `notes` — se src/lib/beregner.ts.
+      beregner?: BeregnerSvar;
     }>(),
 
     // Kampagne-tracking
