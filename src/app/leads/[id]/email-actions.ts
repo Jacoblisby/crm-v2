@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leads, leadCommunications } from '@/lib/db/schema';
+import { svaradresse } from '@/lib/svaradresse';
 
 interface SendLeadEmailInput {
   leadId: string;
@@ -48,10 +49,9 @@ export async function sendLeadEmailAction(
     body: JSON.stringify({
       from,
       to: lead.email,
-      // Samme svaradresse som de automatiske mails. Uden den landede kundens
-      // svar i afsenderens almindelige indbakke i stedet for på leadets kort —
-      // /api/inbound-email fanger kun det, der sendes til INBOUND_REPLY_TO.
-      reply_to: process.env.INBOUND_REPLY_TO || 'administration@365ejendom.dk',
+      // Svaradressen bærer leadets id, så kundens svar lander på netop
+      // dette lead — se src/lib/svaradresse.ts.
+      reply_to: svaradresse(input.leadId),
       subject,
       text: body,
     }),

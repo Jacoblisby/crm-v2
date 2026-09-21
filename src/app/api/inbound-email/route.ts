@@ -17,10 +17,11 @@
  * Lead detail page viser den automatisk.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from '@/lib/db/client';
 import { leadCommunications, leads } from '@/lib/db/schema';
+import { leadIdFraAdresser } from '@/lib/svaradresse';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -28,6 +29,10 @@ export const maxDuration = 30;
 interface NormalizedEmail {
   fromEmail: string;
   fromName: string;
+  /** Modtageradresser — svaradressen bærer leadets id (reply+<id>@…). */
+  to: string[];
+  /** Resends id for den modtagne mail; bruges til at hente teksten. */
+  emailId: string | null;
   subject: string;
   text: string;
   html: string | null;
@@ -63,6 +68,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (!authed) {
+    // Uden denne linje var en forkert webhook-hemmelighed usynlig: Resend
+    // fik 401, og loggen sagde ingenting.
+    console.warn(
+      `[inbound-email] 401 — ${hasSvixHeaders ? (resendSecret ? 'svix-signaturen passer ikke til RESEND_WEBHOOK_SECRET' : 'RESEND_WEBHOOK_SECRET er ikke sat') : 'ingen svix-signatur og intet gyldigt Bearer-token'}`,
+    );
     return NextResponse.json(
       { error: 'unauthorized — need svix signature or Bearer token' },
       { status: 401 },
@@ -77,6 +87,13 @@ export async function POST(req: NextRequest) {
   }
 
   const email = normalizePayload(payload);
+
+  // Resends webhook indeholder kun metadata — ikke tekst eller headers.
+  // Hent resten, ellers gemmes svaret som «(intet indhold)».
+  if (email.emailId && !email.text && !email.html) {
+    await hentFuldMail(email);
+  }
+
   if (!email.fromEmail) {
     return NextResponse.json({ error: 'no sender email' }, { status: 400 });
   }
@@ -84,9 +101,8 @@ export async function POST(req: NextRequest) {
   // Match til lead — først via In-Reply-To/References, så via from-email
   const leadId = await findLeadForEmail(email);
   if (!leadId) {
-    // Gem stadig som unmatched så vi ikke mister beskeden
     console.warn(
-      `[inbound-email] No lead match for ${email.fromEmail} — subject="${email.subject}". Payload kept in note table.`,
+      `[inbound-email] Intet lead — fra ${email.fromEmail} til ${email.to.join(', ') || '?'}, emne «${email.subject}»`,
     );
     return NextResponse.json({
       ok: true,
@@ -96,6 +112,8 @@ export async function POST(req: NextRequest) {
       note: 'No matching lead found',
     });
   }
+
+  console.log(`[inbound-email] Svar fra ${email.fromEmail} → lead ${leadId} («${email.subject}»)`);
 
   // Tag email-body — foretræk text over html (vi viser plain text i UI)
   const body = email.text || stripHtml(email.html || '') || '(intet indhold)';
@@ -199,6 +217,8 @@ function tryResendEvent(p: Record<string, unknown>): NormalizedEmail | null {
   return {
     fromEmail,
     fromName,
+    to: somListe(data.to),
+    emailId: typeof data.email_id === 'string' ? data.email_id : null,
     subject: typeof data.subject === 'string' ? data.subject : '',
     text: typeof data.text === 'string' ? data.text : '',
     html: typeof data.html === 'string' ? data.html : null,
@@ -219,6 +239,8 @@ function tryPostmark(p: Record<string, unknown>): NormalizedEmail | null {
   return {
     fromEmail: extractEmail(p.From),
     fromName: typeof p.FromName === 'string' ? p.FromName : extractName(p.From),
+    to: somListe(p.To),
+    emailId: null,
     subject: p.Subject,
     text: typeof p.TextBody === 'string' ? p.TextBody : '',
     html: typeof p.HtmlBody === 'string' ? p.HtmlBody : null,
@@ -238,6 +260,8 @@ function tryResend(p: Record<string, unknown>): NormalizedEmail | null {
     return {
       fromEmail: extractEmail(fromStr),
       fromName: extractName(fromStr),
+      to: somListe(d.to),
+      emailId: null,
       subject: typeof d.subject === 'string' ? d.subject : '',
       text: typeof d.text === 'string' ? d.text : '',
       html: typeof d.html === 'string' ? d.html : null,
@@ -255,6 +279,8 @@ function tryGeneric(p: Record<string, unknown>): NormalizedEmail {
   return {
     fromEmail: extractEmail(fromStr),
     fromName: extractName(fromStr),
+    to: somListe(p.to ?? p.To),
+    emailId: null,
     subject: (p.subject || p.Subject || '') as string,
     text: (p.text || p.body || p.TextBody || '') as string,
     html: (p.html || p.HtmlBody || null) as string | null,
@@ -269,6 +295,8 @@ function emptyEmail(raw: unknown): NormalizedEmail {
   return {
     fromEmail: '',
     fromName: '',
+    to: [],
+    emailId: null,
     subject: '',
     text: '',
     html: null,
@@ -283,41 +311,89 @@ function emptyEmail(raw: unknown): NormalizedEmail {
 // Lead matching
 // ============================
 async function findLeadForEmail(email: NormalizedEmail): Promise<string | null> {
-  // Strategy 1: Match In-Reply-To/References mod tidligere udsendte mails
+  // 1. Svaradressen: reply+<lead-id>@… — entydigt, uanset afsender.
+  const fraAdresse = leadIdFraAdresser(email.to);
+  if (fraAdresse) {
+    const [l] = await db
+      .select({ id: leads.id })
+      .from(leads)
+      .where(and(eq(leads.id, fraAdresse), isNull(leads.deletedAt)))
+      .limit(1);
+    if (l) return l.id;
+  }
+
+  // 2. Trådhenvisning mod en mail vi selv har sendt.
   const candidates = [email.inReplyTo, email.references]
     .filter((s): s is string => typeof s === 'string' && s.length > 0)
     .flatMap((s) => extractMessageIds(s));
-
   for (const msgId of candidates) {
-    // Resend's id kan være indlejret i Message-ID header som <resend-id@email.resend.com>
-    // Vi sammenligner mod resendId-feltet (LIKE for fleksibilitet)
     const matches = await db
       .select({ leadId: leadCommunications.leadId })
       .from(leadCommunications)
-      .where(sql`${leadCommunications.resendId} = ${msgId} OR ${leadCommunications.body} ILIKE ${`%${msgId}%`}`)
+      .innerJoin(leads, eq(leads.id, leadCommunications.leadId))
+      .where(
+        and(
+          isNull(leads.deletedAt),
+          sql`(${leadCommunications.resendId} = ${msgId} OR ${leadCommunications.body} ILIKE ${`%${msgId}%`})`,
+        ),
+      )
       .limit(1);
     if (matches[0]) return matches[0].leadId;
   }
 
-  // Strategy 2: Match by from-email
+  // 3. Afsenderens mail. Kun aktive leads, og har flere samme mail, det
+  //    lead vi senest har skrevet til — ellers det senest opdaterede.
+  //    Før tog vi det første, databasen fandt, også slettede.
   if (email.fromEmail) {
-    const matches = await db
+    const [senest] = await db
       .select({ id: leads.id })
       .from(leads)
-      .where(eq(leads.email, email.fromEmail.toLowerCase()))
+      .leftJoin(
+        leadCommunications,
+        and(eq(leadCommunications.leadId, leads.id), eq(leadCommunications.direction, 'out')),
+      )
+      .where(and(isNull(leads.deletedAt), sql`LOWER(${leads.email}) = LOWER(${email.fromEmail})`))
+      .orderBy(desc(sql`COALESCE(${leadCommunications.createdAt}, ${leads.updatedAt})`))
       .limit(1);
-    if (matches[0]) return matches[0].id;
-
-    // Try case-insensitive
-    const ciMatches = await db
-      .select({ id: leads.id })
-      .from(leads)
-      .where(sql`LOWER(${leads.email}) = LOWER(${email.fromEmail})`)
-      .limit(1);
-    if (ciMatches[0]) return ciMatches[0].id;
+    if (senest) return senest.id;
   }
 
   return null;
+}
+
+/** Tekst, html og headers til en modtaget mail — webhooket har dem ikke. */
+async function hentFuldMail(email: NormalizedEmail): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !email.emailId) return;
+  try {
+    const res = await fetch(`https://api.resend.com/emails/receiving/${email.emailId}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!res.ok) {
+      console.warn(`[inbound-email] Kunne ikke hente mail ${email.emailId}: HTTP ${res.status}`);
+      return;
+    }
+    const d = (await res.json()) as {
+      text?: string | null;
+      html?: string | null;
+      to?: unknown;
+      headers?: Record<string, string>;
+    };
+    email.text = d.text ?? '';
+    email.html = d.html ?? null;
+    if (email.to.length === 0) email.to = somListe(d.to);
+    const h = d.headers ?? {};
+    email.inReplyTo ??= h['in-reply-to'] ?? h['In-Reply-To'] ?? null;
+    email.references ??= h['references'] ?? h['References'] ?? null;
+  } catch (err) {
+    console.warn(`[inbound-email] Fejl ved hentning af mail ${email.emailId}:`, err);
+  }
+}
+
+function somListe(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map((x) => String(typeof x === 'object' && x ? (x as { email?: string }).email ?? '' : x)).filter(Boolean);
+  if (typeof v === 'string' && v) return v.split(',').map((x) => x.trim());
+  return [];
 }
 
 // ============================

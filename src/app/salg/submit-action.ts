@@ -6,6 +6,7 @@ import { leads, leadCommunications, properties } from '@/lib/db/schema';
 import type { FunnelState } from './types';
 import { computeEstimate, type StandLevel } from '@/lib/services/price-engine';
 import { customerEmailHtml, escapeHtml } from '@/lib/services/customer-email';
+import { svaradresse } from '@/lib/svaradresse';
 import {
   svarFraState,
   labelTidshorisont as labelTimeframe,
@@ -516,7 +517,7 @@ async function sendNotificationEmails(
   const customerResult = await sendResendEmail(apiKey, {
     from,
     to: state.email,
-    reply_to: process.env.INBOUND_REPLY_TO || 'administration@365ejendom.dk',
+    reply_to: svaradresse(leadId),
     subject: customerSubject,
     html,
   });
