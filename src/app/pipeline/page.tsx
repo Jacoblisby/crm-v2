@@ -36,7 +36,8 @@ export default async function PipelinePage() {
     <div>
       <h1 className="text-2xl font-bold mb-1">Pipeline</h1>
       <p className="text-sm text-slate-500 mb-4">
-        {rows.length} aktive leads · scroll horisontalt på mobil
+        {rows.length} aktive leads · scroll horisontalt på mobil ·{' '}
+        <Link href="/arkiv" className="text-slate-700 underline underline-offset-2 hover:text-slate-900">Arkiv</Link>
       </p>
 
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">

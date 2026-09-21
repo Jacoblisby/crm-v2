@@ -35,7 +35,8 @@ export default async function RydPipelinePage() {
         <h1 className="text-2xl font-semibold text-slate-900 mt-2">Ryd pipelinen</h1>
         <p className="text-sm text-slate-500 mt-1">
           Besluttet 21.09.2026. Seks leads bliver i Ny lead, købte leads bliver stående, resten arkiveres.
-          Arkiverede leads forsvinder fra pipelinen, men mails, noter og historik bevares, og de kan flyttes tilbage.
+          Arkiverede leads forsvinder fra pipelinen, men mails, noter og historik bevares. De ligger bagefter
+          under <Link href="/arkiv" className="underline underline-offset-2">Arkiv</Link> og kan flyttes tilbage.
         </p>
       </header>
 
@@ -58,7 +59,11 @@ export default async function RydPipelinePage() {
       <section className="bg-white border border-slate-200 rounded-lg p-4">
         <div className="flex items-baseline justify-between gap-3 mb-3">
           <h2 className="text-sm font-semibold text-slate-900">Arkiveres ({venter.length})</h2>
-          {udfoert > 0 && <span className="text-xs text-teal-800">{udfoert} allerede arkiveret</span>}
+          {udfoert > 0 && (
+            <Link href="/arkiv" className="text-xs text-teal-800 hover:underline">
+              {udfoert} arkiveret — se dem i Arkiv →
+            </Link>
+          )}
         </div>
         <RydKnap antal={venter.length} />
         {venter.length > 0 && (
