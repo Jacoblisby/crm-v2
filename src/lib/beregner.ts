@@ -17,7 +17,10 @@ export type StandNiveau = 'nyrenoveret' | 'god' | 'middel' | 'trænger' | 'slidt
 
 export interface Rum {
   navn: string;
+  /** Prismotorens niveau — bruges til farven og til buddet. */
   stand: StandNiveau | null;
+  /** Det kunden faktisk valgte, med beregnerens ord («God men brugt»). */
+  valg: string | null;
   aargang: number | null;
   maerke: string | null;
 }
@@ -30,6 +33,13 @@ export interface Post {
 export interface BeregnerSvar {
   /** Hvor svarene er læst fra. «note» = rekonstrueret fra fritekst (ældre leads). */
   kilde: 'snapshot' | 'note';
+  /**
+   * Hvilken beregner kunden brugte. v4 (live fra 10.07.2026) har andre ord og
+   * andre spørgsmål end de tidligere versioner — «God men brugt» i stedet for
+   * en femtrinsskala, ét valg for «Øvrige rum» i stedet for stue og
+   * soveværelse hver for sig.
+   */
+  flow: 'v4' | 'ældre';
   tilbud: {
     bud: number | null;
     markedsestimat: number | null;
@@ -38,6 +48,10 @@ export interface BeregnerSvar {
   /** Det sælger valgte på «Bekræft boligens detaljer». */
   boligtype: string | null;
   energimaerke: string | null;
+  /** Fra «Bekræft boligens detaljer». null = ikke spurgt / ukendt. */
+  etage: string | null;
+  elevator: boolean | null;
+  altan: boolean | null;
   /** Sælgers egne tal fra bekræft-skærmen — kan afvige fra BBR. */
   saelgerKvm: number | null;
   saelgerVaerelser: number | null;
@@ -129,6 +143,70 @@ const OVERTAGELSE: Record<FunnelState['chosenOvertagelseMaaneder'], string> = {
 };
 export const labelOvertagelse = (v: FunnelState['chosenOvertagelseMaaneder']) => OVERTAGELSE[v] ?? `${v} mdr`;
 
+// ─── Kundens egne ord i v4 ────────────────────────────────────────────────
+//
+// v4 viser tre stand-niveauer og gemmer dem som prismotorens niveauer
+// (StandV4.tsx). Tidshorisont og «efter salget» gemmes som kategorier
+// (salg-v2/types.ts). Begge oversættelser er 1:1, så kundens ord kan læses
+// tilbage fra niveauet — for leads fra v4.
+
+export const V4_LIVE = '2026-07-10';
+
+const STAND_V4: Partial<Record<StandNiveau, string>> = {
+  nyrenoveret: 'Nyrenoveret',
+  god: 'God men brugt',
+  slidt: 'Skal renoveres',
+};
+const TIDSHORISONT_V4: Record<string, string> = {
+  'Under 1 mdr': 'Hurtigst muligt',
+  '1-3 mdr': '1–3 måneder',
+  '3-6 mdr': '3–6 måneder',
+  '6+ mdr': '6+ måneder',
+  'Ved ikke endnu': 'Ved ikke endnu',
+};
+const EFTER_SALGET_V4: Record<string, string> = {
+  'Flytter ud helt': 'Flytter ud helt',
+  'Vil leje noget andet': 'Vil leje en anden bolig',
+  'Vil blive boende som lejer (sale-leaseback)': 'Vil blive boende som lejer',
+  'Ved ikke endnu': 'Ved ikke endnu',
+};
+/** Beregnerens spørgsmål, så kortet stiller dem med samme ord. */
+const SPOERGSMAAL_V4: Record<string, string> = {
+  Tidshorisont: 'Hvornår vil du flytte?',
+  'Efter salget': 'Hvad skal du efter salget?',
+};
+
+export function standValg(s: StandNiveau | null, flow: 'v4' | 'ældre'): string | null {
+  if (!s) return null;
+  return flow === 'v4' ? (STAND_V4[s] ?? STAND_LABEL[s]) : STAND_LABEL[s];
+}
+
+/**
+ * v4 spørger om køkken og bad hver for sig og om «Øvrige rum» samlet —
+ * StandV4 skriver det ene valg til både stue og soveværelse. Vis det som
+ * kunden så det: tre rækker, ikke fire.
+ */
+function rumSomKundenSaa(rum: Rum[], flow: 'v4' | 'ældre'): Rum[] {
+  const med = rum.map((r) => ({ ...r, valg: standValg(r.stand, flow) }));
+  if (flow !== 'v4') return med;
+  const [koekken, bad, stue, sove] = med;
+  const oevrige: Rum = { navn: 'Øvrige rum', stand: stue?.stand ?? sove?.stand ?? null, valg: stue?.valg ?? sove?.valg ?? null, aargang: null, maerke: null };
+  return [
+    { ...koekken, navn: 'Køkken' },
+    { ...bad, navn: 'Badeværelse' },
+    stue?.stand === sove?.stand ? oevrige : stue,
+    ...(stue?.stand === sove?.stand ? [] : [sove]),
+  ].filter(Boolean) as Rum[];
+}
+
+function behovMedKundensOrd(behov: BeregnerSvar['behov'], flow: 'v4' | 'ældre'): BeregnerSvar['behov'] {
+  if (flow !== 'v4') return behov;
+  return behov.map((b) => {
+    const ord = b.label === 'Tidshorisont' ? TIDSHORISONT_V4[b.vaerdi] : b.label === 'Efter salget' ? EFTER_SALGET_V4[b.vaerdi] : undefined;
+    return { label: SPOERGSMAAL_V4[b.label] ?? b.label, vaerdi: ord ?? b.vaerdi };
+  });
+}
+
 // ─── Fra beregnerens state (nye leads) ────────────────────────────────────
 
 /**
@@ -137,6 +215,9 @@ export const labelOvertagelse = (v: FunnelState['chosenOvertagelseMaaneder']) =>
  */
 export interface V4Ekstra {
   bekraeftBoligtype?: string;
+  moveTimeframeRaw?: string;
+  afterSaleRaw?: string;
+  sellReasonRaw?: string;
   smokeFree?: 'Ja' | 'Nej' | null;
   econNotes?: string;
   notes?: string;
@@ -185,9 +266,9 @@ export function svarFraState(
     );
   }
 
+  // Altan og elevator spørges om på bekræft-skærmen og vises dér — ikke
+  // som «særlige forhold».
   const forhold: BeregnerSvar['forhold'] = [];
-  if (s.hasAltan) forhold.push({ tekst: 'Altan/terrasse', advarsel: false });
-  if (s.hasElevator) forhold.push({ tekst: 'Elevator', advarsel: false });
   if (s.hasSolarPanels) forhold.push({ tekst: 'Solceller/solfanger', advarsel: false });
   if (s.hasTinglysteServitutter) forhold.push({ tekst: 'Tinglyste servitutter', advarsel: true });
   if (s.hasRenovationPlans)
@@ -196,10 +277,17 @@ export function svarFraState(
       advarsel: true,
     });
 
+  // v4 har bekræft-skærmens boligtype; de ældre flows havde ikke.
+  const flow: 'v4' | 'ældre' = s.bekraeftBoligtype ? 'v4' : 'ældre';
+
+  // Kundens egne ord, når flowet gemmer dem — ellers kategorien.
   const behov: BeregnerSvar['behov'] = [];
-  if (s.sellTimeframe) behov.push({ label: 'Tidshorisont', vaerdi: TIDSHORISONT[s.sellTimeframe] });
-  if (s.sellReason) behov.push({ label: 'Grund', vaerdi: GRUND[s.sellReason] });
-  if (s.afterSale) behov.push({ label: 'Efter salget', vaerdi: EFTER_SALGET[s.afterSale] });
+  if (s.moveTimeframeRaw) behov.push({ label: 'Hvornår vil du flytte?', vaerdi: s.moveTimeframeRaw });
+  else if (s.sellTimeframe) behov.push({ label: 'Tidshorisont', vaerdi: TIDSHORISONT[s.sellTimeframe] });
+  if (s.sellReasonRaw) behov.push({ label: 'Grund', vaerdi: s.sellReasonRaw });
+  else if (s.sellReason) behov.push({ label: 'Grund', vaerdi: GRUND[s.sellReason] });
+  if (s.afterSaleRaw) behov.push({ label: 'Hvad skal du efter salget?', vaerdi: s.afterSaleRaw });
+  else if (s.afterSale) behov.push({ label: 'Efter salget', vaerdi: EFTER_SALGET[s.afterSale] });
   if (s.ownerCount) behov.push({ label: 'Antal ejere', vaerdi: ANTAL_EJERE[s.ownerCount] });
   if (s.livedHere) behov.push({ label: 'Boet der', vaerdi: BOET_DER[s.livedHere] });
   if (s.isOver65) behov.push({ label: 'Fyldt 65', vaerdi: JA_NEJ[s.isOver65] });
@@ -210,6 +298,7 @@ export function svarFraState(
 
   return {
     kilde: 'snapshot',
+    flow,
     tilbud: {
       bud: tilbud.bud,
       markedsestimat: tilbud.markedsestimat,
@@ -217,17 +306,23 @@ export function svarFraState(
     },
     boligtype: s.bekraeftBoligtype || 'Ejerlejlighed',
     energimaerke: s.energyClass || null,
+    etage: s.floor || null,
+    elevator: !!s.hasElevator,
+    altan: !!s.hasAltan,
     saelgerKvm: s.kvm,
     saelgerVaerelser: s.rooms,
     saelgerByggeaar: s.yearBuilt,
     stand: {
       samlet: (s.stand as StandNiveau) ?? null,
-      rum: [
-        { navn: 'Køkken', stand: s.kitchenStand as StandNiveau, aargang: s.kitchenYear, maerke: s.kitchenBrand || null },
-        { navn: 'Bad', stand: s.bathroomStand as StandNiveau, aargang: s.bathroomYear, maerke: null },
-        { navn: 'Stue', stand: s.livingRoomStand as StandNiveau, aargang: null, maerke: null },
-        { navn: 'Soveværelse', stand: s.bedroomStand as StandNiveau, aargang: null, maerke: null },
-      ],
+      rum: rumSomKundenSaa(
+        [
+          { navn: 'Køkken', stand: s.kitchenStand as StandNiveau, valg: null, aargang: s.kitchenYear, maerke: s.kitchenBrand || null },
+          { navn: 'Bad', stand: s.bathroomStand as StandNiveau, valg: null, aargang: s.bathroomYear, maerke: null },
+          { navn: 'Stue', stand: s.livingRoomStand as StandNiveau, valg: null, aargang: null, maerke: null },
+          { navn: 'Soveværelse', stand: s.bedroomStand as StandNiveau, valg: null, aargang: null, maerke: null },
+        ],
+        flow,
+      ),
       hvidevarer,
       roegfri: s.smokeFree ?? null,
       // standNote i v4 er en sammenkædning af notes/røgfri/økonomi/senere.
@@ -296,7 +391,11 @@ interface AfkastUdgifter {
  * Læs noteteksten tilbage. Et lead der er flettet flere gange, har flere
  * «📐 BOLIGBEREGNER LEAD»-blokke; den sidste er den seneste indsendelse.
  */
-export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): BeregnerSvar | null {
+export function fraNote(
+  notes: string | null,
+  afkast?: AfkastUdgifter | null,
+  oprettet?: Date | string | null,
+): BeregnerSvar | null {
   if (!notes || !notes.includes('BOLIGBEREGNER LEAD')) return null;
   const blok = notes.slice(notes.lastIndexOf('📐 BOLIGBEREGNER LEAD'));
   const linjer = blok.split('\n').map((l) => l.trim()).filter(Boolean);
@@ -325,6 +424,7 @@ export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): B
     return {
       navn,
       stand: somStand(m?.[1]),
+      valg: null,
       aargang: m?.[2] ? Number(m[2]) : null,
       maerke: m?.[3]?.trim() || null,
     };
@@ -387,6 +487,12 @@ export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): B
     }
   }
 
+  // Noten siger ikke, hvilken beregner kunden brugte — oprettelsesdatoen gør.
+  const dato = oprettet ? (oprettet instanceof Date ? oprettet.toISOString() : String(oprettet)).slice(0, 10) : null;
+  const flow: 'v4' | 'ældre' = dato && dato >= V4_LIVE ? 'v4' : 'ældre';
+  const altan = forhold.some((f) => f.tekst.startsWith('Altan'));
+  const elevator = forhold.some((f) => f.tekst.startsWith('Elevator'));
+
   const tilbud = find(/^Tilbud til sælger: ([\d.]+) kr/);
   const marked = find(/^Markedsestimat: ([\d.]+) kr · Overtagelse: (.*)$/);
   const hvidevarer = find(/^Hvidevarer: (.*)$/)?.[1].split(', ').map((h) => h.trim()) ?? [];
@@ -395,6 +501,7 @@ export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): B
 
   return {
     kilde: 'note',
+    flow,
     tilbud: {
       bud: tilbud ? kr(tilbud[1]) : null,
       markedsestimat: marked ? kr(marked[1]) : null,
@@ -404,12 +511,17 @@ export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): B
     // «Ejerlejlighed» i databasen, uanset hvad sælger valgte.
     boligtype: null,
     energimaerke: null,
+    etage: null,
+    // Noten nævner kun altan og elevator, når svaret var ja. Et nej og et
+    // ubesvaret spørgsmål ser ens ud, så «nej» vises som ukendt.
+    elevator: elevator || null,
+    altan: altan || null,
     saelgerKvm: null,
     saelgerVaerelser: null,
     saelgerByggeaar: null,
     stand: {
       samlet: somStand(find(/^STAND .*?: (\S+)$/)?.[1]),
-      rum: [rumLinje('Køkken'), rumLinje('Bad'), rumLinje('Stue'), rumLinje('Soveværelse')],
+      rum: rumSomKundenSaa([rumLinje('Køkken'), rumLinje('Bad'), rumLinje('Stue'), rumLinje('Soveværelse')], flow),
       hvidevarer,
       roegfri,
       note: fritekst || null,
@@ -424,9 +536,9 @@ export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): B
       efGaeld: ef ? { ydelse: kr(ef[1]), restgaeld: kr(ef[2]), kanIndfries: ef[3] ?? null } : null,
       haeftelse: haeft ? kr(haeft[1]) : null,
     },
-    forhold,
+    forhold: forhold.filter((f) => !f.tekst.startsWith('Altan') && !f.tekst.startsWith('Elevator')),
     udlejning,
-    behov,
+    behov: behovMedKundensOrd(behov, flow),
     saleLeaseback,
     soegerLejebolig,
     media: { fotos: kr(find(/^· Fotos: (\d+)$/)?.[1]), dokumenter },
@@ -437,8 +549,9 @@ export function fraNote(notes: string | null, afkast?: AfkastUdgifter | null): B
 export function beregnerSvar(lead: {
   notes: string | null;
   afkastInputs: unknown;
+  createdAt?: Date | string | null;
 }): BeregnerSvar | null {
   const a = lead.afkastInputs as ({ beregner?: BeregnerSvar } & AfkastUdgifter) | null;
   if (a?.beregner) return a.beregner;
-  return fraNote(lead.notes, a);
+  return fraNote(lead.notes, a, lead.createdAt);
 }

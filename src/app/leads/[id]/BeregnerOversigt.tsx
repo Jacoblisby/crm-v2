@@ -13,7 +13,7 @@
  */
 import Link from 'next/link';
 import type { Lead } from '@/lib/types';
-import { STAND_LABEL, type BeregnerSvar, type StandNiveau } from '@/lib/beregner';
+import { STAND_LABEL, standValg, type BeregnerSvar, type StandNiveau } from '@/lib/beregner';
 import type { BbrLejlighed } from '@/lib/bbr-lejlighed';
 
 export interface Marked {
@@ -43,10 +43,13 @@ const STAND_FARVE: Record<StandNiveau, string> = {
   slidt: 'bg-rose-100 text-rose-800',
 };
 
-function StandChip({ s }: { s: StandNiveau | null }) {
+/** Farven følger prismotorens niveau; teksten er det kunden valgte. */
+function StandChip({ s, label }: { s: StandNiveau | null; label?: string | null }) {
   if (!s) return <span className="text-slate-400">—</span>;
-  return <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ${STAND_FARVE[s]}`}>{STAND_LABEL[s]}</span>;
+  return <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ${STAND_FARVE[s]}`}>{label ?? STAND_LABEL[s]}</span>;
 }
+
+const jaNej = (v: boolean | null) => (v == null ? null : v ? 'Ja' : 'Nej');
 
 function Kort({ titel, kilde, children }: { titel: string; kilde?: string; children: React.ReactNode }) {
   return (
@@ -149,7 +152,7 @@ export function BeregnerOversigt({
         </div>
         <div className="p-4">
           <div className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Stand · overtagelse</div>
-          <div className="mt-1.5"><StandChip s={svar.stand.samlet} /></div>
+          <div className="mt-1.5"><StandChip s={svar.stand.samlet} label={standValg(svar.stand.samlet, svar.flow)} /></div>
           <div className="text-xs text-slate-500 mt-1">{svar.tilbud.overtagelse ?? '—'}</div>
         </div>
       </section>
@@ -190,28 +193,38 @@ export function BeregnerOversigt({
                 ['Boligareal', saelgerKvm ? `${saelgerKvm} m²` : null],
                 ['Værelser', saelgerVaer],
                 ['Byggeår', svar.saelgerByggeaar ?? lead.yearBuilt],
+                ['Etage', svar.etage],
+                ['Elevator', jaNej(svar.elevator)],
+                ['Altan/terrasse', jaNej(svar.altan)],
                 ['Energimærke', svar.energimaerke ?? property?.energyClass ?? null],
               ]}
             />
           </Kort>
 
           <Kort titel="Stand" kilde="Sælger">
+            {svar.flow === 'v4' && (
+              <p className="text-xs text-slate-500 mb-2">
+                Kunden valgte for hvert rum mellem <em>Nyrenoveret</em>, <em>God men brugt</em> og <em>Skal renoveres</em>.
+              </p>
+            )}
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[11px] uppercase tracking-wider text-slate-500">
                   <th className="text-left font-semibold py-1">Rum</th>
-                  <th className="text-left font-semibold py-1">Stand</th>
+                  <th className="text-left font-semibold py-1">Kundens valg</th>
                   <th className="text-right font-semibold py-1">Årgang</th>
-                  <th className="text-left font-semibold py-1 pl-3">Mærke</th>
+                  {svar.stand.rum.some((r) => r.maerke) && <th className="text-left font-semibold py-1 pl-3">Mærke</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {svar.stand.rum.map((r) => (
                   <tr key={r.navn}>
                     <td className="py-1.5 text-slate-700">{r.navn}</td>
-                    <td className="py-1.5"><StandChip s={r.stand} /></td>
-                    <td className="py-1.5 text-right tabular-nums text-slate-700">{r.aargang ?? '—'}</td>
-                    <td className="py-1.5 pl-3 text-slate-700">{r.maerke ?? ''}</td>
+                    <td className="py-1.5"><StandChip s={r.stand} label={r.valg} /></td>
+                    <td className="py-1.5 text-right tabular-nums text-slate-900 font-medium">
+                      {r.aargang ?? (r.navn === 'Køkken' || r.navn === 'Badeværelse' || r.navn === 'Bad' ? <span className="text-slate-400 font-normal">ikke oplyst</span> : '')}
+                    </td>
+                    {svar.stand.rum.some((x) => x.maerke) && <td className="py-1.5 pl-3 text-slate-700">{r.maerke ?? ''}</td>}
                   </tr>
                 ))}
               </tbody>
@@ -219,11 +232,17 @@ export function BeregnerOversigt({
             <div className="mt-3">
               <Felter
                 rows={[
-                  ['Samlet', <StandChip key="s" s={svar.stand.samlet} />],
                   ['Røgfri', svar.stand.roegfri],
                   ['Hvidevarer', svar.stand.hvidevarer.length ? svar.stand.hvidevarer.join(', ') : null],
                   ['Sælgers note', svar.stand.note],
                   ['Økonomiske forhold', svar.stand.oekonomiNote],
+                  [
+                    'Til prisberegningen',
+                    <span key="p" className="text-slate-700 font-normal">
+                      <StandChip s={svar.stand.samlet} label={standValg(svar.stand.samlet, svar.flow)} />{' '}
+                      <span className="text-xs text-slate-500">— det dårligste rum</span>
+                    </span>,
+                  ],
                 ]}
               />
             </div>
