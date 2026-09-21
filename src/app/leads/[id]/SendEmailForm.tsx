@@ -9,6 +9,11 @@ interface Props {
   toName: string | null;
   /** Boligens adresse — skabelonerne nævner den, så den skal med. */
   address?: string | null;
+  /**
+   * Færdigt udkast (booking af besigtigelse). Formularen åbner med det
+   * udfyldt, så det eneste der mangler, er at læse det og trykke send.
+   */
+  udkast?: { subject: string; body: string; note?: string } | null;
 }
 
 const TEMPLATE_BUD = `Hej {NAVN}
@@ -41,12 +46,12 @@ Du kan altid ringe til mig på 61789071.
 Venlig hilsen
 Jacob`;
 
-export function SendEmailForm({ leadId, toEmail, toName, address }: Props) {
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+export function SendEmailForm({ leadId, toEmail, toName, address, udkast }: Props) {
+  const [subject, setSubject] = useState(udkast?.subject ?? '');
+  const [body, setBody] = useState(udkast?.body ?? '');
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!udkast);
 
   function loadTemplate(template: string) {
     /**
@@ -122,7 +127,24 @@ export function SendEmailForm({ leadId, toEmail, toName, address }: Props) {
           ✕ Annuller
         </button>
       </div>
+      {udkast?.note && (
+        <div className="text-xs bg-amber-50 border border-amber-200 text-amber-900 rounded px-2 py-1.5">
+          {udkast.note}
+        </div>
+      )}
       <div className="flex gap-1 text-xs">
+        {udkast && (
+          <button
+            type="button"
+            onClick={() => {
+              setSubject(udkast.subject);
+              setBody(udkast.body);
+            }}
+            className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200"
+          >
+            📅 Booking-udkast
+          </button>
+        )}
         <button
           type="button"
           onClick={() => loadTemplate(TEMPLATE_BUD)}

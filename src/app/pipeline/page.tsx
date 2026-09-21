@@ -6,17 +6,20 @@ import Link from 'next/link';
 import { listLeadsForPipeline, listPipelineStages } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, PipelineStage } from '@/lib/types';
+import { bookingOversigt, type Booking } from '@/lib/besigtigelse-plan';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PipelinePage() {
   let stages: PipelineStage[];
   let rows: Awaited<ReturnType<typeof listLeadsForPipeline>>;
+  let booking: Map<string, Booking>;
 
   try {
-    [stages, rows] = await Promise.all([
+    [stages, rows, booking] = await Promise.all([
       listPipelineStages(),
       listLeadsForPipeline(),
+      bookingOversigt().catch(() => new Map<string, Booking>()),
     ]);
   } catch (err) {
     return <ConnectionWarning error={err instanceof Error ? err.message : String(err)} />;
@@ -42,14 +45,14 @@ export default async function PipelinePage() {
 
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
         {visibleStages.map((stage) => (
-          <Column key={stage.slug} stage={stage} leads={byStage.get(stage.slug) || []} />
+          <Column key={stage.slug} stage={stage} leads={byStage.get(stage.slug) || []} booking={booking} />
         ))}
       </div>
     </div>
   );
 }
 
-function Column({ stage, leads }: { stage: PipelineStage; leads: Lead[] }) {
+function Column({ stage, leads, booking }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, Booking> }) {
   return (
     <div className="flex-shrink-0 w-72 bg-slate-100 rounded-lg p-3">
       <div className="flex items-center justify-between mb-3">
@@ -67,6 +70,13 @@ function Column({ stage, leads }: { stage: PipelineStage; leads: Lead[] }) {
             >
               <div className="font-medium text-sm truncate">{lead.fullName || '(uden navn)'}</div>
               <div className="text-xs text-slate-500 truncate">{lead.address || '—'}</div>
+              {(() => {
+                const b = booking.get(lead.id);
+                if (b?.svar) return <div className="mt-1.5 text-[11px] font-medium text-teal-800">💬 Har svaret</div>;
+                if (b?.udkast) return <div className="mt-1.5 text-[11px] font-medium text-amber-800">📝 Udkast klar</div>;
+                if (b?.sendt) return <div className="mt-1.5 text-[11px] text-slate-500">📅 Booking sendt</div>;
+                return null;
+              })()}
               <div className="flex items-center justify-between mt-1.5">
                 {lead.listPrice && (
                   <span className="text-xs text-slate-600">

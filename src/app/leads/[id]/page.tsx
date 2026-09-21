@@ -18,6 +18,8 @@ import { beregnerSvar } from '@/lib/beregner';
 import { bbrForAdresse } from '@/lib/bbr-lejlighed';
 import { handlerFor, graense } from '@/lib/handler';
 import { BeregnerOversigt, type Marked } from './BeregnerOversigt';
+import { bookingForLead, type Booking } from '@/lib/besigtigelse-plan';
+import { kalenderLink, tidTekst } from '@/lib/besigtigelse';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,10 +45,11 @@ export default async function LeadDetailPage({
   const { lead, stage, property } = result;
   const sla = computeSLA({ stageChangedAt: lead.stageChangedAt, stage });
 
-  const [comms, history, stages] = await Promise.all([
+  const [comms, history, stages, booking] = await Promise.all([
     getLeadCommunications(id),
     getLeadStageHistory(id),
     listPipelineStages(),
+    bookingForLead(id).catch(() => null),
   ]);
 
   return (
@@ -69,6 +72,16 @@ export default async function LeadDetailPage({
           <div className="text-xs text-slate-500 mt-1">
             {Math.floor(sla.daysInStage)}d{sla.slaDays != null && ` / ${sla.slaDays}d SLA`}
           </div>
+          {booking?.udkast && (
+            <Link href={`/leads/${id}?tab=kommunikation`} className="inline-block mt-1.5 text-xs font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-900 hover:bg-amber-200">
+              📝 Udkast klar
+            </Link>
+          )}
+          {booking?.svar && (
+            <Link href={`/leads/${id}?tab=kommunikation`} className="inline-block mt-1.5 text-xs font-medium px-2 py-0.5 rounded bg-teal-100 text-teal-900 hover:bg-teal-200">
+              💬 Kunden har svaret
+            </Link>
+          )}
         </div>
       </div>
 
@@ -91,11 +104,23 @@ export default async function LeadDetailPage({
         )}
         {tab === 'kommunikation' && (
           <div className="space-y-3">
+            <BookingBoks lead={lead} booking={booking} />
             <SendEmailForm
               leadId={lead.id}
               toEmail={lead.email}
               toName={lead.fullName}
               address={lead.address}
+              udkast={
+                booking?.udkast
+                  ? {
+                      subject: booking.udkast.subject,
+                      body: booking.udkast.body,
+                      note: booking.udkast.tid
+                        ? `Udkast til booking af besigtigelse · foreslået tid: ${tidTekst(booking.udkast.tid)}. Tiden følger dine regler, men planlæggeren kan ikke se kalenderen — ret den i teksten, hvis du er optaget.`
+                        : 'Udkast til booking af besigtigelse. Der var ingen ledig tid de næste uger efter reglerne — skriv en tid ind.',
+                    }
+                  : null
+              }
             />
             <KommunikationTab comms={comms} />
           </div>
@@ -161,6 +186,44 @@ function markedISammeStoerrelse(forening: string, kvm: number): Marked | null {
     }
   }
   return null;
+}
+
+/**
+ * Status for booking af besigtigelse: sendt, foreslået tid, kundens svar —
+ * og ét klik til Google Kalender, når kunden har bekræftet.
+ */
+function BookingBoks({ lead, booking }: { lead: Lead; booking: Booking | null }) {
+  if (!booking?.sendt) return null;
+  const { sendt, svar } = booking;
+  return (
+    <div className={`rounded-lg border p-3 text-sm ${svar ? 'bg-teal-50 border-teal-200' : 'bg-white border-slate-200'}`}>
+      <div className="font-medium text-slate-900">
+        {svar ? '💬 Kunden har svaret på booking-mailen' : '📅 Booking-mail sendt — venter på svar'}
+      </div>
+      <div className="text-xs text-slate-600 mt-0.5">
+        Sendt {sendt.sendtAt.toISOString().slice(0, 10)}
+        {sendt.tid ? ` · foreslået tid ${tidTekst(sendt.tid)}` : ' · tiden blev skrevet om i mailen'}
+      </div>
+      {svar?.body && (
+        <div className="text-sm text-slate-700 mt-2 whitespace-pre-line line-clamp-4 border-l-2 border-teal-300 pl-2">
+          {svar.body.replace(/^Fra: .*\n\n?/, '')}
+        </div>
+      )}
+      {svar && sendt.tid && (
+        <a
+          href={kalenderLink({ leadId: lead.id, navn: lead.fullName, adresse: lead.address, telefon: lead.phone, email: lead.email, start: sendt.tid })}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block mt-2 px-3 py-1.5 rounded bg-slate-900 text-white text-xs font-medium hover:bg-slate-800"
+        >
+          📅 Bekræftet? Læg i Google Kalender ({tidTekst(sendt.tid)})
+        </a>
+      )}
+      {svar && !sendt.tid && (
+        <p className="text-xs text-slate-500 mt-2">Tiden i mailen blev rettet, så den skal lægges i kalenderen manuelt.</p>
+      )}
+    </div>
+  );
 }
 
 function AfkastTab({ lead }: { lead: Lead }) {

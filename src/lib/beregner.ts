@@ -487,8 +487,11 @@ export function fraNote(
     }
   }
 
-  // Noten siger ikke, hvilken beregner kunden brugte — oprettelsesdatoen gør.
-  const dato = oprettet ? (oprettet instanceof Date ? oprettet.toISOString() : String(oprettet)).slice(0, 10) : null;
+  // Noten siger ikke, hvilken beregner kunden brugte — datoen gør. Er leadet
+  // flettet med et ældre lead, står indsendelsens dato i fletningsmærket lige
+  // før blokken; oprettelsesdatoen er så det gamle leads.
+  const flettet = notes.slice(0, notes.lastIndexOf('📐 BOLIGBEREGNER LEAD')).match(/\[merged from boligberegner (\d{4}-\d{2}-\d{2})\]\s*$/);
+  const dato = flettet?.[1] ?? (oprettet ? (oprettet instanceof Date ? oprettet.toISOString() : String(oprettet)).slice(0, 10) : null);
   const flow: 'v4' | 'ældre' = dato && dato >= V4_LIVE ? 'v4' : 'ældre';
   const altan = forhold.some((f) => f.tekst.startsWith('Altan'));
   const elevator = forhold.some((f) => f.tekst.startsWith('Elevator'));
