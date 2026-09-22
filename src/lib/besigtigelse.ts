@@ -231,7 +231,7 @@ export function bookingUdkast(
   const navn = fornavn(lead.fullName);
   const tidLinje = tid
     ? `Passer det ${tidTekst(tid)}? Ellers skriv, hvornår det passer dig.`
-    : 'Hvornår passer det dig? Vi kommer gerne torsdag eftermiddag eller fredag formiddag.';
+    : 'Hvornår passer det dig? Vi kommer gerne torsdag mellem kl. 10 og 17 eller fredag mellem kl. 10 og 15.';
   const personlig = personligLinje(svar);
   const body = [
     `Hej${navn ? ` ${navn}` : ''}`,
