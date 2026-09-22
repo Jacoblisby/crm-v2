@@ -18,6 +18,8 @@ import { beregnerSvar } from '@/lib/beregner';
 import { bbrForAdresse } from '@/lib/bbr-lejlighed';
 import { handlerFor, graense } from '@/lib/handler';
 import { BeregnerOversigt, type Marked } from './BeregnerOversigt';
+import { FotoGalleri } from './FotoGalleri';
+import { fotosForLead } from '@/lib/fotos';
 import { bookingForLead, type Booking } from '@/lib/besigtigelse-plan';
 import { kalenderLink, tidTekst } from '@/lib/besigtigelse';
 
@@ -154,15 +156,20 @@ async function Oversigt({ lead, property }: { lead: Lead; property: Property }) 
     foreningId = f?.id ?? null;
   }
 
+  const fotos = await fotosForLead(lead.id).catch(() => []);
+
   return (
-    <BeregnerOversigt
-      lead={lead}
-      property={property}
-      svar={svar}
-      bbr={bbr}
-      marked={bbr?.forening && kvm ? markedISammeStoerrelse(bbr.forening, kvm) : null}
-      foreningId={foreningId}
-    />
+    <div className="space-y-4">
+      <FotoGalleri fotos={fotos} />
+      <BeregnerOversigt
+        lead={lead}
+        property={property}
+        svar={svar}
+        bbr={bbr}
+        marked={bbr?.forening && kvm ? markedISammeStoerrelse(bbr.forening, kvm) : null}
+        foreningId={foreningId}
+      />
+    </div>
   );
 }
 

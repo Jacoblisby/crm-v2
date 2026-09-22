@@ -8,6 +8,7 @@
  */
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
 import { V4, Card, CardLabel, ChipV4, FieldV4 } from '../primitives';
+import { FotoUpload } from '../FotoUpload';
 
 const HVIDEVARER: Array<{ label: string; key: 'applVaskemaskine' | 'applTorretumbler' | 'applOpvaskemaskine' | 'applKoeleFryseskab' | 'applOvn' | 'applKomfur' | 'applMikroovn' | 'applEmhaette' }> = [
   { label: 'Vask', key: 'applVaskemaskine' },
@@ -58,22 +59,7 @@ export function DetaljerV4() {
       {/* Billeder */}
       <Card className="p-6 space-y-3.5">
         <CardLabel>Tilføj billeder (valgfri)</CardLabel>
-        <button
-          type="button"
-          className="w-full py-7 rounded-md border border-dashed flex flex-col items-center justify-center gap-1.5 transition-colors hover:bg-[#faf9f7]"
-          style={{ borderColor: '#c9cfcc' }}
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke={V4.soft} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
-          </svg>
-          <span className="text-[13.5px]" style={{ color: V4.ink, fontWeight: 500 }}>
-            Tryk for at vedhæfte op til 10 billeder
-          </span>
-          <span className="text-[12px]" style={{ color: V4.soft }}>
-            Altan, plantegning, entré, andet rum du vil have os til at se
-          </span>
-        </button>
+        <FotoUpload ids={state.photoIds ?? []} onChange={(photoIds) => update({ photoIds })} />
       </Card>
 
       {/* Andre ting */}

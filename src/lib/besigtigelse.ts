@@ -217,6 +217,9 @@ export function personligLinje(svar: BeregnerSvar | null): string {
     const skal = svar.stand.rum.find((r) => r.valg === 'Skal renoveres' || r.stand === 'slidt' || r.stand === 'trænger');
     if (skal) s.push(`Du skrev, at ${BESTEMT[skal.navn] ?? skal.navn.toLowerCase()} trænger til en renovering — det kigger vi på, mens vi er der.`);
   }
+  if (svar.media.fotos > 0) {
+    s.push(svar.media.fotos === 1 ? 'Tak for billedet, du sendte med.' : 'Tak for billederne, du sendte med.');
+  }
   if (svar.udgifter.senere) {
     s.push('Du nåede ikke at udfylde udgifterne; har du den seneste opkrævning fra ejerforeningen og din ejendomsskattebillet ved hånden, kan vi give dig buddet hurtigere.');
   }

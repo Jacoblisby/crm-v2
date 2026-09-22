@@ -7,6 +7,7 @@ import { listLeadsForPipeline, listPipelineStages } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, PipelineStage } from '@/lib/types';
 import { bookingOversigt, type Booking } from '@/lib/besigtigelse-plan';
+import { antalFotos } from '@/lib/fotos';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,7 @@ export default async function PipelinePage() {
   let stages: PipelineStage[];
   let rows: Awaited<ReturnType<typeof listLeadsForPipeline>>;
   let booking: Map<string, Booking>;
+  let fotos = new Map<string, number>();
 
   try {
     [stages, rows, booking] = await Promise.all([
@@ -21,6 +23,7 @@ export default async function PipelinePage() {
       listLeadsForPipeline(),
       bookingOversigt().catch(() => new Map<string, Booking>()),
     ]);
+    fotos = await antalFotos(rows.map((r) => r.lead.id)).catch(() => new Map<string, number>());
   } catch (err) {
     return <ConnectionWarning error={err instanceof Error ? err.message : String(err)} />;
   }
@@ -45,14 +48,14 @@ export default async function PipelinePage() {
 
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
         {visibleStages.map((stage) => (
-          <Column key={stage.slug} stage={stage} leads={byStage.get(stage.slug) || []} booking={booking} />
+          <Column key={stage.slug} stage={stage} leads={byStage.get(stage.slug) || []} booking={booking} fotos={fotos} />
         ))}
       </div>
     </div>
   );
 }
 
-function Column({ stage, leads, booking }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, Booking> }) {
+function Column({ stage, leads, booking, fotos }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, Booking>; fotos: Map<string, number> }) {
   return (
     <div className="flex-shrink-0 w-72 bg-slate-100 rounded-lg p-3">
       <div className="flex items-center justify-between mb-3">
@@ -70,6 +73,9 @@ function Column({ stage, leads, booking }: { stage: PipelineStage; leads: Lead[]
             >
               <div className="font-medium text-sm truncate">{lead.fullName || '(uden navn)'}</div>
               <div className="text-xs text-slate-500 truncate">{lead.address || '—'}</div>
+              {fotos.get(lead.id) ? (
+                <div className="mt-1 text-[11px] text-slate-600">📷 {fotos.get(lead.id)} billede{fotos.get(lead.id) === 1 ? '' : 'r'}</div>
+              ) : null}
               {(() => {
                 const b = booking.get(lead.id);
                 if (b?.svar) return <div className="mt-1.5 text-[11px] font-medium text-teal-800">💬 Har svaret</div>;

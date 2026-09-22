@@ -1,5 +1,6 @@
 'use server';
 
+import { knytFotos } from '@/lib/fotos';
 import { eq, and, isNull, ne } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leads, leadCommunications, properties } from '@/lib/db/schema';
@@ -129,6 +130,9 @@ export async function submitFunnelAction(
 
   // 3. Smart routing — bestem stage
   const photoCount = photoDataUrls.length;
+  // Billeder fra v4 er allerede uploadet (se FotoUpload); de ændrer ikke
+  // routingen, så leadet stadig lander i Ny lead og får et booking-udkast.
+  const fotoIds = (state.photoIds ?? []).slice(0, 10);
   const hasFullData = photoCount >= 3 && driftTotal > 0;
   const stageSlug = hasFullData
     ? 'interesse'
@@ -224,7 +228,7 @@ export async function submitFunnelAction(
       : '',
     ``,
     `MEDIA:`,
-    `· Fotos: ${photoCount}`,
+    `· Fotos: ${photoCount || fotoIds.length}`,
     state.documents.length > 0 ? `· Dokumenter: ${state.documents.map((d) => d.name).join(', ')}` : '',
     ``,
     state.utmSource ? `Kilde: ${state.utmSource}/${state.utmMedium ?? ''}/${state.utmCampaign ?? ''}` : '',
@@ -401,6 +405,15 @@ export async function submitFunnelAction(
     leadId = lead.id;
   }
 
+  // Kobl kundens billeder på leadet.
+  if (fotoIds.length) {
+    try {
+      await knytFotos(leadId, fotoIds);
+    } catch (err) {
+      console.error('[boligberegner] kunne ikke koble billeder:', err);
+    }
+  }
+
   // 5. Log estimat-udregningen som kommunikation
   await db.insert(leadCommunications).values({
     leadId: leadId,
@@ -422,7 +435,7 @@ export async function submitFunnelAction(
   });
 
   // 6. Send email til Jacob (admin) + kunde
-  void sendNotificationEmails(leadId, state, estimate, photoCount).catch((err) => {
+  void sendNotificationEmails(leadId, state, estimate, photoCount || fotoIds.length).catch((err) => {
     console.error('[boligberegner] email-fejl:', err);
   });
 
