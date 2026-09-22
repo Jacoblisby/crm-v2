@@ -2,13 +2,14 @@
  * Besigtigelser: forslag til tid, udkast til booking-mail og kalenderlink.
  *
  * Jacobs regler (21.09.2026):
- *   · Besigtigelser torsdag fra kl. 12 og fredag — aldrig weekend.
- *   · Fredag ikke efter kl. 15.
+ *   · Besigtigelser torsdag kl. 10–17 og fredag kl. 10–15 — aldrig weekend.
+ *     (22.09: tidligere end kl. 10 er for tidligt at se lejligheder.)
  *   · Internt afsættes 1 time pr. besigtigelse plus transport. Kunden får at
  *     vide, at det tager 10–15 minutter.
  *
- * Torsdag starter 13.30, fordi «Payables meeting» ligger 12–13. Fredag slutter
- * 14.30, så sidste besigtigelse er færdig i god tid før kl. 15.
+ * Sluttiden er hvornår besigtigelsen skal være færdig: sidste start er
+ * torsdag 16.00 og fredag 14.00. Torsdag 12–13 er holdt fri til
+ * «Payables meeting».
  *
  * Planen laves af alle ventende beregner-leads på én gang, i fast rækkefølge,
  * så samme lead altid får samme forslag, og to leads aldrig får samme tid.
@@ -26,9 +27,10 @@ const MINDST_VARSEL_TIMER = 20;
 
 type Zone = 'sydvest' | 'nord';
 
-const DAGE: { ugedag: number; start: [number, number]; slut: [number, number]; zone: Zone }[] = [
-  { ugedag: 4, start: [13, 30], slut: [20, 0], zone: 'sydvest' }, // torsdag
-  { ugedag: 5, start: [8, 0], slut: [14, 30], zone: 'nord' }, // fredag — færdig før 15
+type Kl = [number, number];
+const DAGE: { ugedag: number; start: Kl; slut: Kl; pause?: [Kl, Kl]; zone: Zone }[] = [
+  { ugedag: 4, start: [10, 0], slut: [17, 0], pause: [[12, 0], [13, 0]], zone: 'sydvest' }, // torsdag
+  { ugedag: 5, start: [10, 0], slut: [15, 0], zone: 'nord' }, // fredag
 ];
 
 /**
@@ -143,6 +145,9 @@ export function planlaeg(ventende: Ventende[], laaste: Laast[], nu = new Date())
       const dagStart = kbh(dagen.y, dagen.m, dagen.d, regel.start[0], regel.start[1]);
       const dagSlut = kbh(dagen.y, dagen.m, dagen.d, regel.slut[0], regel.slut[1]);
 
+      const pauseStart = regel.pause && kbh(dagen.y, dagen.m, dagen.d, regel.pause[0][0], regel.pause[0][1]);
+      const pauseSlut = regel.pause && kbh(dagen.y, dagen.m, dagen.d, regel.pause[1][0], regel.pause[1][1]);
+
       const idag = optaget
         .filter((o) => o.start >= dagStart && o.start < dagSlut)
         .sort((a, b) => a.start.getTime() - b.start.getTime());
@@ -157,6 +162,10 @@ export function planlaeg(ventende: Ventende[], laaste: Laast[], nu = new Date())
             !(plusMin(slut, koeretid(lead.postnr, o.postnr)) <= o.start ||
               t >= plusMin(o.slut, koeretid(o.postnr, lead.postnr))),
         );
+        if (pauseStart && pauseSlut && t < pauseSlut && slut > pauseStart) {
+          t = pauseSlut;
+          continue;
+        }
         if (!konflikt) break;
         t = rundOp15(plusMin(konflikt.slut, koeretid(konflikt.postnr, lead.postnr)));
       }
