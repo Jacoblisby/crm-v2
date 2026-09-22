@@ -21,6 +21,7 @@ import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from '@/lib/db/client';
 import { leadCommunications, leads } from '@/lib/db/schema';
+import { gemMailHeaders } from '@/lib/mail-traad';
 import { leadIdFraAdresser } from '@/lib/svaradresse';
 
 export const dynamic = 'force-dynamic';
@@ -98,6 +99,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'no sender email' }, { status: 400 });
   }
 
+  // Videresendt af os selv (fx et kundesvar, der landede i administration@):
+  // leadet findes ud fra den oprindelige afsender i den videresendte tekst.
+  const videresendtAf = pakUdVideresendt(email);
+
   // Match til lead — først via In-Reply-To/References, så via from-email
   const leadId = await findLeadForEmail(email);
   if (!leadId) {
@@ -118,18 +123,31 @@ export async function POST(req: NextRequest) {
   // Tag email-body — foretræk text over html (vi viser plain text i UI)
   const body = email.text || stripHtml(email.html || '') || '(intet indhold)';
 
-  await db.insert(leadCommunications).values({
-    leadId,
-    type: 'email',
-    direction: 'in',
-    subject: email.subject || '(intet emne)',
-    body: [
-      `Fra: ${email.fromName ? `${email.fromName} <${email.fromEmail}>` : email.fromEmail}`,
-      ``,
-      body,
-    ].join('\n'),
-    createdBy: 'inbound-webhook',
-  });
+  const [gemt] = await db
+    .insert(leadCommunications)
+    .values({
+      leadId,
+      type: 'email',
+      direction: 'in',
+      subject: email.subject || '(intet emne)',
+      body: [
+        `Fra: ${email.fromName ? `${email.fromName} <${email.fromEmail}>` : email.fromEmail}`,
+        ...(videresendtAf ? [`(videresendt af ${videresendtAf})`] : []),
+        ``,
+        body,
+      ].join('\n'),
+      createdBy: 'inbound-webhook',
+    })
+    .returning({ id: leadCommunications.id });
+
+  // Message-ID gemmes, så vores svar kan lægge sig i samme tråd hos kunden.
+  // En mail vi selv har videresendt, har vores egen Message-ID — den er
+  // ikke kundens tråd, så den springes over.
+  if (gemt && !videresendtAf) {
+    await gemMailHeaders(gemt.id, email.messageId, email.references).catch((e) =>
+      console.warn('[inbound-email] Kunne ikke gemme Message-ID:', e),
+    );
+  }
 
   return NextResponse.json({
     ok: true,
@@ -361,6 +379,38 @@ async function findLeadForEmail(email: NormalizedEmail): Promise<string | null> 
   return null;
 }
 
+const EGNE_DOMAENER = /@(365ejendom\.dk|reply\.365ejendom\.dk|faurholt\.com|herlufshave\.(dk|com)|sommerhaven?\.(dk|com))$/i;
+
+/**
+ * Er mailen videresendt af en af os, findes den oprindelige afsender i den
+ * videresendte tekst («Fra: Navn <mail>» / «From: …»). Afsender og emne
+ * skrives om til kundens, og vi returnerer hvem der videresendte.
+ */
+function pakUdVideresendt(email: NormalizedEmail): string | null {
+  if (!EGNE_DOMAENER.test(email.fromEmail)) return null;
+  if (leadIdFraAdresser(email.to)) return null;
+  const tekst = email.text || stripHtml(email.html || '');
+  for (const m of tekst.matchAll(/^\s*\*?(?:Fra|From|Von)\s*:\*?\s*(.+)$/gim)) {
+    const linje = m[1];
+    const mail = (linje.match(/<([^>\s]+@[^>\s]+)>/) ?? linje.match(/([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/))?.[1];
+    if (!mail || EGNE_DOMAENER.test(mail)) continue;
+    const af = email.fromEmail;
+    email.fromEmail = mail.toLowerCase();
+    email.fromName = linje.replace(/<[^>]*>/, '').replace(mail, '').replace(/["\[\]]/g, '').trim();
+    email.subject = email.subject.replace(/^\s*((fw|fwd|vs|wg)\s*:\s*)+/i, '').trim();
+    // Behold kun kundens mail: alt efter videresendelses-hovedet (første
+    // tomme linje efter «Fra:»-linjen).
+    const efter = tekst.slice((m.index ?? 0) + m[0].length);
+    const tom = efter.search(/\n\s*\n/);
+    if (tom >= 0) {
+      email.text = efter.slice(tom).trim();
+      email.html = null;
+    }
+    return af;
+  }
+  return null;
+}
+
 /** Tekst, html og headers til en modtaget mail — webhooket har dem ikke. */
 async function hentFuldMail(email: NormalizedEmail): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -385,6 +435,7 @@ async function hentFuldMail(email: NormalizedEmail): Promise<void> {
     const h = d.headers ?? {};
     email.inReplyTo ??= h['in-reply-to'] ?? h['In-Reply-To'] ?? null;
     email.references ??= h['references'] ?? h['References'] ?? null;
+    email.messageId ??= h['message-id'] ?? h['Message-ID'] ?? h['Message-Id'] ?? null;
   } catch (err) {
     console.warn(`[inbound-email] Fejl ved hentning af mail ${email.emailId}:`, err);
   }

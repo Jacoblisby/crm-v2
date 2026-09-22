@@ -5,11 +5,14 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leads, leadCommunications } from '@/lib/db/schema';
 import { svaradresse } from '@/lib/svaradresse';
+import { traadFor } from '@/lib/mail-traad';
 
 interface SendLeadEmailInput {
   leadId: string;
   subject: string;
   body: string;
+  /** Kundens mail vi svarer på — så svaret lander i samme tråd hos kunden. */
+  svarPaaId?: string | null;
 }
 
 interface SendLeadEmailResult {
@@ -39,6 +42,12 @@ export async function sendLeadEmailAction(
   if (!lead) return { ok: false, error: 'Lead ikke fundet' };
   if (!lead.email) return { ok: false, error: 'Lead har ingen email' };
 
+  // Svar i tråd: In-Reply-To/References peger på kundens mail.
+  const traad = input.svarPaaId ? await traadFor(input.svarPaaId, input.leadId).catch(() => null) : null;
+  const headers: Record<string, string> = {};
+  if (traad?.inReplyTo) headers['In-Reply-To'] = traad.inReplyTo;
+  if (traad?.references) headers['References'] = traad.references;
+
   // Send via Resend
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -54,6 +63,7 @@ export async function sendLeadEmailAction(
       reply_to: svaradresse(input.leadId),
       subject,
       text: body,
+      ...(Object.keys(headers).length ? { headers } : {}),
     }),
   });
 

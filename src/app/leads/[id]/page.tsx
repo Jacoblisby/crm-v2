@@ -9,6 +9,8 @@ import { getLeadById, getLeadCommunications, getLeadStageHistory, listPipelineSt
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
 import { SendEmailForm } from './SendEmailForm';
+import { MailTekst } from './MailTekst';
+import { reEmne } from '@/lib/mail-traad';
 import { LeadActions } from './LeadActions';
 import { AfkastDebug } from '@/app/admin/afkast/AfkastDebug';
 import { eq } from 'drizzle-orm';
@@ -32,10 +34,10 @@ export default async function LeadDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: Tab }>;
+  searchParams: Promise<{ tab?: Tab; svar?: string }>;
 }) {
   const { id } = await params;
-  const { tab = 'oversigt' } = await searchParams;
+  const { tab = 'oversigt', svar: svarParam } = await searchParams;
 
   const result = await getLeadById(id).catch((err) => {
     return { error: err instanceof Error ? err.message : String(err) };
@@ -53,6 +55,13 @@ export default async function LeadDetailPage({
     listPipelineStages(),
     bookingForLead(id).catch(() => null),
   ]);
+
+  // Svar på kundens mail: den valgte (↩ Svar), ellers den nyeste, hvis
+  // kunden har skrevet efter vores seneste mail.
+  const senesteMail = comms.find((c) => c.type === 'email');
+  const svarPaa =
+    (svarParam ? comms.find((c) => c.id === svarParam && c.direction === 'in') : undefined) ??
+    (senesteMail?.direction === 'in' ? senesteMail : undefined);
 
   return (
     <div className="space-y-4">
@@ -108,12 +117,20 @@ export default async function LeadDetailPage({
           <div className="space-y-3">
             <BookingBoks lead={lead} booking={booking} />
             <SendEmailForm
+              key={svarPaa?.id ?? 'ny'}
               leadId={lead.id}
               toEmail={lead.email}
               toName={lead.fullName}
               address={lead.address}
               udkast={
-                booking?.udkast
+                svarPaa
+                  ? {
+                      subject: reEmne(svarPaa.subject ?? ''),
+                      body: `Hej${fornavnAf(lead.fullName)}\n\n\n\nVenlig hilsen\nJacob Fast Lisby\n365 Ejendomme`,
+                      note: `Svar i samme tråd som kundens mail fra ${svarPaa.createdAt.toLocaleString('da-DK', { timeZone: 'Europe/Copenhagen', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}.`,
+                      svarPaaId: svarPaa.id,
+                    }
+                  : booking?.udkast
                   ? {
                       subject: booking.udkast.subject,
                       body: booking.udkast.body,
@@ -124,7 +141,7 @@ export default async function LeadDetailPage({
                   : null
               }
             />
-            <KommunikationTab comms={comms} />
+            <KommunikationTab comms={comms} leadId={lead.id} />
           </div>
         )}
         {tab === 'historik' && <HistorikTab history={history} />}
@@ -212,8 +229,8 @@ function BookingBoks({ lead, booking }: { lead: Lead; booking: Booking | null })
         {sendt.tid ? ` · foreslået tid ${tidTekst(sendt.tid)}` : ' · tiden blev skrevet om i mailen'}
       </div>
       {svar?.body && (
-        <div className="text-sm text-slate-700 mt-2 whitespace-pre-line line-clamp-4 border-l-2 border-teal-300 pl-2">
-          {svar.body.replace(/^Fra: .*\n\n?/, '')}
+        <div className="mt-2 border-l-2 border-teal-300 pl-2">
+          <MailTekst body={svar.body.replace(/^Fra: .*\n(\(videresendt af .*\)\n)?\n?/, '')} indgaaende />
         </div>
       )}
       {svar && sendt.tid && (
@@ -473,7 +490,7 @@ function OversigtTab({ lead, property }: { lead: Lead; property: Property }) {
   );
 }
 
-function KommunikationTab({ comms }: { comms: LeadCommunication[] }) {
+function KommunikationTab({ comms, leadId }: { comms: LeadCommunication[]; leadId: string }) {
   if (comms.length === 0) return <EmptyState>Ingen kommunikation endnu.</EmptyState>;
   return (
     <ul className="space-y-2">
@@ -501,7 +518,15 @@ function KommunikationTab({ comms }: { comms: LeadCommunication[] }) {
             </span>
           </div>
           {c.subject && <div className="font-medium text-sm">{c.subject}</div>}
-          {c.body && <div className="text-sm text-slate-700 mt-1 whitespace-pre-line line-clamp-4">{c.body}</div>}
+          {c.body && <MailTekst body={c.body} indgaaende={c.direction === 'in' && c.type === 'email'} />}
+          {c.type === 'email' && c.direction === 'in' && (
+            <Link
+              href={`/leads/${leadId}?tab=kommunikation&svar=${c.id}`}
+              className="inline-block mt-2 px-2.5 py-1 rounded border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              ↩ Svar i tråden
+            </Link>
+          )}
           {/* Kvitteringen fra Resend.
               De automatiske mails skriver «SENDT · Resend id» ind i selve
               brødteksten, men en manuelt sendt mail gemmer id'et i sin egen
@@ -576,3 +601,8 @@ function ConnectionWarning({ error }: { error: string }) {
     </div>
   );
 }
+
+const fornavnAf = (navn: string | null) => {
+  const f = (navn ?? '').trim().split(/\s+/)[0];
+  return f ? ` ${f.charAt(0).toUpperCase()}${f.slice(1)}` : '';
+};

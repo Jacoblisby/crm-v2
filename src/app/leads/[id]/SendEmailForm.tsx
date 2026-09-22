@@ -13,7 +13,7 @@ interface Props {
    * Færdigt udkast (booking af besigtigelse). Formularen åbner med det
    * udfyldt, så det eneste der mangler, er at læse det og trykke send.
    */
-  udkast?: { subject: string; body: string; note?: string } | null;
+  udkast?: { subject: string; body: string; note?: string; svarPaaId?: string } | null;
 }
 
 const TEMPLATE_BUD = `Hej {NAVN}
@@ -52,6 +52,7 @@ export function SendEmailForm({ leadId, toEmail, toName, address, udkast }: Prop
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
   const [open, setOpen] = useState(!!udkast);
+  const [svarPaaId, setSvarPaaId] = useState(udkast?.svarPaaId ?? null);
 
   function loadTemplate(template: string) {
     /**
@@ -82,7 +83,7 @@ export function SendEmailForm({ leadId, toEmail, toName, address, udkast }: Prop
     e.preventDefault();
     setMsg(null);
     startTransition(async () => {
-      const r = await sendLeadEmailAction({ leadId, subject, body });
+      const r = await sendLeadEmailAction({ leadId, subject, body, svarPaaId });
       if (r.ok) {
         setMsg('✅ Sendt — logget under kommunikation');
         setSubject('');
@@ -127,6 +128,14 @@ export function SendEmailForm({ leadId, toEmail, toName, address, udkast }: Prop
           ✕ Annuller
         </button>
       </div>
+      {svarPaaId && (
+        <div className="flex items-center justify-between text-xs bg-teal-50 border border-teal-200 text-teal-900 rounded px-2 py-1.5">
+          <span>↩ Svarer i kundens tråd — lander under samme samtale hos kunden.</span>
+          <button type="button" onClick={() => setSvarPaaId(null)} className="text-teal-700 hover:text-teal-900 underline">
+            Ny tråd i stedet
+          </button>
+        </div>
+      )}
       {udkast?.note && (
         <div className="text-xs bg-amber-50 border border-amber-200 text-amber-900 rounded px-2 py-1.5">
           {udkast.note}
@@ -142,7 +151,7 @@ export function SendEmailForm({ leadId, toEmail, toName, address, udkast }: Prop
             }}
             className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200"
           >
-            📅 Booking-udkast
+            {udkast.svarPaaId ? '↩ Svar-udkast' : '📅 Booking-udkast'}
           </button>
         )}
         <button
