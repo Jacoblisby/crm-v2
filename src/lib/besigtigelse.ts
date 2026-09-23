@@ -264,16 +264,56 @@ const MAANED: Record<string, number> = {
   juli: 7, august: 8, september: 9, oktober: 10, november: 11, december: 12,
 };
 
-/** «Passer det torsdag 24. september kl. 13.30?» → Date. null hvis tiden er rettet væk. */
+const UGEDAGE = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
+
+/**
+ * Tiden i en sendt mail. Udkastet skriver «Passer det torsdag 24. september
+ * kl. 13.30?», men når Jacob selv skriver videre i tråden, står der lige så
+ * ofte «Skal vi aftale fredag kl 13?». Begge skal kunne læses, ellers står
+ * aftalen ingen steder, og planlæggeren giver tiden væk til en anden.
+ *
+ * Sidste tid i mailen vinder — det er den, der bliver foreslået til sidst.
+ * En ugedag uden dato betyder den førstkommende af slagsen efter afsendelsen.
+ */
 export function tidFraMail(body: string | null, sendt: Date): Date | null {
-  const m = body?.match(/Passer det \S+ (\d{1,2})\. (\p{L}+) kl\. (\d{1,2})[.:](\d{2})/u);
-  if (!m) return null;
-  const maaned = MAANED[m[2].toLowerCase()];
-  if (!maaned) return null;
+  if (!body) return null;
   const s = kbhDele(sendt);
-  // Sendt i december om en januar-dato → næste år
-  const aar = maaned < s.m - 6 ? s.y + 1 : s.y;
-  return kbh(aar, maaned, Number(m[1]), Number(m[3]), Number(m[4]));
+
+  // 1. Dato med månedsnavn: «24. september kl. 13.30»
+  let fund: Date | null = null;
+  for (const m of body.matchAll(/(\d{1,2})\.\s*(\p{L}+)(?:\s+\d{4})?[^\d\n]{0,12}kl\.?\s*(\d{1,2})(?:[.:](\d{2}))?/gu)) {
+    const maaned = MAANED[m[2].toLowerCase()];
+    if (!maaned) continue;
+    const aar = maaned < s.m - 6 ? s.y + 1 : s.y;
+    fund = kbh(aar, maaned, Number(m[1]), Number(m[3]), Number(m[4] ?? 0));
+  }
+  if (fund) return fund;
+
+  // 2. Dato som tal: «25/9 kl 13»
+  for (const m of body.matchAll(/(\d{1,2})[/.](\d{1,2})(?:[.\s]|-\d{4})?[^\d\n]{0,12}kl\.?\s*(\d{1,2})(?:[.:](\d{2}))?/g)) {
+    const maaned = Number(m[2]);
+    if (maaned < 1 || maaned > 12) continue;
+    const aar = maaned < s.m - 6 ? s.y + 1 : s.y;
+    fund = kbh(aar, maaned, Number(m[1]), Number(m[3]), Number(m[4] ?? 0));
+  }
+  if (fund) return fund;
+
+  // 3. Kun ugedag: «fredag kl 13» → førstkommende fredag efter mailen.
+  for (const m of body.matchAll(/(mandag|tirsdag|onsdag|torsdag|fredag|lørdag|søndag)[^.\n]{0,24}?kl\.?\s*(\d{1,2})(?:[.:](\d{2}))?/giu)) {
+    const ugedag = UGEDAGE.indexOf(m[1].toLowerCase());
+    if (ugedag < 0) continue;
+    const timer = Number(m[2]);
+    const min = Number(m[3] ?? 0);
+    if (timer > 23 || min > 59) continue;
+    const iDag = kbh(s.y, s.m, s.d, timer, min);
+    let frem = (ugedag - s.ugedag + 7) % 7;
+    if (frem === 0 && iDag <= sendt) frem = 7;
+    fund = new Date(iDag.getTime() + frem * 24 * 60 * 60_000);
+    // Sommertid: læs klokkeslættet igen på den rigtige dag.
+    const d = kbhDele(fund);
+    fund = kbh(d.y, d.m, d.d, timer, min);
+  }
+  return fund;
 }
 
 // ─── Kalenderlink ─────────────────────────────────────────────────────────
