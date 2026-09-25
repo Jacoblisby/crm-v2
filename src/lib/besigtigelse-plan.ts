@@ -11,6 +11,13 @@ import { leadCommunications, leads } from '@/lib/db/schema';
 import { beregnerSvar } from '@/lib/beregner';
 import { BOOKING_EMNE, bookingUdkast, planlaeg, postnrFra, tidFraMail, type Laast } from '@/lib/besigtigelse';
 
+/**
+ * Stadierne før en besigtigelse er aftalt. Et lead med udgifter udfyldt
+ * ryger direkte i «Interesse» ved indsendelse (se submit-action), og stod
+ * derfor uden udkast, selvom det er lige så nyt som dem i «Ny lead».
+ */
+const TIDLIGE_STAGES = ['ny-lead', 'kontaktet', 'mail-sendt', 'interesse'];
+
 export interface Booking {
   /** Udkast klar til at blive sendt. */
   udkast: { subject: string; body: string; tid: Date | null } | null;
@@ -27,7 +34,7 @@ export async function bookingOversigt(): Promise<Map<string, Booking>> {
     .where(
       and(
         isNull(leads.deletedAt),
-        eq(leads.stageSlug, 'ny-lead'),
+        inArray(leads.stageSlug, TIDLIGE_STAGES),
         or(like(leads.source, 'boligberegner%')),
       ),
     );
