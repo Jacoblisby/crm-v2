@@ -10,6 +10,7 @@ import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
 import { SendEmailForm } from './SendEmailForm';
 import { MailTekst } from './MailTekst';
+import { NoterTab, type Note } from './NoterTab';
 import { reEmne } from '@/lib/mail-traad';
 import { LeadActions } from './LeadActions';
 import { AfkastDebug } from '@/app/admin/afkast/AfkastDebug';
@@ -55,6 +56,8 @@ export default async function LeadDetailPage({
     listPipelineStages(),
     bookingForLead(id).catch(() => null),
   ]);
+
+  const antalNoter = comms.filter((c) => (c.type === 'note' || c.type === 'phone') && c.createdBy !== 'boligberegner').length;
 
   // Svar på kundens mail: den valgte (↩ Svar), ellers den nyeste, hvis
   // kunden har skrevet efter vores seneste mail.
@@ -105,7 +108,7 @@ export default async function LeadDetailPage({
         )}
         <TabLink id={id} tab="kommunikation" active={tab} label={`Kommunikation (${comms.length})`} />
         <TabLink id={id} tab="historik" active={tab} label={`Historik (${history.length})`} />
-        <TabLink id={id} tab="noter" active={tab} label="Noter" />
+        <TabLink id={id} tab="noter" active={tab} label={`Noter${antalNoter ? ` (${antalNoter})` : ''}`} />
       </div>
 
       <div className="pt-2">
@@ -145,7 +148,21 @@ export default async function LeadDetailPage({
           </div>
         )}
         {tab === 'historik' && <HistorikTab history={history} />}
-        {tab === 'noter' && <NoterTab lead={lead} />}
+        {tab === 'noter' && (
+          <NoterTab
+            leadId={lead.id}
+            noter={comms
+              .filter((c) => (c.type === 'note' || c.type === 'phone') && c.createdBy !== 'boligberegner')
+              .map((c): Note => ({
+                id: c.id,
+                body: c.body ?? '',
+                createdAt: (c.createdAt instanceof Date ? c.createdAt : new Date(c.createdAt)).toISOString(),
+                createdBy: c.createdBy,
+                type: c.type,
+              }))}
+            beregnerNote={lead.notes}
+          />
+        )}
       </div>
     </div>
   );
@@ -571,19 +588,6 @@ function HistorikTab({ history }: { history: LeadStageHistoryRow[] }) {
         </li>
       ))}
     </ol>
-  );
-}
-
-function NoterTab({ lead }: { lead: Lead }) {
-  return (
-    <div className="bg-white border border-slate-200 rounded-lg p-4">
-      {lead.notes ? (
-        <div className="text-sm whitespace-pre-line text-slate-700">{lead.notes}</div>
-      ) : (
-        <div className="text-sm text-slate-400">Ingen noter endnu.</div>
-      )}
-      <div className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-400">Skrive-tilstand kommer i Uge 3.</div>
-    </div>
   );
 }
 
