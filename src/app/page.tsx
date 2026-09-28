@@ -33,8 +33,8 @@ export default async function InboxPage() {
   }
 
   // ─── "I dag"-action buckets ─────────────────────────────────────────────
-  const RING_STAGES = new Set(['kontaktet', 'mail-sendt', 'interesse', 'fremvisning']);
-  const OPFOLG_STAGES = new Set(['ny-lead', 'mail-sendt', 'kontaktet']);
+  const RING_STAGES = new Set(['besigtigelse-foreslaaet', 'besigtigelse-afholdt', 'bud-afgivet']);
+  const OPFOLG_STAGES = new Set(['ny-lead', 'besigtigelse-foreslaaet']);
 
   const ring = enriched
     .filter((e) => RING_STAGES.has(e.lead.stageSlug) && e.lead.phone && e.sla.daysInStage > 5)
@@ -45,7 +45,7 @@ export default async function InboxPage() {
     .sort((a, b) => b.lead.priority - a.lead.priority || b.sla.daysInStage - a.sla.daysInStage)
     .slice(0, 5);
   const aktivBud = enriched
-    .filter((e) => e.lead.stageSlug === 'aktivt-bud' && e.sla.daysInStage > 3)
+    .filter((e) => e.lead.stageSlug === 'bud-afgivet' && e.sla.daysInStage > 3)
     .sort((a, b) => b.sla.daysInStage - a.sla.daysInStage)
     .slice(0, 5);
 

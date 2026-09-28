@@ -134,11 +134,10 @@ export async function submitFunnelAction(
   // routingen, så leadet stadig lander i Ny lead og får et booking-udkast.
   const fotoIds = (state.photoIds ?? []).slice(0, 10);
   const hasFullData = photoCount >= 3 && driftTotal > 0;
-  const stageSlug = hasFullData
-    ? 'interesse'
-    : photoCount >= 1 || driftTotal > 0
-      ? 'interesse'
-      : 'ny-lead';
+  // Alle nye beregner-leads starter i «Ny lead» — der laves booking-udkast
+  // til dem, og så flytter pipelinen dem selv videre. Før røg leads med
+  // udgifter udfyldt direkte i «Interesse» og fik aldrig et udkast.
+  const stageSlug = 'ny-lead';
 
   // 4. Opret lead
   const appliances = [
@@ -303,8 +302,14 @@ export async function submitFunnelAction(
         kvm: state.kvm,
         rooms: state.rooms ? String(state.rooms) : null,
         yearBuilt: state.yearBuilt,
-        stageSlug: 'interesse', // sælger har aktivt henvendt sig — bump til interesse
-        stageChangedAt: new Date(),
+        // Sælger har henvendt sig igen. Er vi ikke nået videre end til at
+        // foreslå en besigtigelse, ryger leadet forrest, så der laves et nyt
+        // udkast. Er der aftalt tid eller givet bud, bliver det stående.
+        ...(['ny-lead', 'besigtigelse-foreslaaet', 'kontaktet', 'mail-sendt', 'interesse', 'afventer-lejer'].includes(
+          existingLead.stageSlug,
+        )
+          ? { stageSlug: 'ny-lead', stageChangedAt: new Date() }
+          : {}),
         conditionRating: standToRating(state.stand as StandLevel),
         valuationDkk: estimate.marketEstimate,
         bidDkk: adjustedFinalOffer,

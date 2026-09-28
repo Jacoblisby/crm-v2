@@ -10,13 +10,24 @@ import { db } from '@/lib/db/client';
 import { leadCommunications, leads } from '@/lib/db/schema';
 import { beregnerSvar } from '@/lib/beregner';
 import { BOOKING_EMNE, bookingUdkast, planlaeg, postnrFra, tidFraMail, type Laast } from '@/lib/besigtigelse';
+import type { BookingStatus } from '@/lib/pipeline-stages';
 
 /**
  * Stadierne før en besigtigelse er aftalt. Et lead med udgifter udfyldt
  * ryger direkte i «Interesse» ved indsendelse (se submit-action), og stod
  * derfor uden udkast, selvom det er lige så nyt som dem i «Ny lead».
  */
-const TIDLIGE_STAGES = ['ny-lead', 'kontaktet', 'mail-sendt', 'interesse'];
+const TIDLIGE_STAGES = [
+  'ny-lead',
+  'besigtigelse-foreslaaet',
+  'besigtigelse-aftalt',
+  'besigtigelse-afholdt',
+  // De gamle stadier, indtil omlægningen har flyttet alle leads.
+  'kontaktet',
+  'mail-sendt',
+  'interesse',
+  'afventer-lejer',
+];
 
 export interface Booking {
   /** Udkast klar til at blive sendt. */
@@ -133,4 +144,46 @@ export async function bookingForLead(leadId: string): Promise<Booking | null> {
     sendt: { tid: tidFraMail(s.body, s.createdAt), sendtAt: s.createdAt },
     svar: svar && svar.createdAt > s.createdAt ? { at: svar.createdAt, subject: svar.subject, body: svar.body } : null,
   };
+}
+
+/**
+ * Sendt booking, aftalt tid og kundens svar for alle leads — uanset stadie.
+ * Pipelinen bruger det til selv at flytte leads videre.
+ */
+export async function bookingStatus(): Promise<Map<string, BookingStatus>> {
+  const sendte = await db
+    .select({
+      leadId: leadCommunications.leadId,
+      body: leadCommunications.body,
+      createdAt: leadCommunications.createdAt,
+    })
+    .from(leadCommunications)
+    .innerJoin(leads, eq(leads.id, leadCommunications.leadId))
+    .where(
+      and(
+        isNull(leads.deletedAt),
+        eq(leadCommunications.direction, 'out'),
+        eq(leadCommunications.type, 'email'),
+        ilike(leadCommunications.subject, `%${BOOKING_EMNE}%`),
+      ),
+    )
+    .orderBy(desc(leadCommunications.createdAt));
+
+  const ud = new Map<string, BookingStatus>();
+  for (const s of sendte) {
+    if (ud.has(s.leadId)) continue;
+    ud.set(s.leadId, { sendtAt: s.createdAt, tid: tidFraMail(s.body, s.createdAt), svarAt: null });
+  }
+  if (ud.size === 0) return ud;
+
+  const svar = await db
+    .select({ leadId: leadCommunications.leadId, createdAt: leadCommunications.createdAt })
+    .from(leadCommunications)
+    .where(and(inArray(leadCommunications.leadId, [...ud.keys()]), eq(leadCommunications.direction, 'in')))
+    .orderBy(desc(leadCommunications.createdAt));
+  for (const s of svar) {
+    const b = ud.get(s.leadId)!;
+    if (!b.svarAt && b.sendtAt && s.createdAt > b.sendtAt) b.svarAt = s.createdAt;
+  }
+  return ud;
 }

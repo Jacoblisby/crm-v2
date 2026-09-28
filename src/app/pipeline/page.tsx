@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { listLeadsForPipeline, listPipelineStages } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, PipelineStage } from '@/lib/types';
-import { bookingOversigt, type Booking } from '@/lib/besigtigelse-plan';
+import { bookingOversigt, bookingStatus, type Booking } from '@/lib/besigtigelse-plan';
 import { antalFotos } from '@/lib/fotos';
+import { budRunder, flytEfterBooking, HANDLING, sikrStadier } from '@/lib/pipeline-stages';
+import { tidTekst } from '@/lib/besigtigelse';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,13 +19,27 @@ export default async function PipelinePage() {
   let booking: Map<string, Booking>;
   let fotos = new Map<string, number>();
 
+  let bud = new Map<string, number>();
+
   try {
+    // Stadierne skrives og leads flyttes efter, hvad der faktisk er sket
+    // (booking sendt, tid bekræftet, besigtigelse overstået) — før tavlen
+    // tegnes, så kortene står det rigtige sted med det samme.
+    await sikrStadier();
+    await flytEfterBooking(await bookingStatus()).catch((e) =>
+      console.warn('[pipeline] kunne ikke flytte leads:', e),
+    );
+
     [stages, rows, booking] = await Promise.all([
       listPipelineStages(),
       listLeadsForPipeline(),
       bookingOversigt().catch(() => new Map<string, Booking>()),
     ]);
-    fotos = await antalFotos(rows.map((r) => r.lead.id)).catch(() => new Map<string, number>());
+    const ids = rows.map((r) => r.lead.id);
+    [fotos, bud] = await Promise.all([
+      antalFotos(ids).catch(() => new Map<string, number>()),
+      budRunder(ids).catch(() => new Map<string, number>()),
+    ]);
   } catch (err) {
     return <ConnectionWarning error={err instanceof Error ? err.message : String(err)} />;
   }
@@ -48,14 +64,14 @@ export default async function PipelinePage() {
 
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
         {visibleStages.map((stage) => (
-          <Column key={stage.slug} stage={stage} leads={byStage.get(stage.slug) || []} booking={booking} fotos={fotos} />
+          <Column key={stage.slug} stage={stage} leads={byStage.get(stage.slug) || []} booking={booking} fotos={fotos} bud={bud} />
         ))}
       </div>
     </div>
   );
 }
 
-function Column({ stage, leads, booking, fotos }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, Booking>; fotos: Map<string, number> }) {
+function Column({ stage, leads, booking, fotos, bud }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, Booking>; fotos: Map<string, number>; bud: Map<string, number> }) {
   return (
     <div className="flex-shrink-0 w-72 bg-slate-100 rounded-lg p-3">
       <div className="flex items-center justify-between mb-3">
@@ -76,13 +92,7 @@ function Column({ stage, leads, booking, fotos }: { stage: PipelineStage; leads:
               {fotos.get(lead.id) ? (
                 <div className="mt-1 text-[11px] text-slate-600">📷 {fotos.get(lead.id)} billede{fotos.get(lead.id) === 1 ? '' : 'r'}</div>
               ) : null}
-              {(() => {
-                const b = booking.get(lead.id);
-                if (b?.svar) return <div className="mt-1.5 text-[11px] font-medium text-teal-800">💬 Har svaret</div>;
-                if (b?.udkast) return <div className="mt-1.5 text-[11px] font-medium text-amber-800">📝 Udkast klar</div>;
-                if (b?.sendt) return <div className="mt-1.5 text-[11px] text-slate-500">📅 Booking sendt</div>;
-                return null;
-              })()}
+              <Maerke lead={lead} stage={stage.slug} booking={booking.get(lead.id)} runder={bud.get(lead.id) ?? 0} />
               <div className="flex items-center justify-between mt-1.5">
                 {lead.listPrice && (
                   <span className="text-xs text-slate-600">
@@ -98,11 +108,55 @@ function Column({ stage, leads, booking, fotos }: { stage: PipelineStage; leads:
         })}
         {leads.length === 0 && <div className="text-xs text-slate-400 text-center py-4">Ingen leads</div>}
       </div>
-      {stage.slaDays != null && (
-        <div className="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-200">SLA: {stage.slaDays} dage</div>
+      {HANDLING[stage.slug] && (
+        <div className="text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-200">{HANDLING[stage.slug]}</div>
       )}
     </div>
   );
+}
+
+const DAG = 24 * 60 * 60_000;
+
+/**
+ * Det ene, der er værd at vide om kortet her og nu. Rækkefølgen er
+ * vigtigst først: et svar skal ses før en påmindelse om at følge op.
+ */
+function Maerke({
+  lead,
+  stage,
+  booking,
+  runder,
+}: {
+  lead: Lead;
+  stage: string;
+  booking: Booking | undefined;
+  runder: number;
+}) {
+  const linje = (tekst: string, farve: string) => <div className={`mt-1.5 text-[11px] font-medium ${farve}`}>{tekst}</div>;
+
+  if (booking?.svar && stage === 'besigtigelse-foreslaaet') return linje('💬 Har svaret — læs og aftal tid', 'text-teal-800');
+  if (booking?.udkast) return linje('📝 Udkast klar — tryk send', 'text-amber-800');
+
+  if (stage === 'besigtigelse-aftalt' && booking?.sendt?.tid) return linje(`📅 ${tidTekst(booking.sendt.tid)}`, 'text-slate-700');
+
+  if (stage === 'besigtigelse-foreslaaet' && booking?.sendt) {
+    const dage = Math.floor((Date.now() - booking.sendt.sendtAt.getTime()) / DAG);
+    if (dage >= 3) return linje(`⏰ Følg op — sendt for ${dage} dage siden`, 'text-rose-700');
+    return linje(`📤 Sendt ${dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`}`, 'text-slate-500');
+  }
+
+  if (stage === 'bud-afgivet' && lead.bidDkk)
+    return linje(`💰 Bud ${Math.max(1, runder)}: ${Math.round(lead.bidDkk / 1000).toLocaleString('da-DK')}k kr`, 'text-slate-700');
+
+  if (stage === 'ikke-enige-om-pris' || stage === 'vil-ikke-saelge-nu') {
+    const dage = Math.floor((Date.now() - new Date(lead.stageChangedAt).getTime()) / DAG);
+    const om = 30 - dage;
+    return om <= 0
+      ? linje(`🔔 Følg op nu — ${dage} dage siden`, 'text-rose-700')
+      : linje(`🗓 Følg op om ${om} dage`, 'text-slate-500');
+  }
+
+  return null;
 }
 
 function ConnectionWarning({ error }: { error: string }) {
