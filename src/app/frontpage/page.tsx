@@ -151,19 +151,19 @@ function Nav() {
             transition: 'box-shadow 320ms ease',
           }}
         >
-          {/* Samme mål som topbaren på 365ejendom.dk: logoet 40 px højt, og
-              hele headeren 72 px med luften over. Logoet er stående, så det
-              fylder mere i højden end et liggende wordmark — derfor er 40 px
-              den grænse, hvor rammen og «EJENDOMME» stadig kan læses.
+          {/* Præcis samme mærke og mål som topbaren på 365ejendom.dk: det
+              kvadratiske logo, 40 × 40 px, i en 56 px høj bar. Det høje logo
+              blev for spinkelt ved 40 px, fordi rammen har luft omkring sig;
+              det kvadratiske er beskåret til mærket og fylder hele feltet.
               Hvid variant, fordi glasset er mørkt. */}
           <a href="#" className="flex items-center" aria-label="365 Ejendomme — til toppen">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/365-ejendomme-hvid.png"
+              src="/brand/365-kvadrat-hvid.png"
               alt="365 Ejendomme"
-              width={34}
+              width={40}
               height={40}
-              className="h-[40px] w-auto"
+              className="h-10 w-10"
             />
           </a>
 
