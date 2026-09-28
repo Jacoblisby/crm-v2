@@ -74,11 +74,16 @@ export async function bookingOversigt(): Promise<Map<string, Booking>> {
     .orderBy(desc(leadCommunications.createdAt));
 
   const senestSendt = new Map<string, (typeof sendte)[number]>();
-  for (const s of sendte) if (!senestSendt.has(s.leadId)) senestSendt.set(s.leadId, s);
+  // Nyeste tid, der kan læses — den seneste mail i tråden har ikke altid en.
+  const tidPrLead = new Map<string, Date | null>();
+  for (const s of sendte) {
+    if (!senestSendt.has(s.leadId)) senestSendt.set(s.leadId, s);
+    if (!tidPrLead.get(s.leadId)) tidPrLead.set(s.leadId, tidFraMail(s.body, s.createdAt));
+  }
 
   const laaste: Laast[] = [];
   for (const [id, s] of senestSendt) {
-    const tid = tidFraMail(s.body, s.createdAt);
+    const tid = tidPrLead.get(id) ?? null;
     if (tid) laaste.push({ id, postnr: postnrFra(s.postalCode, s.address), start: tid });
   }
 
@@ -108,7 +113,7 @@ export async function bookingOversigt(): Promise<Map<string, Booking>> {
     const tid = plan.get(l.id) ?? null;
     ud.set(l.id, {
       udkast: !s && l.email ? { ...bookingUdkast(l, beregnerSvar(l), tid), tid } : null,
-      sendt: s ? { tid: tidFraMail(s.body, s.createdAt), sendtAt: s.createdAt } : null,
+      sendt: s ? { tid: tidPrLead.get(l.id) ?? null, sendtAt: s.createdAt } : null,
       svar: svar ? { at: svar.createdAt, subject: svar.subject, body: svar.body } : null,
     });
   }
