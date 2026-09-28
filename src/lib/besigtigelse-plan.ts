@@ -169,10 +169,17 @@ export async function bookingStatus(): Promise<Map<string, BookingStatus>> {
     )
     .orderBy(desc(leadCommunications.createdAt));
 
+  // Tiden står ikke nødvendigvis i den seneste mail: «Vi ses i morgen kl 13»
+  // kan være fulgt af en mail uden tid. Nyeste tid, der kan læses, gælder.
+  // Kundens svar tæller fra den FØRSTE booking-mail, ikke den seneste —
+  // ellers tæller et «Ok» fra i går ikke, fordi vi skrev igen bagefter.
   const ud = new Map<string, BookingStatus>();
+  const foerste = new Map<string, Date>();
   for (const s of sendte) {
-    if (ud.has(s.leadId)) continue;
-    ud.set(s.leadId, { sendtAt: s.createdAt, tid: tidFraMail(s.body, s.createdAt), svarAt: null });
+    const b = ud.get(s.leadId);
+    if (!b) ud.set(s.leadId, { sendtAt: s.createdAt, tid: tidFraMail(s.body, s.createdAt), svarAt: null });
+    else if (!b.tid) b.tid = tidFraMail(s.body, s.createdAt);
+    foerste.set(s.leadId, s.createdAt); // listen er nyeste først, så den sidste vinder
   }
   if (ud.size === 0) return ud;
 
@@ -183,7 +190,8 @@ export async function bookingStatus(): Promise<Map<string, BookingStatus>> {
     .orderBy(desc(leadCommunications.createdAt));
   for (const s of svar) {
     const b = ud.get(s.leadId)!;
-    if (!b.svarAt && b.sendtAt && s.createdAt > b.sendtAt) b.svarAt = s.createdAt;
+    const f = foerste.get(s.leadId);
+    if (!b.svarAt && f && s.createdAt > f) b.svarAt = s.createdAt;
   }
   return ud;
 }

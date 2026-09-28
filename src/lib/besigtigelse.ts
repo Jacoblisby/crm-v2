@@ -298,7 +298,18 @@ export function tidFraMail(body: string | null, sendt: Date): Date | null {
   }
   if (fund) return fund;
 
-  // 3. Kun ugedag: «fredag kl 13» → førstkommende fredag efter mailen.
+  // 3. «i morgen kl 13» / «i dag kl 13»
+  for (const m of body.matchAll(/\bi\s+(dag|morgen|overmorgen)\b[^.\n]{0,24}?kl\.?\s*(\d{1,2})(?:[.:](\d{2}))?/giu)) {
+    const timer = Number(m[2]);
+    const min = Number(m[3] ?? 0);
+    if (timer > 23 || min > 59) continue;
+    const frem = m[1].toLowerCase() === 'dag' ? 0 : m[1].toLowerCase() === 'morgen' ? 1 : 2;
+    const d = kbhDele(new Date(kbh(s.y, s.m, s.d, 12, 0).getTime() + frem * 24 * 60 * 60_000));
+    fund = kbh(d.y, d.m, d.d, timer, min);
+  }
+  if (fund) return fund;
+
+  // 4. Kun ugedag: «fredag kl 13» → førstkommende fredag efter mailen.
   for (const m of body.matchAll(/(mandag|tirsdag|onsdag|torsdag|fredag|lørdag|søndag)[^.\n]{0,24}?kl\.?\s*(\d{1,2})(?:[.:](\d{2}))?/giu)) {
     const ugedag = UGEDAGE.indexOf(m[1].toLowerCase());
     if (ugedag < 0) continue;
