@@ -139,7 +139,7 @@ function Nav() {
     <>
       <header className="sticky top-0 z-40 px-3 sm:px-5 pt-3 sm:pt-4">
         <div
-          className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-5 sm:pl-7 pr-2 py-2"
+          className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-6 pr-2 py-2"
           style={{
             // Designerens endelige spec (Make-fil, version 44, efter 6 forsøg):
             // "Headeren bruger nu præcis samme effekt som søgefeltet og de
@@ -151,23 +151,22 @@ function Nav() {
             transition: 'box-shadow 320ms ease',
           }}
         >
-          {/* Præcis samme mærke og mål som topbaren på 365ejendom.dk: det
-              kvadratiske logo, 40 × 40 px, i en 56 px høj bar. Det høje logo
-              blev for spinkelt ved 40 px, fordi rammen har luft omkring sig;
-              det kvadratiske er beskåret til mærket og fylder hele feltet.
-              Hvid variant, fordi glasset er mørkt. */}
+          {/* Præcis samme mærke og mål som topbaren på 365ejendom.dk:
+              logo-mærket (307 × 360) vist 34 × 40 px, 24 px inde i en 56 px
+              høj bar. Hvid variant, fordi glasset er mørkt — originalen har
+              sort tekst. */}
           <a href="#" className="flex items-center" aria-label="365 Ejendomme — til toppen">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/365-kvadrat-hvid.png"
+              src="/brand/365-ejendomme-hvid.png"
               alt="365 Ejendomme"
-              width={40}
+              width={34}
               height={40}
-              className="h-10 w-10"
+              className="h-10 w-auto"
             />
           </a>
 
-          <nav className="hidden lg:flex items-center gap-9 text-[13.5px] text-white" style={{ fontWeight: 400 }}>
+          <nav className="hidden lg:flex items-center gap-7 text-[13.5px] text-white" style={{ fontWeight: 400 }}>
             {NAV_LINKS.map((l) => (
               <a
                 key={l.label}
