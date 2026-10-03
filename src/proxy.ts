@@ -36,8 +36,16 @@ const KUNDESIDER = [
   '/k/',              // brevkoder, når de bygges
 ];
 
-/** Teknik der skal virke begge steder, ellers kan siderne ikke rendere. */
-const ALTID_TILLADT = /^\/(_next\/|favicon\.ico|robots\.txt|sitemap\.xml|monitoring|frontpage\/|.*\.(?:png|jpe?g|svg|webp|avif|ico|woff2?|css|js|map)$)/;
+/**
+ * Teknik der skal virke begge steder, ellers kan siderne ikke rendere.
+ *
+ * api/search-address og api/address-details er kundesidens egne JSON-kald
+ * (boligberegnerens adressesøgning — se AddressCta.tsx). De er bevidst
+ * navngivet enkeltvis og IKKE som et blankt "api/"-match: resten af
+ * /api/ (admin-, cron- og auth-ruter) har ingen login i denne fil (se
+ * filens intro) og må aldrig kunne nås fra sælgerdomænet.
+ */
+const ALTID_TILLADT = /^\/(_next\/|api\/search-address|api\/address-details|favicon\.ico|robots\.txt|sitemap\.xml|monitoring|frontpage\/|.*\.(?:png|jpe?g|svg|webp|avif|ico|woff2?|css|js|map)$)/;
 
 export function proxy(req: NextRequest) {
   const vaert = req.headers.get('host')?.split(':')[0] ?? '';
