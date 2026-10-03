@@ -68,6 +68,19 @@ export function proxy(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
+  // Server actions ligger på de sider de hører til, og skal kunne kaldes —
+  // ellers kan boligberegneren ikke indsende.
+  //
+  // Dette tjek skal stå FØR pathname-rewrites herunder. Next.js' server
+  // actions poster tilbage til den URL browseren står på ("/" for
+  // forsiden), og klienten sender en `Next-Action`-header, som skal matche
+  // den route, siden faktisk blev renderet fra. Rewriter middleware den
+  // POST til en anden pathname (som "/"→"/frontpage" herunder), stemmer
+  // action-dispatchet ikke længere overens, og Next afbryder forbindelsen
+  // (fetch fejler med net::ERR_ABORTED — ingen fejlbesked, ingen log).
+  // Det var derfor adressesøgningen på forsiden aldrig fik et svar.
+  if (req.method === 'POST') return NextResponse.next();
+
   // Roden på sælgerdomænet ER forsiden.
   //
   // Det lå før som en rewrite i next.config.ts, og det virkede ikke: en
@@ -83,10 +96,6 @@ export function proxy(req: NextRequest) {
   }
 
   if (ALTID_TILLADT.test(pathname)) return NextResponse.next();
-
-  // Server actions ligger på de sider de hører til, og skal kunne kaldes —
-  // ellers kan boligberegneren ikke indsende.
-  if (req.method === 'POST') return NextResponse.next();
 
   const erKundeside = KUNDESIDER.some((p) => pathname === p || pathname.startsWith(p));
   if (erKundeside) return NextResponse.next();
