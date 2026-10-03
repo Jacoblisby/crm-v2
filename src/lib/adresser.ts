@@ -77,6 +77,18 @@ export function sikrTabel(): Promise<void> {
     `);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS adresser_postnr_idx ON adresser (postnr)`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS adresser_kommune_idx ON adresser (kommunekode)`);
+
+    // Ord midt i adressen («% noerre%») kan et almindeligt indeks ikke
+    // bruges til. Med pg_trgm bliver også dem slået op i et indeks — ellers
+    // skal hele tabellen læses, og med en halv million adresser er det
+    // forskellen på 30 ms og et sekund. Mangler udvidelsen rettigheder,
+    // kører søgningen videre uden den.
+    try {
+      await db.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS adresser_sog_trgm ON adresser USING gin (sog gin_trgm_ops)`);
+    } catch (e) {
+      console.warn('[adresser] pg_trgm ikke tilgængelig — søgning kører uden:', e);
+    }
   })().catch((e) => {
     klar = null;
     throw e;
