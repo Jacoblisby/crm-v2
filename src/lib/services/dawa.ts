@@ -11,6 +11,8 @@
  * Virker DEN også engang ned, er fremgangsmåden: find en ny kompatibel
  * udbyder og ret kun BASE_URL herunder — resten af filen er uændret.
  */
+import { bbrForAdresse } from '@/lib/bbr-lejlighed';
+
 const BASE_URL = 'https://dawa.companydata.dk';
 
 export interface DawaSuggestion {
@@ -97,9 +99,22 @@ export async function getAddressDetails(addressId: string): Promise<AddressDetai
   };
 
   const aa = data.adgangsadresse;
+  const fullAddress = `${aa.vejstykke.navn} ${aa.husnr}${data.etage ? `, ${data.etage}` : ''}${data.dør ? `. ${data.dør}` : ''}, ${aa.postnummer.nr} ${aa.postnummer.navn}`;
+
+  /**
+   * BFE-nummeret. Spejlet leverer det ikke (den officielle DAWA gjorde), så
+   * uden den her ville alle leads oprettet efter 1. oktober stå uden BFE —
+   * og dermed uden kobling til ejendommen i CRM'et.
+   *
+   * Vores eget BBR-indeks dækker de ejerforeninger, vi køber i, og det er
+   * dem, leads kommer fra. Udenfor dem er BFE fortsat tomt.
+   */
+  const bfeNumber =
+    data.bfe ?? aa.bfe?.nummer ?? bbrForAdresse(fullAddress, aa.postnummer.nr)?.bbr.ejendomBfe ?? null;
+
   return {
-    fullAddress: `${aa.vejstykke.navn} ${aa.husnr}${data.etage ? `, ${data.etage}` : ''}${data.dør ? `. ${data.dør}` : ''}, ${aa.postnummer.nr} ${aa.postnummer.navn}`,
-    bfeNumber: data.bfe ?? aa.bfe?.nummer ?? null,
+    fullAddress,
+    bfeNumber,
     postalCode: aa.postnummer.nr,
     city: aa.postnummer.navn,
     streetName: aa.vejstykke.navn,
