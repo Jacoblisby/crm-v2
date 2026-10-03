@@ -1,9 +1,17 @@
 /**
  * DAWA (Danmarks Adresseregister) integration.
- * Gratis API, ingen auth.
  *
- * https://dawadocs.dataforsyningen.dk/
+ * Den officielle DAWA (api.dataforsyningen.dk) blev lukket permanent af
+ * staten 1. oktober 2026 — alle kald giver nu 410 Gone, uden varsel eller
+ * omdirigering. BASE_URL peger derfor på companydata.dk's spejl, som er
+ * en byte-for-byte kompatibel erstatning (samme felter, samme URL-stier,
+ * samme JSON-form) — verificeret mod /adresser/autocomplete og
+ * /adresser/{id} før skiftet. Gratis, ingen nøgle, ingen konto.
+ *
+ * Virker DEN også engang ned, er fremgangsmåden: find en ny kompatibel
+ * udbyder og ret kun BASE_URL herunder — resten af filen er uændret.
  */
+const BASE_URL = 'https://dawa.companydata.dk';
 
 export interface DawaSuggestion {
   /** Display-tekst (fx "Bogensevej 53, 2. tv, 4700 Næstved") */
@@ -29,7 +37,7 @@ export interface DawaSuggestion {
 export async function searchAddress(query: string): Promise<DawaSuggestion[]> {
   if (!query || query.trim().length < 3) return [];
 
-  const url = `https://api.dataforsyningen.dk/adresser/autocomplete?q=${encodeURIComponent(query)}&type=adresse&fuzzy=true`;
+  const url = `${BASE_URL}/adresser/autocomplete?q=${encodeURIComponent(query)}&type=adresse&fuzzy=true`;
   const res = await fetch(url, { next: { revalidate: 0 } });
   if (!res.ok) return [];
   const data = (await res.json()) as DawaSuggestion[];
@@ -67,7 +75,7 @@ export interface AddressDetails {
  * Returnerer BFE-nummer, koordinater, kommune.
  */
 export async function getAddressDetails(addressId: string): Promise<AddressDetails | null> {
-  const url = `https://api.dataforsyningen.dk/adresser/${addressId}`;
+  const url = `${BASE_URL}/adresser/${addressId}`;
   const res = await fetch(url, { next: { revalidate: 3600 } });
   if (!res.ok) return null;
   const data = (await res.json()) as {

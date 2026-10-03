@@ -10,24 +10,44 @@
  * 'Tjek din pris'". DAWA-søgning + OIS-opslag genbruges fra /salg; valget
  * skrives synkront i localStorage før navigation til /salg-v4.
  */
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFunnelV2, STORAGE_KEY } from '../salg-v2/FunnelV2Context';
-import { searchAddressAction, lookupAddressAction } from '../salg/actions';
-import type { DawaSuggestion } from '@/lib/services/dawa';
+import type { DawaSuggestion, AddressDetails } from '@/lib/services/dawa';
+import type { PropertyLookupResult } from '@/lib/services/boligsiden';
 
+type AddressDetailsResponse =
+  | { ok: true; address: AddressDetails; property: PropertyLookupResult | null }
+  | { ok: false; error: string };
+
+/**
+ * Adressesøgningen kalder /api/search-address og /api/address-details —
+ * almindelige Route Handlers, IKKE server actions.
+ *
+ * Det var oprindeligt to server actions (searchAddressAction/
+ * lookupAddressAction fra ../salg/actions, POST tilbage til siden selv
+ * via React transitions). I produktion blev langt de fleste af de kald
+ * afbrudt (net::ERR_ABORTED, response "200" men body aldrig fuldt
+ * modtaget) — kun enkelte lykkedes, uden noget mønster der pegede på
+ * debounce eller input-metode. Mistanken er samspillet mellem RSC-
+ * streaming og proxy.ts' rewrites (se den fil), kombineret med
+ * React-transitions. Et almindeligt fetch-kald mod en Route Handler har
+ * ingen af de to lag og er langt mere forudsigeligt gennem en reverse
+ * proxy. Se git-historik for detaljerne/fejlsøgningen.
+ */
 export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: 'plate' | 'bar' }) {
   const { update } = useFunnelV2();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DawaSuggestion[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [pending, startTransition] = useTransition();
-  const [lookupPending, startLookup] = useTransition();
+  const [pending, setPending] = useState(false);
+  const [lookupPending, setLookupPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const justSelectedRef = useRef(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -51,13 +71,25 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
     }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      startTransition(async () => {
-        const r = await searchAddressAction(query);
-        if (r.ok) {
-          setResults(r.results);
-          setShowResults(true);
-        }
-      });
+      searchAbortRef.current?.abort();
+      const ac = new AbortController();
+      searchAbortRef.current = ac;
+      setPending(true);
+      fetch(`/api/search-address?q=${encodeURIComponent(query)}`, { signal: ac.signal })
+        .then((res) => res.json())
+        .then((r: { ok: boolean; results?: DawaSuggestion[] }) => {
+          if (r.ok && r.results) {
+            setResults(r.results);
+            setShowResults(true);
+          }
+        })
+        .catch((e) => {
+          // AbortError er forventet, når en nyere søgning overhaler denne — ikke en fejl.
+          if (e?.name !== 'AbortError') setError('Kunne ikke søge adresser');
+        })
+        .finally(() => {
+          if (searchAbortRef.current === ac) setPending(false);
+        });
     }, 250);
   }, [query]);
 
@@ -67,45 +99,49 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
     setResults([]);
     setShowResults(false);
     setError(null);
-    startLookup(async () => {
-      const r = await lookupAddressAction(s.adresse.id);
-      if (!r.ok) {
-        setError(r.error || 'Kunne ikke hente bolig-data');
-        return;
-      }
-      const { address, property } = r;
-      const patch = {
-        addressId: address.accessAddressId,
-        fullAddress: address.fullAddress,
-        postalCode: address.postalCode,
-        city: address.city,
-        streetName: address.streetName,
-        houseNumber: address.houseNumber,
-        floor: address.floor,
-        door: address.door,
-        bfeNumber: address.bfeNumber ?? property?.bfeNumber ?? null,
-        latitude: address.coordinates?.lat ?? null,
-        longitude: address.coordinates?.lon ?? null,
-        kvm: property?.kvm ?? null,
-        rooms: property?.rooms ?? null,
-        yearBuilt: property?.yearBuilt ?? null,
-        energyClass: property?.energyClass ?? null,
-        currentListingPrice: property?.currentListingPrice ?? null,
-        caseUrl: property?.caseUrl ?? null,
-        isOnMarket: property?.isOnMarket ?? false,
-        screenIdx: 1,
-      };
-      update(patch);
-      // Persistér synkront FØR navigation — /salg-v4 mounter sin egen provider,
-      // som læser localStorage. Uden dette taber vi adressen i en race med
-      // providerens useEffect-persist.
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const cur = raw ? JSON.parse(raw) : {};
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...cur, ...patch }));
-      } catch {}
-      router.push('/salg-v4');
-    });
+    setLookupPending(true);
+    fetch(`/api/address-details?id=${encodeURIComponent(s.adresse.id)}`)
+      .then((res) => res.json())
+      .then((r: AddressDetailsResponse) => {
+        if (!r.ok) {
+          setError(r.error || 'Kunne ikke hente bolig-data');
+          return;
+        }
+        const { address, property } = r;
+        const patch = {
+          addressId: address.accessAddressId,
+          fullAddress: address.fullAddress,
+          postalCode: address.postalCode,
+          city: address.city,
+          streetName: address.streetName,
+          houseNumber: address.houseNumber,
+          floor: address.floor,
+          door: address.door,
+          bfeNumber: address.bfeNumber ?? property?.bfeNumber ?? null,
+          latitude: address.coordinates?.lat ?? null,
+          longitude: address.coordinates?.lon ?? null,
+          kvm: property?.kvm ?? null,
+          rooms: property?.rooms ?? null,
+          yearBuilt: property?.yearBuilt ?? null,
+          energyClass: property?.energyClass ?? null,
+          currentListingPrice: property?.currentListingPrice ?? null,
+          caseUrl: property?.caseUrl ?? null,
+          isOnMarket: property?.isOnMarket ?? false,
+          screenIdx: 1,
+        };
+        update(patch);
+        // Persistér synkront FØR navigation — /salg-v4 mounter sin egen provider,
+        // som læser localStorage. Uden dette taber vi adressen i en race med
+        // providerens useEffect-persist.
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const cur = raw ? JSON.parse(raw) : {};
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...cur, ...patch }));
+        } catch {}
+        router.push('/salg-v4');
+      })
+      .catch(() => setError('Kunne ikke hente bolig-data'))
+      .finally(() => setLookupPending(false));
   }
 
   const isLoading = pending || lookupPending;
