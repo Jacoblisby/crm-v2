@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { listLeadsForPipeline, listPipelineStages } from '@/lib/db/queries';
 import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, PipelineStage } from '@/lib/types';
-import { bookingOversigt, bookingStatus, type Booking } from '@/lib/besigtigelse-plan';
+import { bookingStatus } from '@/lib/besigtigelse-plan';
+import { udkastOversigt, skalParkeres, type LeadUdkast } from '@/lib/udkast';
 import { antalFotos } from '@/lib/fotos';
-import { budRunder, flytEfterBooking, HANDLING, sikrStadier } from '@/lib/pipeline-stages';
+import { budRunder, flyt, flytEfterBooking, HANDLING, sikrStadier } from '@/lib/pipeline-stages';
 import { tidTekst } from '@/lib/besigtigelse';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export default async function PipelinePage() {
   let stages: PipelineStage[];
   let rows: Awaited<ReturnType<typeof listLeadsForPipeline>>;
-  let booking: Map<string, Booking>;
+  let booking: Map<string, LeadUdkast>;
   let fotos = new Map<string, number>();
 
   let bud = new Map<string, number>();
@@ -30,10 +31,16 @@ export default async function PipelinePage() {
       console.warn('[pipeline] kunne ikke flytte leads:', e),
     );
 
+    // Tre opfølgninger uden svar: leadet parkeres, så tavlen kun viser det,
+    // der stadig er i spil.
+    for (const id of await skalParkeres().catch(() => [])) {
+      await flyt(id, 'besigtigelse-foreslaaet', 'vil-ikke-saelge-nu', 'automatik');
+    }
+
     [stages, rows, booking] = await Promise.all([
       listPipelineStages(),
       listLeadsForPipeline(),
-      bookingOversigt().catch(() => new Map<string, Booking>()),
+      udkastOversigt().catch(() => new Map<string, LeadUdkast>()),
     ]);
     const ids = rows.map((r) => r.lead.id);
     [fotos, bud] = await Promise.all([
@@ -71,7 +78,7 @@ export default async function PipelinePage() {
   );
 }
 
-function Column({ stage, leads, booking, fotos, bud }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, Booking>; fotos: Map<string, number>; bud: Map<string, number> }) {
+function Column({ stage, leads, booking, fotos, bud }: { stage: PipelineStage; leads: Lead[]; booking: Map<string, LeadUdkast>; fotos: Map<string, number>; bud: Map<string, number> }) {
   return (
     <div className="flex-shrink-0 w-72 bg-slate-100 rounded-lg p-3">
       <div className="flex items-center justify-between mb-3">
@@ -129,33 +136,54 @@ function Maerke({
 }: {
   lead: Lead;
   stage: string;
-  booking: Booking | undefined;
+  booking: LeadUdkast | undefined;
   runder: number;
 }) {
   const linje = (tekst: string, farve: string) => <div className={`mt-1.5 text-[11px] font-medium ${farve}`}>{tekst}</div>;
 
-  if (booking?.svar && stage === 'besigtigelse-foreslaaet') return linje('💬 Har svaret — læs og aftal tid', 'text-teal-800');
-  if (booking?.udkast) return linje('📝 Udkast klar — tryk send', 'text-amber-800');
+  // Er der et udkast, er DET næste handling — uanset hvad kortet ellers
+  // kunne fortælle.
+  const u = booking?.udkast;
+  if (u) {
+    switch (u.type) {
+      case 'booking':
+        return linje('📝 Booking-udkast klar', 'text-amber-800');
+      case 'opfoelgning1':
+      case 'opfoelgning2':
+      case 'opfoelgning3':
+        return linje(`⏰ Følg op (${u.type.slice(-1)} af 3)`, 'text-rose-700');
+      case 'bekraeftelse':
+        return linje('💬 Har svaret — bekræft tiden', 'text-teal-800');
+      case 'paamindelse':
+        return linje('🔔 Mind om i morgen', 'text-amber-800');
+      case 'tak-for-besoeget':
+        return linje('📝 Tak for besøget', 'text-amber-800');
+      case 'bud':
+        return linje('💰 Send buddet', 'text-amber-800');
+      case 'bud-opfoelgning':
+        return linje('⏰ Følg op på buddet', 'text-rose-700');
+      case 'maanedlig':
+      case 'kvartal':
+        return linje('🔔 Tid til at skrive', 'text-rose-700');
+      case 'handlen':
+        return linje('📝 Send «Sådan foregår handlen»', 'text-amber-800');
+    }
+  }
 
-  if (stage === 'besigtigelse-aftalt' && booking?.sendt?.tid) return linje(`📅 ${tidTekst(booking.sendt.tid)}`, 'text-slate-700');
-
+  if (booking?.svar) return linje('💬 Kunden har svaret', 'text-teal-800');
+  if (stage === 'besigtigelse-aftalt' && booking?.sendt?.tid)
+    return linje(`📅 ${tidTekst(booking.sendt.tid)}`, 'text-slate-700');
   if (stage === 'besigtigelse-foreslaaet' && booking?.sendt) {
     const dage = Math.floor((Date.now() - booking.sendt.sendtAt.getTime()) / DAG);
-    if (dage >= 3) return linje(`⏰ Følg op — sendt for ${dage} dage siden`, 'text-rose-700');
     return linje(`📤 Sendt ${dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`}`, 'text-slate-500');
   }
-
   if (stage === 'bud-afgivet' && lead.bidDkk)
     return linje(`💰 Bud ${Math.max(1, runder)}: ${Math.round(lead.bidDkk / 1000).toLocaleString('da-DK')}k kr`, 'text-slate-700');
-
   if (stage === 'ikke-enige-om-pris' || stage === 'vil-ikke-saelge-nu') {
     const dage = Math.floor((Date.now() - new Date(lead.stageChangedAt).getTime()) / DAG);
-    const om = 30 - dage;
-    return om <= 0
-      ? linje(`🔔 Følg op nu — ${dage} dage siden`, 'text-rose-700')
-      : linje(`🗓 Følg op om ${om} dage`, 'text-slate-500');
+    const om = (stage === 'ikke-enige-om-pris' ? 30 : 90) - dage;
+    return om > 0 ? linje(`🗓 Skriver igen om ${om} dage`, 'text-slate-500') : null;
   }
-
   return null;
 }
 

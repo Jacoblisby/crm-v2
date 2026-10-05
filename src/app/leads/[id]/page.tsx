@@ -23,7 +23,7 @@ import { handlerFor, graense } from '@/lib/handler';
 import { BeregnerOversigt, type Marked } from './BeregnerOversigt';
 import { FotoGalleri } from './FotoGalleri';
 import { fotosForLead } from '@/lib/fotos';
-import { bookingForLead, type Booking } from '@/lib/besigtigelse-plan';
+import { udkastForLead, type LeadUdkast } from '@/lib/udkast';
 import { kalenderLink, tidTekst } from '@/lib/besigtigelse';
 
 export const dynamic = 'force-dynamic';
@@ -54,7 +54,7 @@ export default async function LeadDetailPage({
     getLeadCommunications(id),
     getLeadStageHistory(id),
     listPipelineStages(),
-    bookingForLead(id).catch(() => null),
+    udkastForLead(id).catch(() => null),
   ]);
 
   const antalNoter = comms.filter((c) => (c.type === 'note' || c.type === 'phone') && c.createdBy !== 'boligberegner').length;
@@ -137,9 +137,11 @@ export default async function LeadDetailPage({
                   ? {
                       subject: booking.udkast.subject,
                       body: booking.udkast.body,
-                      note: booking.udkast.tid
-                        ? `Udkast til booking af besigtigelse · foreslået tid: ${tidTekst(booking.udkast.tid)}. Tiden følger dine regler, men planlæggeren kan ikke se kalenderen — ret den i teksten, hvis du er optaget.`
-                        : 'Udkast til booking af besigtigelse. Der var ingen ledig tid de næste uger efter reglerne — skriv en tid ind.',
+                      note:
+                        booking.udkast.note ??
+                        (booking.udkast.tid
+                          ? `Foreslået tid: ${tidTekst(booking.udkast.tid)}. Tiden følger dine regler, men planlæggeren kan ikke se kalenderen — ret den i teksten, hvis du er optaget.`
+                          : 'Der var ingen ledig tid de næste uger efter reglerne — skriv en tid ind.'),
                     }
                   : null
               }
@@ -233,7 +235,7 @@ function markedISammeStoerrelse(forening: string, kvm: number): Marked | null {
  * Status for booking af besigtigelse: sendt, foreslået tid, kundens svar —
  * og ét klik til Google Kalender, når kunden har bekræftet.
  */
-function BookingBoks({ lead, booking }: { lead: Lead; booking: Booking | null }) {
+function BookingBoks({ lead, booking }: { lead: Lead; booking: LeadUdkast | null }) {
   if (!booking?.sendt) return null;
   const { sendt, svar } = booking;
   return (
