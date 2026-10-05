@@ -67,13 +67,26 @@ export async function udkastOversigt(nu = new Date()): Promise<Map<string, LeadU
   // Tider, der allerede er lovet væk, så to kunder ikke får samme tidspunkt.
   const laaste: Laast[] = [];
   for (const l of raekker) {
-    const b = bookingMail(prLead.get(l.id) ?? []);
-    const tid = b ? nyesteTid(prLead.get(l.id) ?? []) : null;
-    if (tid) laaste.push({ id: l.id, postnr: postnrFra(l.postalCode, l.address), start: tid });
+    const k = prLead.get(l.id) ?? [];
+    const tid = bookingMail(k) ? nyesteTid(k) : null;
+    // Kun tider, kunden har sagt ja til, er låst. En tid, der er foreslået
+    // og aldrig besvaret, må gerne tilbydes en anden.
+    const ind = senesteInd(k);
+    const bekraeftet = !!(ind && bookingMail(k) && ind.createdAt > bookingMail(k)!.createdAt);
+    if (tid && bekraeftet) laaste.push({ id: l.id, postnr: postnrFra(l.postalCode, l.address), start: tid });
   }
-  const venter = raekker.filter(
-    (l) => l.email && l.stageSlug === 'ny-lead' && !bookingMail(prLead.get(l.id) ?? []),
-  );
+  // Hvem skal have et tidspunkt foreslået: nye leads, og dem vi har skrevet
+  // til uden svar — første opfølgning foreslår en ny tid, og den skal være
+  // ledig på samme måde som den første.
+  const venter = raekker.filter((l) => {
+    if (!l.email) return false;
+    const k = prLead.get(l.id) ?? [];
+    if (l.stageSlug === 'ny-lead') return !bookingMail(k);
+    if (l.stageSlug !== 'besigtigelse-foreslaaet') return false;
+    const ud = senesteUd(k);
+    const ind = senesteInd(k);
+    return !!ud && !(ind && ind.createdAt > ud.createdAt);
+  });
   const plan = planlaeg(
     venter.map((l) => ({ id: l.id, postnr: postnrFra(l.postalCode, l.address), oprettet: l.createdAt })),
     laaste,
