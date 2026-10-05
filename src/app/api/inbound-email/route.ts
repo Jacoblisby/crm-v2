@@ -340,6 +340,19 @@ async function findLeadForEmail(email: NormalizedEmail): Promise<string | null> 
     if (l) return l.id;
   }
 
+  // 1b. Svaradressen citeret i selve mailen. Outlook og flere webmails tager
+  //     vores «Svar til»-linje med i det citerede hoved, og så står leadets id
+  //     i teksten, selv om kunden svarede til en helt anden adresse.
+  const citeret = `${email.text}\n${email.html ?? ''}`.match(/reply\+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})@/i)?.[1];
+  if (citeret) {
+    const [l] = await db
+      .select({ id: leads.id })
+      .from(leads)
+      .where(and(eq(leads.id, citeret.toLowerCase()), isNull(leads.deletedAt)))
+      .limit(1);
+    if (l) return l.id;
+  }
+
   // 2. Trådhenvisning mod en mail vi selv har sendt.
   const candidates = [email.inReplyTo, email.references]
     .filter((s): s is string => typeof s === 'string' && s.length > 0)
@@ -374,6 +387,26 @@ async function findLeadForEmail(email: NormalizedEmail): Promise<string | null> 
       .orderBy(desc(sql`COALESCE(${leadCommunications.createdAt}, ${leads.updatedAt})`))
       .limit(1);
     if (senest) return senest.id;
+  }
+
+  // 4. Adressen i emnet. Vores mails hedder «Din lejlighed på <adresse> …» eller
+  //    «Kontantbud på <adresse>», og et svar beholder emnet bag «SV:» eller
+  //    «Re:». Findes præcis ét aktivt lead på adressen, er det det. Er der flere
+  //    (to lejligheder i samme opgang), gætter vi ikke.
+  const adresse = email.subject
+    .replace(/^\s*((re|sv|aw|fw|fwd|vs)\s*:\s*)+/i, '')
+    .match(/^(?:Din lejlighed på|Kontantbud på)\s+(.+?)(?:\s*[—:–]\s|$)/i)?.[1]
+    ?.trim();
+  if (adresse && adresse.length > 4) {
+    const traef = await db
+      .select({ id: leads.id })
+      .from(leads)
+      .where(and(isNull(leads.deletedAt), sql`${leads.address} ILIKE ${adresse + ',%'}`))
+      .limit(3);
+    if (traef.length === 1) return traef[0].id;
+    if (traef.length > 1) {
+      console.warn(`[inbound-email] Emnet peger på «${adresse}», men ${traef.length} leads har den adresse. Gætter ikke.`);
+    }
   }
 
   return null;

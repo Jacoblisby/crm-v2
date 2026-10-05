@@ -129,7 +129,9 @@ export default async function LeadDetailPage({
               toName={lead.fullName}
               address={lead.address}
               udkast={
-                svarPaa
+                // Et valgt «↩ Svar» er et tomt svar. Ellers vinder udkastet, hvis der
+                // er et (bekræftelse efter kundens ja), og det sendes i tråden.
+                svarPaa && (svarParam || !booking?.udkast)
                   ? {
                       subject: reEmne(svarPaa.subject ?? ''),
                       body: `Hej${fornavnAf(lead.fullName)}\n\n\n\nVenlig hilsen\nJacob Fast Lisby\n365 Ejendomme`,
@@ -140,6 +142,7 @@ export default async function LeadDetailPage({
                   ? {
                       subject: booking.udkast.subject,
                       body: booking.udkast.body,
+                      svarPaaId: svarPaa?.id,
                       note:
                         booking.udkast.note ??
                         (booking.udkast.tid
