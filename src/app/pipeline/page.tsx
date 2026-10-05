@@ -9,6 +9,7 @@ import type { Lead, PipelineStage } from '@/lib/types';
 import { bookingStatus } from '@/lib/besigtigelse-plan';
 import { udkastOversigt, skalParkeres, type LeadUdkast } from '@/lib/udkast';
 import { antalFotos } from '@/lib/fotos';
+import { antalUplacerede } from '@/lib/uplaceret';
 import { budRunder, flyt, flytEfterBooking, HANDLING, sikrStadier } from '@/lib/pipeline-stages';
 import { tidTekst } from '@/lib/besigtigelse';
 
@@ -21,6 +22,7 @@ export default async function PipelinePage() {
   let fotos = new Map<string, number>();
 
   let bud = new Map<string, number>();
+  let uplacerede = 0;
 
   try {
     // Stadierne skrives og leads flyttes efter, hvad der faktisk er sket
@@ -42,6 +44,7 @@ export default async function PipelinePage() {
       listLeadsForPipeline(),
       udkastOversigt().catch(() => new Map<string, LeadUdkast>()),
     ]);
+    uplacerede = await antalUplacerede().catch(() => 0);
     const ids = rows.map((r) => r.lead.id);
     [fotos, bud] = await Promise.all([
       antalFotos(ids).catch(() => new Map<string, number>()),
@@ -68,6 +71,11 @@ export default async function PipelinePage() {
         {rows.length} aktive leads · scroll horisontalt på mobil ·{' '}
         <Link href="/arkiv" className="text-slate-700 underline underline-offset-2 hover:text-slate-900">Arkiv</Link>
       </p>
+      {uplacerede > 0 && (
+        <Link href="/admin/uplacerede" className="inline-block mb-3 text-sm px-3 py-1.5 rounded bg-amber-100 text-amber-900 hover:bg-amber-200 font-medium">
+          ✉️ {uplacerede} {uplacerede === 1 ? 'svar' : 'svar'} fra kunder kunne ikke placeres. Se dem
+        </Link>
+      )}
 
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
         {visibleStages.map((stage) => (

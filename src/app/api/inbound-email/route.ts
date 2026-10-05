@@ -22,6 +22,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from '@/lib/db/client';
 import { leadCommunications, leads } from '@/lib/db/schema';
 import { gemMailHeaders } from '@/lib/mail-traad';
+import { gemUplaceret } from '@/lib/uplaceret';
 import { leadIdFraAdresser } from '@/lib/svaradresse';
 
 export const dynamic = 'force-dynamic';
@@ -109,6 +110,14 @@ export async function POST(req: NextRequest) {
     console.warn(
       `[inbound-email] Intet lead — fra ${email.fromEmail} til ${email.to.join(', ') || '?'}, emne «${email.subject}»`,
     );
+    // Gem den, så den kan ses og placeres i stedet for at forsvinde.
+    await gemUplaceret({
+      fraMail: email.fromEmail,
+      fraNavn: email.fromName,
+      til: email.to,
+      emne: email.subject,
+      tekst: email.text || stripHtml(email.html || '') || '(intet indhold)',
+    }).catch((e) => console.warn('[inbound-email] Kunne ikke gemme uplaceret mail:', e));
     return NextResponse.json({
       ok: true,
       matched: false,
