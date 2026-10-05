@@ -8,7 +8,7 @@
  * Intet gemmes. Udkastet regnes ud, hver gang en side vises, og forsvinder
  * af sig selv, så snart mailen er sendt eller kunden har svaret.
  */
-import { and, desc, eq, inArray, isNull, notInArray } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, isNull, notInArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { leadCommunications, leads } from '@/lib/db/schema';
 import { beregnerSvar } from '@/lib/beregner';
@@ -20,7 +20,8 @@ const TIME = 60 * 60_000;
 
 export interface LeadUdkast {
   udkast: (M.Mail & { tid: Date | null }) | null;
-  sendt: { tid: Date | null; sendtAt: Date } | null;
+  /** `telefon`: tiden blev aftalt i et opkald, ikke i en mail. */
+  sendt: { tid: Date | null; sendtAt: Date; telefon?: boolean } | null;
   svar: { at: Date; subject: string | null; body: string | null } | null;
 }
 
@@ -64,6 +65,8 @@ export async function udkastOversigt(nu = new Date()): Promise<Map<string, LeadU
     else prLead.set(k.leadId, [k]);
   }
 
+  const aftaler = await telefonAftaler(ids);
+
   // Tider, der allerede er lovet væk, så to kunder ikke får samme tidspunkt.
   const laaste: Laast[] = [];
   for (const l of raekker) {
@@ -74,6 +77,9 @@ export async function udkastOversigt(nu = new Date()): Promise<Map<string, LeadU
     const ind = senesteInd(k);
     const bekraeftet = !!(ind && bookingMail(k) && ind.createdAt > bookingMail(k)!.createdAt);
     if (tid && bekraeftet) laaste.push({ id: l.id, postnr: postnrFra(l.postalCode, l.address), start: tid });
+    // En tid aftalt i telefonen er lovet væk, også uden en mail.
+    const a = aftaler.get(l.id);
+    if (a?.tid && !(tid && bekraeftet)) laaste.push({ id: l.id, postnr: postnrFra(l.postalCode, l.address), start: a.tid });
   }
   // Hvem skal have et tidspunkt foreslået: nye leads, og dem vi har skrevet
   // til uden svar — første opfølgning foreslår en ny tid, og den skal være
@@ -97,11 +103,19 @@ export async function udkastOversigt(nu = new Date()): Promise<Map<string, LeadU
   for (const l of raekker) {
     const k = prLead.get(l.id) ?? [];
     const b = bookingMail(k);
-    const tid = nyesteTid(k);
+    const aftale = aftaler.get(l.id) ?? null;
+    // Er tiden aftalt i telefonen senere end den sidste booking-mail, er det
+    // den, der gælder.
+    const telefonGaelder = !!(aftale?.tid && (!b || aftale.at > b.createdAt));
+    const tid = telefonGaelder ? aftale!.tid : nyesteTid(k);
     const svar = senesteInd(k);
     ud.set(l.id, {
-      udkast: l.email ? naeste(l, k, tid, plan.get(l.id) ?? null, nu) : null,
-      sendt: b ? { tid, sendtAt: b.createdAt } : null,
+      udkast: l.email ? naeste(l, k, tid, plan.get(l.id) ?? null, nu, telefonGaelder ? aftale!.at : null) : null,
+      sendt: telefonGaelder
+        ? { tid, sendtAt: aftale!.at, telefon: true }
+        : b
+          ? { tid, sendtAt: b.createdAt }
+          : null,
       svar:
         svar && b && svar.createdAt > b.createdAt
           ? { at: svar.createdAt, subject: svar.subject, body: svar.body }
@@ -151,6 +165,7 @@ function naeste(
   tid: Date | null,
   foreslaaetTid: Date | null,
   nu: Date,
+  telefonAftaltAt: Date | null = null,
 ): (M.Mail & { tid: Date | null }) | null {
   const m = (mail: M.Mail | null, t: Date | null = null) => (mail ? { ...mail, tid: t } : null);
   const ud = senesteUd(k);
@@ -180,8 +195,10 @@ function naeste(
 
     case 'besigtigelse-aftalt': {
       if (!tid) return null;
-      // Bekræftelsen først: er vores seneste mail ældre end kundens ja.
+      // Bekræftelsen først: er vores seneste mail ældre end kundens ja, eller
+      // er tiden aftalt i telefonen efter vores seneste mail.
       if (svarEfterSidsteMail) return m(M.bekraeftelse(lead, tid), tid);
+      if (telefonAftaltAt && (!ud || ud.createdAt < telefonAftaltAt)) return m(M.bekraeftelse(lead, tid), tid);
       const timerTil = (tid.getTime() - nu.getTime()) / TIME;
       const timerSidenMail = ud ? (nu.getTime() - ud.createdAt.getTime()) / TIME : 999;
       if (timerTil > 0 && timerTil <= 30 && timerSidenMail > 18) return m(M.paamindelse(lead, tid), tid);
@@ -270,4 +287,30 @@ export async function skalParkeres(nu = new Date()): Promise<string[]> {
       return antalOpfoelgninger(k) >= M.OPFOELGNINGER.length && dageSiden(ud.createdAt, nu) >= 7;
     })
     .map((r) => r.id);
+}
+
+/**
+ * Tider aftalt i telefonen. Opkaldsfanen logger dem som «Aftalt besigtigelse:
+ * fredag 17. oktober kl. 11.00.» — samme tekst, som mails bruger, så samme
+ * læser kan finde tiden.
+ */
+export async function telefonAftaler(ids: string[]): Promise<Map<string, { tid: Date | null; at: Date }>> {
+  const ud = new Map<string, { tid: Date | null; at: Date }>();
+  if (ids.length === 0) return ud;
+  const raekker = await db
+    .select({ leadId: leadCommunications.leadId, body: leadCommunications.body, createdAt: leadCommunications.createdAt })
+    .from(leadCommunications)
+    .where(
+      and(
+        inArray(leadCommunications.leadId, ids),
+        eq(leadCommunications.type, 'phone'),
+        ilike(leadCommunications.body, 'Aftalt besigtigelse:%'),
+      ),
+    )
+    .orderBy(desc(leadCommunications.createdAt));
+  for (const r of raekker) {
+    if (ud.has(r.leadId)) continue; // nyeste først
+    ud.set(r.leadId, { tid: tidFraMail(r.body, r.createdAt), at: r.createdAt });
+  }
+  return ud;
 }

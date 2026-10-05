@@ -91,6 +91,15 @@ function kbh(y: number, m: number, d: number, hh: number, mm: number): Date {
   return new Date(gaet.getTime() - forskydning);
 }
 
+/** «2026-10-17T11:00» fra et datetime-local-felt som københavnsk vægur-tid. */
+export function kbhFraLokal(v: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v ?? '');
+  if (!m) return null;
+  const [y, mo, d, hh, mm] = m.slice(1).map(Number);
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || hh > 23 || mm > 59) return null;
+  return kbh(y, mo, d, hh, mm);
+}
+
 const plusMin = (d: Date, min: number) => new Date(d.getTime() + min * 60_000);
 const rundOp15 = (d: Date) => new Date(Math.ceil(d.getTime() / (15 * 60_000)) * 15 * 60_000);
 
@@ -205,26 +214,48 @@ const BESTEMT: Record<string, string> = {
  */
 export function personligLinje(svar: BeregnerSvar | null): string {
   if (!svar) return '';
-  const s: string[] = [];
+
+  const behov = (spoergsmaal: string) => svar.behov.find((b) => b.label === spoergsmaal)?.vaerdi ?? null;
+  const tid = behov('Hvornår vil du flytte?');
+  const efter = behov('Hvad skal du efter salget?');
+
+  // 1. Hendes situation, med hendes egne ord.
+  let situation: string | null = null;
   if (svar.saleLeaseback) {
-    s.push('Du skrev, at du gerne vil blive boende som lejer efter salget. Det kan i mange tilfælde lade sig gøre, og når vi ses, gennemgår vi både pris, husleje og vilkår med dig, før du beslutter noget.');
-  } else if (svar.forhold.some((f) => f.tekst.startsWith('EF har renoveringsplaner'))) {
-    s.push('Du nævnte, at ejerforeningen har renoveringsplaner. Tag gerne det materiale med, I har fået om dem. Det har betydning for buddet.');
-  } else if (svar.stand.note) {
-    const n = svar.stand.note.trim().replace(/[.!]+$/, '');
-    s.push(`Du skrev: «${n}». Det kigger vi på, mens vi er der.`);
-  } else {
-    const skal = svar.stand.rum.find((r) => r.valg === 'Skal renoveres' || r.stand === 'slidt' || r.stand === 'trænger');
-    if (skal) s.push(`Du skrev, at ${BESTEMT[skal.navn] ?? skal.navn.toLowerCase()} trænger til en renovering. Det kigger vi på, mens vi er der.`);
+    situation = 'Du skrev, at du gerne vil blive boende som lejer efter salget. Det kan i mange tilfælde lade sig gøre, og når vi ses, gennemgår vi pris, husleje og vilkår, før du beslutter noget.';
+  } else if (efter === 'Vil leje en anden bolig') {
+    situation = 'Du skrev, at du gerne vil leje en anden bolig bagefter. Det kan jeg hjælpe med, for vi udlejer selv lejligheder.';
+  } else if (tid === 'Hurtigst muligt') {
+    situation = 'Du skrev, at du gerne vil videre hurtigt, så jeg prøver at gøre det enkelt at komme i gang.';
+  } else if (tid === '1–3 måneder') {
+    situation = 'Du skrev, at du gerne vil videre inden for 1–3 måneder.';
+  } else if (tid === '3–6 måneder' || tid === '6+ måneder') {
+    situation = 'Du skrev, at du ikke har travlt, så du bestemmer selv tempoet.';
   }
-  if (svar.media.fotos > 0) {
-    s.push(svar.media.fotos === 1 ? 'Tak for billedet, du sendte med.' : 'Tak for billederne, du sendte med.');
+
+  // 2. Detaljer, med de nyttigste først: dem hvor kunden kan gøre noget
+  //    (tage materiale med) før dem hvor jeg blot viser, at jeg har læst med.
+  const detaljer: string[] = [];
+  if (svar.forhold.some((f) => f.tekst.startsWith('EF har renoveringsplaner'))) {
+    detaljer.push('Du nævnte, at ejerforeningen har renoveringsplaner. Tag gerne det materiale med, I har fået om dem. Det har betydning for buddet.');
   }
   if (svar.udgifter.senere) {
-    s.push('Du nåede ikke at udfylde udgifterne. Har du den seneste opkrævning fra ejerforeningen og din ejendomsskattebillet ved hånden, kan vi give dig buddet hurtigere.');
+    detaljer.push('Udgifterne nåede du ikke at udfylde. Har du den seneste opkrævning fra ejerforeningen og din ejendomsskattebillet ved hånden, kan jeg give dig buddet hurtigere.');
   }
-  // Hvert emne i sit eget afsnit, ellers læses tre forskellige ting som én.
-  return s.join('\n\n');
+  if (svar.stand.note) {
+    const n = svar.stand.note.trim().replace(/[.!]+$/, '');
+    detaljer.push(`Du skrev: «${n}». Det kigger jeg på, mens jeg er der.`);
+  } else {
+    const skal = svar.stand.rum.find((r) => r.valg === 'Skal renoveres' || r.stand === 'slidt' || r.stand === 'trænger');
+    if (skal) detaljer.push(`${BESTEMT[skal.navn] ?? skal.navn.toLowerCase()} trænger til en renovering, skrev du. Det kigger jeg på, mens jeg er der.`.replace(/^./, (c) => c.toUpperCase()));
+  }
+  if (svar.media.fotos > 0) {
+    detaljer.push(svar.media.fotos === 1 ? 'Tak for billedet, du sendte med.' : 'Tak for billederne, du sendte med.');
+  }
+
+  // To linjer er nok. Flere end det ligner en formular, ikke et menneske,
+  // der har læst hendes svar. Hvert emne i sit eget afsnit.
+  return [situation, ...detaljer].filter((l): l is string => !!l).slice(0, 2).join('\n\n');
 }
 
 

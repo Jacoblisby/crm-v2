@@ -39,17 +39,47 @@ export async function bookingStatus(): Promise<Map<string, BookingStatus>> {
     else if (!b.tid) b.tid = tidFraMail(s.body, s.createdAt);
     foerste.set(s.leadId, s.createdAt); // listen er nyeste først, så den sidste vinder
   }
-  if (ud.size === 0) return ud;
 
-  const svar = await db
-    .select({ leadId: leadCommunications.leadId, createdAt: leadCommunications.createdAt })
+  if (ud.size > 0) {
+    const svar = await db
+      .select({ leadId: leadCommunications.leadId, createdAt: leadCommunications.createdAt })
+      .from(leadCommunications)
+      .where(and(inArray(leadCommunications.leadId, [...ud.keys()]), eq(leadCommunications.direction, 'in')))
+      .orderBy(desc(leadCommunications.createdAt));
+    for (const s of svar) {
+      const b = ud.get(s.leadId)!;
+      const f = foerste.get(s.leadId);
+      if (!b.svarAt && f && s.createdAt > f) b.svarAt = s.createdAt;
+    }
+  }
+
+  // Tider aftalt i telefonen («Aftalt besigtigelse: fredag 17. oktober kl.
+  // 11.00.» fra opkaldsfanen). En aftale i telefonen er et ja, så den tæller
+  // både som afsendt og som besvaret.
+  const telefon = await db
+    .select({ leadId: leadCommunications.leadId, body: leadCommunications.body, createdAt: leadCommunications.createdAt })
     .from(leadCommunications)
-    .where(and(inArray(leadCommunications.leadId, [...ud.keys()]), eq(leadCommunications.direction, 'in')))
+    .innerJoin(leads, eq(leads.id, leadCommunications.leadId))
+    .where(
+      and(
+        isNull(leads.deletedAt),
+        eq(leadCommunications.type, 'phone'),
+        ilike(leadCommunications.body, 'Aftalt besigtigelse:%'),
+      ),
+    )
     .orderBy(desc(leadCommunications.createdAt));
-  for (const s of svar) {
-    const b = ud.get(s.leadId)!;
-    const f = foerste.get(s.leadId);
-    if (!b.svarAt && f && s.createdAt > f) b.svarAt = s.createdAt;
+  const sete = new Set<string>();
+  for (const t of telefon) {
+    if (sete.has(t.leadId)) continue; // nyeste først
+    sete.add(t.leadId);
+    const tid = tidFraMail(t.body, t.createdAt);
+    const b = ud.get(t.leadId);
+    if (!b) {
+      ud.set(t.leadId, { sendtAt: t.createdAt, tid, svarAt: t.createdAt });
+    } else {
+      if (tid && (!b.tid || (b.sendtAt && t.createdAt > b.sendtAt))) b.tid = tid;
+      b.svarAt ??= t.createdAt;
+    }
   }
   return ud;
 }

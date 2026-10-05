@@ -15,6 +15,7 @@ import Link from 'next/link';
 import type { Lead } from '@/lib/types';
 import { STAND_LABEL, standValg, type BeregnerSvar, type StandNiveau } from '@/lib/beregner';
 import type { BbrLejlighed } from '@/lib/bbr-lejlighed';
+import { vaerdAtVide } from '@/lib/vaerd-at-vide';
 
 export interface Marked {
   medianKrPrKvm: number;
@@ -103,23 +104,7 @@ export function BeregnerOversigt({
   const budMod = budPrKvm && marked ? Math.round((1000 * (budPrKvm - marked.medianKrPrKvm)) / marked.medianKrPrKvm) / 10 : null;
 
   // ── Værd at vide ─────────────────────────────────────────────────────
-  const noter: { tekst: string; alvor: 'advarsel' | 'info' }[] = [];
-  if (bbr?.ejer?.type === 'Selskab')
-    noter.push({ tekst: `Ejeren er et selskab ifølge Resights. ${lead.fullName ?? 'Indsenderen'} er måske lejer, administrator eller selskabets ejer — afklar før bud.`, alvor: 'advarsel' });
-  if (bbr?.bbr.udlejning === 'Udlejet' && !svar.udlejning)
-    noter.push({ tekst: 'BBR siger lejligheden er udlejet, men sælger har ikke angivet et lejeforhold.', alvor: 'advarsel' });
-  if (svar.udlejning && bbr?.bbr.udlejning === 'Benyttet af ejeren')
-    noter.push({ tekst: 'Sælger angiver et lejeforhold, men BBR siger ejeren selv bor der.', alvor: 'advarsel' });
-  if (bbr && saelgerKvm && Math.abs(saelgerKvm - bbr.bbr.kvm) >= 2)
-    noter.push({ tekst: `Sælger har ${saelgerKvm} kvm, BBR har ${bbr.bbr.kvm} kvm. Buddet er regnet på sælgers tal.`, alvor: 'advarsel' });
-  if (bbr?.bbr.vaerelser && saelgerVaer && Math.round(saelgerVaer) !== bbr.bbr.vaerelser)
-    noter.push({ tekst: `Sælger har ${saelgerVaer} værelser, BBR har ${bbr.bbr.vaerelser}.`, alvor: 'info' });
-  if (bbr?.handel && !bbr.handel.fri)
-    noter.push({ tekst: `Seneste handel (${bbr.handel.dato.slice(0, 4)}) var «${bbr.handel.metode}» — prisen er ikke en markedspris.`, alvor: 'info' });
-  if (svar.udgifter.senere)
-    noter.push({ tekst: 'Sælger har ikke udfyldt udgifterne — buddet er regnet uden drift. Indhent ved besigtigelse.', alvor: 'advarsel' });
-  if (svar.saleLeaseback) noter.push({ tekst: 'Vil blive boende som lejer (sale-leaseback).', alvor: 'info' });
-  if (bbr?.ejer?.reklamebeskyttet === 'Ja') noter.push({ tekst: 'Ejeren er reklamebeskyttet.', alvor: 'info' });
+  const noter = vaerdAtVide(lead, svar, bbr);
 
   const poster = svar.udgifter.poster.filter((p) => p.kr > 0);
 

@@ -10,6 +10,7 @@ import { computeSLA, slaBadgeColor } from '@/lib/sla';
 import type { Lead, LeadCommunication, LeadStageHistoryRow } from '@/lib/types';
 import { SendEmailForm } from './SendEmailForm';
 import { MailTekst } from './MailTekst';
+import { OpkaldTab } from './OpkaldTab';
 import { NoterTab, type Note } from './NoterTab';
 import { reEmne } from '@/lib/mail-traad';
 import { LeadActions } from './LeadActions';
@@ -28,7 +29,7 @@ import { kalenderLink, tidTekst } from '@/lib/besigtigelse';
 
 export const dynamic = 'force-dynamic';
 
-type Tab = 'oversigt' | 'kommunikation' | 'historik' | 'noter' | 'afkast';
+type Tab = 'oversigt' | 'opkald' | 'kommunikation' | 'historik' | 'noter' | 'afkast';
 
 export default async function LeadDetailPage({
   params,
@@ -106,6 +107,7 @@ export default async function LeadDetailPage({
         {lead.afkastInputs && (
           <TabLink id={id} tab="afkast" active={tab} label="💰 Afkast" />
         )}
+        <TabLink id={id} tab="opkald" active={tab} label="📞 Opkald" />
         <TabLink id={id} tab="kommunikation" active={tab} label={`Kommunikation (${comms.length})`} />
         <TabLink id={id} tab="historik" active={tab} label={`Historik (${history.length})`} />
         <TabLink id={id} tab="noter" active={tab} label={`Noter${antalNoter ? ` (${antalNoter})` : ''}`} />
@@ -116,6 +118,7 @@ export default async function LeadDetailPage({
         {tab === 'afkast' && lead.afkastInputs && (
           <AfkastTab lead={lead} />
         )}
+        {tab === 'opkald' && <OpkaldTab lead={lead} udkast={booking} />}
         {tab === 'kommunikation' && (
           <div className="space-y-3">
             <BookingBoks lead={lead} booking={booking} />
@@ -237,15 +240,22 @@ function markedISammeStoerrelse(forening: string, kvm: number): Marked | null {
  */
 function BookingBoks({ lead, booking }: { lead: Lead; booking: LeadUdkast | null }) {
   if (!booking?.sendt) return null;
-  const { sendt, svar } = booking;
+  const { sendt } = booking;
+  const telefon = !!sendt.telefon;
+  // En aftale i telefonen er et ja, så den tæller som besvaret.
+  const svar = telefon ? { at: sendt.sendtAt, subject: null, body: null } : booking.svar;
   return (
     <div className={`rounded-lg border p-3 text-sm ${svar ? 'bg-teal-50 border-teal-200' : 'bg-white border-slate-200'}`}>
       <div className="font-medium text-slate-900">
-        {svar ? '💬 Kunden har svaret på booking-mailen' : '📅 Booking-mail sendt — venter på svar'}
+        {telefon
+          ? '📞 Besigtigelsen er aftalt i telefonen'
+          : svar
+            ? '💬 Kunden har svaret på booking-mailen'
+            : '📅 Booking-mail sendt. Venter på svar'}
       </div>
       <div className="text-xs text-slate-600 mt-0.5">
-        Sendt {sendt.sendtAt.toISOString().slice(0, 10)}
-        {sendt.tid ? ` · foreslået tid ${tidTekst(sendt.tid)}` : ' · tiden blev skrevet om i mailen'}
+        {telefon ? 'Aftalt' : 'Sendt'} {sendt.sendtAt.toISOString().slice(0, 10)}
+        {sendt.tid ? `, ${telefon ? 'tid' : 'foreslået tid'} ${tidTekst(sendt.tid)}` : ' · tiden blev skrevet om i mailen'}
       </div>
       {svar?.body && (
         <div className="mt-2 border-l-2 border-teal-300 pl-2">
