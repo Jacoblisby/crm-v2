@@ -25,12 +25,12 @@ export function SalgHeader() {
             </span>
           </Link>
           <a
-            href="tel:+4589876634"
-            aria-label="Ring til 365 Ejendomme på +45 89 87 66 34"
+            href="tel:+4561789071"
+            aria-label="Ring til 365 Ejendomme på +45 61 78 90 71"
             className="text-sm text-white inline-flex items-center gap-1.5 min-h-[44px] px-4 -mr-3 rounded-full hover:bg-white/10 transition-colors tracking-tight font-medium"
           >
             <Phone className="w-4 h-4" strokeWidth={2} />
-            <span className="hidden sm:inline">+45 89 87 66 34</span>
+            <span className="hidden sm:inline">+45 61 78 90 71</span>
           </a>
         </div>
       </header>
@@ -48,12 +48,12 @@ export function SalgHeader() {
           <span className="ml-1.5 text-sm font-medium text-muted">Ejendomme</span>
         </Link>
         <a
-          href="tel:+4589876634"
-          aria-label="Ring til 365 Ejendomme på +45 89 87 66 34"
+          href="tel:+4561789071"
+          aria-label="Ring til 365 Ejendomme på +45 61 78 90 71"
           className="text-sm text-muted hover:text-ink inline-flex items-center gap-1.5 min-h-[44px] px-3 -mr-2 rounded-full hover:bg-stone-100 transition-colors"
         >
           <Phone className="w-4 h-4" strokeWidth={2} />
-          <span className="hidden sm:inline">+45 89 87 66 34</span>
+          <span className="hidden sm:inline">+45 61 78 90 71</span>
         </a>
       </div>
     </header>

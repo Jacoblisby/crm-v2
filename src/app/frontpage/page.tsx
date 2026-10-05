@@ -199,12 +199,12 @@ function Nav() {
             </a>
             {/* Telefon-pill: skjult på mobil (som i mobil-framen) */}
             <a
-              href="tel:+4589876634"
+              href="tel:+4561789071"
               className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13.5px]"
               style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
             >
               <Phone size={15} weight="regular" />
-              +45 89 87 66 34
+              +45 61 78 90 71
             </a>
             <button
               type="button"
@@ -288,12 +288,12 @@ function Nav() {
               <ArrowUpRight size={17} weight="regular" />
             </a>
             <a
-              href="tel:+4589876634"
+              href="tel:+4561789071"
               className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[15px]"
               style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
             >
               <Phone size={17} weight="regular" />
-              +45 89 87 66 34
+              +45 61 78 90 71
             </a>
           </nav>
         </div>

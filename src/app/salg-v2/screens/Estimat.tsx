@@ -155,12 +155,12 @@ export function Estimat() {
             <span className="text-[13px] font-medium text-[#5A6166]">ejendomme</span>
           </button>
           <a
-            href="tel:+4589876634"
+            href="tel:+4561789071"
             className="flex items-center gap-2 text-[14px] font-medium hover:opacity-70 text-[#14181A]"
             style={{ transition: `opacity 150ms ${EASE_OUT}` }}
           >
             <PhoneIcon className="w-4 h-4" stroke={ACCENT} />
-            +45 89 87 66 34
+            +45 61 78 90 71
           </a>
         </div>
       </header>
@@ -331,7 +331,7 @@ export function Estimat() {
               )}
               <div className="pt-2">
                 <a
-                  href="tel:+4589876634"
+                  href="tel:+4561789071"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[14px] font-medium text-[#0F1A1A] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-white"
                   style={{ transition: `transform 150ms ${EASE_OUT}` }}
                 >
