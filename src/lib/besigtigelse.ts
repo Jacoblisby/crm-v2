@@ -227,22 +227,14 @@ export function personligLinje(svar: BeregnerSvar | null): string {
 }
 
 export function bookingUdkast(
-  lead: { fullName: string | null; address: string | null; bidDkk?: number | null },
+  lead: { fullName: string | null; address: string | null },
   svar: BeregnerSvar | null,
   tid: Date | null,
 ): { subject: string; body: string } {
   const navn = fornavn(lead.fullName);
 
-  /**
-   * Buddet med i mailen. Kunden så det i beregneren og fik det i den første
-   * mail, så det er ikke nyt — men det er grunden til at lukke op for døren,
-   * og uden det beder vi om et besøg uden at sige hvad der er i det for dem.
-   * «Foreløbigt», fordi det endelige først gives efter besigtigelsen.
-   */
-  const bud = svar?.tilbud.bud ?? lead.bidDkk ?? null;
-  const budLinje = bud
-    ? `Ud fra dem og de seneste handler i din ejerforening ligger vores foreløbige bud på ${Math.round(bud).toLocaleString('da-DK')} kr. kontant. Vi mangler kun at se lejligheden, før vi kan gøre buddet endeligt.`
-    : 'Vi har kigget på dem sammen med de seneste handler i din ejerforening. For at give dig et endeligt kontantbud mangler vi kun at se lejligheden.';
+  const budLinje =
+    'Vi har kigget på dem sammen med de seneste handler i din ejerforening, og vi er klar med et kontantbud. Vi mangler kun at se lejligheden, før vi kan gøre det endeligt.';
 
   const tidLinje = tid
     ? `Passer det ${tidTekst(tid)}? Ellers skriv et tidspunkt, der passer dig bedre.`
@@ -263,7 +255,9 @@ export function bookingUdkast(
     tidLinje,
     ...(personlig ? ['', personlig] : []),
     '',
-    'Bagefter får du buddet skriftligt. Du bestemmer selv, om du vil tage imod det, og hvornår vi i så fald overtager. Ingen mægler, intet salær og ingen fremvisninger.',
+    // Ikke et ord om overtagelsesdato her: hun har ikke sagt ja til noget
+    // endnu, og spørgsmålet hører til, når buddet ligger.
+    'Bagefter får du buddet skriftligt, så du kan tage stilling i ro og mag. Ingen mægler, intet salær og ingen fremvisninger.',
     '',
     'Svar på denne mail, eller ring til mig på 61 78 90 71.',
     '',
