@@ -80,7 +80,7 @@ export function booking(lead: MailLead, svar: BeregnerSvar | null, tid: Date | n
       '',
       'Vi har kigget på dem sammen med de seneste handler i din ejerforening, og vi er klar med et kontantbud. Vi mangler kun at se lejligheden, før vi kan gøre det endeligt.',
       '',
-      'Besøget tager 10–15 minutter. Vi kigger på stand og indretning — du skal ikke gøre rent eller forberede noget, og du forpligter dig ikke til noget.',
+      'Besøget tager 10–15 minutter. Vi ser på stand og indretning. Du skal ikke gøre rent eller forberede noget, og du forpligter dig ikke til noget.',
       '',
       tid
         ? `Passer det ${tidTekst(tid)}? Ellers skriv et tidspunkt, der passer dig bedre.`
@@ -100,13 +100,13 @@ export function opfoelgning1(lead: MailLead, nyTid: Date | null): Mail {
   return {
     type: 'opfoelgning1',
     subject: emne(lead),
-    note: 'Første opfølgning (dag 3). Foreslår en ny tid — folk svarer lettere på et konkret tidspunkt end på et åbent spørgsmål.',
+    note: 'Første opfølgning (dag 3). Foreslår en ny tid, fordi folk svarer lettere på et konkret tidspunkt end på et åbent spørgsmål.',
     body: byg(lead, [
       `Jeg skrev til dig for et par dage siden om at kigge forbi ${kortAdresse(lead.address)}. Måske passede tidspunktet skidt.`,
       '',
       nyTid
-        ? `Passer ${tidTekst(nyTid)} bedre? Ellers skriv bare, hvad der passer dig — vi kører i området hver uge.`
-        : 'Skriv bare, hvad der passer dig — vi kører i området hver uge.',
+        ? `Passer ${tidTekst(nyTid)} bedre? Ellers skriv, hvad der passer dig. Vi kører i området hver uge.`
+        : 'Skriv, hvad der passer dig. Vi kører i området hver uge.',
     ]),
   };
 }
@@ -117,9 +117,9 @@ export function opfoelgning2(lead: MailLead): Mail {
     subject: emne(lead),
     note: 'Anden opfølgning (dag 8). Kort og uden pres.',
     body: byg(lead, [
-      'Jeg følger lige op en sidste gang med et konkret tilbud: vi kan komme forbi på en hverdag og bruge et kvarter på at se lejligheden, og så har du et skriftligt bud dagen efter.',
+      'Jeg skriver igen med et konkret forslag. Vi kan komme forbi en hverdag og bruge et kvarter på at se lejligheden, og dagen efter har du et skriftligt bud.',
       '',
-      'Har du lyst, så skriv et tidspunkt. Passer det ikke nu, er det også helt fint.',
+      'Har du lyst, så skriv et tidspunkt. Passer det ikke nu, er det også fint.',
     ]),
   };
 }
@@ -130,9 +130,9 @@ export function opfoelgning3(lead: MailLead): Mail {
     subject: emne(lead),
     note: 'Sidste opfølgning (dag 15). Efter denne parkeres leadet i «Vil ikke sælge nu» og dukker op igen om tre måneder.',
     body: byg(lead, [
-      'Jeg har ikke hørt fra dig, og det er helt i orden — timingen er måske ikke rigtig lige nu.',
+      'Jeg har ikke hørt fra dig, og det er helt i orden. Timingen er måske ikke rigtig lige nu.',
       '',
-      'Skal jeg lukke sagen, eller må jeg vende tilbage om et par måneder? Et enkelt ord er nok.',
+      'Skal jeg lukke sagen, eller må jeg vende tilbage om tre måneder? Et enkelt ord er nok.',
     ]),
   };
 }
@@ -145,11 +145,11 @@ export function bekraeftelse(lead: MailLead, tid: Date): Mail {
     subject: emne(lead),
     note: 'Bekræftelse af den aftalte tid. Send den, så kunden har tidspunktet på skrift.',
     body: byg(lead, [
-      `Så er det på plads: ${tidTekst(tid)} på ${kortAdresse(lead.address)}.`,
+      `Vi ses ${tidTekst(tid)} på ${kortAdresse(lead.address)}.`,
       '',
       'Jeg kommer selv. Vi bruger 10–15 minutter på at se stand og indretning, og du skal ikke forberede noget.',
       '',
-      `Skulle det skride, så ring eller skriv — ${TLF}.`,
+      `Skulle det skride, så ring eller skriv til mig på ${TLF}.`,
     ]),
   };
 }
@@ -160,9 +160,7 @@ export function paamindelse(lead: MailLead, tid: Date): Mail {
     subject: emne(lead),
     note: 'Påmindelse dagen før. Den fanger de aftaler, der ellers ville blive glemt.',
     body: byg(lead, [
-      `Kort påmindelse: vi ses i morgen ${tidTekst(tid).replace(/^\S+ /, '').replace(/^\d+\. \S+ /, '')} på ${kortAdresse(lead.address)}.`,
-      '',
-      'Passer det stadig?',
+      `Vi ses i morgen ${tidTekst(tid).replace(/^\S+ /, '').replace(/^\d+\. \S+ /, '')} på ${kortAdresse(lead.address)}. Passer det stadig?`,
     ]),
   };
 }
@@ -212,7 +210,7 @@ export function budOpfoelgning(lead: MailLead): Mail {
     body: byg(lead, [
       'Jeg følger op på buddet, jeg sendte dig.',
       '',
-      'Er der noget, der er uklart, eller noget du gerne vil have regnet anderledes? Så siger du bare til. Er svaret nej tak, er det også fint — så ved jeg det.',
+      'Er der noget, der er uklart, eller noget du gerne vil have regnet anderledes? Så siger du bare til. Er svaret nej tak, er det også i orden. Så ved jeg det.',
     ]),
   };
 }
@@ -225,10 +223,10 @@ export function maanedlig(lead: MailLead, handler: string | null): Mail {
     subject: `Din lejlighed på ${kortAdresse(lead.address)}`,
     note: 'Månedlig kontakt til et lead, vi ikke blev enige med om prisen. Indsæt gerne de nyeste handler fra foreningssiden.',
     body: byg(lead, [
-      'Jeg følger op, som jeg lovede.',
+      'Jeg skriver igen, nu hvor der er gået en måned.',
       ...(handler ? ['', handler] : []),
       '',
-      'Vores bud står ved magt, hvis du er i tanker om det igen. Ellers hører du fra mig om en måneds tid.',
+      'Er du i tanker om det igen, kan vi give dig et opdateret bud. Ellers hører du fra mig om en måneds tid.',
     ]),
   };
 }
@@ -239,7 +237,7 @@ export function kvartal(lead: MailLead): Mail {
     subject: `Din lejlighed på ${kortAdresse(lead.address)}`,
     note: 'Kvartalsvis kontakt til et lead, der ikke vil sælge lige nu. Den beder ikke om noget.',
     body: byg(lead, [
-      'Du sagde, at salg ikke var aktuelt lige nu, så jeg skriver bare kort: vi køber stadig i din ejerforening, og du kan få et nyt bud på en dag, hvis det bliver aktuelt.',
+      'Jeg skriver bare kort, fordi tidspunktet ikke var det rigtige, sidst vi var i kontakt. Vi køber stadig i din ejerforening, og du kan få et nyt bud på en dag, hvis det bliver aktuelt.',
       '',
       'Du skal ikke gøre noget ved denne mail.',
     ]),
@@ -253,7 +251,7 @@ export const HANDLEN_EMNE = 'Sådan foregår handlen';
 export function handlen(lead: MailLead): Mail {
   return {
     type: 'handlen',
-    subject: `${HANDLEN_EMNE} — ${kortAdresse(lead.address)}`,
+    subject: `${HANDLEN_EMNE}, ${kortAdresse(lead.address)}`,
     note: 'Send når I er blevet enige. Den fjerner den usikkerhed, de fleste sælgere har lige efter et ja.',
     body: byg(lead, [
       'Godt vi blev enige. Herfra går det sådan her:',

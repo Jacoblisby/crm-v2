@@ -209,63 +209,22 @@ export function personligLinje(svar: BeregnerSvar | null): string {
   if (svar.saleLeaseback) {
     s.push('Du skrev, at du gerne vil blive boende som lejer efter salget. Det kan i mange tilfælde lade sig gøre, og når vi ses, gennemgår vi både pris, husleje og vilkår med dig, før du beslutter noget.');
   } else if (svar.forhold.some((f) => f.tekst.startsWith('EF har renoveringsplaner'))) {
-    s.push('Du nævnte, at ejerforeningen har renoveringsplaner. Tag gerne det materiale med, I har fået om dem — det har betydning for buddet.');
+    s.push('Du nævnte, at ejerforeningen har renoveringsplaner. Tag gerne det materiale med, I har fået om dem. Det har betydning for buddet.');
   } else if (svar.stand.note) {
     const n = svar.stand.note.trim().replace(/[.!]+$/, '');
-    s.push(`Du skrev: «${n}» — det kigger vi på, mens vi er der.`);
+    s.push(`Du skrev: «${n}». Det kigger vi på, mens vi er der.`);
   } else {
     const skal = svar.stand.rum.find((r) => r.valg === 'Skal renoveres' || r.stand === 'slidt' || r.stand === 'trænger');
-    if (skal) s.push(`Du skrev, at ${BESTEMT[skal.navn] ?? skal.navn.toLowerCase()} trænger til en renovering — det kigger vi på, mens vi er der.`);
+    if (skal) s.push(`Du skrev, at ${BESTEMT[skal.navn] ?? skal.navn.toLowerCase()} trænger til en renovering. Det kigger vi på, mens vi er der.`);
   }
   if (svar.media.fotos > 0) {
     s.push(svar.media.fotos === 1 ? 'Tak for billedet, du sendte med.' : 'Tak for billederne, du sendte med.');
   }
   if (svar.udgifter.senere) {
-    s.push('Du nåede ikke at udfylde udgifterne; har du den seneste opkrævning fra ejerforeningen og din ejendomsskattebillet ved hånden, kan vi give dig buddet hurtigere.');
+    s.push('Du nåede ikke at udfylde udgifterne. Har du den seneste opkrævning fra ejerforeningen og din ejendomsskattebillet ved hånden, kan vi give dig buddet hurtigere.');
   }
-  return s.join(' ');
-}
-
-export function bookingUdkast(
-  lead: { fullName: string | null; address: string | null },
-  svar: BeregnerSvar | null,
-  tid: Date | null,
-): { subject: string; body: string } {
-  const navn = fornavn(lead.fullName);
-
-  const budLinje =
-    'Vi har kigget på dem sammen med de seneste handler i din ejerforening, og vi er klar med et kontantbud. Vi mangler kun at se lejligheden, før vi kan gøre det endeligt.';
-
-  const tidLinje = tid
-    ? `Passer det ${tidTekst(tid)}? Ellers skriv et tidspunkt, der passer dig bedre.`
-    : 'Hvornår passer det dig? Vi kommer gerne torsdag mellem kl. 10 og 17 eller fredag mellem kl. 10 og 15.';
-  const personlig = personligLinje(svar);
-
-  const body = [
-    `Hej${navn ? ` ${navn}` : ''}`,
-    '',
-    `Tak for dine oplysninger om ${kortAdresse(lead.address)}.`,
-    '',
-    budLinje,
-    '',
-    // Den hyppigste grund til at udskyde er, at man tror der skal gøres
-    // klar. Derfor står det eksplicit, at der ikke skal.
-    'Besøget tager 10–15 minutter. Vi kigger på stand og indretning — du skal ikke gøre rent eller forberede noget, og du forpligter dig ikke til noget.',
-    '',
-    tidLinje,
-    ...(personlig ? ['', personlig] : []),
-    '',
-    // Ikke et ord om overtagelsesdato her: hun har ikke sagt ja til noget
-    // endnu, og spørgsmålet hører til, når buddet ligger.
-    'Bagefter får du buddet skriftligt, så du kan tage stilling i ro og mag. Ingen mægler, intet salær og ingen fremvisninger.',
-    '',
-    'Svar på denne mail, eller ring til mig på 61 78 90 71.',
-    '',
-    'Venlig hilsen',
-    'Jacob Fast Lisby',
-    '365 Ejendomme',
-  ].join('\n');
-  return { subject: `Din lejlighed på ${kortAdresse(lead.address)} — ${BOOKING_EMNE}`, body };
+  // Hvert emne i sit eget afsnit, ellers læses tre forskellige ting som én.
+  return s.join('\n\n');
 }
 
 
