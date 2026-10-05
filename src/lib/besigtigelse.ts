@@ -227,28 +227,45 @@ export function personligLinje(svar: BeregnerSvar | null): string {
 }
 
 export function bookingUdkast(
-  lead: { fullName: string | null; address: string | null },
+  lead: { fullName: string | null; address: string | null; bidDkk?: number | null },
   svar: BeregnerSvar | null,
   tid: Date | null,
 ): { subject: string; body: string } {
   const navn = fornavn(lead.fullName);
+
+  /**
+   * Buddet med i mailen. Kunden så det i beregneren og fik det i den første
+   * mail, så det er ikke nyt — men det er grunden til at lukke op for døren,
+   * og uden det beder vi om et besøg uden at sige hvad der er i det for dem.
+   * «Foreløbigt», fordi det endelige først gives efter besigtigelsen.
+   */
+  const bud = svar?.tilbud.bud ?? lead.bidDkk ?? null;
+  const budLinje = bud
+    ? `Ud fra dem og de seneste handler i din ejerforening ligger vores foreløbige bud på ${Math.round(bud).toLocaleString('da-DK')} kr. kontant. Vi mangler kun at se lejligheden, før vi kan gøre buddet endeligt.`
+    : 'Vi har kigget på dem sammen med de seneste handler i din ejerforening. For at give dig et endeligt kontantbud mangler vi kun at se lejligheden.';
+
   const tidLinje = tid
-    ? `Passer det ${tidTekst(tid)}? Ellers skriv, hvornår det passer dig.`
+    ? `Passer det ${tidTekst(tid)}? Ellers skriv et tidspunkt, der passer dig bedre.`
     : 'Hvornår passer det dig? Vi kommer gerne torsdag mellem kl. 10 og 17 eller fredag mellem kl. 10 og 15.';
   const personlig = personligLinje(svar);
+
   const body = [
     `Hej${navn ? ` ${navn}` : ''}`,
     '',
-    'Tak fordi du tjekkede din lejlighed hos os.',
+    `Tak for dine oplysninger om ${kortAdresse(lead.address)}.`,
     '',
-    'Vi har gennemgået dine oplysninger og de seneste handler i din ejerforening. For at give dig et endeligt kontantbud mangler vi kun at se lejligheden. Det tager 10–15 minutter, det er gratis og forpligter dig ikke til noget.',
+    budLinje,
+    '',
+    // Den hyppigste grund til at udskyde er, at man tror der skal gøres
+    // klar. Derfor står det eksplicit, at der ikke skal.
+    'Besøget tager 10–15 minutter. Vi kigger på stand og indretning — du skal ikke gøre rent eller forberede noget, og du forpligter dig ikke til noget.',
     '',
     tidLinje,
     ...(personlig ? ['', personlig] : []),
     '',
-    'Efter besigtigelsen sender vi dig et skriftligt kontantbud. Du bestemmer selv, om du vil tage imod det, og hvornår vi i så fald overtager.',
+    'Bagefter får du buddet skriftligt. Du bestemmer selv, om du vil tage imod det, og hvornår vi i så fald overtager. Ingen mægler, intet salær og ingen fremvisninger.',
     '',
-    'Svar bare på denne mail, eller ring direkte til mig på 61 78 90 71.',
+    'Svar på denne mail, eller ring til mig på 61 78 90 71.',
     '',
     'Venlig hilsen',
     'Jacob Fast Lisby',
@@ -256,6 +273,7 @@ export function bookingUdkast(
   ].join('\n');
   return { subject: `Din lejlighed på ${kortAdresse(lead.address)} — ${BOOKING_EMNE}`, body };
 }
+
 
 // ─── Læs tiden tilbage fra en sendt mail ──────────────────────────────────
 
