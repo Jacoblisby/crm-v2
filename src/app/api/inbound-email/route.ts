@@ -110,7 +110,17 @@ export async function POST(req: NextRequest) {
     console.warn(
       `[inbound-email] Intet lead — fra ${email.fromEmail} til ${email.to.join(', ') || '?'}, emne «${email.subject}»`,
     );
-    // Gem den, så den kan ses og placeres i stedet for at forsvinde.
+    // Gem den, så den kan ses og placeres i stedet for at forsvinde, men kun
+    // hvis den ligner et svar til os. Hele administration@ videresendes hertil,
+    // og husleje, fakturaer og nyhedsbreve skal ikke havne på en side uden
+    // login. Dem gemmer vi ikke, kun en linje i loggen uden indhold.
+    const ligner =
+      /(Din lejlighed på|Kontantbud på|Sådan foregår handlen|Vi er i gang med din bolig|hvornår passer det, vi kigger forbi)/i.test(email.subject) ||
+      /reply\+[0-9a-f-]{36}@/i.test(`${email.to.join(' ')} ${email.text}`);
+    if (!ligner) {
+      console.log(`[inbound-email] Ikke et svar til os, gemmes ikke — fra ${email.fromEmail}`);
+      return NextResponse.json({ ok: true, matched: false, stored: false });
+    }
     await gemUplaceret({
       fraMail: email.fromEmail,
       fraNavn: email.fromName,
