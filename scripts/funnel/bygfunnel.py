@@ -184,6 +184,10 @@ class Bygger:
         section(ws, 33, 'Flow 2: fremskrivning', 6)
         lbl(ws, 'A34', 'Gæt: respons i Flow 2 (breve → lead)'); inp(ws, 'B34', 0.03, fmt=PCT); A['resp2'] = 'Antagelser!$B$34'
         note(ws, 'D34', 'Intet målt. Brevet lander hos lejeren eller beboeren, ikke hos ejeren, så jeg har sat det under Flow 1')
+
+        section(ws, 36, 'Over tid', 6)
+        lbl(ws, 'A37', 'Dage efter en uges slutning, før dens leads tæller som modne'); inp(ws, 'B37', 14); A['moden'] = 'Antagelser!$B$37'
+        note(ws, 'D37', 'Et lead fra sidste uge har ikke haft tid til at nå besigtigelse. Modne uger bruges til konverteringen i bunden af hver tabel')
         ws.freeze_panes = 'A4'
 
     # ── Breve ───────────────────────────────────────────────────────────
@@ -392,6 +396,82 @@ class Bygger:
         note(ws, 'J32', 'Hele foreninger: Farimagsvej og Nordre Farimagsvej var ikke med i runden i juli 2025, så alle deres Flow 1-modtagere har kun fået dette brev')
         note(ws, 'J33', 'Resten er enkeltlejligheder i foreninger, der ellers fik brev i 2025: sandsynligvis nye ejere eller adresser, der først nu opfylder kravet om 20–80 kvm og Resights-data')
         note(ws, f'A{t+2}', 'Adresserne på de 18 står i vaultnoten «Flow 1 med kun ét brev.md». Regnearket indeholder ingen adresser.')
+
+    # ── Tid ─────────────────────────────────────────────────────────────
+    def tid(self):
+        ws = self.wb.create_sheet('Tid')
+        title(ws, 'Tid: lead conversion over tid', 'Leads grupperet efter den uge (eller måned) de blev oprettet i, og hvor langt hver gruppe er nået. Opdateres, når bygfunnel.py køres.', 20)
+        widths(ws, {'A': 8, 'B': 11, 'C': 11, 'D': 8, 'E': 9, 'F': 10, 'G': 9, 'H': 8, 'I': 8, 'J': 9, 'K': 7, 'L': 7, 'M': 9, 'N': 8, 'O': 8, 'P': 9, 'Q': 7, 'R': 7, 'S': 11, 'T': 10})
+        A, hentet = self.A, self.A['hentet']
+        stadier = [('G', 'Y', 'Booking'), ('H', 'Z', 'Svar'), ('I', 'AB', 'Aftalt'), ('J', 'AC', 'Afholdt'), ('K', 'AD', 'Bud'), ('L', 'AE', 'Købt')]
+        rate = dict(zip('GHIJKL', 'MNOPQR'))
+        hdr = ['Uge', 'Fra', 'Til', 'Nye leads', 'Kum. leads', 'Kum. respons', 'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt',
+               'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt', 'Dage siden ugen sluttede', 'Moden']
+
+        def blok(r0, titel, grp_krav, start, trin, n, breve=None, enhed='Uge'):
+            """grp_krav: COUNTIFS-krav på Data!P. start: formel for første fra-dato. trin: 'uge' eller 'maaned'."""
+            section(ws, r0, titel, 20)
+            put(ws, f'G{r0+1}', 'Antal leads, der er nået trinnet', italic=True, color='64748B', size=9)
+            put(ws, f'M{r0+1}', 'Andel af ugens leads', italic=True, color='64748B', size=9)
+            h = list(hdr); h[0] = enhed
+            header_row(ws, r0 + 2, h)
+            ws.row_dimensions[r0 + 2].height = 32
+            first = r0 + 3
+            last = first + n - 1
+            for i in range(n):
+                r = first + i
+                hard(ws, f'A{r}', i, fmt='0')
+                if trin == 'uge':
+                    fml(ws, f'B{r}', f'=IF({start}="","",{start}+7*A{r})' , fmt='dd-mm-yy')
+                    slut = f'B{r}+7'
+                    fml(ws, f'C{r}', f'=IF(B{r}="","",B{r}+6)', fmt='dd-mm-yy')
+                else:
+                    fml(ws, f'B{r}', f'=EDATE({start},A{r})', fmt='mmm yyyy')
+                    slut = f'EDATE(B{r},1)'
+                    fml(ws, f'C{r}', f'=EDATE(B{r},1)-1', fmt='dd-mm-yy')
+                ok = f'AND(ISNUMBER(B{r}),B{r}<={hentet})'
+                cnt = lambda *x: 'COUNTIFS(' + ','.join([grp_krav, f'{self.D("B")},">="&B{r}', f'{self.D("B")},"<"&({slut})'] + [f'{self.D(c)},{k}' for c, k in x]) + ')'
+                fml(ws, f'D{r}', f'=IF({ok},{cnt()},"")')
+                fml(ws, f'E{r}', f'=IF({ok},SUM(D${first}:D{r}),"")')
+                if breve:
+                    fml(ws, f'F{r}', f'=IF({ok},IF({breve}>0,E{r}/{breve},""),"")', fmt=PCT)
+                for kol, tid_, _ in stadier:
+                    fml(ws, f'{kol}{r}', f'=IF({ok},{cnt((tid_, IKKE))},"")')
+                    fml(ws, f'{rate[kol]}{r}', f'=IF({ok},IF(D{r}>0,{kol}{r}/D{r},""),"")', fmt=PCT)
+                fml(ws, f'S{r}', f'=IF({ok},ROUND({hentet}-C{r},0),"")', fmt='0')
+                fml(ws, f'T{r}', f'=IF({ok},IF(C{r}>={hentet},"delvis",IF(S{r}>={A["moden"]},"ja","nej")),"")', fmt='@')
+            for lab, r_, krav in [('I alt', last + 1, None), ('Modne', last + 2, '"ja"')]:
+                lbl(ws, f'A{r_}', lab, bold=True)
+                cols = 'DGHIJKL'
+                for c in cols:
+                    f_ = f'=SUM({c}{first}:{c}{last})' if krav is None else f'=SUMIF($T${first}:$T${last},{krav},{c}${first}:{c}${last})'
+                    fml(ws, f'{c}{r_}', f_, bold=True)
+                for kol, _, _ in stadier:
+                    fml(ws, f'{rate[kol]}{r_}', f'=IF($D{r_}>0,{kol}{r_}/$D{r_},"")', fmt=PCT, bold=True)
+            note(ws, f'S{last+2}', 'Kun uger der er modne')
+            return last + 4
+
+        if True:
+            r = 4
+            for k, navn, segs in FLOWS:
+                fl = 1 if k == 'Flow 1' else 2
+                r = blok(r, f'{navn}: uge for uge efter afsendelse', f'{self.D("P")},"{k} · sendt"',
+                         A['sendt' + str(fl)], 'uge', 10, breve=A['breve' + str(fl)])
+            # alle ikke-test-leads pr. måned
+            førstemd = min(til_dato(l['oprettet']) for l in self.crm['leads'] if l['oprettet'])
+            første = date(førstemd.year, førstemd.month, 1)
+            nu = til_dato(self.crm['genereret'])
+            md = (nu.year - første.year) * 12 + nu.month - første.month + 1
+            r0 = r
+            section(ws, r0, 'Alle leads uden test: måned for måned', 20)
+            self.F['tid_md_start'] = r0
+            # månedsblok: startdato er et blåt hardcodet tal i en celle, så formlerne kan pege på den
+            lbl(ws, f'A{r0+1}', 'Første måned'); hard(ws, f'D{r0+1}', første, fmt='mmm yyyy')
+            r = blok(r0 + 2, 'Alle leads: oprettet i måneden', f'{self.D("P")},"<>Test"', f'$D${r0+1}', 'maaned', md, enhed='Måned')
+            ws.row_dimensions[r0].height = 18
+        note(ws, f'A{r}', 'Uge 0 starter på afsendelsesdagen. Brevene er 3–9 hverdage om at nå frem, så de første uger er lave. En uge kaldes delvis, hvis den ikke er slut, når data blev hentet.')
+        note(ws, f'A{r+1}', 'Flow 2 fyldes ud, når datoen står i Antagelser. Tallene stiger, efterhånden som ældre leads når videre. Kør bygfunnel.py igen for at opdatere.')
+        ws.freeze_panes = 'A4'
 
     # ── Segmenter ───────────────────────────────────────────────────────
     def segmenter(self):
@@ -916,12 +996,13 @@ class Bygger:
         self.foreninger_fane()
         self.udsendelser_fane()
         self.funnel()
+        self.tid()
         self.segmenter()
         self.beregner()
         self.sensitivity()
         self.konklusion()
         self.kontroller()
-        navne = ['Konklusion', 'Segmenter', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
+        navne = ['Konklusion', 'Segmenter', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Tid', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
         self.wb._sheets = [self.wb[n] for n in navne]
         for ws in self.wb.worksheets:
             ws.sheet_view.showGridLines = False
