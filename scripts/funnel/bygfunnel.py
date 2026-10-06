@@ -397,8 +397,8 @@ class Bygger:
     def segmenter(self):
         ws = self.wb.create_sheet('Segmenter')
         title(ws, 'Segmenter: hvem de er, og hvad de har fået', 'A til D er brevlistens fire grupper. De deles i to flows efter, om ejeren bor på adressen. Tallene er formler på Breve.', 11)
-        widths(ws, {'A': 9, 'B': 8, 'C': 26, 'D': 42, 'E': 40, 'F': 34, 'G': 28, 'H': 10, 'I': 12, 'J': 11, 'K': 52})
-        header_row(ws, 4, ['Segment', 'Flow', 'Navn', 'Hvem er de', 'Sådan afgøres det', 'Brevet lander hos', 'Brev', 'Antal', 'Fik brev jul 2025', 'Sendt 2026', 'Forbehold'])
+        widths(ws, {'A': 9, 'B': 8, 'C': 26, 'D': 42, 'E': 40, 'F': 34, 'G': 28, 'H': 10, 'I': 12, 'J': 11, 'K': 52, 'L': 9, 'M': 10})
+        header_row(ws, 4, ['Segment', 'Flow', 'Navn', 'Hvem er de', 'Sådan afgøres det', 'Brevet lander hos', 'Brev', 'Antal', 'Fik brev jul 2025', 'Sendt 2026', 'Forbehold', 'Leads', 'Respons'])
         ws.row_dimensions[4].height = 32
         BC, BG, BH = self.B('C'), self.B('G'), self.B('H')
         beskyttet = 'Reklamebeskyttelse betyder, at ejeren har sagt nej til uopfordret reklame (CPR for privatpersoner, CVR for selskaber). '
@@ -434,21 +434,26 @@ class Bygger:
             fml(ws, f'I{r}', f'=COUNTIFS({BC},A{r},{BG},"Ja")')
             fml(ws, f'J{r}', f'=COUNTIFS({BC},A{r},{BH},1)')
             note(ws, f'K{r}', forbehold)
-            for c in 'ABCDEFGHIJK':
-                ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'HIJ' else None))
+            fml(ws, f'L{r}', f'=COUNTIFS({self.D("P")},"*sendt",{self.D("K")},A{r})')
+            fml(ws, f'M{r}', f'=IF(J{r}>0,L{r}/J{r},"–")', fmt=PCT)
+            for c in 'ABCDEFGHIJKLM':
+                ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'HIJLM' else None))
             ws.row_dimensions[r].height = 92
         lbl(ws, 'A9', 'I alt', bold=True)
-        for c in 'HIJ':
+        for c in 'HIJL':
             fml(ws, f'{c}9', f'=SUM({c}5:{c}8)', bold=True)
+        fml(ws, 'M9', '=IF(J9>0,L9/J9,"–")', fmt=PCT, bold=True)
+        lbl(ws, 'A10', 'A og C har samme situation: ejeren bor i lejligheden og får brevet selv, med samme brev. Forskellen er kun, om ejeren er reklamebeskyttet. Respons pr. segment viser, om det har betydning.', italic=True, color='64748B')
+        ws['A10'].font = _font(False, '64748B', 9, True)
 
-        section(ws, 11, 'De to flows', 11)
-        header_row(ws, 12, ['Flow', '', 'Navn', 'Segmenter', 'Hvad vi skriver', 'Hvem der læser det', '', 'Antal', '', 'Sendt 2026', 'Status'])
+        section(ws, 12, 'De to flows', 13)
+        header_row(ws, 13, ['Flow', '', 'Navn', 'Segmenter', 'Hvad vi skriver', 'Hvem der læser det', '', 'Antal', '', 'Sendt 2026', 'Status'])
         flows = [
             ('Flow 1', 'Beboet af ejer', 'A + C', 'Et kontant bud, uden mægler, og at ejeren kan blive boende som lejer.', 'Ejeren, som bor i lejligheden.'),
             ('Flow 2', 'Ikke beboet, lejer', 'B + D', 'Et kontant bud, med eller uden lejer, uden fremvisninger.', 'Skal være ejeren. Lander i dag hos lejeren.'),
         ]
         for j, (fl, navn, seg, hvad, laeser) in enumerate(flows):
-            r = 13 + j
+            r = 14 + j
             hard(ws, f'A{r}', fl, fmt='@'); lbl(ws, f'C{r}', navn, bold=True); lbl(ws, f'D{r}', seg); lbl(ws, f'E{r}', hvad); lbl(ws, f'F{r}', laeser)
             fml(ws, f'H{r}', f'=SUMIF($B$5:$B$8,A{r},$H$5:$H$8)')
             fml(ws, f'J{r}', f'=SUMIF($B$5:$B$8,A{r},$J$5:$J$8)')
@@ -457,14 +462,14 @@ class Bygger:
                 ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'HJ' else None))
             ws.row_dimensions[r].height = 44
 
-        section(ws, 16, 'Fælles for alle fire', 11)
+        section(ws, 17, 'Fælles for alle fire', 13)
         for j, txt in enumerate([
             'Ejerlejligheder på 20–80 kvm i de 11 brevgrupper under Foreninger, og ejeren kendes i Resights.',
             'Koncernens egne lejligheder er trukket fra, så ingen af dem får brev.',
             'Alle breve har en QR-kode, der peger på forsiden uden personlig kode. Derfor kan vi ikke se, hvem der scannede.',
             'Fik brev jul 2025 er hvor mange af segmentet, der også stod på listen i juli 2025.',
         ]):
-            note(ws, f'A{17+j}', f'· {txt}')
+            note(ws, f'A{18+j}', f'· {txt}')
         ws.freeze_panes = 'A5'
 
     # ── Funnel ──────────────────────────────────────────────────────────
