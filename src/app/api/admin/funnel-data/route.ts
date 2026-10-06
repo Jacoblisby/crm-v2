@@ -39,6 +39,14 @@ function adresseNoegle(adresse: string | null, postnr: string | null): string | 
   return `${norm(vejOgEtage)}|${pn}`;
 }
 
+/** Kun «vej nr|postnr», til leads der ikke har etage og dør med (fx «st»). */
+function gadeNoegle(adresse: string | null, postnr: string | null): string | null {
+  if (!adresse) return null;
+  const pn = postnr || adresse.match(/\b(\d{4})\b(?!.*\b\d{4}\b)/)?.[1];
+  const vej = adresse.split(',')[0]?.trim();
+  return pn && vej ? `${norm(vej)}|${pn}` : null;
+}
+
 const hash = (s: string) => createHash('sha256').update(`365-funnel|${s}`).digest('hex').slice(0, 16);
 
 const erTest = (l: { email: string | null; fullName: string | null }) =>
@@ -83,6 +91,7 @@ export async function GET() {
     const svar = beregnerSvar(l);
     const bbr = bbrForAdresse(l.address, l.postalCode);
     const noegle = adresseNoegle(l.address, l.postalCode);
+    const gade = gadeNoegle(l.address, l.postalCode);
 
     const booking = foerste(k.filter((x) => x.type === 'email' && x.retning === 'out' && (x.emne ?? '').toLowerCase().includes(BOOKING_EMNE)));
     const svarMail = foerste(k.filter((x) => x.type === 'email' && x.retning === 'in'));
@@ -112,6 +121,7 @@ export async function GET() {
       kvm: l.kvm,
       forening: bbr?.forening ?? null,
       nogle: noegle ? hash(noegle) : null,
+      nogleGade: gade ? hash(gade) : null,
       test: erTest(l) ? 1 : 0,
       flow: svar?.flow ?? null,
       tidshorisont: behov('Hvornår vil du flytte?'),
