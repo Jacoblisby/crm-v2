@@ -406,13 +406,13 @@ class Bygger:
         stadier = [('G', 'Y', 'Booking'), ('H', 'Z', 'Svar'), ('I', 'AB', 'Aftalt'), ('J', 'AC', 'Afholdt'), ('K', 'AD', 'Bud'), ('L', 'AE', 'Købt')]
         rate = dict(zip('GHIJKL', 'MNOPQR'))
         hdr = ['Uge', 'Fra', 'Til', 'Nye leads', 'Kum. leads', 'Kum. respons', 'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt',
-               'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt', 'Dage siden ugen sluttede', 'Moden']
+               'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt', 'Dage siden periodens slutning', 'Moden']
 
         def blok(r0, titel, grp_krav, start, trin, n, breve=None, enhed='Uge'):
             """grp_krav: COUNTIFS-krav på Data!P. start: formel for første fra-dato. trin: 'uge' eller 'maaned'."""
             section(ws, r0, titel, 20)
             put(ws, f'G{r0+1}', 'Antal leads, der er nået trinnet', italic=True, color='64748B', size=9)
-            put(ws, f'M{r0+1}', 'Andel af ugens leads', italic=True, color='64748B', size=9)
+            put(ws, f'M{r0+1}', 'Andel af periodens leads', italic=True, color='64748B', size=9)
             h = list(hdr); h[0] = enhed
             header_row(ws, r0 + 2, h)
             ws.row_dimensions[r0 + 2].height = 32
