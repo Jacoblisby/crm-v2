@@ -207,7 +207,7 @@ class Bygger:
     def data_fane(self):
         ws = self.wb.create_sheet('Data')
         gen = til_dato(self.crm['genereret'])
-        title(ws, 'Data', f'Hentet fra CRM {gen:%d-%m-%Y %H:%M}. Én række pr. lead, uden navne, mails, telefon og adresser. Kør bygfunnel.py for at opdatere.', 48)
+        title(ws, 'Data', f'Hentet fra CRM {gen:%d-%m-%Y %H:%M}. Én række pr. lead, uden navne, mails, telefon og adresser. Kør bygfunnel.py for at opdatere.', 49)
         lbl(ws, 'A3', 'Hentet'); put(ws, 'B3', gen, fmt='dd-mm-yyyy hh:mm', color='0000FF'); self.A['hentet'] = 'Data!$B$3'
         lbl(ws, 'C3', 'Leads i CRM'); hard(ws, 'D3', self.crm['antal']); self.A['nCrm'] = 'Data!$D$3'
         cols = [
@@ -219,6 +219,7 @@ class Bygger:
             ('Ikke enige om pris', 16), ('Vil ikke sælge nu', 16), ('Arkiveret / tabt', 16),
             ('F1 dage brev→lead', 9), ('F1 dage lead→booking', 9), ('F1 dage lead→svar', 9), ('F1 dage lead→aftalt', 9), ('F1 dage lead→afholdt', 9), ('F1 dage lead→bud', 9), ('F1 dage lead→købt', 9),
             ('F2 dage brev→lead', 9), ('F2 dage lead→booking', 9), ('F2 dage lead→svar', 9), ('F2 dage lead→aftalt', 9), ('F2 dage lead→afholdt', 9), ('F2 dage lead→bud', 9), ('F2 dage lead→købt', 9),
+            ('Antal breve (modtager)', 9),
         ]
         header_row(ws, 4, [c[0] for c in cols])
         ws.row_dimensions[4].height = 42
@@ -249,6 +250,7 @@ class Bygger:
             fml(ws, f'N{r}', f'=IF(K{r}="","",IF(OR(K{r}="A",K{r}="C"),"Flow 1","Flow 2"))', fmt='@')
             fml(ws, f'O{r}', f'=IF(I{r}="","",INDEX({BF_},I{r}))', fmt='dd-mm-yyyy')
             fml(ws, f'P{r}', f'=IF(F{r}=1,"Test",IF(AND(ISNUMBER(O{r}),B{r}>=O{r}),N{r}&" · sendt",IF(LEFT(C{r},12)="boligberegne","Anden beregner-lead","Øvrige")))', fmt='@')
+            fml(ws, f'AW{r}', f'=IF(I{r}="","",INDEX({self.B("I")},I{r}))', fmt='0')
             for fl, sæt in (('Flow 1', ('AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO')), ('Flow 2', ('AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV'))):
                 fml(ws, f'{sæt[0]}{r}', f'=IF($P{r}="{fl} · sendt",B{r}-$O{r},"")', fmt='0.0')
                 for kol, tid in zip(sæt[1:], ['Y', 'Z', 'AB', 'AC', 'AD', 'AE']):
@@ -368,6 +370,28 @@ class Bygger:
         lbl(ws, 'C26', 'Efter runde 3'); fml(ws, 'D26', '=D15'); put(ws, 'E26', 0, color='64748B'); fml(ws, 'F26', '=E15'); fml(ws, 'G26', '=F15'); fml(ws, 'H26', '=G15')
         note(ws, 'J26', 'Hver modtager rykker ét trin: 0 breve bliver til 1, 1 bliver til 2, 2 bliver til 3')
         note(ws, 'A28', 'Et brev nummer to til samme adresse kan give en anden respons end det første. Det kan kun ses, hvis hver runde har sin egen kode (/k/<kode>).')
+        self.kun_et_brev(ws)
+
+    def kun_et_brev(self, ws):
+        """Hvem i Flow 1 har kun fået ét brev (ikke med i juli 2025)? Pr. brevgruppe, uden adresser."""
+        grupper = sorted({b['gruppe'] for b in self.breve if b['segment'] in ('A', 'C') and b['jul'] != 'Ja'})
+        section(ws, 30, 'Flow 1: dem der kun har fået ét brev (ikke med i juli 2025)', 10)
+        header_row(ws, 31, ['', '', 'Brevgruppe', 'Flow 1 i alt', 'Kun 1 brev', 'Heraf leads', '', '', '', 'Bemærkning'])
+        BC, BG, BD, BI = self.B('C'), self.B('G'), self.B('D'), self.B('I')
+        for j, g in enumerate(grupper):
+            r = 32 + j
+            hard(ws, f'C{r}', g, fmt='@')
+            fml(ws, f'D{r}', f'=COUNTIFS({BD},$C{r},{BC},"A")+COUNTIFS({BD},$C{r},{BC},"C")')
+            fml(ws, f'E{r}', f'=COUNTIFS({BD},$C{r},{BC},"A",{BI},1)+COUNTIFS({BD},$C{r},{BC},"C",{BI},1)')
+            fml(ws, f'F{r}', f'=COUNTIFS({self.D("P")},"Flow 1 · sendt",{self.D("L")},$C{r},{self.D("AW")},1)')
+        last = 32 + len(grupper) - 1
+        t = last + 1
+        lbl(ws, f'C{t}', 'I alt', bold=True)
+        for c in 'DEF':
+            fml(ws, f'{c}{t}', f'=SUM({c}32:{c}{last})', bold=True)
+        note(ws, 'J32', 'Hele foreninger: Farimagsvej og Nordre Farimagsvej var ikke med i runden i juli 2025, så alle deres Flow 1-modtagere har kun fået dette brev')
+        note(ws, 'J33', 'Resten er enkeltlejligheder i foreninger, der ellers fik brev i 2025: sandsynligvis nye ejere eller adresser, der først nu opfylder kravet om 20–80 kvm og Resights-data')
+        note(ws, f'A{t+2}', 'Adresserne på de 18 står i vaultnoten «Flow 1 med kun ét brev.md». Regnearket indeholder ingen adresser.')
 
     # ── Funnel ──────────────────────────────────────────────────────────
     def funnel(self):
