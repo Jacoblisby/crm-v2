@@ -1,25 +1,30 @@
 #!/usr/bin/env python3
 """
-Funnel-regneark for brevkampagnen: fra brev til køb.
+Funnel-regneark for brevkampagnen: fra identificerede ejerforeninger til køb.
 
-Tager udgangspunkt i de breve, der blev sendt i denne omgang (runde 2, 11.09.2026,
-segment A og C), og følger netop dem hele vejen. Alle andre leads vises som
-sammenligning, så tallene ikke blandes.
+Starter hvor «Opkøbs-tragten» på /foreninger starter (alle foreninger, dem vi vil
+købe i, boliger, størrelsen 20–80 kvm) og fortsætter nedad:
+
+  Foreninger → enheder → brevlisten → grupperet efter hvem der bor der
+    Flow 1  beboet af ejer       (segment A må kontaktes, C reklamebeskyttet)
+    Flow 2  ikke beboet, lejer   (segment B må kontaktes, D reklamebeskyttet)
+  → hvem der har fået brev, og hvor mange gange → leads → booking → besigtigelse
+  → bud → køb. Hvert flow har sin egen tragt.
 
 Samme designfilosofi som standard-ejendomsmodellen (skill: ejendomsmodel):
   · Konklusion først, derefter antagelser, beregninger og bilag
   · input = blå tekst på gul baggrund, hardcodet tal = blå tekst, alt andet formel
-  · ingen farvekodede faner, ingen statiske resultater: alt i Funnel, Pr. forening
-    og Sensitivity er COUNTIFS/formler på Data og Breve
-  · Kontroller og flag til sidst
+  · koblingen mellem brev og lead sker i arket (INDEX/MATCH på en adresse-hash),
+    så reglen kan læses og rettes. Scriptet skriver kun rådata.
+  · ingen statiske resultater. Kontroller og flag til sidst.
 
 Data:
-  · CRM: https://crm.365ejendom.dk/api/admin/funnel-data  (anonymt, én række pr. lead)
-  · Breve: Brevliste runde 2 2026-09.xlsx (fanen Flettefil) i vaulten
-  · Adresser kobles via en hash. Regnearket indeholder ingen adresser, navne,
-    mails eller telefonnumre.
+  · CRM: /api/admin/funnel-data  (anonymt: leads og foreningslisten)
+  · Breve: Brevliste runde 2 2026-09.xlsx (Flettefil) i vaulten
+  · BBR pr. forening: src/lib/data/bbr-forening-rollup.json
+  · Arket indeholder ingen adresser, navne, mails eller telefonnumre.
 
-Kør:  python3 scripts/funnel/bygfunnel.py
+Kør:  python3 scripts/funnel/bygfunnel.py [versionsnummer]
 Ud:   Projects/Brevkampagne ejerforeninger/Funnel boligberegner – v<N>.xlsx
 """
 import hashlib
@@ -27,27 +32,39 @@ import json
 import re
 import sys
 import urllib.request
-from collections import Counter
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import openpyxl
+from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
 
 sys.path.insert(0, str(Path.home() / '.claude/skills/ejendomsmodel/scripts'))
 from mstyle import (  # noqa: E402
-    BOX, HEAD_FILL, INPUT_FILL, NUM, NUM1, PCT, SUB_FILL, KPI_FILL,
-    fml, hard, header_row, inp, kpi, lbl, note, put, section, title, widths, _font,
+    NUM, PCT, _font, fml, hard, header_row, inp, kpi, lbl, note, put, section, title, widths,
 )
-from openpyxl.styles import Alignment  # noqa: E402
 
+ROD = Path(__file__).resolve().parents[2]
 VAULT = Path.home() / 'Desktop/Claude Vault/Projects/Brevkampagne ejerforeninger'
 BREVLISTE = VAULT / 'Brevliste runde 2 2026-09.xlsx'
+ROLLUP = ROD / 'src/lib/data/bbr-forening-rollup.json'
 URL = 'https://crm.365ejendom.dk/api/admin/funnel-data'
 CPH = ZoneInfo('Europe/Copenhagen')
-SENDT = date(2026, 9, 11)
-SENDTE_SEGMENTER = ('A', 'C')
-DR = 1000  # Data-fanen: formler dækker række 5 til 1000
+SENDT_FLOW1 = date(2026, 9, 11)
+DR = 1000   # Data: formler dækker række 5 til 1000
+BR = 2000   # Breve: række 5 til 2000
+STATUS_TEKST = {'maalgruppe': 'Målgruppe', 'undersoeges': 'Undersøges', 'fravalgt': 'Fravalgt'}
+FLOWS = [
+    ('Flow 1', 'Flow 1 · beboet af ejer', ('A', 'C')),
+    ('Flow 2', 'Flow 2 · ikke beboet, lejer', ('B', 'D')),
+]
+SEGTEKST = {
+    'A': 'Må kontaktes · ejer bor der', 'B': 'Må kontaktes · ejer bor et andet sted',
+    'C': 'Reklamebeskyttet · ejer bor der', 'D': 'Reklamebeskyttet · ejer bor et andet sted',
+}
+IKKE = '"<>"'
+Q = '"'
 
 
 def norm(s):
@@ -64,7 +81,11 @@ def til_dato(iso):
     return datetime.fromisoformat(iso.replace('Z', '+00:00')).astimezone(CPH).replace(tzinfo=None)
 
 
-# ═══ 1. Hent data ════════════════════════════════════════════════════════
+def q(s):
+    return Q + s + Q
+
+
+# ═══ 1. Data ═════════════════════════════════════════════════════════════
 def hent_crm():
     with urllib.request.urlopen(URL, timeout=90) as r:
         return json.load(r)
@@ -72,332 +93,436 @@ def hent_crm():
 
 def laes_brevliste():
     wb = openpyxl.load_workbook(BREVLISTE, data_only=True)
-    ws = wb['Flettefil']
-    rows = list(ws.iter_rows(values_only=True))
+    rows = list(wb['Flettefil'].iter_rows(values_only=True))
     ix = {n: i for i, n in enumerate(rows[0])}
-    breve, gade = [], {}
+    breve = []
     for r in rows[1:]:
         if not r[0]:
             continue
         pn = str(r[ix['Postnr og by']]).split()[0]
         linje = str(r[ix['Adresselinje 1']])
-        nogle = norm(linje) + '|' + pn
-        base = norm(linje.split(',')[0]) + '|' + pn
-        post = dict(
-            hash=h(nogle), base=h(base), segment=r[ix['Segment']], forening=r[ix['Forening']],
-            kvm=r[ix['Kvm']], jul=r[ix['Fik brev jul 2025']],
-        )
-        breve.append(post)
-        gade.setdefault(post['base'], []).append(post)
-    return breve, gade
-
-
-def kobl(leads, breve, gade):
-    """Hvert lead kobles til et brev: først eksakt adresse, ellers gade+nr hvis entydigt."""
-    pr_hash = {b['hash']: b for b in breve}
-    for l in leads:
-        b, hvordan = pr_hash.get(l.get('nogle')), 'eksakt'
-        if not b and l.get('nogleGade') in gade:
-            kandidater = gade[l['nogleGade']]
-            if len(kandidater) == 1:
-                b, hvordan = kandidater[0], 'gade+nr'
-        l['_brev'], l['_match'] = (b, hvordan) if b else (None, '')
-    return leads
+        breve.append(dict(
+            hash=h(norm(linje) + '|' + pn), gade=h(norm(linje.split(',')[0]) + '|' + pn),
+            segment=r[ix['Segment']], gruppe=r[ix['Forening']], kvm=r[ix['Kvm']], jul=r[ix['Fik brev jul 2025']],
+        ))
+    return breve
 
 
 # ═══ 2. Fanerne ══════════════════════════════════════════════════════════
 class Bygger:
-    def __init__(self, crm, breve, gade):
+    def __init__(self, crm, breve, rollup):
         self.crm = crm
         self.breve = breve
-        self.leads = kobl(crm['leads'], breve, gade)
+        self.rollup = {f['forening']: f for f in rollup['foreninger']}   # nøgle = brevgruppe
         self.wb = openpyxl.Workbook()
         self.wb.remove(self.wb.active)
-        self.A = {}  # Antagelser-celler
-        self.F = {}  # Funnel-celler
+        self.A, self.F = {}, {}
+
+    # ── hjælpere ────────────────────────────────────────────────────────
+    @staticmethod
+    def D(c):
+        return f'Data!${c}$5:${c}${DR}'
+
+    @staticmethod
+    def B(c):
+        return f'Breve!${c}$5:${c}${BR}'
+
+    def tael(self, gruppe, *krav):
+        """COUNTIFS på Data med gruppen (fx 'Flow 1 · sendt') som fast krav."""
+        dele = [f'{self.D("P")},"{gruppe}"'] + [f'{self.D(c)},{k}' for c, k in krav]
+        return 'COUNTIFS(' + ','.join(dele) + ')'
 
     # ── Antagelser ──────────────────────────────────────────────────────
     def antagelser(self):
         ws = self.wb.create_sheet('Antagelser')
-        title(ws, 'Antagelser', 'Gule felter er input. Blå tal uden gul baggrund er hentet fra brevlisten eller CRM’et.', 6)
-        widths(ws, {'A': 54, 'B': 16, 'C': 4, 'D': 70})
+        title(ws, 'Antagelser', 'Gule felter er input. Blå tal uden gul baggrund er hentet fra brevlisten. Resten er formler.', 6)
+        widths(ws, {'A': 56, 'B': 16, 'C': 4, 'D': 76})
+        A = self.A
 
-        seg = Counter(b['segment'] for b in self.breve)
-        section(ws, 4, 'Hvem kan få brev (brevliste runde 2, genereret 11.09.2026)', 6)
-        rows = [
-            ('Målgruppe: bolig, 20–80 kvm', 1166, 'mal', 'Fra Brevliste runde 2, fanen Overblik'),
-            ('− koncernens egne lejligheder', 69, 'egne', 'Trukket fra via Resights (fanen «Vi ejer»)'),
-        ]
-        r = 5
-        for text, v, key, kilde in rows:
-            lbl(ws, f'A{r}', text); hard(ws, f'B{r}', v); note(ws, f'D{r}', kilde); self.A[key] = f'Antagelser!$B${r}'; r += 1
-        lbl(ws, f'A{r}', 'Kan få brev', bold=True); fml(ws, f'B{r}', '=B5-B6', bold=True); self.A['kan'] = f'Antagelser!$B${r}'; r += 1
-        for s, txt in [('A', 'A  Må kontaktes · ejer bor der'), ('B', 'B  Må kontaktes · ejer bor et andet sted'),
-                       ('C', 'C  Reklamebeskyttet · ejer bor der'), ('D', 'D  Reklamebeskyttet · ejer bor et andet sted')]:
-            lbl(ws, f'A{r}', txt, indent=1); hard(ws, f'B{r}', seg[s]); self.A['seg' + s] = f'Antagelser!$B${r}'; r += 1
-        note(ws, f'D{r-4}', 'Segment-tal tælles fra Breve-fanen')
+        section(ws, 4, 'Brevlisten (runde 2, genereret 11.09.2026)', 6)
+        lbl(ws, 'A5', 'Målgruppe: bolig, 20–80 kvm, med Resights-data'); hard(ws, 'B5', 1166); A['mal'] = 'Antagelser!$B$5'
+        note(ws, 'D5', 'BBR kender 1.197 i størrelsen. De 31 uden Resights-data kan ikke grupperes efter, hvem der bor der')
+        lbl(ws, 'A6', '− koncernens egne lejligheder'); hard(ws, 'B6', 69); A['egne'] = 'Antagelser!$B$6'
+        lbl(ws, 'A7', 'Kan få brev', bold=True); fml(ws, 'B7', '=B5-B6', bold=True); A['kan'] = 'Antagelser!$B$7'
+        for i, s in enumerate('ABCD'):
+            r = 8 + i
+            lbl(ws, f'A{r}', f'{s}  {SEGTEKST[s]}', indent=1)
+            fml(ws, f'B{r}', f'=COUNTIFS({self.B("C")},"{s}")'); A['seg' + s] = f'Antagelser!$B${r}'
+        note(ws, 'D8', 'Tælles fra Breve-fanen')
 
-        section(ws, 13, 'Denne omgang (kohorten)', 6)
-        lbl(ws, 'A14', 'Brevene sendt den'); inp(ws, 'B14', SENDT, fmt='dd-mm-yyyy'); self.A['sendt'] = 'Antagelser!$B$14'
-        lbl(ws, 'A15', 'Segmenter sendt'); put(ws, 'B15', 'A + C', align='right'); note(ws, 'D15', 'B og D (611 breve) er ikke sendt endnu')
-        lbl(ws, 'A16', 'Antal breve sendt', bold=True)
-        fml(ws, 'B16', '=COUNTIFS(Breve!$G$5:$G$2000,1)', bold=True); self.A['breve'] = 'Antagelser!$B$16'
-        lbl(ws, 'A17', 'Ikke sendt endnu (B + D)'); fml(ws, 'B17', '=B9+B11'); self.A['ikkeSendt'] = 'Antagelser!$B$17'
+        section(ws, 13, 'Udsendelser: hvornår er brevene sendt', 6)
+        lbl(ws, 'A14', 'Flow 1 (A + C) sendt den'); inp(ws, 'B14', SENDT_FLOW1, fmt='dd-mm-yyyy'); A['sendt1'] = 'Antagelser!$B$14'
+        lbl(ws, 'A15', 'Flow 2 (B + D) sendt den'); inp(ws, 'B15', None, fmt='dd-mm-yyyy'); A['sendt2'] = 'Antagelser!$B$15'
+        note(ws, 'D15', 'Tom = ikke sendt. Skriv datoen, når B og D sendes, så flytter hele regnearket med')
+        lbl(ws, 'A16', 'Breve sendt, Flow 1', bold=True)
+        fml(ws, 'B16', f'=COUNTIFS({self.B("C")},"A",{self.B("H")},1)+COUNTIFS({self.B("C")},"C",{self.B("H")},1)', bold=True); A['breve1'] = 'Antagelser!$B$16'
+        lbl(ws, 'A17', 'Breve sendt, Flow 2', bold=True)
+        fml(ws, 'B17', f'=COUNTIFS({self.B("C")},"B",{self.B("H")},1)+COUNTIFS({self.B("C")},"D",{self.B("H")},1)', bold=True); A['breve2'] = 'Antagelser!$B$17'
+        lbl(ws, 'A18', 'Klar til afsendelse, Flow 2'); fml(ws, 'B18', '=B9+B11-B17'); A['klar2'] = 'Antagelser!$B$18'
 
-        section(ws, 19, 'Omkostning og værdi', 6)
-        lbl(ws, 'A20', 'Pris pr. brev, inkl. print og porto (kr)'); inp(ws, 'B20', None, fmt='#,##0.00'); self.A['pris'] = 'Antagelser!$B$20'
-        note(ws, 'D20', 'Udfyld. Uden en pris viser Konklusion ikke omkostning pr. lead og pr. køb')
-        lbl(ws, 'A21', 'Bruttoavance pr. købt lejlighed (kr)'); inp(ws, 'B21', None); self.A['avance'] = 'Antagelser!$B$21'
-        note(ws, 'D21', 'Udfyld. Bruges til at vise, hvad et brev må koste for at løbe rundt')
+        section(ws, 20, 'Omkostning og værdi', 6)
+        lbl(ws, 'A21', 'Pris pr. brev, inkl. print og porto (kr)'); inp(ws, 'B21', None, fmt='#,##0.00'); A['pris'] = 'Antagelser!$B$21'
+        note(ws, 'D21', 'Udfyld. Uden en pris vises ingen omkostning pr. køb')
+        lbl(ws, 'A22', 'Bruttoavance pr. købt lejlighed (kr)'); inp(ws, 'B22', None); A['avance'] = 'Antagelser!$B$22'
+        note(ws, 'D22', 'Udfyld. Bruges til at vise, hvad et brev højst må koste')
 
-        section(ws, 23, 'Trin vi ikke måler endnu (indtast, når tallet findes)', 6)
-        lbl(ws, 'A24', 'Besøg på forsiden fra brevet'); inp(ws, 'B24', None); self.A['besoeg'] = 'Antagelser!$B$24'
-        note(ws, 'D24', 'QR-koden på brevene peger på forsiden uden kode, så vi kan ikke se, hvem der scannede')
-        lbl(ws, 'A25', 'Startet beregneren (adresse tastet)'); inp(ws, 'B25', None); self.A['startet'] = 'Antagelser!$B$25'
-        note(ws, 'D25', 'Beregneren gemmer først noget ved afsendelse. Trinmåling er ikke bygget')
+        section(ws, 24, 'Trin vi ikke måler endnu (indtast, når tallet findes)', 6)
+        for r, (txt, key, kom) in enumerate([
+            ('Flow 1: besøg på forsiden fra brevet', 'besoeg1', 'QR-koden på brevene peger på forsiden uden kode, så vi ikke kan se, hvem der scannede'),
+            ('Flow 1: startet beregneren (adresse tastet)', 'startet1', 'Beregneren gemmer først noget ved afsendelse'),
+            ('Flow 2: besøg på forsiden fra brevet', 'besoeg2', 'Ikke sendt endnu. Her kan koden på brevet være personlig, hvis den bygges først'),
+            ('Flow 2: startet beregneren', 'startet2', ''),
+        ], start=25):
+            lbl(ws, f'A{r}', txt); inp(ws, f'B{r}', None); A[key] = f'Antagelser!$B${r}'
+            if kom:
+                note(ws, f'D{r}', kom)
 
-        section(ws, 27, 'Hvornår tæller et tal', 6)
-        lbl(ws, 'A28', 'Mindste antal for at kalde en rate sikker'); inp(ws, 'B28', 10); self.A['minN'] = 'Antagelser!$B$28'
-        note(ws, 'D28', 'Rater på færre end dette antal bruges ikke til at udpege lækager og erstattes af gæt i fremskrivningen')
+        section(ws, 30, 'Hvornår tæller et tal', 6)
+        lbl(ws, 'A31', 'Mindste antal for at kalde en rate sikker'); inp(ws, 'B31', 10); A['minN'] = 'Antagelser!$B$31'
+        note(ws, 'D31', 'Rater på færre end dette bruges ikke til at udpege lækager og erstattes af gæt i fremskrivningen')
+
+        section(ws, 33, 'Flow 2: fremskrivning', 6)
+        lbl(ws, 'A34', 'Gæt: respons i Flow 2 (breve → lead)'); inp(ws, 'B34', 0.03, fmt=PCT); A['resp2'] = 'Antagelser!$B$34'
+        note(ws, 'D34', 'Intet målt. Brevet lander hos lejeren eller beboeren, ikke hos ejeren, så jeg har sat det under Flow 1')
         ws.freeze_panes = 'A4'
 
     # ── Breve ───────────────────────────────────────────────────────────
     def breve_fane(self):
         ws = self.wb.create_sheet('Breve')
-        title(ws, 'Breve', 'Alle 1.097 modtagere i runde 2. Adresserne er erstattet af en hash. Kolonne E er udfyldt for de breve, der er sendt.', 7)
-        header_row(ws, 4, ['Adresse-hash', 'Segment', 'Forening', 'Kvm', 'Sendt', 'Fik brev jul 2025', 'Sendt (1/0)'])
-        widths(ws, {'A': 20, 'B': 10, 'C': 28, 'D': 8, 'E': 12, 'F': 16, 'G': 11})
+        title(ws, 'Breve', 'Alle modtagere på brevlisten. Adresserne er erstattet af en hash. Sendt dato kommer fra Antagelser.', 10)
+        header_row(ws, 4, ['Adresse-hash', 'Gade-hash', 'Segment', 'Forening (brevgruppe)', 'Kvm', 'Sendt dato', 'Fik brev jul 2025', 'Sendt (1/0)', 'Antal breve', 'Flow'])
+        widths(ws, {'A': 19, 'B': 19, 'C': 9, 'D': 26, 'E': 7, 'F': 12, 'G': 14, 'H': 10, 'I': 10, 'J': 9})
+        s1, s2 = self.A['sendt1'], self.A['sendt2']
         for i, b in enumerate(self.breve):
             r = 5 + i
-            hard(ws, f'A{r}', b['hash'], fmt='@'); hard(ws, f'B{r}', b['segment'], fmt='@'); hard(ws, f'C{r}', b['forening'], fmt='@')
-            hard(ws, f'D{r}', b['kvm']);
-            fml(ws, f'E{r}', f'=IF(OR(B{r}="A",B{r}="C"),Antagelser!$B$14,"")', fmt='dd-mm-yyyy')
-            hard(ws, f'F{r}', b['jul'], fmt='@')
-            fml(ws, f'G{r}', f'=IF(OR(B{r}="A",B{r}="C"),1,0)', fmt='0')
+            hard(ws, f'A{r}', b['hash'], fmt='@'); hard(ws, f'B{r}', b['gade'], fmt='@'); hard(ws, f'C{r}', b['segment'], fmt='@')
+            hard(ws, f'D{r}', b['gruppe'], fmt='@'); hard(ws, f'E{r}', b['kvm']); hard(ws, f'G{r}', b['jul'], fmt='@')
+            fml(ws, f'F{r}', f'=IF(OR(C{r}="A",C{r}="C"),IF({s1}="","",{s1}),IF({s2}="","",{s2}))', fmt='dd-mm-yyyy')
+            fml(ws, f'H{r}', f'=IF(F{r}="",0,1)', fmt='0')
+            fml(ws, f'I{r}', f'=IF(G{r}="Ja",1,0)+H{r}', fmt='0')
+            fml(ws, f'J{r}', f'=IF(OR(C{r}="A",C{r}="C"),"Flow 1","Flow 2")', fmt='@')
         ws.freeze_panes = 'A5'
 
     # ── Data ────────────────────────────────────────────────────────────
     def data_fane(self):
         ws = self.wb.create_sheet('Data')
         gen = til_dato(self.crm['genereret'])
-        title(ws, 'Data', f'Hentet fra CRM {gen:%d-%m-%Y %H:%M}. Én række pr. lead, uden navne, mails, telefon og adresser. Kør bygfunnel.py for at opdatere.', 36)
-        self.A['hentet'] = 'Data!$B$3'
-        lbl(ws, 'A3', 'Hentet'); put(ws, 'B3', gen, fmt='dd-mm-yyyy hh:mm', color='0000FF')
-        self.A['nCrm'] = 'Data!$D$3'
-        lbl(ws, 'C3', 'Leads i CRM'); hard(ws, 'D3', self.crm['antal'])
+        title(ws, 'Data', f'Hentet fra CRM {gen:%d-%m-%Y %H:%M}. Én række pr. lead, uden navne, mails, telefon og adresser. Kør bygfunnel.py for at opdatere.', 48)
+        lbl(ws, 'A3', 'Hentet'); put(ws, 'B3', gen, fmt='dd-mm-yyyy hh:mm', color='0000FF'); self.A['hentet'] = 'Data!$B$3'
+        lbl(ws, 'C3', 'Leads i CRM'); hard(ws, 'D3', self.crm['antal']); self.A['nCrm'] = 'Data!$D$3'
         cols = [
-            ('Lead', 8), ('Oprettet', 16), ('Kilde', 18), ('Postnr', 8), ('Forening', 24), ('Kvm', 6), ('Test', 6),
-            ('Brevmatch', 11), ('Segment', 9), ('Gruppe', 20),
+            ('Lead', 8), ('Oprettet', 16), ('Kilde', 18), ('Postnr', 8), ('Kvm', 6), ('Test', 6), ('Adresse-hash', 18), ('Gade-hash', 18),
+            ('Breve-række', 9), ('Brevmatch', 10), ('Segment', 8), ('Forening', 24), ('Forening (BBR)', 24), ('Flow', 8), ('Sendt dato', 12), ('Gruppe', 20),
             ('Hvornår vil du flytte', 18), ('Efter salget', 22), ('Stand samlet', 11), ('Udgifter udfyldt', 9), ('Billeder', 8),
             ('Bud', 11), ('Markedsestimat', 12), ('Trin nu', 22),
-            ('Booking sendt', 16), ('Kundens svar', 16), ('Første opkald', 16), ('Aftalt', 16), ('Afholdt', 16),
-            ('Bud afgivet', 16), ('Købt', 16), ('Ikke enige om pris', 16), ('Vil ikke sælge nu', 16), ('Arkiveret / tabt', 16),
-            ('Dage brev→lead', 10), ('Dage →booking', 10), ('Dage →svar', 10), ('Dage →aftalt', 10),
-            ('Dage →afholdt', 10), ('Dage →bud', 10), ('Dage →købt', 10),
+            ('Booking sendt', 16), ('Kundens svar', 16), ('Første opkald', 16), ('Aftalt', 16), ('Afholdt', 16), ('Bud afgivet', 16), ('Købt', 16),
+            ('Ikke enige om pris', 16), ('Vil ikke sælge nu', 16), ('Arkiveret / tabt', 16),
+            ('F1 dage brev→lead', 9), ('F1 dage lead→booking', 9), ('F1 dage lead→svar', 9), ('F1 dage lead→aftalt', 9), ('F1 dage lead→afholdt', 9), ('F1 dage lead→bud', 9), ('F1 dage lead→købt', 9),
+            ('F2 dage brev→lead', 9), ('F2 dage lead→booking', 9), ('F2 dage lead→svar', 9), ('F2 dage lead→aftalt', 9), ('F2 dage lead→afholdt', 9), ('F2 dage lead→bud', 9), ('F2 dage lead→købt', 9),
         ]
         header_row(ws, 4, [c[0] for c in cols])
+        ws.row_dimensions[4].height = 42
         for i, (_, w) in enumerate(cols):
-            ws.column_dimensions[openpyxl.utils.get_column_letter(i + 1)].width = w
-
-        leads = sorted(self.leads, key=lambda x: x['oprettet'] or '')
-        for i, l in enumerate(leads):
+            ws.column_dimensions[get_column_letter(i + 1)].width = w
+        BG, BB, BC, BD, BF = (self.B(x) for x in 'ACDEF')
+        BC_, BD_, BF_ = self.B('C'), self.B('D'), self.B('F')
+        for i, l in enumerate(sorted(self.crm['leads'], key=lambda x: x['oprettet'] or '')):
             r = 5 + i
-            b = l['_brev']
             vals = {
-                'A': l['id'], 'B': til_dato(l['oprettet']), 'C': l['kilde'] or 'ældre import', 'D': l['postnr'],
-                'E': (b['forening'] if b else l['forening']), 'F': l['kvm'], 'G': l['test'],
-                'H': l['_match'] or None, 'I': (b['segment'] if b else None),
-                'K': l['tidshorisont'], 'L': l['efterSalget'], 'M': l['standSamlet'], 'N': l['udgifterUdfyldt'], 'O': l['billeder'],
-                'P': l['bud'], 'Q': l['estimat'], 'R': l['trinNu'],
-                'S': til_dato(l['tBooking']), 'T': til_dato(l['tSvar']), 'U': til_dato(l['tOpkald']), 'V': til_dato(l['tAftalt']),
-                'W': til_dato(l['tAfholdt']), 'X': til_dato(l['tBud']), 'Y': til_dato(l['tKoebt']),
-                'Z': til_dato(l['tIkkeEnige']), 'AA': til_dato(l['tVilIkkeNu']), 'AB': til_dato(l['tArkiv']),
+                'A': l['id'], 'B': til_dato(l['oprettet']), 'C': l['kilde'] or 'ældre import', 'D': l['postnr'], 'E': l['kvm'], 'F': l['test'],
+                'G': l.get('nogle'), 'H': l.get('nogleGade'), 'M': l['forening'],
+                'Q': l['tidshorisont'], 'R': l['efterSalget'], 'S': l['standSamlet'], 'T': l['udgifterUdfyldt'], 'U': l['billeder'],
+                'V': l['bud'], 'W': l['estimat'], 'X': l['trinNu'],
+                'Y': til_dato(l['tBooking']), 'Z': til_dato(l['tSvar']), 'AA': til_dato(l['tOpkald']), 'AB': til_dato(l['tAftalt']),
+                'AC': til_dato(l['tAfholdt']), 'AD': til_dato(l['tBud']), 'AE': til_dato(l['tKoebt']),
+                'AF': til_dato(l['tIkkeEnige']), 'AG': til_dato(l['tVilIkkeNu']), 'AH': til_dato(l['tArkiv']),
             }
             for c, v in vals.items():
                 if v is None:
                     continue
-                cell = hard(ws, f'{c}{r}', v, fmt=('dd-mm-yyyy hh:mm' if isinstance(v, datetime) else '@' if isinstance(v, str) else NUM))
-            # Gruppe: formel, så reglen er synlig
-            fml(ws, f'J{r}',
-                f'=IF(G{r}=1,"Test",IF(AND(OR(I{r}="A",I{r}="C"),B{r}>=Antagelser!$B$14),"Runde 2",'
-                f'IF(LEFT(C{r},12)="boligberegne","Anden beregner-lead","Øvrige")))', fmt='@')
-            # Dage fra lead (kun kohorten)
-            fml(ws, f'AC{r}', f'=IF($J{r}="Runde 2",B{r}-Antagelser!$B$14,"")', fmt='0.0')
-            for kol, tid in [('AD', 'S'), ('AE', 'T'), ('AF', 'V'), ('AG', 'W'), ('AH', 'X'), ('AI', 'Y')]:
-                fml(ws, f'{kol}{r}', f'=IF(AND($J{r}="Runde 2",{tid}{r}<>""),{tid}{r}-$B{r},"")', fmt='0.0')
+                hard(ws, f'{c}{r}', v, fmt=('dd-mm-yyyy hh:mm' if isinstance(v, datetime) else '@' if isinstance(v, str) else NUM))
+            # Kobling brev → lead, i arket så reglen kan læses: eksakt adresse, ellers entydig gade og nummer
+            fml(ws, f'I{r}', f'=IF(G{r}="","",IFERROR(MATCH(G{r},{BG},0),IF(COUNTIF({BB},H{r})=1,MATCH(H{r},{BB},0),"")))', fmt='0')
+            fml(ws, f'J{r}', f'=IF(I{r}="","",IF(ISNUMBER(MATCH(G{r},{BG},0)),"eksakt","gade+nr"))', fmt='@')
+            fml(ws, f'K{r}', f'=IF(I{r}="","",INDEX({BC_},I{r}))', fmt='@')
+            fml(ws, f'L{r}', f'=IF(I{r}="",M{r},INDEX({BD_},I{r}))', fmt='@')
+            fml(ws, f'N{r}', f'=IF(K{r}="","",IF(OR(K{r}="A",K{r}="C"),"Flow 1","Flow 2"))', fmt='@')
+            fml(ws, f'O{r}', f'=IF(I{r}="","",INDEX({BF_},I{r}))', fmt='dd-mm-yyyy')
+            fml(ws, f'P{r}', f'=IF(F{r}=1,"Test",IF(AND(ISNUMBER(O{r}),B{r}>=O{r}),N{r}&" · sendt",IF(LEFT(C{r},12)="boligberegne","Anden beregner-lead","Øvrige")))', fmt='@')
+            for fl, sæt in (('Flow 1', ('AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO')), ('Flow 2', ('AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV'))):
+                fml(ws, f'{sæt[0]}{r}', f'=IF($P{r}="{fl} · sendt",B{r}-$O{r},"")', fmt='0.0')
+                for kol, tid in zip(sæt[1:], ['Y', 'Z', 'AB', 'AC', 'AD', 'AE']):
+                    fml(ws, f'{kol}{r}', f'=IF(AND($P{r}="{fl} · sendt",{tid}{r}<>""),{tid}{r}-$B{r},"")', fmt='0.0')
         ws.freeze_panes = 'B5'
 
-    # Hjælper: reference til Data-kolonne
-    @staticmethod
-    def D(c):
-        return f'Data!${c}$5:${c}${DR}'
+    # ── Foreninger (toppen) ─────────────────────────────────────────────
+    def foreninger_fane(self):
+        ws = self.wb.create_sheet('Foreninger')
+        title(ws, 'Foreninger: fra registret til brev', 'Samme foreninger og tal som tragten på /foreninger, delt i Flow 1 og Flow 2 og fulgt til køb.', 21)
+        widths(ws, {'A': 34, 'B': 12, 'C': 12, 'D': 9, 'E': 9, 'F': 11, 'G': 24, 'H': 7, 'I': 10, 'J': 10, 'K': 10, 'L': 10, 'M': 10, 'N': 10, 'O': 9, 'P': 9, 'Q': 9, 'R': 9, 'S': 9, 'T': 9, 'U': 9})
+        header_row(ws, 5, ['Forening', 'By', 'Status', 'Enheder', 'Boliger (BBR)', 'I størrelsen 20–80', 'Brevgruppe', 'Ejet af os',
+                           'På brevlisten', 'Flow 1 ejer bor der', 'Flow 2 lejer', 'Flow 1 sendt', 'Flow 2 sendt', 'Fik 2 breve',
+                           'Leads Flow 1', 'Respons Flow 1', 'Aftalt', 'Afholdt', 'Bud', 'Købt', 'Leads Flow 2'])
+        ws.row_dimensions[5].height = 42
+        rang = ['maalgruppe', 'undersoeges', 'fravalgt']
+        raek = sorted(self.crm['foreninger'], key=lambda f: (rang.index(f['status']) if f['status'] in rang else 9, -(f['enheder'] or 0)))
+        first = 6
+        for i, f in enumerate(raek):
+            r = first + i
+            ru = self.rollup.get(f['gade'])
+            if ru and ru['foreningNavn'] != f['navn']:
+                ru = None   # to foreninger kan dele gadenøgle; brevgruppen hører kun til den, der hedder det samme
+            hard(ws, f'A{r}', f['navn'], fmt='@'); hard(ws, f'B{r}', f['by'], fmt='@')
+            hard(ws, f'C{r}', STATUS_TEKST.get(f['status'], f['status']), fmt='@')
+            hard(ws, f'D{r}', f['enheder'] or 0)
+            if ru:
+                hard(ws, f'E{r}', ru['boliger']); hard(ws, f'F{r}', ru['iMaalgruppe']); hard(ws, f'G{r}', f['gade'], fmt='@')
+            hard(ws, f'H{r}', f['ejet'] or 0)
+            g = f'$G{r}'
 
-    def tael(self, *krav):
-        """COUNTIFS på Data med kohorten som fast krav. krav = (kolonne, kriterium)…"""
-        dele = [f'{self.D("J")},"Runde 2"'] + [f'{self.D(c)},{k}' for c, k in krav]
-        return 'COUNTIFS(' + ','.join(dele) + ')'
+            def kr(*x):
+                return 'COUNTIFS(' + ','.join([f'{self.B("D")},{g}'] + [f'{self.B(c)},{k}' for c, k in x]) + ')'
+
+            def kd(gr, *x):
+                return 'COUNTIFS(' + ','.join([f'{self.D("P")},"{gr}"', f'{self.D("L")},{g}'] + [f'{self.D(c)},{k}' for c, k in x]) + ')'
+
+            fml(ws, f'I{r}', f'=IF({g}="","",{kr()})')
+            fml(ws, f'J{r}', f'=IF({g}="","",{kr(("J", q("Flow 1")))})')
+            fml(ws, f'K{r}', f'=IF({g}="","",{kr(("J", q("Flow 2")))})')
+            fml(ws, f'L{r}', f'=IF({g}="","",{kr(("J", q("Flow 1")), ("H", "1"))})')
+            fml(ws, f'M{r}', f'=IF({g}="","",{kr(("J", q("Flow 2")), ("H", "1"))})')
+            fml(ws, f'N{r}', f'=IF({g}="","",{kr(("I", "2"))})')
+            fml(ws, f'O{r}', f'=IF({g}="","",{kd("Flow 1 · sendt")})')
+            fml(ws, f'P{r}', f'=IF({g}="","",IF(L{r}>0,O{r}/L{r},"–"))', fmt=PCT)
+            for c_, tid in [('Q', 'AB'), ('R', 'AC'), ('S', 'AD'), ('T', 'AE')]:
+                fml(ws, f'{c_}{r}', f'=IF({g}="","",{kd("Flow 1 · sendt", (tid, IKKE))})')
+            fml(ws, f'U{r}', f'=IF({g}="","",{kd("Flow 2 · sendt")})')
+        last = first + len(raek) - 1
+        tot = last + 1
+        lbl(ws, f'A{tot}', 'I alt', bold=True)
+        for c in 'DEFHIJKLMNOQRSTU':
+            fml(ws, f'{c}{tot}', f'=SUM({c}{first}:{c}{last})', bold=True)
+        fml(ws, f'P{tot}', f'=IF(L{tot}>0,O{tot}/L{tot},"–")', fmt=PCT, bold=True)
+        self.F.update(for_first=first, for_last=last, for_tot=tot)
+        self.F['FR'] = lambda c: f'Foreninger!${c}${first}:${c}${last}'
+        FR = self.F['FR']
+
+        # Status-opdeling (som på hjemmesiden)
+        r0 = tot + 3
+        section(ws, r0, 'Efter status: hvilke foreninger vi vil købe i', 21)
+        header_row(ws, r0 + 1, ['Status', 'Foreninger', 'Enheder', '', '', 'I størrelsen'])
+        for j, st in enumerate(['Målgruppe', 'Undersøges', 'Fravalgt']):
+            r = r0 + 2 + j
+            lbl(ws, f'A{r}', st + ('  (vil købe i)' if st == 'Målgruppe' else ''))
+            fml(ws, f'B{r}', f'=COUNTIF({FR("C")},"{st}")')
+            fml(ws, f'C{r}', f'=SUMIF({FR("C")},"{st}",{FR("D")})')
+            fml(ws, f'F{r}', f'=SUMIF({FR("C")},"{st}",{FR("F")})')
+        note(ws, f'A{r0+6}', 'Foreninger uden brevgruppe er ikke på brevlisten. Enheder er registrets BFE-numre og kan være garager. Boliger og størrelse er målt i BBR.')
+        ws.freeze_panes = 'D6'
+
+    # ── Udsendelser ─────────────────────────────────────────────────────
+    def udsendelser_fane(self):
+        ws = self.wb.create_sheet('Udsendelser')
+        title(ws, 'Udsendelser: hvem har fået brev, og hvor mange gange', 'Tæller breve pr. modtager: ét fra juli 2025 (hvis modtageren stod på den liste) og ét fra runde 2 (hvis gruppen er sendt).', 10)
+        widths(ws, {'A': 8, 'B': 10, 'C': 44, 'D': 12, 'E': 11, 'F': 11, 'G': 11, 'H': 16, 'I': 14, 'J': 44})
+        BC, BH, BI, BF = self.B('C'), self.B('H'), self.B('I'), self.B('F')
+        section(ws, 4, 'Pr. gruppe', 10)
+        header_row(ws, 5, ['Gruppe', 'Flow', 'Hvem', 'Modtagere', '0 breve', '1 brev', '2 breve', 'Breve sendt i alt', '% fået mindst ét', 'Status'])
+        ws.row_dimensions[5].height = 32
+        for j, s in enumerate('ABCD'):
+            r = 6 + j
+            hard(ws, f'A{r}', s, fmt='@'); fml(ws, f'B{r}', f'=IF(OR(A{r}="A",A{r}="C"),"Flow 1","Flow 2")', fmt='@')
+            lbl(ws, f'C{r}', SEGTEKST[s])
+            fml(ws, f'D{r}', f'=COUNTIFS({BC},A{r})')
+            for k, c in enumerate('EFG'):
+                fml(ws, f'{c}{r}', f'=COUNTIFS({BC},$A{r},{BI},{k})')
+            fml(ws, f'H{r}', f'=SUMIFS({BI},{BC},$A{r})')
+            fml(ws, f'I{r}', f'=IF(D{r}>0,1-E{r}/D{r},"–")', fmt=PCT)
+            fml(ws, f'J{r}', f'=IF(COUNTIFS({BC},$A{r},{BH},1)>0,"Runde 2 sendt "&TEXT(INDEX({BF},MATCH($A{r},{BC},0)),"dd-mm-yyyy"),"Ikke sendt i runde 2")', fmt='@')
+        lbl(ws, 'A10', 'I alt', bold=True)
+        for c in 'DEFGH':
+            fml(ws, f'{c}10', f'=SUM({c}6:{c}9)', bold=True)
+        fml(ws, 'I10', '=IF(D10>0,1-E10/D10,"–")', fmt=PCT, bold=True)
+
+        section(ws, 12, 'Pr. flow', 10)
+        header_row(ws, 13, ['', 'Flow', 'Hvem', 'Modtagere', '0 breve', '1 brev', '2 breve', 'Breve sendt i alt', '% fået mindst ét', ''])
+        for j, (k, navn, segs) in enumerate(FLOWS):
+            r = 14 + j
+            hard(ws, f'B{r}', k, fmt='@'); lbl(ws, f'C{r}', navn)
+            for c in 'DEFGH':
+                fml(ws, f'{c}{r}', f'=SUMIF($B$6:$B$9,$B{r},{c}$6:{c}$9)')
+            fml(ws, f'I{r}', f'=IF(D{r}>0,1-E{r}/D{r},"–")', fmt=PCT)
+
+        section(ws, 17, 'Runderne', 10)
+        header_row(ws, 18, ['Runde', '', 'Hvad', 'Dato', 'Modtagere', '', '', '', '', 'Kilde'])
+        lbl(ws, 'A19', '1'); lbl(ws, 'C19', 'Juli 2025: alle segmenter, kun dem på listen i dag'); hard(ws, 'D19', 'jul 2025', fmt='@')
+        fml(ws, 'E19', f'=COUNTIFS({self.B("G")},"Ja")'); note(ws, 'J19', 'Kolonnen «Fik brev jul 2025» i brevlisten')
+        lbl(ws, 'A20', '2'); lbl(ws, 'C20', 'September 2026: Flow 1 (A + C)'); fml(ws, 'D20', f'={self.A["sendt1"]}', fmt='dd-mm-yyyy')
+        fml(ws, 'E20', f'={self.A["breve1"]}'); note(ws, 'J20', 'Brevrunde 11.09.2026, beboende ejere')
+        lbl(ws, 'A21', '3'); lbl(ws, 'C21', 'Flow 2 (B + D)'); fml(ws, 'D21', f'=IF({self.A["sendt2"]}="","ikke sendt",{self.A["sendt2"]})', fmt='dd-mm-yyyy')
+        fml(ws, 'E21', f'=IF({self.A["sendt2"]}="",{self.A["klar2"]},{self.A["breve2"]})'); note(ws, 'J21', 'Klar til afsendelse. Skriv datoen i Antagelser, når brevene sendes')
+
+        section(ws, 23, 'Flow 2: hvor mange breve har modtagerne fået, før og efter runde 3', 10)
+        header_row(ws, 24, ['', '', '', 'Modtagere', '0 breve', '1 brev', '2 breve', '3 breve', '', ''])
+        lbl(ws, 'C25', 'Før runde 3'); fml(ws, 'D25', '=D15'); fml(ws, 'E25', '=E15'); fml(ws, 'F25', '=F15'); fml(ws, 'G25', '=G15'); put(ws, 'H25', 0, color='64748B')
+        lbl(ws, 'C26', 'Efter runde 3'); fml(ws, 'D26', '=D15'); put(ws, 'E26', 0, color='64748B'); fml(ws, 'F26', '=E15'); fml(ws, 'G26', '=F15'); fml(ws, 'H26', '=G15')
+        note(ws, 'J26', 'Hver modtager rykker ét trin: 0 breve bliver til 1, 1 bliver til 2, 2 bliver til 3')
+        note(ws, 'A28', 'Et brev nummer to til samme adresse kan give en anden respons end det første. Det kan kun ses, hvis hver runde har sin egen kode (/k/<kode>).')
 
     # ── Funnel ──────────────────────────────────────────────────────────
     def funnel(self):
         ws = self.wb.create_sheet('Funnel')
-        title(ws, 'Funnel: breve sendt 11.09.2026 til køb', 'Kohorten er de breve, der blev sendt i denne omgang (segment A og C). Alt tælles på leads, hvis adresse er en af de 486.', 10)
-        widths(ws, {'A': 40, 'B': 11, 'C': 12, 'D': 14, 'E': 14, 'F': 13, 'G': 15, 'H': 11, 'I': 3, 'J': 60})
-
-        section(ws, 4, 'Hvem fik brev', 10)
-        lbl(ws, 'A5', 'Målgruppe (bolig 20–80 kvm)'); fml(ws, 'C5', f'={self.A["mal"]}')
-        lbl(ws, 'A6', '− koncernens egne lejligheder'); fml(ws, 'C6', f'=-{self.A["egne"]}')
-        lbl(ws, 'A7', 'Kan få brev', bold=True); fml(ws, 'C7', '=C5+C6', bold=True)
-        lbl(ws, 'A8', '− ikke sendt endnu (segment B og D)'); fml(ws, 'C8', f'=-{self.A["ikkeSendt"]}')
-        lbl(ws, 'A9', 'Breve sendt denne omgang', bold=True); fml(ws, 'C9', '=C7+C8', bold=True)
-
-        section(ws, 11, 'Kohortens funnel', 10)
-        header_row(ws, 12, ['Trin', 'Målt', 'Antal', '% af forrige målte', '% af breve sendt', 'Tabt fra forrige', 'Median dage fra lead', 'Lille n', '', 'Hvad tallet er'])
-        # (label, målt?, formel for antal, dagekolonne eller None, kommentar)
-        t = self.tael
-        trin = [
-            ('Breve sendt', 'Ja', f'={self.A["breve"]}', None, 'Segment A og C, sendt 11.09.2026'),
-            ('Besøgt siden fra brevet', 'Nej', f'=IF({self.A["besoeg"]}="","ikke målt",{self.A["besoeg"]})', None, 'QR-koden har ingen kode. Se Antagelser'),
-            ('Startet beregneren', 'Nej', f'=IF({self.A["startet"]}="","ikke målt",{self.A["startet"]})', None, 'Beregneren logger ikke trin. Se fanen Beregner'),
-            ('Gennemført beregneren (lead)', 'Ja', f'={t()}', 'AC', 'Leads hvis adresse matcher et sendt brev. Dage er fra brevet blev sendt'),
-            ('Booking-mail sendt', 'Ja', f'={t(("S", chr(34)+"<>"+chr(34)))}', 'AD', 'Første udgående mail med booking-frasen'),
-            ('Kunden har svaret', 'Ja', f'={t(("T", chr(34)+"<>"+chr(34)))}', 'AE', 'Første indgående mail. Svar til administration@ er først med fra 05.10'),
-            ('Besigtigelse aftalt', 'Ja', f'={t(("V", chr(34)+"<>"+chr(34)))}', 'AF', 'Stage-skift til aftalt, eller aftale i telefonen'),
-            ('Besigtigelse afholdt', 'Ja', f'={t(("W", chr(34)+"<>"+chr(34)))}', 'AG', ''),
-            ('Bud afgivet', 'Ja', f'={t(("X", chr(34)+"<>"+chr(34)))}', 'AH', ''),
-            ('Købt', 'Ja', f'={t(("Y", chr(34)+"<>"+chr(34)))}', 'AI', ''),
+        title(ws, 'Funnel: fra foreninger til køb', 'Øverst som tragten på /foreninger. Derefter en tragt pr. flow, for de breve der er sendt.', 11)
+        widths(ws, {'A': 46, 'B': 11, 'C': 12, 'D': 14, 'E': 14, 'F': 13, 'G': 15, 'H': 11, 'I': 3, 'J': 64, 'K': 12})
+        FR, A = self.F['FR'], self.A
+        section(ws, 4, 'Fra toppen: alle foreninger til brevlisten', 11)
+        header_row(ws, 5, ['Trin', 'Foreninger', 'Antal', '% af forrige', '', '', '', '', '', 'Hvad tallet er'])
+        top = [
+            # række, navn, foreninger (B), antal (C), % af forrige (D), forklaring, fed
+            (6, 'Enheder i alle foreninger', f'=COUNTA({FR("A")})', f'=SUM({FR("D")})', None, 'Registrets enheder. Et BFE-nummer kan være en garage', False),
+            (7, 'I foreninger vi vil købe i (status Målgruppe)', f'=COUNTIF({FR("C")},"Målgruppe")', f'=SUMIF({FR("C")},"Målgruppe",{FR("D")})', '=IF(C6>0,C7/C6,"–")', 'Foreninger med status Målgruppe på /foreninger', True),
+            (8, 'Heraf boliger, ikke garage eller erhverv', None, f'=SUMIF({FR("C")},"Målgruppe",{FR("E")})', '=IF(C7>0,C8/C7,"–")', 'Målt i BBR', False),
+            (9, 'I størrelsen vi køber (20–80 kvm)', None, f'=SUMIF({FR("C")},"Målgruppe",{FR("F")})', '=IF(C8>0,C9/C8,"–")', 'Målt pr. lejlighed i BBR', False),
+            (10, 'På brevlisten (har Resights-data)', None, f'={A["mal"]}', '=IF(C9>0,C10/C9,"–")', 'Resights kender ejeren og om han bor der. Resten kan ikke grupperes', False),
+            (11, '− koncernens egne lejligheder', None, f'=-{A["egne"]}', None, 'Dem skriver vi ikke til', False),
+            (12, 'Kan få brev', None, '=C10+C11', '=IF(C10>0,C12/C10,"–")', 'Alle der kan få et brev i dag', True),
         ]
-        first = 13
-        prev_measured = None
-        self.F['rows'] = {}
-        for i, (navn, maalt, formel, dagkol, kom) in enumerate(trin):
-            r = first + i
-            lbl(ws, f'A{r}', navn, bold=(i in (0, 3, 9)))
-            put(ws, f'B{r}', maalt, align='center', color='64748B')
-            fml(ws, f'C{r}', formel, bold=(i in (0, 3, 9)))
-            ws[f'C{r}'].alignment = Alignment(horizontal='right')
-            if maalt == 'Ja' and prev_measured:
-                fml(ws, f'D{r}', f'=IF(AND(ISNUMBER(C{r}),ISNUMBER(C{prev_measured}),C{prev_measured}>0),C{r}/C{prev_measured},"–")', fmt=PCT)
-                fml(ws, f'F{r}', f'=IF(AND(ISNUMBER(C{r}),ISNUMBER(C{prev_measured})),C{prev_measured}-C{r},"–")')
-            else:
-                put(ws, f'D{r}', '–', align='right'); put(ws, f'F{r}', '–', align='right')
-            fml(ws, f'E{r}', f'=IF(AND(ISNUMBER(C{r}),$C${first}>0),C{r}/$C${first},"–")', fmt=PCT)
-            if dagkol:
-                fml(ws, f'G{r}', f'=IFERROR(MEDIAN({self.D(dagkol)}),"–")', fmt='0.0')
-            else:
-                put(ws, f'G{r}', '–', align='right')
-            if maalt == 'Ja' and prev_measured:
-                fml(ws, f'H{r}', f'=IF(AND(ISNUMBER(C{prev_measured}),C{prev_measured}<{self.A["minN"]}),"lille n","")')
+        for r, navn, b, c, d, kom, fed in top:
+            lbl(ws, f'A{r}', navn, bold=fed)
+            if b:
+                fml(ws, f'B{r}', b)
+            fml(ws, f'C{r}', c, bold=fed)
+            if d:
+                fml(ws, f'D{r}', d, fmt=PCT)
             note(ws, f'J{r}', kom)
-            self.F['rows'][navn] = r
-            if maalt == 'Ja':
-                prev_measured = r
-        self.F['first'] = first
-        self.F['last'] = first + len(trin) - 1
+        kan = 12
+        self.F['kan_row'] = kan
 
-        # K: sikker rate (ellers blank) til lækage-opslag
-        prev = None
-        for i, (navn, maalt, *_r) in enumerate(trin):
-            r = first + i
-            if maalt == 'Ja' and prev and navn != 'Gennemført beregneren (lead)':
-                fml(ws, f'K{r}', f'=IF(AND(ISNUMBER(D{r}),C{prev}>={self.A["minN"]}),D{r},"")', fmt=PCT)
-            if maalt == 'Ja':
-                prev = r
-        ws.column_dimensions['K'].width = 12
-        put(ws, f'K{first-1}', 'Sikker rate', bold=True, color='1E293B', size=9, align='center', fill=SUB_FILL, border=BOX)
+        section(ws, 14, 'Delt efter hvem der bor der', 11)
+        r = 15
+        for k, navn, segs in FLOWS:
+            lbl(ws, f'A{r}', navn, bold=True)
+            fml(ws, f'C{r}', f'={A["seg"+segs[0]]}+{A["seg"+segs[1]]}', bold=True)
+            fml(ws, f'D{r}', f'=IF(C{kan}>0,C{r}/C{kan},"–")', fmt=PCT)
+            note(ws, f'J{r}', 'Ejeren bor på adressen: brevet når ejeren' if k == 'Flow 1' else 'Ejeren bor et andet sted: brevet lander hos lejeren eller beboeren')
+            self.F['flowrow_' + k] = r
+            flow_r = r
+            r += 1
+            for s in segs:
+                lbl(ws, f'A{r}', f'{s}  {SEGTEKST[s]}', indent=2); fml(ws, f'C{r}', f'={A["seg"+s]}')
+                fml(ws, f'D{r}', f'=IF(C{flow_r}>0,C{r}/C{flow_r},"–")', fmt=PCT)
+                r += 1
+        lbl(ws, f'A{r}', 'Sendt: Flow 1', bold=True); fml(ws, f'C{r}', f'={A["breve1"]}', bold=True)
+        fml(ws, f'D{r}', f'=IF(C{self.F["flowrow_Flow 1"]}>0,C{r}/C{self.F["flowrow_Flow 1"]},"–")', fmt=PCT); r += 1
+        lbl(ws, f'A{r}', 'Sendt: Flow 2', bold=True); fml(ws, f'C{r}', f'={A["breve2"]}', bold=True)
+        fml(ws, f'D{r}', f'=IF(C{self.F["flowrow_Flow 2"]}>0,C{r}/C{self.F["flowrow_Flow 2"]},"–")', fmt=PCT)
+        fml(ws, f'J{r}', f'=IF({A["breve2"]}=0,"Ikke sendt endnu: "&{A["klar2"]}&" breve er klar","")', fmt='@')
+        ws[f'J{r}'].font = _font(False, '64748B', 9, True)
+        r += 3
 
-        # Status i dag
-        r0 = self.F['last'] + 3
-        section(ws, r0, 'Hvor står kohortens leads i dag', 10)
-        header_row(ws, r0 + 1, ['Trin nu', '', 'Antal', '% af leads'])
-        stat = [
-            ('Ny lead', 'ny-lead'), ('Besigtigelse foreslået', 'besigtigelse-foreslaaet'), ('Besigtigelse aftalt', 'besigtigelse-aftalt'),
-            ('Besigtigelse afholdt', 'besigtigelse-afholdt'), ('Bud afgivet', 'bud-afgivet'), ('Ikke enige om pris', 'ikke-enige-om-pris'),
-            ('Vil ikke sælge nu', 'vil-ikke-saelge-nu'), ('Købt', 'koebt'), ('Arkiveret', 'arkiveret'), ('Tabt', 'tabt'),
-        ]
-        leadrow = self.F['rows']['Gennemført beregneren (lead)']
-        for j, (navn, slug) in enumerate(stat):
-            r = r0 + 2 + j
-            lbl(ws, f'A{r}', navn)
-            fml(ws, f'C{r}', f'={t(("R", chr(34)+slug+chr(34)))}')
-            fml(ws, f'D{r}', f'=IF($C${leadrow}>0,C{r}/$C${leadrow},"–")', fmt=PCT)
-        rr = r0 + 2 + len(stat)
-        lbl(ws, f'A{rr}', 'Øvrige trin (ældre navne)')
-        fml(ws, f'C{rr}', f'=C{leadrow}-SUM(C{r0+2}:C{rr-1})')
-        fml(ws, f'D{rr}', f'=IF($C${leadrow}>0,C{rr}/$C${leadrow},"–")', fmt=PCT)
-        self.F['stat0'] = r0 + 2
+        self.F['rows'] = {}
+        for k, navn, segs in FLOWS:
+            r = self.flow_blok(ws, r, k, navn, segs)
 
-        # Pr. segment
-        r1 = rr + 3
-        section(ws, r1, 'Pr. segment', 10)
-        header_row(ws, r1 + 1, ['Segment', '', 'Breve', 'Leads', 'Respons', 'Booking', 'Svar', 'Aftalt', '', 'Afholdt · Bud · Købt'])
-        self.F['seg0'] = r1 + 2
-        for j, (s, txt) in enumerate([('A', 'A  Må kontaktes, ejer bor der'), ('C', 'C  Reklamebeskyttet, ejer bor der')]):
-            r = r1 + 2 + j
-            lbl(ws, f'A{r}', txt)
-            fml(ws, f'C{r}', f'=COUNTIFS(Breve!$B$5:$B$2000,"{s}",Breve!$G$5:$G$2000,1)')
-            fml(ws, f'D{r}', f'={t(("I", chr(34)+s+chr(34)))}')
-            fml(ws, f'E{r}', f'=IF(C{r}>0,D{r}/C{r},"–")', fmt=PCT)
-            fml(ws, f'F{r}', f'={t(("I", chr(34)+s+chr(34)), ("S", chr(34)+"<>"+chr(34)))}')
-            fml(ws, f'G{r}', f'={t(("I", chr(34)+s+chr(34)), ("T", chr(34)+"<>"+chr(34)))}')
-            fml(ws, f'H{r}', f'={t(("I", chr(34)+s+chr(34)), ("V", chr(34)+"<>"+chr(34)))}')
-            fml(ws, f'J{r}', f'={t(("I", chr(34)+s+chr(34)), ("W", chr(34)+"<>"+chr(34)))}&" · "&{t(("I", chr(34)+s+chr(34)), ("X", chr(34)+"<>"+chr(34)))}&" · "&{t(("I", chr(34)+s+chr(34)), ("Y", chr(34)+"<>"+chr(34)))}', fmt='@')
-        rs = r1 + 4
-        lbl(ws, f'A{rs}', 'Samlet', bold=True)
-        for c in 'CDFGH':
-            fml(ws, f'{c}{rs}', f'=SUM({c}{r1+2}:{c}{r1+3})', bold=True)
-        fml(ws, f'E{rs}', f'=IF(C{rs}>0,D{rs}/C{rs},"–")', fmt=PCT, bold=True)
-
-        # Sammenligning
-        r2 = rs + 3
-        section(ws, r2, 'Til sammenligning: beregner-leads uden for runden', 10)
-        header_row(ws, r2 + 1, ['', '', 'Antal', '', '', 'Booking', 'Svar', 'Aftalt', '', 'Afholdt · Bud · Købt'])
-        lbl(ws, f'A{r2+2}', 'Anden beregner-lead')
-        def anden(*krav):
-            dele = [f'{self.D("J")},"Anden beregner-lead"'] + [f'{self.D(c)},{k}' for c, k in krav]
-            return 'COUNTIFS(' + ','.join(dele) + ')'
-        fml(ws, f'C{r2+2}', f'={anden()}')
-        fml(ws, f'F{r2+2}', f'={anden(("S", chr(34)+"<>"+chr(34)))}')
-        fml(ws, f'G{r2+2}', f'={anden(("T", chr(34)+"<>"+chr(34)))}')
-        fml(ws, f'H{r2+2}', f'={anden(("V", chr(34)+"<>"+chr(34)))}')
-        fml(ws, f'J{r2+2}', f'={anden(("W", chr(34)+"<>"+chr(34)))}&" · "&{anden(("X", chr(34)+"<>"+chr(34)))}&" · "&{anden(("Y", chr(34)+"<>"+chr(34)))}', fmt='@')
-        note(ws, f'A{r2+3}', 'Beregner-leads, hvis adresse ikke er et sendt brev: ældre leads fra før runden, segment B og D, og adresser uden for målgruppen.')
+        section(ws, r, 'Til sammenligning: leads uden for de sendte breve', 11)
+        header_row(ws, r + 1, ['', '', 'Antal', '', '', 'Booking', 'Svar', 'Aftalt', '', 'Afholdt · Bud · Købt'])
+        for j, (g, txt) in enumerate([('Anden beregner-lead', 'Anden beregner-lead'), ('Øvrige', 'Øvrige (ældre leads fra før beregneren)')]):
+            rr = r + 2 + j
+            lbl(ws, f'A{rr}', txt)
+            fml(ws, f'C{rr}', f'={self.tael(g)}')
+            for c_, tid in [('F', 'Y'), ('G', 'Z'), ('H', 'AB')]:
+                fml(ws, f'{c_}{rr}', f'={self.tael(g, (tid, IKKE))}')
+            fml(ws, f'J{rr}', f'={self.tael(g, ("AC", IKKE))}&" · "&{self.tael(g, ("AD", IKKE))}&" · "&{self.tael(g, ("AE", IKKE))}', fmt='@')
+        note(ws, f'A{r+4}', 'Beregner-leads, hvis adresse ikke er et sendt brev: leads fra før brevet, adresser uden for brevlisten og segmenter der ikke er sendt.')
         ws.freeze_panes = 'A4'
 
-    # ── Pr. forening ────────────────────────────────────────────────────
-    def pr_forening(self):
-        ws = self.wb.create_sheet('Pr. forening')
-        title(ws, 'Pr. forening', 'Kohortens funnel pr. ejerforening. Forening er brevlistens gruppering.', 11)
-        widths(ws, {'A': 28, 'B': 10, 'C': 10, 'D': 10, 'E': 10, 'F': 10, 'G': 10, 'H': 10, 'I': 10, 'J': 12, 'K': 14})
-        header_row(ws, 4, ['Forening', 'Breve sendt', 'Leads', 'Respons', 'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt', 'Ikke sendt endnu (B+D)'])
-        sendt = Counter(b['forening'] for b in self.breve if b['segment'] in SENDTE_SEGMENTER)
-        alle = Counter(b['forening'] for b in self.breve)
-        fors = sorted(alle, key=lambda f: (-sendt[f], f))
-        first = 5
-        for i, f in enumerate(fors):
-            r = first + i
-            hard(ws, f'A{r}', f, fmt='@')
-            fml(ws, f'B{r}', f'=COUNTIFS(Breve!$C$5:$C$2000,$A{r},Breve!$G$5:$G$2000,1)')
-            q = lambda *kr: 'COUNTIFS(' + ','.join([f'{self.D("J")},"Runde 2"', f'{self.D("E")},$A{r}'] + [f'{self.D(c)},{k}' for c, k in kr]) + ')'
-            fml(ws, f'C{r}', f'={q()}')
-            fml(ws, f'D{r}', f'=IF(B{r}>0,C{r}/B{r},"–")', fmt=PCT)
-            for col_, tid in [('E', 'S'), ('F', 'T'), ('G', 'V'), ('H', 'W'), ('I', 'X'), ('J', 'Y')]:
-                fml(ws, f'{col_}{r}', f'={q((tid, chr(34)+"<>"+chr(34)))}')
-            fml(ws, f'K{r}', f'=COUNTIFS(Breve!$C$5:$C$2000,$A{r},Breve!$G$5:$G$2000,0)')
-        last = first + len(fors) - 1
-        r = last + 1
-        lbl(ws, f'A{r}', 'I alt', bold=True)
-        for c in 'BCEFGHIJK':
-            fml(ws, f'{c}{r}', f'=SUM({c}{first}:{c}{last})', bold=True)
-        fml(ws, f'D{r}', f'=IF(B{r}>0,C{r}/B{r},"–")', fmt=PCT, bold=True)
-        self.F['forTotal'] = r
-        note(ws, f'A{r+2}', 'Respons er leads divideret med breve sendt. Små foreninger har få breve, så en enkelt reply flytter raten meget.')
-        ws.freeze_panes = 'B5'
+    def flow_blok(self, ws, r, k, navn, segs):
+        gruppe = f'{k} · sendt'
+        A = self.A
+        section(ws, r, f'{navn}: tragten for de breve, der er sendt', 11)
+        header_row(ws, r + 1, ['Trin', 'Målt', 'Antal', '% af forrige målte', '% af breve sendt', 'Tabt fra forrige', 'Median dage (brev / lead)', 'Lille n', '', 'Hvad tallet er', 'Sikker rate'])
+        ws.row_dimensions[r + 1].height = 42
+        fl = 1 if k == 'Flow 1' else 2
+
+        def t(*kr):
+            return self.tael(gruppe, *kr)
+
+        dg = ['AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO'] if fl == 1 else ['AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV']
+        trin = [
+            ('Breve sendt', 'Ja', f'={A["breve"+str(fl)]}', None, f'Segment {segs[0]} og {segs[1]}'),
+            ('Besøgt siden fra brevet', 'Nej', f'=IF({A["besoeg"+str(fl)]}="","ikke målt",{A["besoeg"+str(fl)]})', None, 'QR-koden har ingen kode. Se Antagelser'),
+            ('Startet beregneren', 'Nej', f'=IF({A["startet"+str(fl)]}="","ikke målt",{A["startet"+str(fl)]})', None, 'Beregneren logger ikke trin. Se fanen Beregner'),
+            ('Gennemført beregneren (lead)', 'Ja', f'={t()}', dg[0], 'Leads hvis adresse er et sendt brev. Dage fra brevet blev sendt'),
+            ('Booking-mail sendt', 'Ja', f'={t(("Y", IKKE))}', dg[1], 'Første udgående mail med booking-frasen. Dage fra leadet'),
+            ('Kunden har svaret', 'Ja', f'={t(("Z", IKKE))}', dg[2], 'Første indgående mail. Svar til administration@ er først med fra 05.10'),
+            ('Besigtigelse aftalt', 'Ja', f'={t(("AB", IKKE))}', dg[3], 'Skift til aftalt, eller aftale i telefonen'),
+            ('Besigtigelse afholdt', 'Ja', f'={t(("AC", IKKE))}', dg[4], ''),
+            ('Bud afgivet', 'Ja', f'={t(("AD", IKKE))}', dg[5], ''),
+            ('Købt', 'Ja', f'={t(("AE", IKKE))}', dg[6], ''),
+        ]
+        first = r + 2
+        prev = None
+        rows = {}
+        for i, (navn_, maalt, formel, dagkol, kom) in enumerate(trin):
+            rr = first + i
+            rows[navn_] = rr
+            bold = i in (0, 3, 9)
+            lbl(ws, f'A{rr}', navn_, bold=bold)
+            put(ws, f'B{rr}', maalt, align='center', color='64748B')
+            fml(ws, f'C{rr}', formel, bold=bold); ws[f'C{rr}'].alignment = Alignment(horizontal='right')
+            if maalt == 'Ja' and prev:
+                fml(ws, f'D{rr}', f'=IF(AND(ISNUMBER(C{rr}),ISNUMBER(C{prev}),C{prev}>0),C{rr}/C{prev},"–")', fmt=PCT)
+                fml(ws, f'F{rr}', f'=IF(AND(ISNUMBER(C{rr}),ISNUMBER(C{prev})),C{prev}-C{rr},"–")')
+                fml(ws, f'H{rr}', f'=IF(AND(ISNUMBER(C{prev}),C{prev}<{A["minN"]}),"lille n","")')
+                if navn_ != 'Gennemført beregneren (lead)':
+                    fml(ws, f'K{rr}', f'=IF(AND(ISNUMBER(D{rr}),C{prev}>={A["minN"]}),D{rr},"")', fmt=PCT)
+            else:
+                put(ws, f'D{rr}', '–', align='right'); put(ws, f'F{rr}', '–', align='right')
+            fml(ws, f'E{rr}', f'=IF(AND(ISNUMBER(C{rr}),$C${first}>0),C{rr}/$C${first},"–")', fmt=PCT)
+            if dagkol:
+                fml(ws, f'G{rr}', f'=IFERROR(MEDIAN({self.D(dagkol)}),"–")', fmt='0.0')
+            else:
+                put(ws, f'G{rr}', '–', align='right')
+            note(ws, f'J{rr}', kom)
+            if maalt == 'Ja':
+                prev = rr
+        self.F['rows'][k] = rows
+        last = first + len(trin) - 1
+        if k == 'Flow 2':
+            note(ws, f'A{last+1}', 'Flow 2 er ikke sendt endnu. Tragten fyldes, når datoen står i Antagelser, og leads kommer ind.')
+
+        r0 = last + 3
+        header_row(ws, r0, ['Hvor står leadene i dag', '', 'Antal', '% af leads'])
+        stat = [('Ny lead', 'ny-lead'), ('Besigtigelse foreslået', 'besigtigelse-foreslaaet'), ('Besigtigelse aftalt', 'besigtigelse-aftalt'),
+                ('Besigtigelse afholdt', 'besigtigelse-afholdt'), ('Bud afgivet', 'bud-afgivet'), ('Ikke enige om pris', 'ikke-enige-om-pris'),
+                ('Vil ikke sælge nu', 'vil-ikke-saelge-nu'), ('Købt', 'koebt'), ('Arkiveret', 'arkiveret'), ('Tabt', 'tabt')]
+        lead = rows['Gennemført beregneren (lead)']
+        for j, (txt, slug) in enumerate(stat):
+            rr = r0 + 1 + j
+            lbl(ws, f'A{rr}', txt, indent=1); fml(ws, f'C{rr}', f'={t(("X", q(slug)))}')
+            fml(ws, f'D{rr}', f'=IF($C${lead}>0,C{rr}/$C${lead},"–")', fmt=PCT)
+        rr = r0 + 1 + len(stat)
+        lbl(ws, f'A{rr}', 'Øvrige trin (ældre navne)', indent=1)
+        fml(ws, f'C{rr}', f'=C{lead}-SUM(C{r0+1}:C{rr-1})'); fml(ws, f'D{rr}', f'=IF($C${lead}>0,C{rr}/$C${lead},"–")', fmt=PCT)
+
+        r1 = rr + 2
+        header_row(ws, r1, ['Pr. segment', '', 'Breve', 'Leads', 'Respons', 'Booking', 'Svar', 'Aftalt', '', 'Afholdt · Bud · Købt'])
+        for j, s in enumerate(segs):
+            qq = r1 + 1 + j
+            lbl(ws, f'A{qq}', f'{s}  {SEGTEKST[s]}', indent=1)
+            fml(ws, f'C{qq}', f'=COUNTIFS({self.B("C")},"{s}",{self.B("H")},1)')
+            fml(ws, f'D{qq}', f'={t(("K", q(s)))}')
+            fml(ws, f'E{qq}', f'=IF(C{qq}>0,D{qq}/C{qq},"–")', fmt=PCT)
+            for c_, tid in [('F', 'Y'), ('G', 'Z'), ('H', 'AB')]:
+                fml(ws, f'{c_}{qq}', f'={t(("K", q(s)), (tid, IKKE))}')
+            fml(ws, f'J{qq}', f'={t(("K", q(s)), ("AC", IKKE))}&" · "&{t(("K", q(s)), ("AD", IKKE))}&" · "&{t(("K", q(s)), ("AE", IKKE))}', fmt='@')
+        return r1 + 1 + len(segs) + 2
 
     # ── Beregner ────────────────────────────────────────────────────────
     def beregner(self):
         ws = self.wb.create_sheet('Beregner')
-        title(ws, 'Beregner: hvor falder de fra', 'Trinene er målt ved at kigge på dem, der gennemførte. Hvor de falder fra, kræver trinmåling (se nederst).', 8)
-        widths(ws, {'A': 44, 'B': 16, 'C': 14, 'D': 12, 'E': 3, 'F': 70})
+        title(ws, 'Beregner: hvor falder de fra', 'Hvor de falder fra, kræver trinmåling (se nederst). Det vi kan se i dag er, hvad de gennemførte valgte.', 8)
+        widths(ws, {'A': 44, 'B': 16, 'C': 14, 'D': 12, 'E': 3, 'F': 74})
         section(ws, 4, 'A. Trin for trin (unikke besøgende pr. trin)', 8)
         header_row(ws, 5, ['Trin', 'Unikke besøgende', '% af forrige', 'Tabt', '', 'Hvad kunden ser'])
         steps = [
@@ -410,14 +535,14 @@ class Bygger:
             ('6  Tilføj de sidste detaljer', 'Hvidevarer, billeder, særlige forhold. Alt valgfrit'),
             ('7  Boligens udgifter', 'Fællesudgift, ejendomsskat, fælleslån. Kan sættes til «senere»'),
             ('8  Er der noget, vi skal tage højde for?', 'Forhold der kan påvirke prisen'),
-            ('9  Estimat og lead oprettet', 'Her gemmes leadet. Dette tal kender vi allerede: kohortens leads'),
+            ('9  Estimat og lead oprettet', 'Her gemmes leadet. Dette tal kender vi allerede'),
         ]
         first = 6
         for i, (navn, kom) in enumerate(steps):
             r = first + i
             lbl(ws, f'A{r}', navn)
             if i == len(steps) - 1:
-                fml(ws, f'B{r}', f'={self.tael()}')
+                fml(ws, f'B{r}', f'=COUNTIFS({self.D("P")},"*sendt")')
             else:
                 inp(ws, f'B{r}', None)
             if i > 0:
@@ -425,44 +550,43 @@ class Bygger:
                 fml(ws, f'D{r}', f'=IF(AND(ISNUMBER(B{r}),ISNUMBER(B{r-1})),B{r-1}-B{r},"–")')
             note(ws, f'F{r}', kom)
         last = first + len(steps) - 1
-        note(ws, f'A{last+1}', 'Gule felter er tomme, fordi trinene ikke logges. Når de er målt, peger «% af forrige» på det trin, der taber flest.')
+        note(ws, f'A{last+1}', 'Gule felter er tomme, fordi trinene ikke logges. Når de er målt, viser «% af forrige» det trin, der taber flest.')
 
-        # B: hvad de gennemførte svarede
         r0 = last + 4
-        section(ws, r0, 'B. Det vi kan se i dag: hvad de gennemførte valgte (runde 2)', 8)
+        section(ws, r0, 'B. Det vi kan se i dag: hvad de gennemførte valgte (alle sendte breve)', 8)
         header_row(ws, r0 + 1, ['Svar', 'Antal', '% af leads', '', '', 'Kommentar'])
-        leadrow = self.F['rows']['Gennemført beregneren (lead)']
-        n = f'Funnel!$C${leadrow}'
+        n = f'COUNTIFS({self.D("P")},"*sendt")'
+
         def rad(r, navn, kolonne, vaerdi, kom='', key=None):
-            if key: self.F[key] = f'Beregner!$C${r}'
+            if key:
+                self.F[key] = f'Beregner!$C${r}'
             lbl(ws, f'A{r}', navn, indent=1)
-            fml(ws, f'B{r}', f'={self.tael((kolonne, chr(34)+vaerdi+chr(34)))}')
+            fml(ws, f'B{r}', f'=COUNTIFS({self.D("P")},"*sendt",{self.D(kolonne)},"{vaerdi}")')
             fml(ws, f'C{r}', f'=IF({n}>0,B{r}/{n},"–")', fmt=PCT)
-            if kom: note(ws, f'F{r}', kom)
+            if kom:
+                note(ws, f'F{r}', kom)
         r = r0 + 2
         lbl(ws, f'A{r}', 'Udgifter udfyldt', bold=True); r += 1
-        rad(r, 'Udfyldt', 'N', '1'); r += 1
-        rad(r, 'Sat til «senere»', 'N', '0', 'Blød drop-out: kunden kom til estimatet uden at give os udgifterne', key='udg_senere'); r += 1
+        rad(r, 'Udfyldt', 'T', '1'); r += 1
+        rad(r, 'Sat til «senere»', 'T', '0', 'Kunden kom til estimatet uden at give os udgifterne', key='udg_senere'); r += 1
         lbl(ws, f'A{r}', 'Billeder med', bold=True); r += 1
-        rad(r, 'Har uploadet billeder', 'O', '1', 'Billedupload findes først fra 28.09, så ældre leads er 0'); r += 1
+        rad(r, 'Har uploadet billeder', 'U', '1', 'Billedupload findes først fra 28.09, så ældre leads er 0'); r += 1
         lbl(ws, f'A{r}', 'Hvornår vil du flytte', bold=True); r += 1
         for v in ['Hurtigst muligt', '1–3 måneder', '3–6 måneder', '6+ måneder', 'Ved ikke endnu']:
-            rad(r, v, 'K', v, key=('tid_ved_ikke' if v == 'Ved ikke endnu' else None)); r += 1
+            rad(r, v, 'Q', v, key=('tid_ved_ikke' if v == 'Ved ikke endnu' else None)); r += 1
         lbl(ws, f'A{r}', 'Efter salget', bold=True); r += 1
         for v in ['Flytter ud helt', 'Vil leje en anden bolig', 'Vil blive boende som lejer', 'Ved ikke endnu']:
-            rad(r, v, 'L', v, key=('efter_ved_ikke' if v == 'Ved ikke endnu' else None)); r += 1
+            rad(r, v, 'R', v, key=('efter_ved_ikke' if v == 'Ved ikke endnu' else None)); r += 1
         lbl(ws, f'A{r}', 'Stand samlet (prismotorens niveau)', bold=True); r += 1
         for v in ['nyrenoveret', 'god', 'middel', 'trænger', 'slidt']:
-            rad(r, v, 'M', v); r += 1
-
-        # C: plan
+            rad(r, v, 'S', v); r += 1
         r += 2
         section(ws, r, 'C. Sådan måler vi trinene (ikke bygget)', 8)
         for j, txt in enumerate([
             'Hvert trin sender én anonym hændelse til CRM’et: trin, tidspunkt og et sessions-id. Ingen navne, adresser eller indtastede værdier.',
             'Sessions-id regnes på serveren af en hash af IP, browser og dato. Der gemmes ingen cookie og intet på kundens enhed.',
             'Så kan vi se unikke besøgende pr. trin og dermed, hvor de falder fra. Samme metode giver besøg på forsiden.',
-            'Tilføj personlige koder på brevene (/k/<kode>), så et besøg kan kobles til en modtager. Koden kan også forhåndsudfylde adressen.',
+            'Personlige koder på brevene (/k/<kode>) kobler et besøg til en modtager og kan forhåndsudfylde adressen. Byg dem, før Flow 2 sendes.',
             'Få jeres rådgiver til at bekræfte, at måling uden cookie ikke kræver samtykke, før det slås til.',
         ]):
             note(ws, f'A{r+1+j}', f'{j+1}. {txt}')
@@ -470,29 +594,28 @@ class Bygger:
     # ── Sensitivity ─────────────────────────────────────────────────────
     def sensitivity(self):
         ws = self.wb.create_sheet('Sensitivity')
-        title(ws, 'Sensitivity: hvad flytter antal køb', 'Hver rate er målt, hvis grundlaget er stort nok, ellers et gæt (gult). Gæt er ikke resultater.', 9)
-        widths(ws, {'A': 40, 'B': 11, 'C': 11, 'D': 12, 'E': 12, 'F': 12, 'G': 12, 'H': 12, 'I': 50})
-        section(ws, 4, 'Drivere', 9)
+        title(ws, 'Sensitivity: hvad flytter antal køb', 'Ratene er Flow 1, målt hvis grundlaget er stort nok, ellers et gæt (gult). Gæt er ikke resultater.', 9)
+        widths(ws, {'A': 46, 'B': 11, 'C': 11, 'D': 12, 'E': 12, 'F': 12, 'G': 14, 'H': 12, 'I': 52})
+        section(ws, 4, 'Drivere (Flow 1)', 9)
         header_row(ws, 5, ['Driver', 'Målt', 'Grundlag (n)', 'Gæt', 'Bruges', 'Kilde', 'Køb pr. 1.000 breve', 'Hvis +1 pp', 'Hvad det er'])
-        R = self.F['rows']
-        def ref(n): return f'Funnel!$C${R[n]}'
+        R = self.F['rows']['Flow 1']
+
+        def ref(nv):
+            return f'Funnel!$C${R[nv]}'
+        lead, aft, afh, bud, kob, brv = (ref(x) for x in ['Gennemført beregneren (lead)', 'Besigtigelse aftalt', 'Besigtigelse afholdt', 'Bud afgivet', 'Købt', 'Breve sendt'])
         spec = [
-            ('Respons: breve → lead', f'={ref("Gennemført beregneren (lead)")}/{ref("Breve sendt")}', f'={ref("Breve sendt")}', None, 'Leads divideret med breve sendt'),
-            ('Lead → besigtigelse aftalt', f'=IF({ref("Gennemført beregneren (lead)")}>0,{ref("Besigtigelse aftalt")}/{ref("Gennemført beregneren (lead)")},0)', f'={ref("Gennemført beregneren (lead)")}', 0.15, 'Hvor mange leads ender med en aftalt besigtigelse'),
-            ('Aftalt → afholdt', f'=IF({ref("Besigtigelse aftalt")}>0,{ref("Besigtigelse afholdt")}/{ref("Besigtigelse aftalt")},0)', f'={ref("Besigtigelse aftalt")}', 0.85, 'Hvor mange aftalte besigtigelser bliver til afholdte'),
-            ('Afholdt → bud', f'=IF({ref("Besigtigelse afholdt")}>0,{ref("Bud afgivet")}/{ref("Besigtigelse afholdt")},0)', f'={ref("Besigtigelse afholdt")}', 0.80, 'Hvor mange besigtigelser ender med et bud'),
-            ('Bud → køb', f'=IF({ref("Bud afgivet")}>0,{ref("Købt")}/{ref("Bud afgivet")},0)', f'={ref("Bud afgivet")}', 0.25, 'Hvor mange bud bliver til en handel'),
+            ('Respons: breve → lead', f'=IF({brv}>0,{lead}/{brv},0)', f'={brv}', None, 'Leads divideret med breve sendt'),
+            ('Lead → besigtigelse aftalt', f'=IF({lead}>0,{aft}/{lead},0)', f'={lead}', 0.15, 'Hvor mange leads ender med en aftalt besigtigelse'),
+            ('Aftalt → afholdt', f'=IF({aft}>0,{afh}/{aft},0)', f'={aft}', 0.85, 'Hvor mange aftalte besigtigelser bliver til afholdte'),
+            ('Afholdt → bud', f'=IF({afh}>0,{bud}/{afh},0)', f'={afh}', 0.80, 'Hvor mange besigtigelser ender med et bud'),
+            ('Bud → køb', f'=IF({bud}>0,{kob}/{bud},0)', f'={bud}', 0.25, 'Hvor mange bud bliver til en handel'),
         ]
         first = 6
-        for i, (navn, malt, n, gaet, kom) in enumerate(spec):
+        for i, (navn, malt, nn, gaet, kom) in enumerate(spec):
             r = first + i
-            lbl(ws, f'A{r}', navn)
-            fml(ws, f'B{r}', malt, fmt=PCT)
-            fml(ws, f'C{r}', n)
+            lbl(ws, f'A{r}', navn); fml(ws, f'B{r}', malt, fmt=PCT); fml(ws, f'C{r}', nn)
             if gaet is None:
-                put(ws, f'D{r}', '–', align='right')
-                fml(ws, f'E{r}', f'=B{r}', fmt=PCT)
-                put(ws, f'F{r}', 'Målt', align='center')
+                put(ws, f'D{r}', '–', align='right'); fml(ws, f'E{r}', f'=B{r}', fmt=PCT); put(ws, f'F{r}', 'Målt', align='center')
             else:
                 inp(ws, f'D{r}', gaet, fmt=PCT)
                 fml(ws, f'E{r}', f'=IF(C{r}>={self.A["minN"]},B{r},D{r})', fmt=PCT)
@@ -507,166 +630,197 @@ class Bygger:
             fml(ws, f'H{r}', f'=1000*{others}*MIN(1,$E${r}+0.01)', fmt='0.00')
         self.F['drivers'] = (first, last)
         r = last + 2
-        lbl(ws, f'A{r}', 'Køb pr. 1.000 breve', bold=True); kpi(ws, f'G{r}', f'=1000*{prod}', fmt='0.00')
+        lbl(ws, f'A{r}', 'Køb pr. 1.000 breve (Flow 1)', bold=True); kpi(ws, f'G{r}', f'=1000*{prod}', fmt='0.00')
         lbl(ws, f'A{r+1}', 'Breve pr. købt lejlighed'); fml(ws, f'G{r+1}', f'=IF(G{r}>0,1000/G{r},"–")', fmt='#,##0')
         lbl(ws, f'A{r+2}', 'Omkostning pr. købt (kr)')
-        fml(ws, f'G{r+2}', f'=IF(AND(ISNUMBER({self.A["pris"]}),{self.A["pris"]}>0,ISNUMBER(G{r+1})),G{r+1}*{self.A["pris"]},"udfyld pris")', fmt='#,##0')
+        fml(ws, f'G{r+2}', f'=IF(AND(ISNUMBER({self.A["pris"]}),ISNUMBER(G{r+1})),G{r+1}*{self.A["pris"]},"udfyld pris")', fmt='#,##0')
         lbl(ws, f'A{r+3}', 'Et brev må koste højst (kr), for at det løber rundt')
-        fml(ws, f'G{r+3}', f'=IF(AND(ISNUMBER({self.A["avance"]}),{self.A["avance"]}>0),G{r}/1000*{self.A["avance"]},"udfyld avance")', fmt='#,##0.00')
+        fml(ws, f'G{r+3}', f'=IF(ISNUMBER({self.A["avance"]}),G{r}/1000*{self.A["avance"]},"udfyld avance")', fmt='#,##0.00')
         self.F['kpi'] = r
 
-        r0 = r + 6
+        rf = r + 6
+        section(ws, rf, 'Flow 2: hvad giver det at sende B + D', 9)
+        down = '*'.join(f'$E${first+i}' for i in range(1, len(spec)))
+        lbl(ws, f'A{rf+1}', 'Breve klar til afsendelse'); fml(ws, f'G{rf+1}', f'={self.A["klar2"]}')
+        lbl(ws, f'A{rf+2}', 'Respons (gæt, se Antagelser)'); fml(ws, f'G{rf+2}', f'={self.A["resp2"]}', fmt=PCT)
+        lbl(ws, f'A{rf+3}', 'Forventede leads'); fml(ws, f'G{rf+3}', f'=G{rf+1}*G{rf+2}', fmt='0.0')
+        lbl(ws, f'A{rf+4}', 'Forventede køb (resten af kæden som Flow 1)', bold=True); kpi(ws, f'G{rf+4}', f'=G{rf+3}*{down}', fmt='0.0')
+        lbl(ws, f'A{rf+5}', 'Køb pr. 1.000 breve, Flow 2'); fml(ws, f'G{rf+5}', f'=IF(G{rf+1}>0,G{rf+4}/G{rf+1}*1000,"–")', fmt='0.00')
+        note(ws, f'I{rf+2}', 'Gæt: brevet lander hos lejer eller beboer. Kan ikke afgøres før det er sendt')
+        note(ws, f'I{rf+4}', 'Kun så sikkert som gættet på respons og de sidste led')
+        self.F['flow2_koeb'] = f'Sensitivity!$G${rf+4}'
+
+        r0 = rf + 8
         section(ws, r0, 'Forventede køb: antal breve × respons (resten af kæden som ovenfor)', 9)
         lbl(ws, f'A{r0+1}', 'Breve sendt ↓   Respons →', italic=True)
-        resp = [0.02, 0.04, 0.066, 0.08, 0.10]
-        for j, v in enumerate(resp):
+        for j, v in enumerate([0.02, 0.04, 0.066, 0.08, 0.10]):
             inp(ws, f'{chr(66+j)}{r0+1}', v, fmt=PCT)
-        down = '*'.join(f'$E${first+i}' for i in range(1, len(spec)))
-        for k, nb in enumerate([250, 500, 1000, 1500, 2000]):
-            rr = r0 + 2 + k
+        for kk, nb in enumerate([250, 500, 1000, 1500, 2000]):
+            rr = r0 + 2 + kk
             inp(ws, f'A{rr}', nb, fmt='#,##0')
-            for j in range(len(resp)):
+            for j in range(5):
                 c = chr(66 + j)
                 fml(ws, f'{c}{rr}', f'=$A{rr}*{c}${r0+1}*{down}', fmt='0.0')
-        note(ws, f'A{r0+8}', 'Respons i runde 2 står i drivere ovenfor. Matricen viser, hvad fx 1.000 breve giver ved andre responsrater.')
 
     # ── Konklusion ──────────────────────────────────────────────────────
     def konklusion(self):
         ws = self.wb.create_sheet('Konklusion', 0)
-        title(ws, 'Konklusion: funnel fra brev til køb', 'Runde 2: breve sendt 11.09.2026 (segment A og C). Alle tal er formler på Data og Breve.', 8)
-        widths(ws, {'A': 40, 'B': 12, 'C': 14, 'D': 14, 'E': 3, 'F': 62})
-        R = self.F['rows']
-        ws['A3'].value = None
-        fml(ws, 'A3', f'="Data hentet "&TEXT({self.A["hentet"]},"dd-mm-yyyy")&" · "&{self.A["breve"]}&" breve sendt"', fmt='@')
+        title(ws, 'Konklusion: fra foreninger til køb', 'Flow 1 (beboet af ejer) er sendt 11.09.2026. Flow 2 (ikke beboet, lejer) er ikke sendt. Alle tal er formler.', 8)
+        widths(ws, {'A': 46, 'B': 14, 'C': 14, 'D': 14, 'E': 3, 'F': 70})
+        A = self.A
+        fml(ws, 'A3', f'="Data hentet "&TEXT({A["hentet"]},"dd-mm-yyyy")&" · "&{A["breve1"]}&" breve sendt i Flow 1 · "&{A["klar2"]}&" klar i Flow 2"', fmt='@')
         ws['A3'].font = _font(False, '64748B', 9, True)
 
-        section(ws, 5, 'Funnel', 8)
-        header_row(ws, 6, ['Trin', 'Antal', '% af breve', '% af forrige', '', 'Bemærkning'])
+        section(ws, 5, 'Fra toppen', 8)
+        header_row(ws, 6, ['Trin', 'Antal', '% af forrige', '', '', 'Bemærkning'])
+        kan = self.F['kan_row']
+        f1, f2 = self.F['flowrow_Flow 1'], self.F['flowrow_Flow 2']
+        top = [
+            ('Foreninger i registret', '=Funnel!B6', None, '=Funnel!C6&" enheder"', False),
+            ('Foreninger vi vil købe i', '=Funnel!B7', '=IF(Funnel!B6>0,Funnel!B7/Funnel!B6,"–")', '=Funnel!C7&" enheder"', False),
+            ('Boliger i dem, i størrelsen 20–80 kvm', '=Funnel!C9', '=Funnel!D8*Funnel!D9', 'Målt i BBR. Procenten er andelen af enhederne i Målgruppe', False),
+            ('Kan få brev', f'=Funnel!C{kan}', f'=Funnel!D{kan}', 'Har Resights-data, uden vores egne. Procenten er andelen af dem med Resights-data', True),
+            ('Flow 1: beboet af ejer', f'=Funnel!C{f1}', f'=Funnel!D{f1}', 'Sendt 11.09.2026. Procenten er andelen af dem, der kan få brev', False),
+            ('Flow 2: ikke beboet, lejer', f'=Funnel!C{f2}', f'=Funnel!D{f2}', 'Ikke sendt endnu. Procenten er andelen af dem, der kan få brev', False),
+        ]
+        for i, (txt, f_, p, kom, fed) in enumerate(top):
+            r = 7 + i
+            lbl(ws, f'A{r}', txt, bold=fed)
+            fml(ws, f'B{r}', f_, bold=fed); ws[f'B{r}'].alignment = Alignment(horizontal='right')
+            if p:
+                fml(ws, f'C{r}', p, fmt=PCT)
+            if kom.startswith('='):
+                fml(ws, f'F{r}', kom, fmt='@')
+                ws[f'F{r}'].font = _font(False, '64748B', 9, True)
+            else:
+                note(ws, f'F{r}', kom)
+        lbl(ws, 'A13', 'Hvor mange gange har de fået brev', italic=True)
+        fml(ws, 'B13', '="Flow 1: "&Udsendelser!G14&" har fået 2 breve, "&Udsendelser!F14&" har fået 1, "&Udsendelser!E14&" ingen"', fmt='@')
+        fml(ws, 'B14', '="Flow 2: "&Udsendelser!G15&" har fået 2 breve, "&Udsendelser!F15&" har fået 1, "&Udsendelser!E15&" ingen"', fmt='@')
+
+        R = self.F['rows']['Flow 1']
+        e0 = 16
+        section(ws, e0, 'Flow 1 · beboet af ejer: fra brev til køb', 8)
+        header_row(ws, e0 + 1, ['Trin', 'Antal', '% af breve', '% af forrige', '', 'Bemærkning'])
         vis = ['Breve sendt', 'Besøgt siden fra brevet', 'Startet beregneren', 'Gennemført beregneren (lead)', 'Booking-mail sendt',
                'Kunden har svaret', 'Besigtigelse aftalt', 'Besigtigelse afholdt', 'Bud afgivet', 'Købt']
         for i, navn in enumerate(vis):
-            r = 7 + i
+            r = e0 + 2 + i
             fr = R[navn]
             lbl(ws, f'A{r}', navn, bold=(navn in ('Breve sendt', 'Gennemført beregneren (lead)', 'Købt')))
-            fml(ws, f'B{r}', f'=Funnel!C{fr}'); ws[f'B{r}'].alignment = Alignment(horizontal='right')
-            fml(ws, f'C{r}', f'=Funnel!E{fr}', fmt=PCT)
-            fml(ws, f'D{r}', f'=Funnel!D{fr}', fmt=PCT)
+            fml(ws, f'B{r}', f'=Funnel!C{fr}'); fml(ws, f'C{r}', f'=Funnel!E{fr}', fmt=PCT); fml(ws, f'D{r}', f'=Funnel!D{fr}', fmt=PCT)
+            for c in 'BCD':
+                ws[f'{c}{r}'].alignment = Alignment(horizontal='right')
             fml(ws, f'F{r}', f'=IF(ISNUMBER(B{r}),IF(Funnel!H{fr}="lille n","Få data: læs med forbehold",""),"Ikke målt")', fmt='@')
             ws[f'F{r}'].font = _font(False, '64748B', 9, True)
-        e = 7 + len(vis)
-        for rad_ in range(7, e):
-            for kol_ in 'BCD':
-                ws[f'{kol_}{rad_}'].alignment = Alignment(horizontal='right')
+        e = e0 + 2 + len(vis)
 
-        # lækage
-        section(ws, e + 1, 'Hvor lækker det', 8)
+        lbl(ws, f'A{e}', 'Flow 2 · ikke beboet, lejer', bold=True)
+        fml(ws, f'B{e}', f'=IF({A["breve2"]}>0,{A["breve2"]},"ikke sendt")'); ws[f'B{e}'].alignment = Alignment(horizontal='right')
+        fml(ws, f'F{e}', f'="Klar: "&{A["klar2"]}&" breve. Forventet "&ROUND({self.F["flow2_koeb"]},1)&" køb ved "&ROUND({A["resp2"]}*100,1)&" %"&" respons (gæt)"', fmt='@')
+        ws[f'F{e}'].font = _font(False, '64748B', 9, True)
+        e += 1
+
+        section(ws, e + 1, 'Hvor lækker det (Flow 1)', 8)
         a, b = R['Booking-mail sendt'], R['Købt']
         sikker = f'Funnel!$K${a}:$K${b}'
         trin_navne = f'Funnel!$A${a}:$A${b}'
-        lbl(ws, f'A{e+2}', 'Laveste sikre trin-rate')
-        fml(ws, f'B{e+2}', f'=IF(COUNT({sikker})=0,"–",MIN({sikker}))', fmt=PCT)
+        lbl(ws, f'A{e+2}', 'Laveste sikre trin-rate'); fml(ws, f'B{e+2}', f'=IF(COUNT({sikker})=0,"–",MIN({sikker}))', fmt=PCT)
+        note(ws, f'F{e+2}', 'Kun trin hvor forrige trin har mindst det antal, der står i Antagelser')
         lbl(ws, f'A{e+3}', 'Trinnet')
         fml(ws, f'B{e+3}', f'=IF(COUNT({sikker})=0,"for få data",INDEX({trin_navne},MATCH(MIN({sikker}),{sikker},0)))', fmt='@')
-        ws.merge_cells(f'B{e+3}:D{e+3}')
+        fml(ws, f'F{e+3}', f'=IF(B{e+3}="Kunden har svaret","Svarraten er et minimum: svar til administration@ nåede ikke CRM’et før 05.10","")', fmt='@')
+        ws[f'F{e+3}'].font = _font(False, '64748B', 9, True)
         lbl(ws, f'A{e+4}', 'Mistet mellem brev og lead')
         fml(ws, f'B{e+4}', f'=Funnel!C{R["Breve sendt"]}-Funnel!C{R["Gennemført beregneren (lead)"]}')
         note(ws, f'F{e+4}', 'Det største enkelte tab. Vi kan ikke se hvor: besøg og start er ikke målt')
-        fml(ws, f'F{e+3}', f'=IF(B{e+3}="Kunden har svaret","Svarraten er et minimum: svar til administration@ nåede ikke CRM’et før 05.10","")', fmt='@')
-        ws[f'F{e+3}'].font = _font(False, '64748B', 9, True)
-        note(ws, f'F{e+2}', 'Kun trin hvor forrige trin har mindst det antal, der står i Antagelser')
 
-        # drivere
         d1, d2 = self.F['drivers']
         k = self.F['kpi']
-        section(ws, e + 6, 'Driverne og hvad én procentpoint er værd (køb pr. 1.000 breve)', 8)
+        section(ws, e + 6, 'Driverne og hvad ét procentpoint er værd (køb pr. 1.000 breve)', 8)
         header_row(ws, e + 7, ['Driver', 'Bruges', 'Kilde', 'Hvis +1 pp', '', 'Grundlag'])
         for i in range(d2 - d1 + 1):
             r = e + 8 + i
-            fml(ws, f'A{r}', f'=Sensitivity!A{d1+i}', fmt='@')
-            fml(ws, f'B{r}', f'=Sensitivity!E{d1+i}', fmt=PCT)
+            fml(ws, f'A{r}', f'=Sensitivity!A{d1+i}', fmt='@'); fml(ws, f'B{r}', f'=Sensitivity!E{d1+i}', fmt=PCT)
             fml(ws, f'C{r}', f'=Sensitivity!F{d1+i}', fmt='@')
             fml(ws, f'D{r}', f'=Sensitivity!H{d1+i}-Sensitivity!G{d1+i}', fmt='+0.00;-0.00;"–"')
-            fml(ws, f'F{r}', f'="n = "&Sensitivity!C{d1+i}', fmt='@')
-            ws[f'F{r}'].font = _font(False, '64748B', 9, True)
+            fml(ws, f'F{r}', f'="n = "&Sensitivity!C{d1+i}', fmt='@'); ws[f'F{r}'].font = _font(False, '64748B', 9, True)
         rr = e + 8 + (d2 - d1 + 1)
         lbl(ws, f'A{rr}', 'Køb pr. 1.000 breve', bold=True); kpi(ws, f'B{rr}', f'=Sensitivity!G{k}', fmt='0.00')
         lbl(ws, f'A{rr+1}', 'Breve pr. købt lejlighed'); fml(ws, f'B{rr+1}', f'=Sensitivity!G{k+1}', fmt='#,##0')
         lbl(ws, f'A{rr+2}', 'Omkostning pr. købt (kr)'); fml(ws, f'B{rr+2}', f'=Sensitivity!G{k+2}', fmt='#,##0')
-        note(ws, f'F{rr}', 'Gæt i de sidste led til kohorten har nået dem. Kilden står ved hver driver')
+        note(ws, f'F{rr}', 'Gæt i de sidste led, til kohorten har nået dem. Kilden står ved hver driver')
 
-        # hvad leads fortæller
-        section(ws, rr + 4, 'Hvad de, der gennemfører, fortæller', 8)
+        rr += 4
+        section(ws, rr, 'Hvad de, der gennemfører, fortæller', 8)
         for j, (txt, key, kom) in enumerate([
             ('Satte udgifterne til «senere»', 'udg_senere', 'Buddet regnes uden drift, og vi skal indhente tallene ved besigtigelsen'),
-            ('Ved ikke endnu, hvornår de vil flytte', 'tid_ved_ikke', 'Størstedelen er ikke i gang med at sælge. Det er en lang opfølgning, ikke et hurtigt salg'),
+            ('Ved ikke endnu, hvornår de vil flytte', 'tid_ved_ikke', 'Mange er ikke i gang med at sælge. Det er en lang opfølgning, ikke et hurtigt salg'),
             ('Ved ikke endnu, hvad de skal efter salget', 'efter_ved_ikke', ''),
         ]):
-            lbl(ws, f'A{rr+5+j}', txt); fml(ws, f'B{rr+5+j}', f'={self.F[key]}', fmt=PCT)
-            if kom: note(ws, f'F{rr+5+j}', kom)
+            lbl(ws, f'A{rr+1+j}', txt); fml(ws, f'B{rr+1+j}', f'={self.F[key]}', fmt=PCT)
+            if kom:
+                note(ws, f'F{rr+1+j}', kom)
         rr += 5
-        # hvad vi ikke ved
-        section(ws, rr + 4, 'Hvad vi ikke kan se endnu', 8)
+        section(ws, rr, 'Hvad vi ikke kan se endnu', 8)
         for j, txt in enumerate([
             'Hvor mange der besøgte siden fra brevet, og hvor mange der startede beregneren. QR-koden har ingen kode.',
             'Hvor i beregneren de falder fra. Den gemmer først ved afsendelse.',
             'Svar til administration@ før 05.10. Videresendelsen til CRM’et er ikke bevist at virke.',
             'Opkald før 05.10. Fanen Opkald findes først fra da, så «første opkald» er næsten tom.',
         ]):
-            note(ws, f'A{rr+5+j}', f'· {txt}')
-        # kontroller
-        rk = rr + 10
-        lbl(ws, f'A{rk}', 'Kontroller', bold=True)
-        fml(ws, f'B{rk}', "='Kontroller og flag'!C3", fmt='@')
+            note(ws, f'A{rr+1+j}', f'· {txt}')
+        lbl(ws, f'A{rr+6}', 'Kontroller', bold=True); fml(ws, f'B{rr+6}', "='Kontroller og flag'!C3", fmt='@')
         ws.freeze_panes = 'A5'
 
     # ── Kontroller og flag ──────────────────────────────────────────────
     def kontroller(self):
         ws = self.wb.create_sheet('Kontroller og flag')
         title(ws, 'Kontroller og flag', None, 6)
-        widths(ws, {'A': 64, 'B': 14, 'C': 12, 'D': 60})
+        widths(ws, {'A': 66, 'B': 14, 'C': 12, 'D': 62})
         header_row(ws, 5, ['Kontrol', 'Værdi', 'Status', 'Kommentar'])
-        R = self.F['rows']
-        lead = f'Funnel!$C${R["Gennemført beregneren (lead)"]}'
+        A, R1 = self.A, self.F['rows']['Flow 1']
+        FR = self.F['FR']
         tests = [
-            ('Breve sendt = segment A + C i brevlisten', f'={self.A["breve"]}-({self.A["segA"]}+{self.A["segC"]})', '=IF(B{r}=0,"OK","FEJL")', ''),
-            ('A + B + C + D = kan få brev', f'={self.A["segA"]}+{self.A["segB"]}+{self.A["segC"]}+{self.A["segD"]}-{self.A["kan"]}', '=IF(B{r}=0,"OK","FEJL")', ''),
-            ('Rækker i Data = leads i CRM', f'=COUNTA({self.D("A")})-{self.A["nCrm"]}', '=IF(B{r}=0,"OK","FEJL")', ''),
-            ('Testleads, udeladt af alle tal', f'=COUNTIFS({self.D("J")},"Test")', '=IF(B{r}>=0,"Info","")', 'Jacob Lisby og Test Test'),
-            ('Kohortens leads matchet kun på gade og nummer', f'=COUNTIFS({self.D("J")},"Runde 2",{self.D("H")},"gade+nr")', '=IF(B{r}=0,"OK","Tjek")', 'Adressen havde ikke etage og dør. Matchet hvis gade+nr er entydigt'),
-            ('Kohortens leads uden forening', f'=COUNTIFS({self.D("J")},"Runde 2",{self.D("E")},"")', '=IF(B{r}=0,"OK","Tjek")', ''),
-            ('Afholdt større end aftalt', f'=MAX(0,Funnel!C{R["Besigtigelse afholdt"]}-Funnel!C{R["Besigtigelse aftalt"]})', '=IF(B{r}=0,"OK","Tjek")', 'Kan ske, hvis et trin blev sprunget over i CRM’et'),
-            ('Bud større end afholdt', f'=MAX(0,Funnel!C{R["Bud afgivet"]}-Funnel!C{R["Besigtigelse afholdt"]})', '=IF(B{r}=0,"OK","Tjek")', ''),
-            ('Købt større end bud', f'=MAX(0,Funnel!C{R["Købt"]}-Funnel!C{R["Bud afgivet"]})', '=IF(B{r}=0,"OK","Tjek")', ''),
-            ('Dage siden data blev hentet', f'=ROUND(NOW()-{self.A["hentet"]},0)', '=IF(B{r}<=7,"OK","Gammel")', 'Kør bygfunnel.py for at opdatere'),
-            ('Trin der ikke måles', f'=COUNTIF(Funnel!$B${R["Breve sendt"]}:$B${R["Købt"]},"Nej")', '=IF(B{r}=0,"OK","Flag")', 'Besøg og start af beregner. Se Antagelser'),
-            ('Pris pr. brev udfyldt', f'=IF(ISNUMBER({self.A["pris"]}),1,0)', '=IF(B{r}=1,"OK","Mangler")', 'Uden pris vises ingen omkostning pr. køb'),
+            ('A + B + C + D = kan få brev', f'={A["segA"]}+{A["segB"]}+{A["segC"]}+{A["segD"]}-{A["kan"]}', '=IF(B{r}=0,"OK","FEJL")', 'Antagelser B5 og B6 er skrevet ind fra brevlisten'),
+            ('Alle breve hører til en forening i listen', f'=COUNTA({self.B("A")})-SUM({FR("I")})', '=IF(B{r}=0,"OK","FEJL")', 'Ellers mangler en brevgruppe i Foreninger-fanen'),
+            ('Rækker i Data = leads i CRM', f'=COUNTA({self.D("A")})-{A["nCrm"]}', '=IF(B{r}=0,"OK","FEJL")', ''),
+            ('Testleads, udeladt af alle tal', f'=COUNTIFS({self.D("P")},"Test")', '=IF(B{r}>=0,"Info","")', 'Jacob Lisby og Test Test'),
+            ('Leads i Flow 1 matchet kun på gade og nummer', f'=COUNTIFS({self.D("P")},"Flow 1 · sendt",{self.D("J")},"gade+nr")', '=IF(B{r}=0,"OK","Tjek")', 'Adressen havde ikke etage og dør. Matchet, hvis gade og nummer er entydigt'),
+            ('Leads i et sendt flow uden forening', f'=COUNTIFS({self.D("P")},"*sendt",{self.D("L")},"")', '=IF(B{r}=0,"OK","Tjek")', ''),
+            ('Afholdt større end aftalt (Flow 1)', f'=MAX(0,Funnel!C{R1["Besigtigelse afholdt"]}-Funnel!C{R1["Besigtigelse aftalt"]})', '=IF(B{r}=0,"OK","Tjek")', 'Kan ske, hvis et trin blev sprunget over i CRM’et'),
+            ('Bud større end afholdt (Flow 1)', f'=MAX(0,Funnel!C{R1["Bud afgivet"]}-Funnel!C{R1["Besigtigelse afholdt"]})', '=IF(B{r}=0,"OK","Tjek")', ''),
+            ('Købt større end bud (Flow 1)', f'=MAX(0,Funnel!C{R1["Købt"]}-Funnel!C{R1["Bud afgivet"]})', '=IF(B{r}=0,"OK","Tjek")', ''),
+            ('Dage siden data blev hentet', f'=ROUND(NOW()-{A["hentet"]},0)', '=IF(B{r}<=7,"OK","Gammel")', 'Kør bygfunnel.py for at opdatere'),
+            ('Trin der ikke måles (Flow 1)', f'=COUNTIF(Funnel!$B${R1["Breve sendt"]}:$B${R1["Købt"]},"Nej")', '=IF(B{r}=0,"OK","Flag")', 'Besøg og start af beregner. Se Antagelser'),
+            ('Pris pr. brev udfyldt', f'=IF(ISNUMBER({A["pris"]}),1,0)', '=IF(B{r}=1,"OK","Mangler")', 'Uden pris vises ingen omkostning pr. køb'),
         ]
-        r = 6
-        first = r
+        first = r = 6
         for text, form, status, kom in tests:
             lbl(ws, f'A{r}', text); fml(ws, f'B{r}', form)
             fml(ws, f'C{r}', status.replace('{r}', str(r)), fmt='@'); note(ws, f'D{r}', kom)
             r += 1
         last = r - 1
+        flag = '+'.join(f'COUNTIF(C{first}:C{last},"{x}")' for x in ('Tjek', 'Flag', 'Mangler', 'Gammel'))
         lbl(ws, 'A3', 'Samlet', bold=True)
-        fml(ws, 'C3', f'=IF(COUNTIF(C{first}:C{last},"FEJL")>0,"FEJL",IF(COUNTIF(C{first}:C{last},"Tjek")+COUNTIF(C{first}:C{last},"Flag")+COUNTIF(C{first}:C{last},"Mangler")+COUNTIF(C{first}:C{last},"Gammel")>0,"Flag","OK"))', fmt='@', bold=True)
-        fml(ws, 'D3', f'=COUNTIF(C{first}:C{last},"FEJL")&" fejl · "&(COUNTIF(C{first}:C{last},"Tjek")+COUNTIF(C{first}:C{last},"Flag")+COUNTIF(C{first}:C{last},"Mangler")+COUNTIF(C{first}:C{last},"Gammel"))&" flag"', fmt='@')
+        fml(ws, 'C3', f'=IF(COUNTIF(C{first}:C{last},"FEJL")>0,"FEJL",IF({flag}>0,"Flag","OK"))', fmt='@', bold=True)
+        fml(ws, 'D3', f'=COUNTIF(C{first}:C{last},"FEJL")&" fejl · "&({flag})&" flag"', fmt='@')
 
     def byg(self, ud):
         self.antagelser()
         self.breve_fane()
         self.data_fane()
+        self.foreninger_fane()
+        self.udsendelser_fane()
         self.funnel()
-        self.pr_forening()
         self.beregner()
         self.sensitivity()
         self.konklusion()
         self.kontroller()
-        navne = ['Konklusion', 'Antagelser', 'Funnel', 'Pr. forening', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
+        navne = ['Konklusion', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
         self.wb._sheets = [self.wb[n] for n in navne]
         for ws in self.wb.worksheets:
             ws.sheet_view.showGridLines = False
-            ws.sheet_properties.tabColor = None
         self.wb.save(ud)
 
 
@@ -679,8 +833,9 @@ def naeste_version():
 
 if __name__ == '__main__':
     crm = hent_crm()
-    breve, gade = laes_brevliste()
+    breve = laes_brevliste()
+    rollup = json.load(open(ROLLUP))
     n = int(sys.argv[1]) if len(sys.argv) > 1 else naeste_version()
     ud = VAULT / f'Funnel boligberegner – v{n}.xlsx'
-    Bygger(crm, breve, gade).byg(ud)
+    Bygger(crm, breve, rollup).byg(ud)
     print('skrevet', ud)
