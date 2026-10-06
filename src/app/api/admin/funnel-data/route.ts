@@ -20,7 +20,7 @@ import { createHash } from 'crypto';
 import { NextResponse } from 'next/server';
 import { isNull } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { leadCommunications, leadStageHistory, leads } from '@/lib/db/schema';
+import { housingAssociations, leadCommunications, leadStageHistory, leads } from '@/lib/db/schema';
 import { beregnerSvar } from '@/lib/beregner';
 import { bbrForAdresse } from '@/lib/bbr-lejlighed';
 import { BOOKING_EMNE } from '@/lib/besigtigelse';
@@ -53,7 +53,7 @@ const erTest = (l: { email: string | null; fullName: string | null }) =>
   (l.email ?? '').toLowerCase() === 'jacob@faurholt.com' || /\b(test|jacob lisby)\b/i.test(l.fullName ?? '');
 
 export async function GET() {
-  const [alle, historik, komm] = await Promise.all([
+  const [alle, historik, komm, foreninger] = await Promise.all([
     db.select().from(leads).where(isNull(leads.deletedAt)),
     db.select({ leadId: leadStageHistory.leadId, trin: leadStageHistory.toStage, tid: leadStageHistory.changedAt }).from(leadStageHistory),
     db
@@ -66,6 +66,21 @@ export async function GET() {
         tid: leadCommunications.createdAt,
       })
       .from(leadCommunications),
+    // Foreningerne bag tragten på /foreninger: navn, by, antal enheder, status.
+    db
+      .select({
+        navn: housingAssociations.name,
+        by: housingAssociations.city,
+        gade: housingAssociations.streetName,
+        enheder: housingAssociations.unitCount,
+        ejet: housingAssociations.ownedCount,
+        kvmFra: housingAssociations.kvmFrom,
+        kvmTil: housingAssociations.kvmTo,
+        status: housingAssociations.status,
+        hvorfor: housingAssociations.statusReason,
+        breveRunder: housingAssociations.letterRounds,
+      })
+      .from(housingAssociations),
   ]);
 
   const trinPrLead = new Map<string, Map<string, Date>>();
@@ -147,7 +162,7 @@ export async function GET() {
   });
 
   return NextResponse.json(
-    { genereret: new Date().toISOString(), antal: raekker.length, leads: raekker },
+    { genereret: new Date().toISOString(), antal: raekker.length, leads: raekker, foreninger },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
