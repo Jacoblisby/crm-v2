@@ -393,6 +393,80 @@ class Bygger:
         note(ws, 'J33', 'Resten er enkeltlejligheder i foreninger, der ellers fik brev i 2025: sandsynligvis nye ejere eller adresser, der først nu opfylder kravet om 20–80 kvm og Resights-data')
         note(ws, f'A{t+2}', 'Adresserne på de 18 står i vaultnoten «Flow 1 med kun ét brev.md». Regnearket indeholder ingen adresser.')
 
+    # ── Segmenter ───────────────────────────────────────────────────────
+    def segmenter(self):
+        ws = self.wb.create_sheet('Segmenter')
+        title(ws, 'Segmenter: hvem de er, og hvad de har fået', 'A til D er brevlistens fire grupper. De deles i to flows efter, om ejeren bor på adressen. Tallene er formler på Breve.', 11)
+        widths(ws, {'A': 9, 'B': 8, 'C': 26, 'D': 42, 'E': 40, 'F': 34, 'G': 28, 'H': 10, 'I': 12, 'J': 11, 'K': 52})
+        header_row(ws, 4, ['Segment', 'Flow', 'Navn', 'Hvem er de', 'Sådan afgøres det', 'Brevet lander hos', 'Brev', 'Antal', 'Fik brev jul 2025', 'Sendt 2026', 'Forbehold'])
+        ws.row_dimensions[4].height = 32
+        BC, BG, BH = self.B('C'), self.B('G'), self.B('H')
+        beskyttet = 'Reklamebeskyttelse betyder, at ejeren har sagt nej til uopfordret reklame (CPR for privatpersoner, CVR for selskaber). '
+        rows = [
+            ('A', 'Må kontaktes · ejer bor der',
+             'Ejerlejligheder på 20–80 kvm, hvor ejeren selv bor, og hvor ejeren må få reklamepost.',
+             'Resights: ejerens postadresse er lejlighedens adresse, og ejeren er ikke reklamebeskyttet.',
+             'Ejeren selv', 'Beboende ejer brev 2',
+             'Ejernavn og ejeradresse gemmes ikke. Alle breve adresseres «Til ejeren» på lejlighedens adresse.'),
+            ('B', 'Må kontaktes · ejer bor et andet sted',
+             'Ejerlejligheder på 20–80 kvm, som ejeren ikke bor i, og hvor ejeren må få reklamepost. Som regel udlejet.',
+             'Resights: ejerens postadresse er en anden end lejlighedens, og ejeren er ikke reklamebeskyttet.',
+             'Lejeren eller beboeren', 'Udlejer brev 1',
+             'Udlejer-brevet er skrevet til ejeren, men lander hos lejeren, fordi ejerens postadresse ikke er i datasættet. Det skal løses, før B sendes: hent ejerens adresse, eller skriv et brev, en lejer også kan bruge.'),
+            ('C', 'Reklamebeskyttet · ejer bor der',
+             'Som A, men ejeren er reklamebeskyttet.',
+             'Resights: ejeren bor på adressen og er reklamebeskyttet. «Ukendt» (5 stk.) tælles som beskyttet. ' + beskyttet.strip(),
+             'Ejeren selv', 'Beboende ejer brev 2',
+             'Sendt efter Jacobs beslutning. Fodnoten med afmelding blev fjernet før afsendelse.'),
+            ('D', 'Reklamebeskyttet · ejer bor et andet sted',
+             'Som B, men ejeren er reklamebeskyttet.',
+             'Resights: ejeren bor et andet sted og er reklamebeskyttet.',
+             'Lejeren eller beboeren', 'Udlejer brev 1',
+             'Som B. Kræver desuden en ny beslutning om at skrive til reklamebeskyttede, hvis brevet sendes til ejerens egen adresse.'),
+        ]
+        for j, (sg, navn, hvem, afgoer, lander, brev, forbehold) in enumerate(rows):
+            r = 5 + j
+            hard(ws, f'A{r}', sg, fmt='@')
+            fml(ws, f'B{r}', f'=IF(OR(A{r}="A",A{r}="C"),"Flow 1","Flow 2")', fmt='@')
+            lbl(ws, f'C{r}', navn, bold=True)
+            lbl(ws, f'D{r}', hvem); lbl(ws, f'E{r}', afgoer); lbl(ws, f'F{r}', lander); lbl(ws, f'G{r}', brev)
+            fml(ws, f'H{r}', f'=COUNTIFS({BC},A{r})')
+            fml(ws, f'I{r}', f'=COUNTIFS({BC},A{r},{BG},"Ja")')
+            fml(ws, f'J{r}', f'=COUNTIFS({BC},A{r},{BH},1)')
+            note(ws, f'K{r}', forbehold)
+            for c in 'ABCDEFGHIJK':
+                ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'HIJ' else None))
+            ws.row_dimensions[r].height = 92
+        lbl(ws, 'A9', 'I alt', bold=True)
+        for c in 'HIJ':
+            fml(ws, f'{c}9', f'=SUM({c}5:{c}8)', bold=True)
+
+        section(ws, 11, 'De to flows', 11)
+        header_row(ws, 12, ['Flow', '', 'Navn', 'Segmenter', 'Hvad vi skriver', 'Hvem der læser det', '', 'Antal', '', 'Sendt 2026', 'Status'])
+        flows = [
+            ('Flow 1', 'Beboet af ejer', 'A + C', 'Et kontant bud, uden mægler, og at ejeren kan blive boende som lejer.', 'Ejeren, som bor i lejligheden.'),
+            ('Flow 2', 'Ikke beboet, lejer', 'B + D', 'Et kontant bud, med eller uden lejer, uden fremvisninger.', 'Skal være ejeren. Lander i dag hos lejeren.'),
+        ]
+        for j, (fl, navn, seg, hvad, laeser) in enumerate(flows):
+            r = 13 + j
+            hard(ws, f'A{r}', fl, fmt='@'); lbl(ws, f'C{r}', navn, bold=True); lbl(ws, f'D{r}', seg); lbl(ws, f'E{r}', hvad); lbl(ws, f'F{r}', laeser)
+            fml(ws, f'H{r}', f'=SUMIF($B$5:$B$8,A{r},$H$5:$H$8)')
+            fml(ws, f'J{r}', f'=SUMIF($B$5:$B$8,A{r},$J$5:$J$8)')
+            fml(ws, f'K{r}', f'=IF(J{r}=0,"Ikke sendt","Sendt "&TEXT({self.A["sendt"+str(j+1)]},"dd-mm-yyyy"))', fmt='@')
+            for c in 'ACDEFHJK':
+                ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'HJ' else None))
+            ws.row_dimensions[r].height = 44
+
+        section(ws, 16, 'Fælles for alle fire', 11)
+        for j, txt in enumerate([
+            'Ejerlejligheder på 20–80 kvm i de 11 brevgrupper under Foreninger, og ejeren kendes i Resights.',
+            'Koncernens egne lejligheder er trukket fra, så ingen af dem får brev.',
+            'Alle breve har en QR-kode, der peger på forsiden uden personlig kode. Derfor kan vi ikke se, hvem der scannede.',
+            'Fik brev jul 2025 er hvor mange af segmentet, der også stod på listen i juli 2025.',
+        ]):
+            note(ws, f'A{17+j}', f'· {txt}')
+        ws.freeze_panes = 'A5'
+
     # ── Funnel ──────────────────────────────────────────────────────────
     def funnel(self):
         ws = self.wb.create_sheet('Funnel')
@@ -837,11 +911,12 @@ class Bygger:
         self.foreninger_fane()
         self.udsendelser_fane()
         self.funnel()
+        self.segmenter()
         self.beregner()
         self.sensitivity()
         self.konklusion()
         self.kontroller()
-        navne = ['Konklusion', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
+        navne = ['Konklusion', 'Segmenter', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
         self.wb._sheets = [self.wb[n] for n in navne]
         for ws in self.wb.worksheets:
             ws.sheet_view.showGridLines = False
