@@ -187,7 +187,11 @@ class Bygger:
 
         section(ws, 36, 'Over tid', 6)
         lbl(ws, 'A37', 'Dage efter en uges slutning, før dens leads tæller som modne'); inp(ws, 'B37', 14); A['moden'] = 'Antagelser!$B$37'
-        note(ws, 'D37', 'Et lead fra sidste uge har ikke haft tid til at nå besigtigelse. Modne uger bruges til konverteringen i bunden af hver tabel')
+        lbl(ws, 'A38', 'Periode i fanen Tid for Flow 1 og Flow 2 (Uge eller Måned)'); inp(ws, 'B38', 'Måned', fmt='@'); A['periode'] = 'Antagelser!$B$38'
+        from openpyxl.worksheet.datavalidation import DataValidation
+        dv = DataValidation(type='list', formula1='"Uge,Måned"', allow_blank=False); ws.add_data_validation(dv); dv.add('B38')
+        note(ws, 'D38', 'Måned følger afsendelsesdatoen: periode 0 er 30 dage fra brevet. Uge er bedre de første uger')
+        note(ws, 'D37', 'Et lead fra sidste periode har ikke haft tid til at nå besigtigelse. Modne uger bruges til konverteringen i bunden af hver tabel')
         ws.freeze_panes = 'A4'
 
     # ── Breve ───────────────────────────────────────────────────────────
@@ -427,9 +431,10 @@ class Bygger:
                 r = first + i
                 hard(ws, f'A{r}', i, fmt='0')
                 if trin == 'uge':
-                    fml(ws, f'B{r}', f'=IF({start}="","",{start}+7*A{r})' , fmt='dd-mm-yy')
-                    slut = f'B{r}+7'
-                    fml(ws, f'C{r}', f'=IF(B{r}="","",B{r}+6)', fmt='dd-mm-yy')
+                    per = A['periode']
+                    fml(ws, f'B{r}', f'=IF({start}="","",IF({per}="Måned",EDATE({start},A{r}),{start}+7*A{r}))', fmt='dd-mm-yy')
+                    slut = f'IF({per}="Måned",EDATE(B{r},1),B{r}+7)'
+                    fml(ws, f'C{r}', f'=IF(B{r}="","",{slut}-1)', fmt='dd-mm-yy')
                 else:
                     fml(ws, f'B{r}', f'=EDATE({start},A{r})', fmt='mmm yyyy')
                     slut = f'EDATE(B{r},1)'
@@ -453,15 +458,15 @@ class Bygger:
                     fml(ws, f'{c}{r_}', f_, bold=True)
                 for kol, _, _ in stadier:
                     fml(ws, f'{rate[kol]}{r_}', f'=IF($D{r_}>0,{kol}{r_}/$D{r_},"")', fmt=PCT, bold=True)
-            note(ws, f'S{last+2}', 'Kun uger der er modne')
+            note(ws, f'S{last+2}', 'Kun modne perioder')
             return last + 4
 
         if True:
             r = 4
             for k, navn, segs in FLOWS:
                 fl = 1 if k == 'Flow 1' else 2
-                r = blok(r, f'{navn}: uge for uge efter afsendelse', f'{self.D("P")},"{k} · sendt"',
-                         A['sendt' + str(fl)], 'uge', 10, breve=A['breve' + str(fl)])
+                r = blok(r, f'{navn}: pr. periode efter afsendelse (uge eller måned, vælges i Antagelser)', f'{self.D("P")},"{k} · sendt"',
+                         A['sendt' + str(fl)], 'uge', 12, enhed='Periode', breve=A['breve' + str(fl)])
             # alle ikke-test-leads pr. måned
             førstemd = min(til_dato(l['oprettet']) for l in self.crm['leads'] if l['oprettet'])
             første = date(førstemd.year, førstemd.month, 1)
@@ -474,7 +479,7 @@ class Bygger:
             lbl(ws, f'A{r0+1}', 'Første måned'); hard(ws, f'D{r0+1}', første, fmt='mmm yyyy')
             r = blok(r0 + 2, 'Alle leads: oprettet i måneden', f'{self.D("P")},"<>Test"', f'$D${r0+1}', 'maaned', md, enhed='Måned')
             ws.row_dimensions[r0].height = 18
-        note(ws, f'A{r}', 'Uge 0 starter på afsendelsesdagen. Brevene er 3–9 hverdage om at nå frem, så de første uger er lave. En uge kaldes delvis, hvis den ikke er slut, når data blev hentet.')
+        note(ws, f'A{r}', 'Periode 0 starter på afsendelsesdagen. Brevene er 3–9 hverdage om at nå frem, så den første periode er lav. En periode kaldes delvis, hvis den ikke er slut, når data blev hentet.')
         note(ws, f'A{r+1}', 'Flow 2 fyldes ud, når datoen står i Antagelser. Tallene stiger, efterhånden som ældre leads når videre. Kør bygfunnel.py igen for at opdatere.')
         ws.freeze_panes = 'A4'
 
