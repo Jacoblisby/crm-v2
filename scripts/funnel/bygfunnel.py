@@ -482,48 +482,58 @@ class Bygger:
     def handlinger(self):
         from openpyxl.styles import Font
         ws = self.wb.create_sheet('Flow og handling')
-        title(ws, 'Flow og handling: hvad gør vi på hvert trin', 'Hvert trin i tragten med antal, den handling der følger, og det brev eller den mail vi sender. Tallene er formler på Funnel.', 11)
-        widths(ws, {'A': 34, 'B': 10, 'C': 9, 'D': 10, 'E': 10, 'F': 56, 'G': 26, 'H': 28, 'I': 36, 'J': 26, 'K': 14})
-        SALG = 'https://drive.google.com/file/d/1EdfmX4UCgXIwOBE0CTicP-OEO04yJFB4/view?usp=drivesdk'
-        BREV1 = 'https://drive.google.com/file/d/17dwwery6gTZtXqRw6dAhVgQk-4X03FT2/view?usp=drivesdk'
-        BREV2 = 'https://drive.google.com/file/d/1mdo8hP6zQwvmIsVGhMKjh0osq-mPFajN/view?usp=drivesdk'
+        title(ws, 'Flow og handling: hvad gør vi på hvert trin', 'Hvert trin i tragten med antal, handlingen, og de(t) præcise brev, mails og scripts vi bruger. Tallene er formler på Funnel.', 11)
+        widths(ws, {'A': 34, 'B': 10, 'C': 9, 'D': 10, 'E': 10, 'F': 52, 'G': 24, 'H': 30, 'I': 40, 'J': 22})
+        links = json.load(open(Path(__file__).with_name('drive-links.json')))
         CRM = 'https://crm.365ejendom.dk'
-        header_row(ws, 4, ['Trin', 'Flow 1 nået', '% af forrige', 'Flow 1 står her nu', 'Flow 2 nået', 'Handling', 'Hvornår', 'Mail eller brev', 'Emnelinje', 'Tekst', 'I CRM'])
+        header_row(ws, 4, ['Trin', 'Flow 1 nået', '% af forrige', 'Flow 1 står her nu', 'Flow 2 nået', 'Handling', 'Hvornår', 'Brev, mail eller script (link)', 'Emnelinje', 'I CRM'])
         ws.row_dimensions[4].height = 32
         R1, R2, ST = self.F['rows']['Flow 1'], self.F['rows']['Flow 2'], self.F['stat']['Flow 1']
-        BOOK = 'Din lejlighed på {adresse} — hvornår passer det, vi kigger forbi?'
-        S = 'Salgsflow, «Mails og SMS»'
+        BOOK = 'Din lejlighed på {adresse}: hvornår passer det, vi kigger forbi?'
+        BUD = 'Kontantbud på {adresse}'
+        KONT = 'Din lejlighed på {adresse}'
+        PIPE = ('Pipeline', CRM + '/pipeline')
+        # (trin, nøgle i Funnel, stadie, handling, crm-link, [(dokument, hvornår, emnelinje)])
         rows = [
-            ('Foreninger vi vil købe i', None, None, 'Hold status på foreningerne opdateret. Målgruppe er dem, vi vil købe i.', 'Løbende', '', '', None, ('Foreninger', CRM + '/foreninger')),
-            ('Kan få brev', None, None, 'Træk ejerne fra Resights, træk koncernens egne fra, og del i A til D. Brevlisten laves med scripts/brev/brevliste.py.', 'Før hver brevrunde', 'Brevliste runde 2', '', None, None),
-            ('Breve sendt', 'Breve sendt', None, 'Send som Word-fil i Resights brevmodul, så flettefelterne udfyldes. Levering tager 3 til 9 hverdage.', 'Én gang pr. flow', 'Flow 1: Beboende ejer brev 2', '', ('Beboende ejer brev 2', BREV1), None),
-            ('', None, None, '', '', 'Flow 2: Udlejer brev 1', '', ('Udlejer brev 1', BREV2), None),
-            ('Besøgt siden fra brevet', 'Besøgt siden fra brevet', None, 'Ikke målt. Byg personlige koder (/k/<kode>) på brevene, så et besøg kan kobles til en modtager.', 'Før Flow 2 sendes', '', '', None, None),
-            ('Startet beregneren', 'Startet beregneren', None, 'Ikke målt. Byg trinmåling i beregneren, så vi ser, hvor de falder fra.', 'Før Flow 2 sendes', '', '', None, None),
+            ('Foreninger vi vil købe i', None, None, 'Hold status på foreningerne opdateret. Målgruppe er dem, vi vil købe i.', ('Foreninger', CRM + '/foreninger'), []),
+            ('Kan få brev', None, None, 'Træk ejerne fra Resights, træk koncernens egne fra, og del i A til D. Brevlisten laves med scripts/brev/brevliste.py.', None, []),
+            ('Breve sendt', 'Breve sendt', None, 'Send som Word-fil i Resights brevmodul, så flettefelterne udfyldes. Levering tager 3 til 9 hverdage.', None, [
+                ('Beboende ejer brev 2', 'Flow 1 (A og C)', ''), ('Udlejer brev 1', 'Flow 2 (B og D)', '')]),
+            ('Besøgt siden fra brevet', 'Besøgt siden fra brevet', None, 'Ikke målt. Byg personlige koder (/k/<kode>) på brevene, så et besøg kan kobles til en modtager.', None, []),
+            ('Startet beregneren', 'Startet beregneren', None, 'Ikke målt. Byg trinmåling i beregneren, så vi ser, hvor de falder fra.', None, []),
             ('Gennemført beregneren (lead)', 'Gennemført beregneren (lead)', 'ny-lead',
-             'Ring samme dag (fanen Opkald i CRM). Får du ikke fat i dem: telefonsvarer og SMS, og send booking-mailen i samme time.', 'Samme dag, senest næste dag', 'Booking', BOOK, (S, SALG), ('Pipeline', CRM + '/pipeline')),
+             'Ring samme dag (fanen Opkald i CRM). Får du ikke fat i dem: telefonsvarer og SMS, og send booking-mailen i samme time.', PIPE, [
+                ('Script Opkald', 'Samme dag, senest 2 timer efter', ''), ('Mail 01 Booking', 'Samme time som opkaldet', BOOK)]),
             ('Booking-mail sendt', 'Booking-mail sendt', 'besigtigelse-foreslaaet',
-             'Vent på svar. Følg op i samme tråd. Er der intet svar efter tredje opfølgning, parkeres leadet i «Vil ikke sælge nu».', 'Dag 3, 8 og 15 efter booking-mailen', 'Opfølgning 1, 2 og 3', BOOK, (S, SALG), ('Pipeline', CRM + '/pipeline')),
+             'Vent på svar. Følg op i samme tråd. Er der intet svar efter tredje opfølgning, parkeres leadet i «Vil ikke sælge nu».', PIPE, [
+                ('Mail 02 Opfølgning 1 dag 3', 'Dag 3', BOOK), ('Mail 03 Opfølgning 2 dag 8', 'Dag 8', BOOK), ('Mail 04 Opfølgning 3 dag 15', 'Dag 15', BOOK)]),
             ('Kunden har svaret', 'Kunden har svaret', None,
-             'Læs svaret, foreslå en tid (torsdag 10–17 eller fredag 10–15), og bekræft skriftligt med det samme.', 'Straks', 'Bekræftelse', BOOK, (S, SALG), None),
+             'Læs svaret, foreslå en tid (torsdag 10–17 eller fredag 10–15), og bekræft skriftligt med det samme.', None, [
+                ('Mail 05 Bekræftelse', 'Straks', BOOK)]),
             ('Besigtigelse aftalt', 'Besigtigelse aftalt', 'besigtigelse-aftalt',
-             'Sæt tiden i kalenderen. Send påmindelse, og skriv «jeg er på vej» på dagen. Kør derud med besigtigelsesscriptet.', 'Påmindelse ca. 30 timer før', 'Påmindelse', BOOK, ('Salgsflow, «Besigtigelsesscript»', SALG), None),
+             'Sæt tiden i kalenderen. Send påmindelse, og skriv «jeg er på vej» på dagen. Kør derud med besigtigelsesscriptet.', None, [
+                ('Mail 06 Påmindelse', 'Ca. 30 timer før', BOOK), ('Script Besigtigelse', 'På dagen', '')]),
             ('Besigtigelse afholdt', 'Besigtigelse afholdt', 'besigtigelse-afholdt',
-             'Notér røde flag samme dag. Send tak-mail. Giv et skriftligt bud senest dagen efter.', 'Samme dag. Bud senest dagen efter', 'Tak for i dag', BOOK, (S, SALG), None),
+             'Notér røde flag samme dag. Send tak-mail. Giv et skriftligt bud senest dagen efter.', None, [
+                ('Mail 07 Tak for i dag', 'Samme dag', BOOK)]),
             ('Bud afgivet', 'Bud afgivet', 'bud-afgivet',
-             'Send kontantbud, som gælder i 30 dage. Følg op dag 3. «Buddet udløber snart» (dag 24) og «buddet er udløbet» (dag 31) er skrevet, men ikke bygget i CRM.', 'Dag 3, 24 og 31 efter buddet', 'Bud og bud-opfølgning', 'Kontantbud på {adresse}', (S, SALG), None),
+             'Send kontantbud, som gælder i 30 dage, og følg op. De to sidste mails er skrevet, men ikke bygget i CRM.', None, [
+                ('Mail 08 Bud', 'Senest dagen efter besigtigelsen', BUD), ('Mail 09 Bud-opfølgning dag 3', 'Dag 3', BUD),
+                ('Mail 10 Buddet udløber dag 24', 'Dag 24', BUD), ('Mail 11 Buddet er udløbet dag 31', 'Dag 31', BUD)]),
             ('Heraf ikke enige om pris', 'Heraf ikke enige om pris', 'ikke-enige-om-pris',
-             'Kontakt en gang om måneden.', 'Hver 30. dag', 'Månedlig kontakt', 'Din lejlighed på {adresse}', (S, SALG), None),
+             'Kontakt en gang om måneden.', None, [('Mail 12 Månedlig kontakt', 'Hver 30. dag', KONT)]),
             ('Vil ikke sælge nu (sidespor)', None, 'vil-ikke-saelge-nu',
-             'Kontakt hvert kvartal. Her ender de, der ikke svarer efter tredje opfølgning.', 'Hver 90. dag', 'Kvartalsvis kontakt', 'Din lejlighed på {adresse}', (S, SALG), None),
+             'Kontakt hvert kvartal. Her ender de, der ikke svarer efter tredje opfølgning.', None, [('Mail 13 Kvartalsvis kontakt', 'Hver 90. dag', KONT)]),
             ('Købt', 'Købt', 'koebt',
-             'Send mailen om, hvordan handlen foregår, med de næste skridt.', 'Straks', 'Sådan foregår handlen', 'Sådan foregår handlen, {adresse}', (S, SALG), None),
+             'Send mailen om, hvordan handlen foregår, med de næste skridt. Efter overtagelsen sendes en tak.', None, [
+                ('Mail 14 Sådan foregår handlen', 'Når I er enige', 'Sådan foregår handlen, {adresse}'), ('Mail 15 Efter overtagelsen', 'Efter overtagelsesdagen', 'Tak for handlen')]),
         ]
         link_font = Font(name='Arial', size=9, color='0000FF', underline='single')
-        for i, (navn, fr, slug, handling, hvornaar, mail, emne, tekst, crm) in enumerate(rows):
-            r = 5 + i
+        r = 5
+        for navn, fr, slug, handling, crm, mails in rows:
             heraf = navn.startswith('Heraf')
-            lbl(ws, f'A{r}', navn, bold=bool(navn) and not heraf, indent=(2 if heraf else 0))
+            hoved = r
+            lbl(ws, f'A{r}', navn, bold=not heraf, indent=(2 if heraf else 0))
             if navn == 'Foreninger vi vil købe i':
                 fml(ws, f'B{r}', '=Funnel!B7')
             elif navn == 'Kan få brev':
@@ -535,19 +545,29 @@ class Bygger:
                     fml(ws, f'C{r}', f'=Funnel!D{R1[fr]}', fmt=PCT)
             if slug:
                 fml(ws, f'D{r}', f'=Funnel!C{ST[slug]}')
-            for c, v in (('F', handling), ('G', hvornaar), ('H', mail), ('I', emne)):
-                lbl(ws, f'{c}{r}', v)
-            for col_, val in (('J', tekst), ('K', crm)):
-                if val:
-                    c = ws[f'{col_}{r}']
-                    c.value = val[0]; c.hyperlink = val[1]; c.font = link_font
-            for c in 'ABCDEFGHIJK':
-                ind = ws[f'{c}{r}'].alignment.indent
-                ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'BCDE' else None), indent=ind)
-            ws.row_dimensions[r].height = 48 if len(handling) > 80 else 30
-        last = 5 + len(rows) - 1
+            lbl(ws, f'F{r}', handling)
+            if crm:
+                c = ws[f'J{r}']; c.value = crm[0]; c.hyperlink = crm[1]; c.font = link_font
+            antal = max(1, len(mails))
+            for j in range(antal):
+                rr = r + j
+                if mails:
+                    dok, hvornaar, emne = mails[j]
+                    lbl(ws, f'G{rr}', hvornaar)
+                    c = ws[f'H{rr}']; c.value = dok; c.hyperlink = links[dok]; c.font = link_font
+                    lbl(ws, f'I{rr}', emne)
+                for c in 'ABCDEFGHIJ':
+                    ind = ws[f'{c}{rr}'].alignment.indent
+                    ws[f'{c}{rr}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'BCDE' else None), indent=ind)
+                ws.row_dimensions[rr].height = 30
+            if len(handling) > 110:
+                ws.row_dimensions[hoved].height = 44
+            if antal > 1:
+                ws.merge_cells(f'F{r}:F{r+antal-1}')
+            r += antal
+        last = r - 1
         note(ws, f'A{last+2}', '«Flow 1 står her nu» er antal leads i stadiet i dag. «Nået» er antal, der er kommet så langt, også dem der siden er gået videre eller ud.')
-        note(ws, f'A{last+3}', 'Teksten til alle mails og scripts står i Salgsflow boligberegner.docx. Mails sendes fra CRM-leadet, hvor udkastet står klar under fanen Kommunikation.')
+        note(ws, f'A{last+3}', 'Hvert link åbner præcis den ene mail, det ene brev eller det ene script. Mails sendes fra CRM-leadet, hvor udkastet står klar under fanen Kommunikation. «Mail 10, 11 og 15» er nye og ligger endnu ikke i CRM.')
         ws.freeze_panes = 'B5'
 
     # ── Segmenter ───────────────────────────────────────────────────────
