@@ -63,7 +63,7 @@ SEGTEKST = {
     'A': 'Må kontaktes · ejer bor der', 'B': 'Må kontaktes · ejer bor et andet sted',
     'C': 'Reklamebeskyttet · ejer bor der', 'D': 'Reklamebeskyttet · ejer bor et andet sted',
 }
-IKKE = '"<>"'
+IKKE = '">0"'   # dato udfyldt. «<>» ville tælle formelceller med tom tekst med
 Q = '"'
 
 
@@ -211,7 +211,7 @@ class Bygger:
     def data_fane(self):
         ws = self.wb.create_sheet('Data')
         gen = til_dato(self.crm['genereret'])
-        title(ws, 'Data', f'Hentet fra CRM {gen:%d-%m-%Y %H:%M}. Én række pr. lead, uden navne, mails, telefon og adresser. Kør bygfunnel.py for at opdatere.', 49)
+        title(ws, 'Data', f'Hentet fra CRM {gen:%d-%m-%Y %H:%M}. Én række pr. lead, uden navne, mails, telefon og adresser. Kolonnerne AX til AZ tæller et lead med på de trin, det har passeret. Kør bygfunnel.py for at opdatere.', 52)
         lbl(ws, 'A3', 'Hentet'); put(ws, 'B3', gen, fmt='dd-mm-yyyy hh:mm', color='0000FF'); self.A['hentet'] = 'Data!$B$3'
         lbl(ws, 'C3', 'Leads i CRM'); hard(ws, 'D3', self.crm['antal']); self.A['nCrm'] = 'Data!$D$3'
         cols = [
@@ -224,6 +224,7 @@ class Bygger:
             ('F1 dage brev→lead', 9), ('F1 dage lead→booking', 9), ('F1 dage lead→svar', 9), ('F1 dage lead→aftalt', 9), ('F1 dage lead→afholdt', 9), ('F1 dage lead→bud', 9), ('F1 dage lead→købt', 9),
             ('F2 dage brev→lead', 9), ('F2 dage lead→booking', 9), ('F2 dage lead→svar', 9), ('F2 dage lead→aftalt', 9), ('F2 dage lead→afholdt', 9), ('F2 dage lead→bud', 9), ('F2 dage lead→købt', 9),
             ('Antal breve (modtager)', 9),
+            ('Aftalt (nået)', 16), ('Afholdt (nået)', 16), ('Bud (nået)', 16),
         ]
         header_row(ws, 4, [c[0] for c in cols])
         ws.row_dimensions[4].height = 42
@@ -255,9 +256,13 @@ class Bygger:
             fml(ws, f'O{r}', f'=IF(I{r}="","",INDEX({BF_},I{r}))', fmt='dd-mm-yyyy')
             fml(ws, f'P{r}', f'=IF(F{r}=1,"Test",IF(AND(ISNUMBER(O{r}),B{r}>=O{r}),N{r}&" · sendt",IF(LEFT(C{r},12)="boligberegne","Anden beregner-lead","Øvrige")))', fmt='@')
             fml(ws, f'AW{r}', f'=IF(I{r}="","",INDEX({self.B("I")},I{r}))', fmt='0')
+            # «Nået mindst dette trin»: et lead, der er ikke enige om pris, har fået et bud, selv om bud-trinnet blev sprunget over
+            for kol, ind in (('AX', 'AB{r}:AF{r}'), ('AY', 'AC{r}:AF{r}'), ('AZ', 'AD{r}:AF{r}')):
+                rng = ind.format(r=r)
+                fml(ws, f'{kol}{r}', f'=IF(COUNT({rng})=0,"",MIN({rng}))', fmt='dd-mm-yyyy hh:mm')
             for fl, sæt in (('Flow 1', ('AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO')), ('Flow 2', ('AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV'))):
                 fml(ws, f'{sæt[0]}{r}', f'=IF($P{r}="{fl} · sendt",B{r}-$O{r},"")', fmt='0.0')
-                for kol, tid in zip(sæt[1:], ['Y', 'Z', 'AB', 'AC', 'AD', 'AE']):
+                for kol, tid in zip(sæt[1:], ['Y', 'Z', 'AX', 'AY', 'AZ', 'AE']):
                     fml(ws, f'{kol}{r}', f'=IF(AND($P{r}="{fl} · sendt",{tid}{r}<>""),{tid}{r}-$B{r},"")', fmt='0.0')
         ws.freeze_panes = 'B5'
 
@@ -300,7 +305,7 @@ class Bygger:
             fml(ws, f'N{r}', f'=IF({g}="","",{kr(("I", "2"))})')
             fml(ws, f'O{r}', f'=IF({g}="","",{kd("Flow 1 · sendt")})')
             fml(ws, f'P{r}', f'=IF({g}="","",IF(L{r}>0,O{r}/L{r},"–"))', fmt=PCT)
-            for c_, tid in [('Q', 'AB'), ('R', 'AC'), ('S', 'AD'), ('T', 'AE')]:
+            for c_, tid in [('Q', 'AX'), ('R', 'AY'), ('S', 'AZ'), ('T', 'AE')]:
                 fml(ws, f'{c_}{r}', f'=IF({g}="","",{kd("Flow 1 · sendt", (tid, IKKE))})')
             fml(ws, f'U{r}', f'=IF({g}="","",{kd("Flow 2 · sendt")})')
         last = first + len(raek) - 1
@@ -403,7 +408,7 @@ class Bygger:
         title(ws, 'Tid: lead conversion over tid', 'Leads grupperet efter den uge (eller måned) de blev oprettet i, og hvor langt hver gruppe er nået. Opdateres, når bygfunnel.py køres.', 20)
         widths(ws, {'A': 8, 'B': 11, 'C': 11, 'D': 8, 'E': 9, 'F': 10, 'G': 9, 'H': 8, 'I': 8, 'J': 9, 'K': 7, 'L': 7, 'M': 9, 'N': 8, 'O': 8, 'P': 9, 'Q': 7, 'R': 7, 'S': 11, 'T': 10})
         A, hentet = self.A, self.A['hentet']
-        stadier = [('G', 'Y', 'Booking'), ('H', 'Z', 'Svar'), ('I', 'AB', 'Aftalt'), ('J', 'AC', 'Afholdt'), ('K', 'AD', 'Bud'), ('L', 'AE', 'Købt')]
+        stadier = [('G', 'Y', 'Booking'), ('H', 'Z', 'Svar'), ('I', 'AX', 'Aftalt'), ('J', 'AY', 'Afholdt'), ('K', 'AZ', 'Bud'), ('L', 'AE', 'Købt')]
         rate = dict(zip('GHIJKL', 'MNOPQR'))
         hdr = ['Uge', 'Fra', 'Til', 'Nye leads', 'Kum. leads', 'Kum. respons', 'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt',
                'Booking', 'Svar', 'Aftalt', 'Afholdt', 'Bud', 'Købt', 'Dage siden periodens slutning', 'Moden']
@@ -472,6 +477,78 @@ class Bygger:
         note(ws, f'A{r}', 'Uge 0 starter på afsendelsesdagen. Brevene er 3–9 hverdage om at nå frem, så de første uger er lave. En uge kaldes delvis, hvis den ikke er slut, når data blev hentet.')
         note(ws, f'A{r+1}', 'Flow 2 fyldes ud, når datoen står i Antagelser. Tallene stiger, efterhånden som ældre leads når videre. Kør bygfunnel.py igen for at opdatere.')
         ws.freeze_panes = 'A4'
+
+    # ── Flow og handling ────────────────────────────────────────────────
+    def handlinger(self):
+        from openpyxl.styles import Font
+        ws = self.wb.create_sheet('Flow og handling')
+        title(ws, 'Flow og handling: hvad gør vi på hvert trin', 'Hvert trin i tragten med antal, den handling der følger, og det brev eller den mail vi sender. Tallene er formler på Funnel.', 11)
+        widths(ws, {'A': 34, 'B': 10, 'C': 9, 'D': 10, 'E': 10, 'F': 56, 'G': 26, 'H': 28, 'I': 36, 'J': 26, 'K': 14})
+        SALG = 'https://drive.google.com/file/d/1EdfmX4UCgXIwOBE0CTicP-OEO04yJFB4/view?usp=drivesdk'
+        BREV1 = 'https://drive.google.com/file/d/17dwwery6gTZtXqRw6dAhVgQk-4X03FT2/view?usp=drivesdk'
+        BREV2 = 'https://drive.google.com/file/d/1mdo8hP6zQwvmIsVGhMKjh0osq-mPFajN/view?usp=drivesdk'
+        CRM = 'https://crm.365ejendom.dk'
+        header_row(ws, 4, ['Trin', 'Flow 1 nået', '% af forrige', 'Flow 1 står her nu', 'Flow 2 nået', 'Handling', 'Hvornår', 'Mail eller brev', 'Emnelinje', 'Tekst', 'I CRM'])
+        ws.row_dimensions[4].height = 32
+        R1, R2, ST = self.F['rows']['Flow 1'], self.F['rows']['Flow 2'], self.F['stat']['Flow 1']
+        BOOK = 'Din lejlighed på {adresse} — hvornår passer det, vi kigger forbi?'
+        S = 'Salgsflow, «Mails og SMS»'
+        rows = [
+            ('Foreninger vi vil købe i', None, None, 'Hold status på foreningerne opdateret. Målgruppe er dem, vi vil købe i.', 'Løbende', '', '', None, ('Foreninger', CRM + '/foreninger')),
+            ('Kan få brev', None, None, 'Træk ejerne fra Resights, træk koncernens egne fra, og del i A til D. Brevlisten laves med scripts/brev/brevliste.py.', 'Før hver brevrunde', 'Brevliste runde 2', '', None, None),
+            ('Breve sendt', 'Breve sendt', None, 'Send som Word-fil i Resights brevmodul, så flettefelterne udfyldes. Levering tager 3 til 9 hverdage.', 'Én gang pr. flow', 'Flow 1: Beboende ejer brev 2', '', ('Beboende ejer brev 2', BREV1), None),
+            ('', None, None, '', '', 'Flow 2: Udlejer brev 1', '', ('Udlejer brev 1', BREV2), None),
+            ('Besøgt siden fra brevet', 'Besøgt siden fra brevet', None, 'Ikke målt. Byg personlige koder (/k/<kode>) på brevene, så et besøg kan kobles til en modtager.', 'Før Flow 2 sendes', '', '', None, None),
+            ('Startet beregneren', 'Startet beregneren', None, 'Ikke målt. Byg trinmåling i beregneren, så vi ser, hvor de falder fra.', 'Før Flow 2 sendes', '', '', None, None),
+            ('Gennemført beregneren (lead)', 'Gennemført beregneren (lead)', 'ny-lead',
+             'Ring samme dag (fanen Opkald i CRM). Får du ikke fat i dem: telefonsvarer og SMS, og send booking-mailen i samme time.', 'Samme dag, senest næste dag', 'Booking', BOOK, (S, SALG), ('Pipeline', CRM + '/pipeline')),
+            ('Booking-mail sendt', 'Booking-mail sendt', 'besigtigelse-foreslaaet',
+             'Vent på svar. Følg op i samme tråd. Er der intet svar efter tredje opfølgning, parkeres leadet i «Vil ikke sælge nu».', 'Dag 3, 8 og 15 efter booking-mailen', 'Opfølgning 1, 2 og 3', BOOK, (S, SALG), ('Pipeline', CRM + '/pipeline')),
+            ('Kunden har svaret', 'Kunden har svaret', None,
+             'Læs svaret, foreslå en tid (torsdag 10–17 eller fredag 10–15), og bekræft skriftligt med det samme.', 'Straks', 'Bekræftelse', BOOK, (S, SALG), None),
+            ('Besigtigelse aftalt', 'Besigtigelse aftalt', 'besigtigelse-aftalt',
+             'Sæt tiden i kalenderen. Send påmindelse, og skriv «jeg er på vej» på dagen. Kør derud med besigtigelsesscriptet.', 'Påmindelse ca. 30 timer før', 'Påmindelse', BOOK, ('Salgsflow, «Besigtigelsesscript»', SALG), None),
+            ('Besigtigelse afholdt', 'Besigtigelse afholdt', 'besigtigelse-afholdt',
+             'Notér røde flag samme dag. Send tak-mail. Giv et skriftligt bud senest dagen efter.', 'Samme dag. Bud senest dagen efter', 'Tak for i dag', BOOK, (S, SALG), None),
+            ('Bud afgivet', 'Bud afgivet', 'bud-afgivet',
+             'Send kontantbud, som gælder i 30 dage. Følg op dag 3. «Buddet udløber snart» (dag 24) og «buddet er udløbet» (dag 31) er skrevet, men ikke bygget i CRM.', 'Dag 3, 24 og 31 efter buddet', 'Bud og bud-opfølgning', 'Kontantbud på {adresse}', (S, SALG), None),
+            ('Heraf ikke enige om pris', 'Heraf ikke enige om pris', 'ikke-enige-om-pris',
+             'Kontakt en gang om måneden.', 'Hver 30. dag', 'Månedlig kontakt', 'Din lejlighed på {adresse}', (S, SALG), None),
+            ('Vil ikke sælge nu (sidespor)', None, 'vil-ikke-saelge-nu',
+             'Kontakt hvert kvartal. Her ender de, der ikke svarer efter tredje opfølgning.', 'Hver 90. dag', 'Kvartalsvis kontakt', 'Din lejlighed på {adresse}', (S, SALG), None),
+            ('Købt', 'Købt', 'koebt',
+             'Send mailen om, hvordan handlen foregår, med de næste skridt.', 'Straks', 'Sådan foregår handlen', 'Sådan foregår handlen, {adresse}', (S, SALG), None),
+        ]
+        link_font = Font(name='Arial', size=9, color='0000FF', underline='single')
+        for i, (navn, fr, slug, handling, hvornaar, mail, emne, tekst, crm) in enumerate(rows):
+            r = 5 + i
+            heraf = navn.startswith('Heraf')
+            lbl(ws, f'A{r}', navn, bold=bool(navn) and not heraf, indent=(2 if heraf else 0))
+            if navn == 'Foreninger vi vil købe i':
+                fml(ws, f'B{r}', '=Funnel!B7')
+            elif navn == 'Kan få brev':
+                fml(ws, f'B{r}', f'=Funnel!C{self.F["kan_row"]}')
+            elif fr:
+                fml(ws, f'B{r}', f'=Funnel!C{R1[fr]}')
+                fml(ws, f'E{r}', f'=Funnel!C{R2[fr]}')
+                if fr not in ('Breve sendt', 'Besøgt siden fra brevet', 'Startet beregneren'):
+                    fml(ws, f'C{r}', f'=Funnel!D{R1[fr]}', fmt=PCT)
+            if slug:
+                fml(ws, f'D{r}', f'=Funnel!C{ST[slug]}')
+            for c, v in (('F', handling), ('G', hvornaar), ('H', mail), ('I', emne)):
+                lbl(ws, f'{c}{r}', v)
+            for col_, val in (('J', tekst), ('K', crm)):
+                if val:
+                    c = ws[f'{col_}{r}']
+                    c.value = val[0]; c.hyperlink = val[1]; c.font = link_font
+            for c in 'ABCDEFGHIJK':
+                ind = ws[f'{c}{r}'].alignment.indent
+                ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='top', horizontal=('right' if c in 'BCDE' else None), indent=ind)
+            ws.row_dimensions[r].height = 48 if len(handling) > 80 else 30
+        last = 5 + len(rows) - 1
+        note(ws, f'A{last+2}', '«Flow 1 står her nu» er antal leads i stadiet i dag. «Nået» er antal, der er kommet så langt, også dem der siden er gået videre eller ud.')
+        note(ws, f'A{last+3}', 'Teksten til alle mails og scripts står i Salgsflow boligberegner.docx. Mails sendes fra CRM-leadet, hvor udkastet står klar under fanen Kommunikation.')
+        ws.freeze_panes = 'B5'
 
     # ── Segmenter ───────────────────────────────────────────────────────
     def segmenter(self):
@@ -613,9 +690,9 @@ class Bygger:
             rr = r + 2 + j
             lbl(ws, f'A{rr}', txt)
             fml(ws, f'C{rr}', f'={self.tael(g)}')
-            for c_, tid in [('F', 'Y'), ('G', 'Z'), ('H', 'AB')]:
+            for c_, tid in [('F', 'Y'), ('G', 'Z'), ('H', 'AX')]:
                 fml(ws, f'{c_}{rr}', f'={self.tael(g, (tid, IKKE))}')
-            fml(ws, f'J{rr}', f'={self.tael(g, ("AC", IKKE))}&" · "&{self.tael(g, ("AD", IKKE))}&" · "&{self.tael(g, ("AE", IKKE))}', fmt='@')
+            fml(ws, f'J{rr}', f'={self.tael(g, ("AY", IKKE))}&" · "&{self.tael(g, ("AZ", IKKE))}&" · "&{self.tael(g, ("AE", IKKE))}', fmt='@')
         note(ws, f'A{r+4}', 'Beregner-leads, hvis adresse ikke er et sendt brev: leads fra før brevet, adresser uden for brevlisten og segmenter der ikke er sendt.')
         ws.freeze_panes = 'A4'
 
@@ -638,9 +715,10 @@ class Bygger:
             ('Gennemført beregneren (lead)', 'Ja', f'={t()}', dg[0], 'Leads hvis adresse er et sendt brev. Dage fra brevet blev sendt'),
             ('Booking-mail sendt', 'Ja', f'={t(("Y", IKKE))}', dg[1], 'Første udgående mail med booking-frasen. Dage fra leadet'),
             ('Kunden har svaret', 'Ja', f'={t(("Z", IKKE))}', dg[2], 'Første indgående mail. Svar til administration@ er først med fra 05.10'),
-            ('Besigtigelse aftalt', 'Ja', f'={t(("AB", IKKE))}', dg[3], 'Skift til aftalt, eller aftale i telefonen'),
-            ('Besigtigelse afholdt', 'Ja', f'={t(("AC", IKKE))}', dg[4], ''),
-            ('Bud afgivet', 'Ja', f'={t(("AD", IKKE))}', dg[5], ''),
+            ('Besigtigelse aftalt', 'Ja', f'={t(("AX", IKKE))}', dg[3], 'Skift til aftalt, eller aftale i telefonen'),
+            ('Besigtigelse afholdt', 'Ja', f'={t(("AY", IKKE))}', dg[4], ''),
+            ('Bud afgivet', 'Ja', f'={t(("AZ", IKKE))}', dg[5], 'Alle der har fået et bud, også dem der siden er blevet ikke enige eller vil vente'),
+            ('Heraf ikke enige om pris', 'Info', f'={t(("AF", IKKE))}', None, 'Har fået et bud, men blev ikke enige om prisen. Tæller med i Bud afgivet'),
             ('Købt', 'Ja', f'={t(("AE", IKKE))}', dg[6], ''),
         ]
         first = r + 2
@@ -650,9 +728,16 @@ class Bygger:
             rr = first + i
             rows[navn_] = rr
             bold = i in (0, 3, 9)
-            lbl(ws, f'A{rr}', navn_, bold=bold)
+            lbl(ws, f'A{rr}', navn_, bold=bold, indent=(2 if maalt == 'Info' else 0))
             put(ws, f'B{rr}', maalt, align='center', color='64748B')
             fml(ws, f'C{rr}', formel, bold=bold); ws[f'C{rr}'].alignment = Alignment(horizontal='right')
+            if maalt == 'Info':
+                bud_r = rows['Bud afgivet']
+                fml(ws, f'D{rr}', f'=IF(AND(ISNUMBER(C{bud_r}),C{bud_r}>0),C{rr}/C{bud_r},"–")', fmt=PCT)
+                fml(ws, f'E{rr}', f'=IF($C${first}>0,C{rr}/$C${first},"–")', fmt=PCT)
+                put(ws, f'F{rr}', '–', align='right'); put(ws, f'G{rr}', '–', align='right')
+                note(ws, f'J{rr}', kom)
+                continue
             if maalt == 'Ja' and prev:
                 fml(ws, f'D{rr}', f'=IF(AND(ISNUMBER(C{rr}),ISNUMBER(C{prev}),C{prev}>0),C{rr}/C{prev},"–")', fmt=PCT)
                 fml(ws, f'F{rr}', f'=IF(AND(ISNUMBER(C{rr}),ISNUMBER(C{prev})),C{prev}-C{rr},"–")')
@@ -682,6 +767,7 @@ class Bygger:
         lead = rows['Gennemført beregneren (lead)']
         for j, (txt, slug) in enumerate(stat):
             rr = r0 + 1 + j
+            self.F.setdefault('stat', {}).setdefault(k, {})[slug] = rr
             lbl(ws, f'A{rr}', txt, indent=1); fml(ws, f'C{rr}', f'={t(("X", q(slug)))}')
             fml(ws, f'D{rr}', f'=IF($C${lead}>0,C{rr}/$C${lead},"–")', fmt=PCT)
         rr = r0 + 1 + len(stat)
@@ -696,9 +782,9 @@ class Bygger:
             fml(ws, f'C{qq}', f'=COUNTIFS({self.B("C")},"{s}",{self.B("H")},1)')
             fml(ws, f'D{qq}', f'={t(("K", q(s)))}')
             fml(ws, f'E{qq}', f'=IF(C{qq}>0,D{qq}/C{qq},"–")', fmt=PCT)
-            for c_, tid in [('F', 'Y'), ('G', 'Z'), ('H', 'AB')]:
+            for c_, tid in [('F', 'Y'), ('G', 'Z'), ('H', 'AX')]:
                 fml(ws, f'{c_}{qq}', f'={t(("K", q(s)), (tid, IKKE))}')
-            fml(ws, f'J{qq}', f'={t(("K", q(s)), ("AC", IKKE))}&" · "&{t(("K", q(s)), ("AD", IKKE))}&" · "&{t(("K", q(s)), ("AE", IKKE))}', fmt='@')
+            fml(ws, f'J{qq}', f'={t(("K", q(s)), ("AY", IKKE))}&" · "&{t(("K", q(s)), ("AZ", IKKE))}&" · "&{t(("K", q(s)), ("AE", IKKE))}', fmt='@')
         return r1 + 1 + len(segs) + 2
 
     # ── Beregner ────────────────────────────────────────────────────────
@@ -886,7 +972,7 @@ class Bygger:
         section(ws, e0, 'Flow 1 · beboet af ejer: fra brev til køb', 8)
         header_row(ws, e0 + 1, ['Trin', 'Antal', '% af breve', '% af forrige', '', 'Bemærkning'])
         vis = ['Breve sendt', 'Besøgt siden fra brevet', 'Startet beregneren', 'Gennemført beregneren (lead)', 'Booking-mail sendt',
-               'Kunden har svaret', 'Besigtigelse aftalt', 'Besigtigelse afholdt', 'Bud afgivet', 'Købt']
+               'Kunden har svaret', 'Besigtigelse aftalt', 'Besigtigelse afholdt', 'Bud afgivet', 'Heraf ikke enige om pris', 'Købt']
         for i, navn in enumerate(vis):
             r = e0 + 2 + i
             fr = R[navn]
@@ -997,12 +1083,13 @@ class Bygger:
         self.udsendelser_fane()
         self.funnel()
         self.tid()
+        self.handlinger()
         self.segmenter()
         self.beregner()
         self.sensitivity()
         self.konklusion()
         self.kontroller()
-        navne = ['Konklusion', 'Segmenter', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Tid', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
+        navne = ['Konklusion', 'Flow og handling', 'Segmenter', 'Antagelser', 'Foreninger', 'Udsendelser', 'Funnel', 'Tid', 'Beregner', 'Sensitivity', 'Kontroller og flag', 'Data', 'Breve']
         self.wb._sheets = [self.wb[n] for n in navne]
         for ws in self.wb.worksheets:
             ws.sheet_view.showGridLines = False
