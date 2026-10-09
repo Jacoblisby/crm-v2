@@ -252,3 +252,29 @@ Eller manuelt: Coolify → din app → **Redeploy**-knap.
 2. **Uge 3:** Write-operationer (drag-drop på pipeline, note-logging, email-send)
 3. **Uge 5:** On-market scrape + AVM-engine wrapper
 4. **Uge 6:** Tilbudsberegner + `/buy-list/today`
+
+---
+
+## Sådan deployes der nu (siden 9.10.2026)
+
+**Billedet bygges hos GitHub, ikke på serveren.** Hetzner-serveren er en CAX11 med 4 GB hukommelse. Et
+Next.js-build direkte på den gjorde både CRM, kundeside og Coolify utilgængelige i over en time.
+
+1. Du pusher til `main`.
+2. GitHub Actions (`.github/workflows/ci.yml`) kører typecheck, tests og build. Består de, bygger jobbet `image`
+   et **ARM-billede** (samme arkitektur som serveren) og lægger det i `ghcr.io/jacoblisby/crm-v2`. Pakken er
+   offentlig, så serveren henter den uden login.
+3. Jobbet skriver derefter `Dockerfile.deploy` med et fast billedmærke (`FROM ghcr.io/jacoblisby/crm-v2:sha-…`) og
+   committer den til `main` som «deploy: billede sha-… [skip ci]». Det tager 4–6 minutter efter din push.
+4. **Først da** klikkes Redeploy i Coolify. Coolify bygger kun `Dockerfile.deploy`, altså henter billedet. Det tager
+   under et halvt minut. Klikker du før trin 3 er færdigt, får du den forrige version.
+
+Coolify er sat op med **Dockerfile Location = `/Dockerfile.deploy`** (Configuration → General → Build).
+
+**Tilbagerulning:** sæt Dockerfile Location tilbage til `/Dockerfile` og Redeploy, så bygger serveren selv igen
+(tung, kun i nødstilfælde). Eller `git revert` den seneste «deploy: billede …»-commit, så peger Dockerfile.deploy på
+det forrige billede.
+
+**Bages ind i billedet:** kun `NEXT_PUBLIC_APP_URL` (`https://crm.365ejendom.dk`, sat i workflowet). Alt andet
+(DATABASE_URL, Resend, Better Auth osv.) læses ved opstart fra Coolifys miljøvariabler og ligger ikke i billedet.
+Ændres en `NEXT_PUBLIC_…`-variabel, skal den også ændres i workflowet.
