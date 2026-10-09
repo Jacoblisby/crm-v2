@@ -42,7 +42,7 @@ const C = {
 
 
 const TELEFON = '61 78 90 71';
-const LAGER = 'boligstoette-v2';
+const LAGER = 'boligstoette-v3';
 
 type Felter = {
   // trin 1
@@ -51,13 +51,11 @@ type Felter = {
   oevrigFormue: string;
   /** Hvad man står tilbage med, når boligen er solgt og gælden betalt. Tæller som formue. */
   provenu: string;
+  /** Husleje uden forbrug, som i Udbetaling Danmarks egen beregner. */
   huslejeMd: string;
   areal: string;
-  varme: Varme;
-  varmtVandILeje: boolean;
-  elILeje: boolean;
-  vandSaerskilt: boolean;
-  vedligehold: Vedligehold;
+  acontoVarme: boolean;
+  varmeselskab: boolean;
   // trin 2
   ejerAreal: string;
   vurdering: string;
@@ -80,11 +78,8 @@ const EKSEMPEL: Felter = {
   provenu: '1300000',
   huslejeMd: '7500',
   areal: '62',
-  varme: 'saerskilt-fjernvarme-el-gas',
-  varmtVandILeje: false,
-  elILeje: false,
-  vandSaerskilt: true,
-  vedligehold: 'udlejer',
+  acontoVarme: true,
+  varmeselskab: false,
   ejerAreal: '62',
   vurdering: '1900000',
   rkYdelseMd: '3300',
@@ -319,18 +314,21 @@ export function Beregner() {
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const lejerInput: LejerInput = useMemo(
-    () => ({
+  // Samme opvarmningsregel som Udbetaling Danmarks egen beregner: betaler man varme a conto eller
+  // til et varmeselskab, lægges 41,50 kr. pr. m² til. Ellers er varme og varmt vand med i huslejen
+  // og trækkes fra. Der spørges ikke til el, vand eller vedligeholdelse.
+  const lejerInput: LejerInput = useMemo(() => {
+    const saerskilt = f.acontoVarme || f.varmeselskab;
+    return {
       huslejeMd: tal(f.huslejeMd),
       areal: tal(f.areal),
-      varme: f.varme,
-      varmtVandILeje: f.varmtVandILeje,
-      elILeje: f.elILeje,
-      vandSaerskilt: f.vandSaerskilt,
-      vedligehold: f.vedligehold,
-    }),
-    [f],
-  );
+      varme: saerskilt ? ('saerskilt-fjernvarme-el-gas' as Varme) : ('i-leje' as Varme),
+      varmtVandILeje: !saerskilt,
+      elILeje: false,
+      vandSaerskilt: false,
+      vedligehold: 'udlejer' as Vedligehold,
+    };
+  }, [f]);
 
   // Trin 1: boligydelse som lejer alene
   const y1 = useMemo(
@@ -510,46 +508,36 @@ export function Beregner() {
 
                 <Kort nr="2" titel="Hvis du lejer">
                   <div className="grid sm:grid-cols-2 gap-5">
-                    <Felt id="husleje" label="Husleje pr. måned" value={f.huslejeMd} onChange={(v) => sæt('huslejeMd', v)} />
+                    <Felt
+                      id="husleje"
+                      label="Husleje pr. måned uden forbrug"
+                      hint="Selve huslejen, uden varme, vand og el."
+                      value={f.huslejeMd}
+                      onChange={(v) => sæt('huslejeMd', v)}
+                    />
                     <Felt id="areal" label="Lejeboligens størrelse" enhed="m²" value={f.areal} onChange={(v) => sæt('areal', v)} />
                   </div>
                   <Valg
-                    label="Hvordan betaler du varme?"
-                    value={f.varme}
+                    label="Betaler du varme a conto til din udlejer?"
+                    value={f.acontoVarme ? 'ja' : 'nej'}
                     muligheder={[
-                      { v: 'i-leje' as Varme, tekst: 'Med i huslejen' },
-                      { v: 'saerskilt-fjernvarme-el-gas' as Varme, tekst: 'Særskilt: fjernvarme, el eller gas' },
-                      { v: 'saerskilt-andet' as Varme, tekst: 'Særskilt: andet' },
+                      { v: 'ja', tekst: 'Ja' },
+                      { v: 'nej', tekst: 'Nej' },
                     ]}
-                    onChange={(v) => sæt('varme', v)}
+                    onChange={(v) => sæt('acontoVarme', v === 'ja')}
                   />
-                  <div className="space-y-2">
-                    <div className="text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
-                      Hvad er med i huslejen?
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Til label="Varmt vand" valgt={f.varmtVandILeje} onChange={(v) => sæt('varmtVandILeje', v)} />
-                      <Til label="El" valgt={f.elILeje} onChange={(v) => sæt('elILeje', v)} />
-                      <Til label="Vand er ikke med" valgt={f.vandSaerskilt} onChange={(v) => sæt('vandSaerskilt', v)} />
-                    </div>
-                  </div>
-                  <details className="group">
-                    <summary className="cursor-pointer text-[15px] underline hover:no-underline" style={{ color: C.green, fontWeight: 500 }}>
-                      Flere valg
-                    </summary>
-                    <div className="pt-4">
-                      <Valg
-                        label="Hvem vedligeholder indvendigt?"
-                        value={f.vedligehold}
-                        muligheder={[
-                          { v: 'udlejer' as Vedligehold, tekst: 'Udlejer' },
-                          { v: 'maling' as Vedligehold, tekst: 'Jeg maler og tapetserer' },
-                          { v: 'alt' as Vedligehold, tekst: 'Jeg vedligeholder alt indvendigt' },
-                        ]}
-                        onChange={(v) => sæt('vedligehold', v)}
-                      />
-                    </div>
-                  </details>
+                  {!f.acontoVarme && (
+                    <Valg
+                      label="Betaler du til et varmeselskab?"
+                      hint="Fx fjernvarme eller gas. Svarer du nej til begge, regner vi med, at varme og varmt vand er med i huslejen."
+                      value={f.varmeselskab ? 'ja' : 'nej'}
+                      muligheder={[
+                        { v: 'ja', tekst: 'Ja' },
+                        { v: 'nej', tekst: 'Nej' },
+                      ]}
+                      onChange={(v) => sæt('varmeselskab', v === 'ja')}
+                    />
+                  )}
                 </Kort>
 
                 <button
@@ -706,8 +694,9 @@ export function Beregner() {
                     <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
                       Sådan er boligydelsen regnet
                     </summary>
-                    <div className="pt-4">
+                    <div className="pt-4 space-y-4">
                       <Regnestykke titel="Som lejer" y={y1} formue={tal(f.oevrigFormue) + tal(f.provenu)} />
+                      <Kontrolleret />
                     </div>
                   </details>
                 </>
@@ -788,6 +777,7 @@ export function Beregner() {
                     <div className="pt-4 space-y-6">
                       <Regnestykke titel="Som ejer (udbetales som lån)" y={r.ejer.detaljer} formue={r.ejer.formue} />
                       <Regnestykke titel="Som lejer (udbetales som tilskud)" y={r.lejer.detaljer} formue={r.lejer.formue} />
+                      <Kontrolleret />
                     </div>
                   </details>
                 </>
@@ -983,6 +973,16 @@ function Noter({ y, over, laan }: { y: YdelseResultat; over: boolean; laan?: boo
         ))}
       </ul>
     </div>
+  );
+}
+
+function Kontrolleret() {
+  return (
+    <p className="text-[12.5px] leading-[1.6]" style={{ color: C.muted }}>
+      Boligydelsen som lejer er regnet efter samme regler og spørgsmål som Udbetaling Danmarks egen beregner på
+      boligstoette.dk og kontrolleret mod den i 49 scenarier for enlige og par, med satserne for {SATSER.aar}. Boligydelse
+      til ejere findes ikke i den beregner, fordi den udbetales som lån.
+    </p>
   );
 }
 
