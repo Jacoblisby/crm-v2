@@ -3,9 +3,11 @@
 /**
  * Tjek din boligstøtte — for folkepensionister.
  *
- * Til venstre indtaster man, hvad man betaler for at eje i dag og hvad en lejebolig
- * koster. Til højre står regnestykket pr. måned: ejer i dag mod lejer, begge med
- * boligydelse trukket fra. Regnereglerne ligger i src/lib/boligstoette.ts.
+ * To trin:
+ *   1  Tjek boligstøtte  — indkomst, formue og en lejebolig. Resultat: boligydelse pr. måned.
+ *   2  Sammenlign med at eje — hvad man betaler for at eje i dag, sat op mod at leje,
+ *      begge pr. måned og efter boligydelse.
+ * Regnereglerne ligger i src/lib/boligstoette.ts.
  *
  * Siden åbner med et eksempel, så regnestykket kan ses med det samme. Det er markeret
  * som eksempel, indtil man retter det første tal.
@@ -13,7 +15,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   SATSER,
+  lejerAlene,
   sammenlign,
+  type LejerInput,
   type Sammenligning,
   type Varme,
   type Vedligehold,
@@ -38,14 +42,24 @@ const C = {
 
 
 const TELEFON = '61 78 90 71';
-const LAGER = 'boligstoette-v1';
+const LAGER = 'boligstoette-v2';
 
 type Felter = {
+  // trin 1
   personer: 1 | 2;
   indkomstMd: string;
   oevrigFormue: string;
-  // ejer
+  /** Hvad man står tilbage med, når boligen er solgt og gælden betalt. Tæller som formue. */
+  provenu: string;
+  huslejeMd: string;
   areal: string;
+  varme: Varme;
+  varmtVandILeje: boolean;
+  elILeje: boolean;
+  vandSaerskilt: boolean;
+  vedligehold: Vedligehold;
+  // trin 2
+  ejerAreal: string;
   vurdering: string;
   rkYdelseMd: string;
   rkGaeld: string;
@@ -56,23 +70,22 @@ type Felter = {
   faellesudgiftMd: string;
   varmeVandElMd: string;
   forsikringVedligeholdMd: string;
-  salgspris: string;
-  // lejer
-  huslejeMd: string;
-  lejerAreal: string;
   lejerLoebendeMd: string;
-  varme: Varme;
-  varmtVandILeje: boolean;
-  elILeje: boolean;
-  vandSaerskilt: boolean;
-  vedligehold: Vedligehold;
 };
 
 const EKSEMPEL: Felter = {
   personer: 1,
   indkomstMd: '17500',
   oevrigFormue: '150000',
+  provenu: '1300000',
+  huslejeMd: '7500',
   areal: '62',
+  varme: 'saerskilt-fjernvarme-el-gas',
+  varmtVandILeje: false,
+  elILeje: false,
+  vandSaerskilt: true,
+  vedligehold: 'udlejer',
+  ejerAreal: '62',
   vurdering: '1900000',
   rkYdelseMd: '3300',
   rkGaeld: '600000',
@@ -83,15 +96,7 @@ const EKSEMPEL: Felter = {
   faellesudgiftMd: '2600',
   varmeVandElMd: '800',
   forsikringVedligeholdMd: '400',
-  salgspris: '',
-  huslejeMd: '7500',
-  lejerAreal: '',
   lejerLoebendeMd: '',
-  varme: 'saerskilt-fjernvarme-el-gas',
-  varmtVandILeje: false,
-  elILeje: false,
-  vandSaerskilt: true,
-  vedligehold: 'udlejer',
 };
 
 const tal = (s: string) => {
@@ -276,6 +281,7 @@ function Linje({
 export function Beregner() {
   const [f, setF] = useState<Felter>(EKSEMPEL);
   const [eksempel, setEksempel] = useState(true);
+  const [trin, setTrin] = useState<1 | 2>(1);
   const [klar, setKlar] = useState(false);
 
   useEffect(() => {
@@ -308,15 +314,47 @@ export function Beregner() {
     setF((x) => ({ ...x, [k]: v }));
   };
 
+  const gaaTil = (t: 1 | 2) => {
+    setTrin(t);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const lejerInput: LejerInput = useMemo(
+    () => ({
+      huslejeMd: tal(f.huslejeMd),
+      areal: tal(f.areal),
+      varme: f.varme,
+      varmtVandILeje: f.varmtVandILeje,
+      elILeje: f.elILeje,
+      vandSaerskilt: f.vandSaerskilt,
+      vedligehold: f.vedligehold,
+    }),
+    [f],
+  );
+
+  // Trin 1: boligydelse som lejer alene
+  const y1 = useMemo(
+    () =>
+      lejerAlene({
+        personer: f.personer,
+        indkomstMd: tal(f.indkomstMd),
+        formue: tal(f.oevrigFormue) + tal(f.provenu),
+        lejer: lejerInput,
+      }),
+    [f, lejerInput],
+  );
+
+  // Trin 2: ejer i dag mod lejer
   const r: Sammenligning = useMemo(
     () =>
       sammenlign({
         personer: f.personer,
         indkomstMd: tal(f.indkomstMd),
         oevrigFormue: tal(f.oevrigFormue),
-        salgspris: tal(f.salgspris),
+        // Salgsprisen er det, man står tilbage med efter gæld, plus gælden.
+        salgspris: tal(f.provenu) + tal(f.rkGaeld) + tal(f.bankGaeld),
         ejer: {
-          areal: tal(f.areal),
+          areal: tal(f.ejerAreal),
           vurdering: tal(f.vurdering),
           rkYdelseMd: tal(f.rkYdelseMd),
           rkGaeld: tal(f.rkGaeld),
@@ -329,17 +367,11 @@ export function Beregner() {
           forsikringVedligeholdMd: tal(f.forsikringVedligeholdMd),
         },
         lejer: {
-          huslejeMd: tal(f.huslejeMd),
-          areal: f.lejerAreal === '' ? tal(f.areal) : tal(f.lejerAreal),
-          varme: f.varme,
-          varmtVandILeje: f.varmtVandILeje,
-          elILeje: f.elILeje,
-          vandSaerskilt: f.vandSaerskilt,
-          vedligehold: f.vedligehold,
+          ...lejerInput,
           loebendeMd: f.lejerLoebendeMd === '' ? tal(f.varmeVandElMd) : tal(f.lejerLoebendeMd),
         },
       }),
-    [f],
+    [f, lejerInput],
   );
 
   const startForfra = () => {
@@ -350,17 +382,24 @@ export function Beregner() {
     }
     setF(EKSEMPEL);
     setEksempel(true);
+    setTrin(1);
   };
 
   const billigereSomLejer = r.forskelMd >= 0;
   const forskel = Math.abs(r.forskelMd);
+  const huslejeEfter = tal(f.huslejeMd) - y1.ydelseMd;
+
+  const overskrift =
+    trin === 1 ? 'Hvad får du i boligstøtte, hvis du lejer?' : 'Hvad koster det at eje, mod at leje?';
+  const intro =
+    trin === 1
+      ? 'Til dig, der modtager folkepension. Skriv din indkomst og hvad en lejebolig koster, så ser du, hvad du kan få i boligstøtte pr. måned.'
+      : 'Skriv, hvad du betaler for at eje i dag. Så ser du ejer og lejer side om side pr. måned, efter boligstøtten er trukket fra.';
 
   return (
     <div className="min-h-screen">
-      <Menu />
-
-      {/* Hero — samme rosa flade som forsiden, menuen ligger i glas oven på */}
-      <section className="relative -mt-[68px] sm:-mt-[76px]" style={{ background: 'var(--fp-rose)' }}>
+      {/* Hero — samme rosa flade som forsiden. Ingen menu, kun vejen tilbage. */}
+      <section className="relative" style={{ background: 'var(--fp-rose)' }}>
         <div className="hidden lg:block absolute top-0 right-0 bottom-0" style={{ width: '49%' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -369,15 +408,22 @@ export function Beregner() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="relative max-w-[1380px] mx-auto px-6 sm:px-10 pt-28 sm:pt-32 pb-12 sm:pb-20 lg:min-h-[460px]">
-          <div className="max-w-[560px] space-y-5">
-            <p className="fp-kicker">Boligstøtte</p>
+        <div className="relative max-w-[1380px] mx-auto px-6 sm:px-10 pt-6 sm:pt-8 pb-12 sm:pb-20 lg:min-h-[440px]">
+          <a
+            href="/frontpage"
+            className="fp-press inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13.5px] text-white"
+            style={{ background: 'var(--fp-green)', fontWeight: 500 }}
+          >
+            <span aria-hidden>←</span>
+            Tilbage til forsiden
+          </a>
+          <div className="max-w-[560px] space-y-5 pt-10 sm:pt-14">
+            <p className="fp-kicker">Boligstøtte · trin {trin} af 2</p>
             <h1 className="text-[36px] sm:text-[46px] lg:text-[52px] leading-[1.15]" style={{ color: 'var(--fp-ink)' }}>
-              Hvad får du i boligstøtte, hvis du lejer?
+              {overskrift}
             </h1>
             <p className="text-[14.5px] leading-[1.7] max-w-[460px]" style={{ color: 'var(--fp-muted)' }}>
-              Til dig, der modtager folkepension. Skriv, hvad du betaler for at eje i dag, og hvad en lejebolig koster. Så
-              ser du begge dele pr. måned, efter boligstøtten er trukket fra.
+              {intro}
             </p>
             {!eksempel && (
               <button
@@ -393,264 +439,384 @@ export function Beregner() {
         </div>
       </section>
 
-      <section className="px-4 sm:px-10 py-12 sm:py-20" style={{ background: 'var(--fp-cream)' }}>
+      <section className="px-4 sm:px-10 py-10 sm:py-16" style={{ background: 'var(--fp-cream)' }}>
         <div className="max-w-[1240px] mx-auto">
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] gap-6 lg:gap-8 items-start">
-          {/* ── Indtastning ───────────────────────────────────────────── */}
-          <div className="space-y-5">
-            <Kort nr="1" titel="Din økonomi">
-              <Valg
-                label="Hvem bor i boligen?"
-                value={f.personer}
-                muligheder={[
-                  { v: 1, tekst: 'Jeg bor alene' },
-                  { v: 2, tekst: 'Vi er to' },
-                ]}
-                onChange={(v) => sæt('personer', v as 1 | 2)}
-              />
-              <Felt
-                id="indkomst"
-                label={f.personer === 2 ? 'Jeres indkomst før skat pr. måned' : 'Din indkomst før skat pr. måned'}
-                hint="Folkepension, arbejdsmarkeds- og firmapension, ATP, løn og renter. Medregn begge, hvis I er to."
-                value={f.indkomstMd}
-                onChange={(v) => sæt('indkomstMd', v)}
-              />
-              <Felt
-                id="formue"
-                label="Formue ud over boligen"
-                hint="Bank, aktier og bil. Pension tæller ikke med. Boligens friværdi regner vi selv med."
-                value={f.oevrigFormue}
-                onChange={(v) => sæt('oevrigFormue', v)}
-              />
-            </Kort>
+          {/* De to trin */}
+          <nav aria-label="Trin" className="flex flex-wrap gap-2 pb-8">
+            {([
+              [1, 'Tjek boligstøtte'],
+              [2, 'Sammenlign med at eje'],
+            ] as const).map(([n, tekst]) => {
+              const aktiv = trin === n;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => gaaTil(n)}
+                  aria-current={aktiv ? 'step' : undefined}
+                  className="fp-press inline-flex items-center gap-2.5 rounded-lg px-4 min-h-[46px] text-[14.5px]"
+                  style={{
+                    background: aktiv ? C.green : '#fff',
+                    color: aktiv ? '#fff' : C.ink,
+                    border: `1px solid ${aktiv ? C.green : C.ruleStrong}`,
+                    fontWeight: 500,
+                  }}
+                >
+                  <span className="tabular-nums" style={{ opacity: 0.7 }}>
+                    {n}
+                  </span>
+                  {tekst}
+                </button>
+              );
+            })}
+          </nav>
 
-            <Kort nr="2" titel="Det betaler du for at eje i dag">
-              <div className="grid sm:grid-cols-2 gap-5">
-                <Felt id="areal" label="Boligens størrelse" enhed="m²" value={f.areal} onChange={(v) => sæt('areal', v)} />
-                <Felt
-                  id="vurdering"
-                  label="Offentlig vurdering"
-                  hint="Står på dit ejendomsskattebrev."
-                  value={f.vurdering}
-                  onChange={(v) => sæt('vurdering', v)}
-                />
-                <Felt
-                  id="rk-ydelse"
-                  label="Realkreditlån, ydelse pr. måned"
-                  hint="Renter, afdrag og bidrag."
-                  value={f.rkYdelseMd}
-                  onChange={(v) => sæt('rkYdelseMd', v)}
-                />
-                <Felt id="rk-gaeld" label="Realkreditlån, restgæld" value={f.rkGaeld} onChange={(v) => sæt('rkGaeld', v)} />
-                <Felt
-                  id="bank-ydelse"
-                  label="Banklån, ydelse pr. måned"
-                  hint="Lån i banken, som er brugt på boligen."
-                  value={f.bankYdelseMd}
-                  onChange={(v) => sæt('bankYdelseMd', v)}
-                />
-                <Felt id="bank-gaeld" label="Banklån, restgæld" value={f.bankGaeld} onChange={(v) => sæt('bankGaeld', v)} />
-              </div>
-              {tal(f.bankYdelseMd) > 0 && (
-                <Til label="Banklånet har pant i boligen" valgt={f.bankPant} onChange={(v) => sæt('bankPant', v)} />
-              )}
-              <div className="grid sm:grid-cols-2 gap-5">
-                <Felt
-                  id="ejendomsskat"
-                  label="Ejendomsskat pr. måned"
-                  hint="Grundskyld og ejendomsværdiskat."
-                  value={f.ejendomsskatMd}
-                  onChange={(v) => sæt('ejendomsskatMd', v)}
-                />
-                <Felt
-                  id="faelles"
-                  label="Fællesudgifter pr. måned"
-                  hint="Til ejerforeningen."
-                  value={f.faellesudgiftMd}
-                  onChange={(v) => sæt('faellesudgiftMd', v)}
-                />
-                <Felt
-                  id="vve"
-                  label="Varme, vand og el pr. måned"
-                  hint="Det du selv betaler, ud over fællesudgifterne."
-                  value={f.varmeVandElMd}
-                  onChange={(v) => sæt('varmeVandElMd', v)}
-                />
-                <Felt
-                  id="forsikring"
-                  label="Forsikring og vedligehold pr. måned"
-                  value={f.forsikringVedligeholdMd}
-                  onChange={(v) => sæt('forsikringVedligeholdMd', v)}
-                />
-              </div>
-            </Kort>
-
-            <Kort nr="3" titel="Hvis du lejer">
-              <div className="grid sm:grid-cols-2 gap-5">
-                <Felt id="husleje" label="Husleje pr. måned" value={f.huslejeMd} onChange={(v) => sæt('huslejeMd', v)} />
-                <Felt
-                  id="lejer-areal"
-                  label="Lejeboligens størrelse"
-                  enhed="m²"
-                  hint="Tom = samme som din bolig."
-                  placeholder={f.areal}
-                  value={f.lejerAreal}
-                  onChange={(v) => sæt('lejerAreal', v)}
-                />
-              </div>
-              <Valg
-                label="Hvordan betaler du varme?"
-                value={f.varme}
-                muligheder={[
-                  { v: 'i-leje' as Varme, tekst: 'Med i huslejen' },
-                  { v: 'saerskilt-fjernvarme-el-gas' as Varme, tekst: 'Særskilt: fjernvarme, el eller gas' },
-                  { v: 'saerskilt-andet' as Varme, tekst: 'Særskilt: andet' },
-                ]}
-                onChange={(v) => sæt('varme', v)}
-              />
-              <div className="space-y-2">
-                <div className="text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
-                  Hvad er med i huslejen?
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Til label="Varmt vand" valgt={f.varmtVandILeje} onChange={(v) => sæt('varmtVandILeje', v)} />
-                  <Til label="El" valgt={f.elILeje} onChange={(v) => sæt('elILeje', v)} />
-                  <Til
-                    label="Vand er ikke med"
-                    valgt={f.vandSaerskilt}
-                    onChange={(v) => sæt('vandSaerskilt', v)}
-                  />
-                </div>
-              </div>
-              <Felt
-                id="lejer-loebende"
-                label="Varme, vand og el pr. måned ud over huslejen"
-                hint="Tom = samme beløb, som du betaler i dag."
-                placeholder={f.varmeVandElMd}
-                value={f.lejerLoebendeMd}
-                onChange={(v) => sæt('lejerLoebendeMd', v)}
-              />
-              <details className="group">
-                <summary className="cursor-pointer text-[15px] underline hover:no-underline" style={{ color: C.green, fontWeight: 500 }}>
-                  Flere valg
-                </summary>
-                <div className="pt-4 space-y-5">
-                  <Felt
-                    id="salgspris"
-                    label="Hvad du får for din bolig"
-                    hint="Pengene tæller med i din formue, når du har solgt. Tom = den offentlige vurdering."
-                    placeholder={f.vurdering}
-                    value={f.salgspris}
-                    onChange={(v) => sæt('salgspris', v)}
-                  />
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] gap-6 lg:gap-8 items-start">
+            {/* ── Indtastning ─────────────────────────────────────────── */}
+            {trin === 1 ? (
+              <div className="space-y-5">
+                <Kort nr="1" titel="Din økonomi">
                   <Valg
-                    label="Hvem vedligeholder indvendigt?"
-                    value={f.vedligehold}
+                    label="Hvem bor i boligen?"
+                    value={f.personer}
                     muligheder={[
-                      { v: 'udlejer' as Vedligehold, tekst: 'Udlejer' },
-                      { v: 'maling' as Vedligehold, tekst: 'Jeg maler og tapetserer' },
-                      { v: 'alt' as Vedligehold, tekst: 'Jeg vedligeholder alt indvendigt' },
+                      { v: 1, tekst: 'Jeg bor alene' },
+                      { v: 2, tekst: 'Vi er to' },
                     ]}
-                    onChange={(v) => sæt('vedligehold', v)}
+                    onChange={(v) => sæt('personer', v as 1 | 2)}
                   />
-                </div>
-              </details>
-            </Kort>
+                  <Felt
+                    id="indkomst"
+                    label={f.personer === 2 ? 'Jeres indkomst før skat pr. måned' : 'Din indkomst før skat pr. måned'}
+                    hint="Folkepension, arbejdsmarkeds- og firmapension, ATP, løn og renter. Medregn begge, hvis I er to."
+                    value={f.indkomstMd}
+                    onChange={(v) => sæt('indkomstMd', v)}
+                  />
+                  <Felt
+                    id="formue"
+                    label="Formue ud over boligen"
+                    hint="Bank, aktier og bil. Pension tæller ikke med."
+                    value={f.oevrigFormue}
+                    onChange={(v) => sæt('oevrigFormue', v)}
+                  />
+                  <Felt
+                    id="provenu"
+                    label="Hvad du står tilbage med efter et salg"
+                    hint="Det du får for boligen, når gælden er betalt. Det tæller med i din formue. Har du ikke solgt, så skriv 0."
+                    value={f.provenu}
+                    onChange={(v) => sæt('provenu', v)}
+                  />
+                </Kort>
+
+                <Kort nr="2" titel="Hvis du lejer">
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    <Felt id="husleje" label="Husleje pr. måned" value={f.huslejeMd} onChange={(v) => sæt('huslejeMd', v)} />
+                    <Felt id="areal" label="Lejeboligens størrelse" enhed="m²" value={f.areal} onChange={(v) => sæt('areal', v)} />
+                  </div>
+                  <Valg
+                    label="Hvordan betaler du varme?"
+                    value={f.varme}
+                    muligheder={[
+                      { v: 'i-leje' as Varme, tekst: 'Med i huslejen' },
+                      { v: 'saerskilt-fjernvarme-el-gas' as Varme, tekst: 'Særskilt: fjernvarme, el eller gas' },
+                      { v: 'saerskilt-andet' as Varme, tekst: 'Særskilt: andet' },
+                    ]}
+                    onChange={(v) => sæt('varme', v)}
+                  />
+                  <div className="space-y-2">
+                    <div className="text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
+                      Hvad er med i huslejen?
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Til label="Varmt vand" valgt={f.varmtVandILeje} onChange={(v) => sæt('varmtVandILeje', v)} />
+                      <Til label="El" valgt={f.elILeje} onChange={(v) => sæt('elILeje', v)} />
+                      <Til label="Vand er ikke med" valgt={f.vandSaerskilt} onChange={(v) => sæt('vandSaerskilt', v)} />
+                    </div>
+                  </div>
+                  <details className="group">
+                    <summary className="cursor-pointer text-[15px] underline hover:no-underline" style={{ color: C.green, fontWeight: 500 }}>
+                      Flere valg
+                    </summary>
+                    <div className="pt-4">
+                      <Valg
+                        label="Hvem vedligeholder indvendigt?"
+                        value={f.vedligehold}
+                        muligheder={[
+                          { v: 'udlejer' as Vedligehold, tekst: 'Udlejer' },
+                          { v: 'maling' as Vedligehold, tekst: 'Jeg maler og tapetserer' },
+                          { v: 'alt' as Vedligehold, tekst: 'Jeg vedligeholder alt indvendigt' },
+                        ]}
+                        onChange={(v) => sæt('vedligehold', v)}
+                      />
+                    </div>
+                  </details>
+                </Kort>
+
+                <button
+                  type="button"
+                  onClick={() => gaaTil(2)}
+                  className="fp-press inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg text-[15px] text-white"
+                  style={{ background: C.green, fontWeight: 500 }}
+                >
+                  Sammenlign med at eje
+                  <span aria-hidden>→</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <Kort nr="1" titel="Det betaler du for at eje i dag">
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    <Felt id="ejer-areal" label="Boligens størrelse" enhed="m²" value={f.ejerAreal} onChange={(v) => sæt('ejerAreal', v)} />
+                    <Felt
+                      id="vurdering"
+                      label="Offentlig vurdering"
+                      hint="Står på dit ejendomsskattebrev."
+                      value={f.vurdering}
+                      onChange={(v) => sæt('vurdering', v)}
+                    />
+                    <Felt
+                      id="rk-ydelse"
+                      label="Realkreditlån, ydelse pr. måned"
+                      hint="Renter, afdrag og bidrag."
+                      value={f.rkYdelseMd}
+                      onChange={(v) => sæt('rkYdelseMd', v)}
+                    />
+                    <Felt id="rk-gaeld" label="Realkreditlån, restgæld" value={f.rkGaeld} onChange={(v) => sæt('rkGaeld', v)} />
+                    <Felt
+                      id="bank-ydelse"
+                      label="Banklån, ydelse pr. måned"
+                      hint="Lån i banken, som er brugt på boligen."
+                      value={f.bankYdelseMd}
+                      onChange={(v) => sæt('bankYdelseMd', v)}
+                    />
+                    <Felt id="bank-gaeld" label="Banklån, restgæld" value={f.bankGaeld} onChange={(v) => sæt('bankGaeld', v)} />
+                  </div>
+                  {tal(f.bankYdelseMd) > 0 && (
+                    <Til label="Banklånet har pant i boligen" valgt={f.bankPant} onChange={(v) => sæt('bankPant', v)} />
+                  )}
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    <Felt
+                      id="ejendomsskat"
+                      label="Ejendomsskat pr. måned"
+                      hint="Grundskyld og ejendomsværdiskat."
+                      value={f.ejendomsskatMd}
+                      onChange={(v) => sæt('ejendomsskatMd', v)}
+                    />
+                    <Felt
+                      id="faelles"
+                      label="Fællesudgifter pr. måned"
+                      hint="Til ejerforeningen."
+                      value={f.faellesudgiftMd}
+                      onChange={(v) => sæt('faellesudgiftMd', v)}
+                    />
+                    <Felt
+                      id="vve"
+                      label="Varme, vand og el pr. måned"
+                      hint="Det du selv betaler, ud over fællesudgifterne."
+                      value={f.varmeVandElMd}
+                      onChange={(v) => sæt('varmeVandElMd', v)}
+                    />
+                    <Felt
+                      id="forsikring"
+                      label="Forsikring og vedligehold pr. måned"
+                      value={f.forsikringVedligeholdMd}
+                      onChange={(v) => sæt('forsikringVedligeholdMd', v)}
+                    />
+                  </div>
+                </Kort>
+
+                <Kort nr="2" titel="Det koster at leje, ud over huslejen">
+                  <Felt
+                    id="lejer-loebende"
+                    label="Varme, vand og el pr. måned"
+                    hint={`Huslejen på ${fmt.format(tal(f.huslejeMd))} kr. har du skrevet i trin 1. Tom her = samme beløb, som du betaler som ejer.`}
+                    placeholder={f.varmeVandElMd}
+                    value={f.lejerLoebendeMd}
+                    onChange={(v) => sæt('lejerLoebendeMd', v)}
+                  />
+                </Kort>
+
+                <button
+                  type="button"
+                  onClick={() => gaaTil(1)}
+                  className="fp-press inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-[14.5px]"
+                  style={{ background: '#fff', color: C.green, border: `1px solid ${C.green}`, fontWeight: 500 }}
+                >
+                  <span aria-hidden>←</span>
+                  Tilbage til boligstøtten
+                </button>
+              </div>
+            )}
+
+            {/* ── Resultat ────────────────────────────────────────────── */}
+            <aside id="resultat" aria-live="polite" className="lg:sticky lg:top-6 space-y-5">
+              {trin === 1 ? (
+                <>
+                  <div className="bg-white rounded-xl overflow-hidden" style={{ border: C.kantKort }}>
+                    <div className="px-5 sm:px-7 pt-6 pb-5" style={{ background: C.mint }}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: C.greenDeep, fontWeight: 600 }}>
+                          Boligstøtte som lejer
+                        </div>
+                        {eksempel && (
+                          <span
+                            className="text-[11px] tracking-[0.1em] uppercase rounded-md px-2.5 py-1"
+                            style={{ background: '#fff', color: C.greenDeep, fontWeight: 600 }}
+                          >
+                            Eksempel
+                          </span>
+                        )}
+                      </div>
+                      <div className="pt-3 text-[15px]" style={{ color: C.greenDeep }}>
+                        {y1.ydelseAar > 0 ? 'Du kan få ca.' : 'Med de tal får du'}
+                      </div>
+                      <div className="text-[40px] sm:text-[46px] leading-[1.05] tabular-nums" style={{ color: C.ink, fontWeight: 300 }}>
+                        {kr(y1.ydelseMd)}
+                      </div>
+                      <div className="pt-1 text-[17px]" style={{ color: C.greenDeep, fontWeight: 500 }}>
+                        {y1.ydelseAar > 0 ? 'i boligstøtte pr. måned' : 'ikke boligstøtte'}
+                      </div>
+                      <div className="pt-3 text-[14px] tabular-nums" style={{ color: C.greenDeep }}>
+                        {kr(y1.ydelseAar)} om året
+                      </div>
+                    </div>
+                    <div className="px-5 sm:px-7 py-5">
+                      <Linje label="Husleje" vaerdi={tal(f.huslejeMd)} />
+                      <Linje label="Boligydelse (skøn)" vaerdi={y1.ydelseMd} fortegn="−" />
+                      <div className="rounded-lg px-3 mt-2" style={{ background: C.mintSoft }}>
+                        <Linje label="Husleje efter boligstøtte" vaerdi={huslejeEfter} fed />
+                      </div>
+                      <div className="pt-5">
+                        <button
+                          type="button"
+                          onClick={() => gaaTil(2)}
+                          className="fp-press w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg text-[15px] text-white"
+                          style={{ background: C.green, fontWeight: 500 }}
+                        >
+                          Sammenlign med at eje
+                          <span aria-hidden>→</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Noter y={y1} over={y1.huslejeOverHalvdelenAfIndkomst} />
+
+                  <details className="bg-white rounded-xl px-5 sm:px-7 py-4" style={{ border: C.kantKort }}>
+                    <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
+                      Sådan er boligydelsen regnet
+                    </summary>
+                    <div className="pt-4">
+                      <Regnestykke titel="Som lejer" y={y1} formue={tal(f.oevrigFormue) + tal(f.provenu)} />
+                    </div>
+                  </details>
+                </>
+              ) : (
+                <>
+                  <div className="bg-white rounded-xl overflow-hidden" style={{ border: C.kantKort }}>
+                    <div className="px-5 sm:px-7 pt-6 pb-5" style={{ background: C.mint }}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: C.greenDeep, fontWeight: 600 }}>
+                          Pr. måned
+                        </div>
+                        {eksempel && (
+                          <span
+                            className="text-[11px] tracking-[0.1em] uppercase rounded-md px-2.5 py-1"
+                            style={{ background: '#fff', color: C.greenDeep, fontWeight: 600 }}
+                          >
+                            Eksempel
+                          </span>
+                        )}
+                      </div>
+                      <div className="pt-3 text-[15px]" style={{ color: C.greenDeep }}>
+                        Som lejer betaler du ca.
+                      </div>
+                      <div className="text-[40px] sm:text-[46px] leading-[1.05] tabular-nums" style={{ color: C.ink, fontWeight: 300 }}>
+                        {kr(forskel)}
+                      </div>
+                      <div className="pt-1 text-[17px]" style={{ color: C.greenDeep, fontWeight: 500 }}>
+                        {Math.round(forskel) === 0 ? 'det samme som i dag' : billigereSomLejer ? 'mindre end i dag' : 'mere end i dag'}
+                      </div>
+                      <div className="pt-3 text-[14px] tabular-nums" style={{ color: C.greenDeep }}>
+                        {kr(forskel * 12)} om året
+                      </div>
+                    </div>
+
+                    <div className="px-5 sm:px-7 py-5 space-y-5">
+                      <Side
+                        titel="Du ejer i dag"
+                        rækker={[
+                          { l: 'Realkreditlån', v: r.ejer.ydelseRK },
+                          { l: 'Banklån', v: r.ejer.ydelseBank },
+                          { l: 'Ejendomsskat', v: r.ejer.ejendomsskat },
+                          { l: 'Fællesudgifter', v: r.ejer.faelles },
+                          { l: 'Varme, vand og el', v: r.ejer.varmeVandEl },
+                          { l: 'Forsikring og vedligehold', v: r.ejer.forsikringVedligehold },
+                        ].filter((x) => x.v > 0)}
+                        sum={r.ejer.udgifterMd}
+                        ydelse={r.ejer.boligydelseMd}
+                        netto={r.ejer.nettoMd}
+                        nettoLabel="Du betaler som ejer"
+                      />
+                      <div style={{ borderTop: `1px solid ${C.rule}` }} />
+                      <Side
+                        titel="Du lejer"
+                        rækker={[
+                          { l: 'Husleje', v: r.lejer.husleje },
+                          { l: 'Varme, vand og el', v: r.lejer.loebende },
+                        ].filter((x) => x.v > 0)}
+                        sum={r.lejer.udgifterMd}
+                        ydelse={r.lejer.boligydelseMd}
+                        netto={r.lejer.nettoMd}
+                        nettoLabel="Du betaler som lejer"
+                      />
+                    </div>
+                  </div>
+
+                  <Noter y={r.lejer.detaljer} over={r.huslejeOverHalvdelenAfIndkomst} />
+
+                  <details className="bg-white rounded-xl px-5 sm:px-7 py-4" style={{ border: C.kantKort }}>
+                    <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
+                      Sådan er boligydelsen regnet
+                    </summary>
+                    <div className="pt-4 space-y-6">
+                      <Regnestykke titel="Som ejer" y={r.ejer.detaljer} formue={r.ejer.formue} />
+                      <Regnestykke titel="Som lejer" y={r.lejer.detaljer} formue={r.lejer.formue} />
+                    </div>
+                  </details>
+                </>
+              )}
+            </aside>
           </div>
 
-          {/* ── Resultat ──────────────────────────────────────────────── */}
-          <aside id="resultat" aria-live="polite" className="lg:sticky lg:top-6 space-y-5">
-            <div className="bg-white rounded-xl overflow-hidden" style={{ border: C.kantKort }}>
-              <div className="px-5 sm:px-7 pt-6 pb-5" style={{ background: C.mint }}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: C.greenDeep, fontWeight: 600 }}>
-                    Pr. måned
-                  </div>
-                  {eksempel && (
-                    <span
-                      className="text-[11px] tracking-[0.1em] uppercase rounded-md px-2.5 py-1"
-                      style={{ background: '#fff', color: C.greenDeep, fontWeight: 600 }}
-                    >
-                      Eksempel
-                    </span>
-                  )}
-                </div>
-                <div className="pt-3 text-[15px]" style={{ color: C.greenDeep }}>
-                  Som lejer betaler du ca.
-                </div>
-                <div className="text-[40px] sm:text-[46px] leading-[1.05] tabular-nums" style={{ color: C.ink, fontWeight: 300 }}>
-                  {kr(forskel)}
-                </div>
-                <div className="pt-1 text-[17px]" style={{ color: C.greenDeep, fontWeight: 500 }}>
-                  {Math.round(forskel) === 0 ? 'det samme som i dag' : billigereSomLejer ? 'mindre end i dag' : 'mere end i dag'}
-                </div>
-                <div className="pt-3 text-[14px] tabular-nums" style={{ color: C.greenDeep }}>
-                  {kr(forskel * 12)} om året
-                </div>
-              </div>
+          {/* Fast bjælke på mobil: resultatet er nederst, felterne øverst */}
+          <a
+            href="#resultat"
+            className="lg:hidden fixed left-4 right-4 bottom-4 z-20 rounded-lg px-5 min-h-[52px] flex items-center justify-between gap-3 text-[15px]"
+            style={{ background: C.green, color: '#fff', boxShadow: '0 10px 30px -8px rgba(15,71,73,0.55)' }}
+          >
+            {trin === 1 ? (
+              <>
+                <span>Boligstøtte pr. md.</span>
+                <span className="tabular-nums" style={{ fontWeight: 600 }}>
+                  {kr(y1.ydelseMd)} ↓
+                </span>
+              </>
+            ) : (
+              <>
+                <span>{Math.round(forskel) === 0 ? 'Det samme som i dag' : billigereSomLejer ? 'Som lejer: mindre pr. md.' : 'Som lejer: mere pr. md.'}</span>
+                <span className="tabular-nums" style={{ fontWeight: 600 }}>
+                  {kr(forskel)} ↓
+                </span>
+              </>
+            )}
+          </a>
 
-              <div className="px-5 sm:px-7 py-5 space-y-5">
-                <Side
-                  titel="Du ejer i dag"
-                  rækker={[
-                    { l: 'Realkreditlån', v: r.ejer.ydelseRK },
-                    { l: 'Banklån', v: r.ejer.ydelseBank },
-                    { l: 'Ejendomsskat', v: r.ejer.ejendomsskat },
-                    { l: 'Fællesudgifter', v: r.ejer.faelles },
-                    { l: 'Varme, vand og el', v: r.ejer.varmeVandEl },
-                    { l: 'Forsikring og vedligehold', v: r.ejer.forsikringVedligehold },
-                  ].filter((x) => x.v > 0)}
-                  sum={r.ejer.udgifterMd}
-                  ydelse={r.ejer.boligydelseMd}
-                  netto={r.ejer.nettoMd}
-                  nettoLabel="Du betaler som ejer"
-                />
-                <div style={{ borderTop: `1px solid ${C.rule}` }} />
-                <Side
-                  titel="Du lejer"
-                  rækker={[
-                    { l: 'Husleje', v: r.lejer.husleje },
-                    { l: 'Varme, vand og el', v: r.lejer.loebende },
-                  ].filter((x) => x.v > 0)}
-                  sum={r.lejer.udgifterMd}
-                  ydelse={r.lejer.boligydelseMd}
-                  netto={r.lejer.nettoMd}
-                  nettoLabel="Du betaler som lejer"
-                />
-              </div>
-            </div>
-
-            <Noter r={r} />
-
-            <details className="bg-white rounded-xl px-5 sm:px-7 py-4" style={{ border: C.kantKort }}>
-              <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
-                Sådan er boligydelsen regnet
-              </summary>
-              <div className="pt-4 space-y-6">
-                <Regnestykke titel="Som ejer" y={r.ejer.detaljer} formue={r.ejer.formue} />
-                <Regnestykke titel="Som lejer" y={r.lejer.detaljer} formue={r.lejer.formue} />
-              </div>
-            </details>
-
-          </aside>
-        </div>
-
-        <a
-          href="#resultat"
-          className="lg:hidden fixed left-4 right-4 bottom-4 z-20 rounded-lg px-5 min-h-[52px] flex items-center justify-between gap-3 text-[15px]"
-          style={{ background: C.green, color: '#fff', boxShadow: '0 10px 30px -8px rgba(15,71,73,0.55)' }}
-        >
-          <span>{Math.round(forskel) === 0 ? 'Det samme som i dag' : billigereSomLejer ? 'Som lejer: mindre pr. md.' : 'Som lejer: mere pr. md.'}</span>
-          <span className="tabular-nums" style={{ fontWeight: 600 }}>
-            {kr(forskel)} ↓
-          </span>
-        </a>
-
-        <p className="max-w-[760px] pt-10 text-[13px] leading-[1.65]" style={{ color: C.muted }}>
-          Regnestykket er vejledende og bygger på boligstøttelovens regler og satserne for {SATSER.aar}. Det er ikke en
-          afgørelse og ikke rådgivning. Det er Udbetaling Danmark, der afgør, om du kan få boligydelse, og hvor meget. Du
-          søger selv på borger.dk.
-        </p>
+          <p className="max-w-[760px] pt-10 text-[13px] leading-[1.65]" style={{ color: C.muted }}>
+            Regnestykket er vejledende og bygger på boligstøttelovens regler og satserne for {SATSER.aar}. Det er ikke en
+            afgørelse og ikke rådgivning. Det er Udbetaling Danmark, der afgør, om du kan få boligydelse, og hvor meget. Du
+            søger selv på borger.dk.
+          </p>
         </div>
       </section>
 
@@ -660,45 +826,7 @@ export function Beregner() {
   );
 }
 
-// ── Menu, afslutning og bund: samme som forsiden ─────────────────────────
-
-const TILBAGE_TIL_LEJE = 'https://365ejendom.dk/';
-
-function Menu() {
-  return (
-    <header className="sticky top-0 z-40 px-3 sm:px-5 pt-3 sm:pt-4">
-      <div
-        className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-6 pr-2 py-2"
-        style={{ background: 'rgba(0,0,0,0.30)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      >
-        <a href="/frontpage" className="flex items-center" aria-label="365 Ejendomme, til forsiden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/365-ejendomme-hvid.png" alt="365 Ejendomme" width={34} height={40} className="h-10 w-auto" />
-        </a>
-        <nav className="hidden lg:flex items-center gap-7 text-[13.5px] text-white">
-          <a href="/frontpage" className="hover:opacity-75 transition-opacity">Forside</a>
-          <a href="/tjek-din-pris" className="hover:opacity-75 transition-opacity">Tjek din pris</a>
-        </nav>
-        <div className="flex items-center gap-2">
-          <a
-            href={TILBAGE_TIL_LEJE}
-            className="fp-press hidden md:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-[13.5px] text-white hover:opacity-75"
-          >
-            Tilbage til Leje
-            <span aria-hidden>↗</span>
-          </a>
-          <a
-            href="tel:+4561789071"
-            className="fp-press inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-[13.5px] tabular-nums"
-            style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
-          >
-            +45 61 78 90 71
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-}
+// ── Afslutning og bund: samme som forsiden ─────────────────────────
 
 function KomIGang() {
   return (
@@ -790,31 +918,31 @@ function Side({
   );
 }
 
-function Noter({ r }: { r: Sammenligning }) {
+function Noter({ y, over }: { y: YdelseResultat; over: boolean }) {
   const noter: string[] = [];
-  if (r.lejer.detaljer.begraenset === 'under-minimum') {
+  if (y.begraenset === 'under-minimum') {
     noter.push('Boligydelsen som lejer bliver under 365 kr. om måneden, og så udbetales den ikke.');
   }
-  if (r.lejer.detaljer.begraenset === 'ingen-ydelse') {
+  if (y.begraenset === 'ingen-ydelse') {
     noter.push('Med de tal får du ikke boligydelse som lejer. Det skyldes som regel indkomsten eller formuen.');
   }
-  if (r.lejer.detaljer.begraenset === 'maksimum') {
+  if (y.begraenset === 'maksimum') {
     noter.push(`Du får den højeste boligydelse, ${fmt.format(SATSER.maxYdelse / 12)} kr. om måneden.`);
   }
-  if (r.lejer.detaljer.arealBeskaaret) {
+  if (y.arealBeskaaret) {
     noter.push(
-      `Lejeboligen er større end ${r.lejer.detaljer.arealTilladt} m². Boligstøtten regnes kun af ${r.lejer.detaljer.arealTilladt} m², så en stor bolig giver ikke mere i støtte.`,
+      `Lejeboligen er større end ${y.arealTilladt} m². Boligstøtten regnes kun af ${y.arealTilladt} m², så en stor bolig giver ikke mere i støtte.`,
     );
   }
-  if (r.lejer.detaljer.loftBrugt) {
+  if (y.loftBrugt) {
     noter.push(`Boligudgiften regnes højst med ${fmt.format(SATSER.maxBoligudgift)} kr. om året.`);
   }
-  if (r.lejer.detaljer.formuetillaeg > 0) {
+  if (y.formuetillaeg > 0) {
     noter.push(
-      `Din formue lægger ${kr(r.lejer.detaljer.formuetillaeg / 12)} om måneden oven i din indkomst. Det trækker boligydelsen ned.`,
+      `Din formue lægger ${kr(y.formuetillaeg / 12)} om måneden oven i din indkomst. Det trækker boligydelsen ned.`,
     );
   }
-  if (r.huslejeOverHalvdelenAfIndkomst) {
+  if (over) {
     noter.push(
       'Huslejen er over halvdelen af indkomsten. Så vurderer Udbetaling Danmark din samlede økonomi, før de beslutter, om du får boligydelse (boligstøtteloven § 15).',
     );

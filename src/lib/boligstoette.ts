@@ -197,6 +197,24 @@ export function ejerBoligudgift(e: EjerInput): number {
   return lan + e.ejendomsskatMd * 12 + SATSER.ejerDrift;
 }
 
+// ── Trin 1: boligstøtte som lejer alene ──────────────────────────────────
+
+export function lejerAlene(i: {
+  personer: 1 | 2;
+  indkomstMd: number;
+  /** Nettoformue som lejer: bank, aktier, bil og det, der er tilbage af boligen efter gæld. */
+  formue: number;
+  lejer: LejerInput;
+}): YdelseResultat & { huslejeOverHalvdelenAfIndkomst: boolean } {
+  const indkomstAar = i.indkomstMd * 12;
+  const y = beregnYdelse(lejerBoligudgift(i.lejer), i.lejer.areal, {
+    personer: i.personer,
+    indkomstAar,
+    formue: i.formue,
+  });
+  return { ...y, huslejeOverHalvdelenAfIndkomst: i.lejer.huslejeMd * 12 > indkomstAar / 2 };
+}
+
 // ── Sammenligning ────────────────────────────────────────────────────────
 
 export type SammenligningInput = {
@@ -210,8 +228,8 @@ export type SammenligningInput = {
     varmeVandElMd: number;
     forsikringVedligeholdMd: number;
   };
-  /** Hvad boligen sælges for. Tom = vurderingen. */
-  salgspris: number;
+  /** Hvad boligen sælges for. null = vurderingen. */
+  salgspris: number | null;
   lejer: LejerInput & {
     /** Varme, vand og el, som lejeren selv betaler ud over huslejen, kr. pr. måned. */
     loebendeMd: number;
@@ -250,7 +268,7 @@ export type Sammenligning = {
 export function sammenlign(i: SammenligningInput): Sammenligning {
   const indkomstAar = i.indkomstMd * 12;
   const gaeld = i.ejer.rkGaeld + i.ejer.bankGaeld;
-  const salgspris = i.salgspris > 0 ? i.salgspris : i.ejer.vurdering;
+  const salgspris = i.salgspris ?? i.ejer.vurdering;
 
   const formueEjer = i.oevrigFormue + i.ejer.vurdering - gaeld;
   const formueLejer = i.oevrigFormue + salgspris - gaeld;

@@ -5,6 +5,7 @@ import {
   beregnYdelse,
   ejerBoligudgift,
   formuetillaeg,
+  lejerAlene,
   lejerBoligudgift,
   sammenlign,
   type LejerInput,
@@ -130,6 +131,28 @@ describe('ejers boligudgift', () => {
   });
 });
 
+describe('trin 1: boligstøtte som lejer alene', () => {
+  const lejer: LejerInput = {
+    huslejeMd: 7_000,
+    areal: 55,
+    varme: 'saerskilt-andet',
+    varmtVandILeje: false,
+    elILeje: false,
+    vandSaerskilt: false,
+    vedligehold: 'udlejer',
+  };
+  it('giver samme boligydelse som den fælles beregning', () => {
+    const a = lejerAlene({ personer: 1, indkomstMd: 16_000, formue: 100_000, lejer });
+    const b = beregnYdelse(lejerBoligudgift(lejer), 55, { personer: 1, indkomstAar: 192_000, formue: 100_000 });
+    expect(a.ydelseAar).toBeCloseTo(b.ydelseAar, 5);
+  });
+  it('trækkes ned af formue fra salget', () => {
+    const lav = lejerAlene({ personer: 1, indkomstMd: 16_000, formue: 100_000, lejer });
+    const hoej = lejerAlene({ personer: 1, indkomstMd: 16_000, formue: 1_500_000, lejer });
+    expect(hoej.ydelseAar).toBeLessThan(lav.ydelseAar);
+  });
+});
+
 describe('sammenligning', () => {
   const base = {
     personer: 1 as const,
@@ -148,7 +171,7 @@ describe('sammenligning', () => {
       varmeVandElMd: 800,
       forsikringVedligeholdMd: 400,
     },
-    salgspris: 0,
+    salgspris: null as number | null,
     lejer: {
       huslejeMd: 7_500,
       areal: 60,
@@ -173,6 +196,7 @@ describe('sammenligning', () => {
   });
   it('lader salgsprisen styre formuen som lejer', () => {
     const lav = sammenlign({ ...base, salgspris: 1_800_000 });
+    expect(sammenlign({ ...base, salgspris: null }).lejer.formue).toBe(base.oevrigFormue + base.ejer.vurdering - base.ejer.rkGaeld);
     const hoej = sammenlign({ ...base, salgspris: 2_300_000 });
     expect(hoej.lejer.formue - lav.lejer.formue).toBe(500_000);
     expect(hoej.lejer.boligydelseMd).toBeLessThanOrEqual(lav.lejer.boligydelseMd);
