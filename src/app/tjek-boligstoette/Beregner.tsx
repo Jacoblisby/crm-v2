@@ -394,7 +394,7 @@ export function Beregner() {
   const intro =
     trin === 1
       ? 'Til dig, der modtager folkepension. Skriv din indkomst og hvad en lejebolig koster, så ser du, hvad du kan få i boligstøtte pr. måned.'
-      : 'Skriv, hvad du betaler for at eje i dag. Så ser du ejer og lejer side om side pr. måned, efter boligstøtten er trukket fra.';
+      : 'Skriv, hvad du betaler for at eje i dag. Så ser du ejer og lejer side om side pr. måned. Som lejer er boligstøtten et tilskud og trækkes fra. Som ejer kan den kun fås som lån.';
 
   return (
     <div className="min-h-screen">
@@ -754,9 +754,15 @@ export function Beregner() {
                           { l: 'Forsikring og vedligehold', v: r.ejer.forsikringVedligehold },
                         ].filter((x) => x.v > 0)}
                         sum={r.ejer.udgifterMd}
-                        ydelse={r.ejer.boligydelseMd}
                         netto={r.ejer.nettoMd}
                         nettoLabel="Du betaler som ejer"
+                        fod={
+                          <p className="pt-2.5 text-[13px] leading-[1.55]" style={{ color: C.muted }}>
+                            {r.ejer.laanMd > 0
+                              ? `Som ejer kan du søge boligydelse på ca. ${kr(r.ejer.laanMd)} pr. måned, men kun som lån med rente. Den trækkes ikke fra her.`
+                              : 'Med de tal kan du ikke få boligydelse som ejer.'}
+                          </p>
+                        }
                       />
                       <div style={{ borderTop: `1px solid ${C.rule}` }} />
                       <Side
@@ -773,15 +779,15 @@ export function Beregner() {
                     </div>
                   </div>
 
-                  <Noter y={r.lejer.detaljer} over={r.huslejeOverHalvdelenAfIndkomst} />
+                  <Noter y={r.lejer.detaljer} over={r.huslejeOverHalvdelenAfIndkomst} laan />
 
                   <details className="bg-white rounded-xl px-5 sm:px-7 py-4" style={{ border: C.kantKort }}>
                     <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
                       Sådan er boligydelsen regnet
                     </summary>
                     <div className="pt-4 space-y-6">
-                      <Regnestykke titel="Som ejer" y={r.ejer.detaljer} formue={r.ejer.formue} />
-                      <Regnestykke titel="Som lejer" y={r.lejer.detaljer} formue={r.lejer.formue} />
+                      <Regnestykke titel="Som ejer (udbetales som lån)" y={r.ejer.detaljer} formue={r.ejer.formue} />
+                      <Regnestykke titel="Som lejer (udbetales som tilskud)" y={r.lejer.detaljer} formue={r.lejer.formue} />
                     </div>
                   </details>
                 </>
@@ -887,13 +893,16 @@ function Side({
   rækker,
   sum,
   ydelse,
+  fod,
   netto,
   nettoLabel,
 }: {
   titel: string;
   rækker: Array<{ l: string; v: number }>;
   sum: number;
-  ydelse: number;
+  /** Boligydelse, der trækkes fra (kun for lejere). Udelades, når støtten er et lån. */
+  ydelse?: number;
+  fod?: React.ReactNode;
   netto: number;
   nettoLabel: string;
 }) {
@@ -909,17 +918,23 @@ function Side({
         <div style={{ borderTop: `1px solid ${C.rule}`, marginTop: 4 }}>
           <Linje label="Udgifter i alt" vaerdi={sum} fed />
         </div>
-        <Linje label="Boligydelse (skøn)" vaerdi={ydelse} fortegn="−" />
+        {ydelse !== undefined && <Linje label="Boligydelse (skøn, tilskud)" vaerdi={ydelse} fortegn="−" />}
         <div className="rounded-lg px-3 mt-2" style={{ background: C.mintSoft }}>
           <Linje label={nettoLabel} vaerdi={netto} fed />
         </div>
+        {fod}
       </div>
     </div>
   );
 }
 
-function Noter({ y, over }: { y: YdelseResultat; over: boolean }) {
+function Noter({ y, over, laan }: { y: YdelseResultat; over: boolean; laan?: boolean }) {
   const noter: string[] = [];
+  if (laan) {
+    noter.push(
+      'Som ejer får du boligydelsen som et lån. Det forrentes med Nationalbankens diskonto, har pant i boligen og skal betales tilbage med renter, når du sælger. Som lejer er den et tilskud, du ikke skal betale tilbage.',
+    );
+  }
   if (y.begraenset === 'under-minimum') {
     noter.push('Boligydelsen som lejer bliver under 365 kr. om måneden, og så udbetales den ikke.');
   }

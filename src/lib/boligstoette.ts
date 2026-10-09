@@ -4,8 +4,13 @@
  * Kilder (alle slået op 9.10.2026):
  *   · Lov om individuel boligstøtte, LBK nr. 995 af 1.7.2025: §§ 8, 8 a, 10–15, 17, 20, 21, 23
  *   · Vejledning om regulering pr. 1.1.2026 af satser (VEJ nr. 10077), tabel 1: satserne herunder
+ *   · Bekendtgørelse nr. 137 af 11.2.2013 (opgørelse af boligudgift for ejere, § 1 om ejerlejligheder)
  *   · BL-analyse maj 2022 (bl.dk): tillægget lægges til boligudgiften, før de 75 % tages
  *     («bruttotillægget udgør 7.300 kr.», «medfører 5.475 kr. mere i boligydelsen» = 75 % af 7.300)
+ *
+ * LEJERE får boligydelsen som TILSKUD (§ 30). EJERE får den som LÅN (§ 31): den forrentes med
+ * Nationalbankens diskonto (§ 35), har pant i boligen (§ 36) og forfalder ved ejerskifte (§ 39).
+ * Derfor trækkes den kun fra lejerens udgifter, aldrig fra ejerens.
  *
  * Det her er et SKØN, ikke en afgørelse. Udbetaling Danmark afgør, hvad man får, og bruger
  * oplysninger vi ikke har (bruttoetageareal, konkrete lejekontrakt, indkomstregisteret).
@@ -245,7 +250,9 @@ export type Sammenligning = {
     varmeVandEl: number;
     forsikringVedligehold: number;
     udgifterMd: number;
-    boligydelseMd: number;
+    /** Boligydelse, som ejeren kan søge som LÅN. Trækkes ikke fra udgifterne. */
+    laanMd: number;
+    /** Ejerens udgifter. Lig med udgifterMd, fordi støtten er et lån. */
     nettoMd: number;
     detaljer: YdelseResultat;
     formue: number;
@@ -288,7 +295,7 @@ export function sammenlign(i: SammenligningInput): Sammenligning {
     i.ejer.rkYdelseMd + i.ejer.bankYdelseMd + i.ejer.ejendomsskatMd + i.ejer.faellesudgiftMd + i.ejer.varmeVandElMd + i.ejer.forsikringVedligeholdMd;
   const lejerUdgifter = i.lejer.huslejeMd + i.lejer.loebendeMd;
 
-  const ejerNetto = ejerUdgifter - ejerYdelse.ydelseMd;
+  const ejerNetto = ejerUdgifter; // boligydelse til ejere er et lån, ikke et tilskud
   const lejerNetto = lejerUdgifter - lejerYdelse.ydelseMd;
 
   return {
@@ -300,7 +307,7 @@ export function sammenlign(i: SammenligningInput): Sammenligning {
       varmeVandEl: i.ejer.varmeVandElMd,
       forsikringVedligehold: i.ejer.forsikringVedligeholdMd,
       udgifterMd: ejerUdgifter,
-      boligydelseMd: ejerYdelse.ydelseMd,
+      laanMd: ejerYdelse.ydelseMd,
       nettoMd: ejerNetto,
       detaljer: ejerYdelse,
       formue: formueEjer,

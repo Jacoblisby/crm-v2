@@ -187,9 +187,10 @@ describe('sammenligning', () => {
     const r = sammenlign(base);
     expect(r.ejer.udgifterMd).toBe(3_300 + 700 + 2_600 + 800 + 400);
   });
-  it('trækker boligydelsen fra på begge sider', () => {
+  it('trækker boligydelsen fra som lejer, men ikke som ejer (ejere får den som lån)', () => {
     const r = sammenlign(base);
-    expect(r.ejer.nettoMd).toBeCloseTo(r.ejer.udgifterMd - r.ejer.boligydelseMd, 5);
+    expect(r.ejer.nettoMd).toBe(r.ejer.udgifterMd);
+    expect(r.ejer.laanMd).toBeGreaterThan(0);
     expect(r.lejer.nettoMd).toBeCloseTo(r.lejer.udgifterMd - r.lejer.boligydelseMd, 5);
     expect(r.forskelMd).toBeCloseTo(r.ejer.nettoMd - r.lejer.nettoMd, 5);
     expect(r.forskelAar).toBeCloseTo(r.forskelMd * 12, 5);
@@ -200,9 +201,65 @@ describe('sammenligning', () => {
     const hoej = sammenlign({ ...base, salgspris: 2_300_000 });
     expect(hoej.lejer.formue - lav.lejer.formue).toBe(500_000);
     expect(hoej.lejer.boligydelseMd).toBeLessThanOrEqual(lav.lejer.boligydelseMd);
+    // …og salget flytter ikke ejerens egen beregning
+    expect(hoej.ejer.laanMd).toBe(lav.ejer.laanMd);
   });
   it('markerer, når huslejen er over halvdelen af indkomsten (§ 15)', () => {
     expect(sammenlign(base).huslejeOverHalvdelenAfIndkomst).toBe(false);
     expect(sammenlign({ ...base, indkomstMd: 12_000 }).huslejeOverHalvdelenAfIndkomst).toBe(true);
+  });
+});
+
+// Egenskaber, der skal holde for alle tal, ikke kun for de eksempler ovenfor.
+describe('egenskaber', () => {
+  // Lille deterministisk generator, så testen er ens fra gang til gang.
+  let seed = 12345;
+  const rnd = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const tilfaelde = Array.from({ length: 400 }, () => ({
+    personer: (rnd() < 0.5 ? 1 : 2) as 1 | 2,
+    indkomstAar: Math.round(rnd() * 500_000),
+    formue: Math.round(rnd() * 3_000_000),
+    boligudgift: Math.round(rnd() * 200_000),
+    areal: Math.round(30 + rnd() * 120),
+  }));
+  it('overskrider aldrig de tre lofter', () => {
+    for (const t of tilfaelde) {
+      const y = beregnYdelse(t.boligudgift, t.areal, { personer: t.personer, indkomstAar: t.indkomstAar, formue: t.formue });
+      expect(y.ydelseAar).toBeGreaterThanOrEqual(0);
+      expect(y.ydelseAar).toBeLessThanOrEqual(SATSER.maxYdelse + 1e-6);
+      expect(y.ydelseAar).toBeLessThanOrEqual(Math.max(0, y.boligudgift - y.egenbetalingMin) + 1e-6);
+    }
+  });
+  it('falder aldrig, når indkomst eller formue stiger', () => {
+    for (const t of tilfaelde) {
+      const hus = { personer: t.personer, indkomstAar: t.indkomstAar, formue: t.formue };
+      const a = beregnYdelse(t.boligudgift, t.areal, hus).ydelseAar;
+      const b = beregnYdelse(t.boligudgift, t.areal, { ...hus, indkomstAar: hus.indkomstAar + 20_000 }).ydelseAar;
+      const c = beregnYdelse(t.boligudgift, t.areal, { ...hus, formue: hus.formue + 500_000 }).ydelseAar;
+      expect(b).toBeLessThanOrEqual(a + 1e-6);
+      expect(c).toBeLessThanOrEqual(a + 1e-6);
+    }
+  });
+  it('stiger aldrig, når boligudgiften falder', () => {
+    for (const t of tilfaelde) {
+      const hus = { personer: t.personer, indkomstAar: t.indkomstAar, formue: t.formue };
+      const a = beregnYdelse(t.boligudgift, t.areal, hus).ydelseAar;
+      const b = beregnYdelse(t.boligudgift * 0.8, t.areal, hus).ydelseAar;
+      expect(b).toBeLessThanOrEqual(a + 1e-6);
+    }
+  });
+  it('har satser, der hænger sammen med lovens grundbeløb gange regulering', () => {
+    // Lovens grundbeløb (1993-niveau) og 2026-satserne skal have samme faktor, ca. 1,805.
+    const faktor = SATSER.indkomstgraense / 111_600;
+    expect(SATSER.tillaeg / 4_700).toBeCloseTo(faktor, 1);
+    expect(SATSER.egenbetalingMin / 11_800).toBeCloseTo(faktor, 1);
+    expect(SATSER.maxYdelse / 33_036).toBeCloseTo(faktor, 1);
+    expect(SATSER.maxBoligudgift / 62_600).toBeCloseTo(faktor, 1);
+    expect(SATSER.formueLav / 587_500).toBeCloseTo(faktor, 1);
+    expect(SATSER.formueHoej / 1_175_100).toBeCloseTo(faktor, 1);
+    expect(SATSER.ejerDrift / 9_000).toBeCloseTo(faktor, 1);
   });
 });
