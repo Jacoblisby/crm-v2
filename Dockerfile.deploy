@@ -1,2 +1,2 @@
 # Skrives automatisk af .github/workflows/ci.yml. Peger på det billede, GitHub har bygget.
-FROM ghcr.io/jacoblisby/crm-v2:sha-7dd2ea152dadabf39cbe3396df2e39768347009d
+FROM ghcr.io/jacoblisby/crm-v2:sha-43d4c841c437c4c178a35de19327665ae0c48b03
