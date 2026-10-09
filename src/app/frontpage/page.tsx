@@ -33,6 +33,7 @@ import {
   Coins,
   HouseLine,
   ArrowUpRight,
+  ArrowRight,
 } from '@phosphor-icons/react';
 import { AddressCta } from './AddressCta';
 import { Reveal, useScrolled, MobileCarousel, useParallaxGroup, RevealBackstop } from './Motion';
@@ -114,6 +115,7 @@ export default function Frontpage() {
       <Erfaringer />
       <Trovaerdighed />
       <Faq />
+      <Boligstoette />
       <FinalCta />
       <FooterBar />
       <StickyCta />
@@ -420,13 +422,6 @@ function BlivBoende() {
             <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
               Hvis boligen passer til os, kan du i mange tilfælde sælge og fortsætte som
               lejer. Vi gennemgår både pris, husleje og vilkår med dig, før du beslutter noget.
-            </p>
-            <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
-              Modtager du folkepension?{' '}
-              <a href="/tjek-boligstoette" className="underline hover:no-underline" style={{ color: 'var(--fp-green)' }}>
-                Se, hvad du kan få i boligstøtte som lejer
-              </a>
-              .
             </p>
           </div>
         </Reveal>
@@ -840,6 +835,37 @@ function Faq() {
             );
           })}
           <div className="border-t" style={{ borderColor: 'rgba(28,43,43,0.15)' }} />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Boligstøtte — under FAQ'en, samme opbygning ───────────────────────────── */
+function Boligstoette() {
+  return (
+    <section id="boligstoette" className="px-6 sm:px-10 py-16 sm:py-24 scroll-mt-20" style={{ background: 'var(--fp-cream)' }}>
+      <div className="max-w-[1240px] mx-auto grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <Reveal className="lg:col-span-5 space-y-4">
+          <p className="fp-kicker">Til dig, der modtager folkepension</p>
+          <h2 className="text-[30px] sm:text-[40px] leading-[1.25] max-w-[340px]">Tjek din boligstøtte</h2>
+        </Reveal>
+        <Reveal delay={80} className="lg:col-span-7 lg:max-w-[560px] space-y-6">
+          <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
+            Som lejer kan du have ret til boligydelse. Skriv, hvad du betaler for at eje i dag, og hvad en lejebolig
+            koster, så ser du begge dele pr. måned, efter boligstøtten er trukket fra.
+          </p>
+          <a
+            href="/tjek-boligstoette"
+            className="fp-press inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[14px] text-white"
+            style={{ background: 'var(--fp-green)', fontWeight: 500 }}
+          >
+            Tjek din boligstøtte
+            <ArrowRight size={15} weight="regular" />
+          </a>
+          <p className="text-[12.5px] leading-[1.6]" style={{ color: 'var(--fp-muted)' }}>
+            Regnestykket er vejledende. Det er Udbetaling Danmark, der afgør, hvad du får.
+          </p>
         </Reveal>
       </div>
     </section>

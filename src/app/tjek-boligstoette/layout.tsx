@@ -19,14 +19,35 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${montserrat.className} min-h-screen`} style={{ background: '#f5f2f1', color: '#1c2b2b' }}>
+    <div className={`${montserrat.className} bs-root min-h-screen`}>
       {children}
       <style>{`
-        .bs-root h1 { font-weight: 300; letter-spacing: -0.021em; line-height: 1.1; font-optical-sizing: auto; }
-        .bs-root h2 { font-weight: 400; letter-spacing: -0.012em; }
-        .bs-root button:active { transition-duration: 90ms; }
+        /* Samme tokens og typografi som forsiden (frontpage/layout.tsx), så siderne læses som én. */
+        .bs-root {
+          --fp-green:      #145d5f;
+          --fp-green-deep: #0f4749;
+          --fp-mint:       #c8dfdd;
+          --fp-mint-card:  #b4d4d1;
+          --fp-faq:        #deeceb;
+          --fp-cream:      #f5f2f1;
+          --fp-rose:       #e8dfde;
+          --fp-cta:        #83ebeb;
+          --fp-ink:        #1c2b2b;
+          --fp-muted:      #4d5a59;
+          --fp-out:        cubic-bezier(0.23, 1, 0.32, 1);
+          --fp-press:      90ms cubic-bezier(0.4, 0, 0.6, 1);
+          background: #ffffff;
+          color: var(--fp-ink);
+          font-weight: 400;
+        }
+        .bs-root h1 { font-weight: 400; letter-spacing: -0.022em; line-height: 1.08; font-optical-sizing: auto; }
+        .bs-root h2 { font-weight: 400; letter-spacing: -0.016em; line-height: 1.15; }
+        .bs-root h3 { font-weight: 400; letter-spacing: -0.008em; }
+        .bs-root .fp-kicker { font-size: 12px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #3a4746; }
+        .bs-root .fp-press { transition: scale var(--fp-press), opacity 200ms var(--fp-out); }
+        .bs-root .fp-press:active { scale: 0.97; }
         .bs-root input:focus-visible, .bs-root button:focus-visible, .bs-root summary:focus-visible, .bs-root a:focus-visible {
-          outline: 3px solid #83ebeb; outline-offset: 2px;
+          outline: 3px solid var(--fp-cta); outline-offset: 2px;
         }
         @media (prefers-reduced-motion: reduce) { .bs-root * { transition: none !important; } }
       `}</style>
