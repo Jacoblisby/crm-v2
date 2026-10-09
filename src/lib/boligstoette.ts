@@ -3,7 +3,9 @@
  *
  * Kilder (alle slået op 9.10.2026):
  *   · Lov om individuel boligstøtte, LBK nr. 995 af 1.7.2025: §§ 8, 8 a, 10–15, 17, 20, 21, 23
- *   · Vejledning om regulering pr. 1.1.2026 af satser (VEJ nr. 10077), tabel 1: satserne herunder
+ *   · Vejledning om regulering pr. 1.1.2026 af satser, gældende udgave VEJ nr. 9336 af 24.3.2026, tabel 1
+ *     (boligydelse) og tabel 2 (boligsikring). Tabel 2 blev rettet i 2026, så ældre udgaver (VEJ nr. 10077)
+ *     har forkerte boligsikringssatser.
  *   · Bekendtgørelse nr. 137 af 11.2.2013 (opgørelse af boligudgift for ejere, § 1 om ejerlejligheder)
  *   · BL-analyse maj 2022 (bl.dk): tillægget lægges til boligudgiften, før de 75 % tages
  *     («bruttotillægget udgør 7.300 kr.», «medfører 5.475 kr. mere i boligydelsen» = 75 % af 7.300)
@@ -55,6 +57,37 @@ export const SATSER = {
   },
 } as const;
 
+/** Boligsikring (ikke-pensionister), tabel 2. Samme opbygning som SATSER, andre satser. */
+export const SIKRING = {
+  aar: 2026,
+  formueLav: 896_400,
+  formueHoej: 1_793_000,
+  andel: 0.6,
+  aftrapning: 0.18,
+  indkomstgraense: 170_300,
+  /** Fast mindstebeløb, ikke en procent af indkomsten som ved boligydelse (§ 22, stk. 2). */
+  egenbetalingMin: 28_700,
+  maxYdelse: 50_412,
+  maxBoligudgift: 95_500,
+  minimumAar: 3_696,
+  ejerDrift: 13_700,
+  /** Uden børn kan boligsikringen højst være 15 % af boligudgiften (§ 22, stk. 3). */
+  loftUdenBoern: 0.15,
+  lejer: {
+    fradragVarme: 91.5,
+    fradragVarmtVand: 29.0,
+    fradragEl: 69.0,
+    tillaegVandafgift: 15.25,
+    tillaegVandafledning: 22.0,
+    tillaegMaling: 69.0,
+    tillaegAnden: 69.0,
+    tillaegVarmeSaerskilt: 35.0,
+  },
+} as const;
+
+/** Boligydelse er for folkepensionister, boligsikring for alle andre. */
+export type Ordning = 'ydelse' | 'sikring';
+
 export type Husstand = {
   /** 1 = bor alene, 2 = to voksne. Begge antages at have folkepension. */
   personer: 1 | 2;
@@ -64,9 +97,10 @@ export type Husstand = {
   formue: number;
 };
 
-export type Begraensning = 'ingen' | 'egenbetaling' | 'maksimum' | 'under-minimum' | 'ingen-ydelse';
+export type Begraensning = 'ingen' | 'egenbetaling' | 'maksimum' | 'femtenprocent' | 'under-minimum' | 'ingen-ydelse';
 
 export type YdelseResultat = {
+  ordning: Ordning;
   boligudgiftRaa: number;
   /** Efter arealloft og loft på boligudgiften. */
   boligudgift: number;
@@ -80,6 +114,8 @@ export type YdelseResultat = {
   reduktion: number;
   beregnet: number;
   egenbetalingMin: number;
+  /** Kun boligsikring: 15 %-loftet. */
+  loft15: number | null;
   ydelseAar: number;
   ydelseMd: number;
   begraenset: Begraensning;
@@ -87,9 +123,10 @@ export type YdelseResultat = {
 
 const maxNul = (x: number) => Math.max(0, x);
 
-export function formuetillaeg(formue: number): number {
-  const mellem = Math.min(formue, SATSER.formueHoej) - SATSER.formueLav;
-  const over = formue - SATSER.formueHoej;
+export function formuetillaeg(formue: number, ordning: Ordning = 'ydelse'): number {
+  const S = ordning === 'ydelse' ? SATSER : SIKRING;
+  const mellem = Math.min(formue, S.formueHoej) - S.formueLav;
+  const over = formue - S.formueHoej;
   return 0.1 * maxNul(mellem) + 0.2 * maxNul(over);
 }
 
@@ -98,36 +135,41 @@ export function arealTilladt(personer: 1 | 2): number {
 }
 
 /** Fælles beregning for lejere og ejere, når boligudgiften (før areal og loft) er kendt. */
-export function beregnYdelse(boligudgiftRaa: number, areal: number, hus: Husstand): YdelseResultat {
+export function beregnYdelse(boligudgiftRaa: number, areal: number, hus: Husstand, ordning: Ordning = 'ydelse'): YdelseResultat {
+  const S = ordning === 'ydelse' ? SATSER : SIKRING;
   const tilladt = arealTilladt(hus.personer);
   const arealBeskaaret = areal > tilladt && areal > 0;
   const efterAreal = arealBeskaaret ? (boligudgiftRaa * tilladt) / areal : boligudgiftRaa;
-  const loftBrugt = efterAreal > SATSER.maxBoligudgift;
-  const boligudgift = Math.min(efterAreal, SATSER.maxBoligudgift);
+  const loftBrugt = efterAreal > S.maxBoligudgift;
+  const boligudgift = Math.min(efterAreal, S.maxBoligudgift);
 
-  const ft = formuetillaeg(hus.formue);
+  const ft = formuetillaeg(hus.formue, ordning);
   const indkomst = hus.indkomstAar + ft;
-  const grundbeloeb = SATSER.andel * (boligudgift + SATSER.tillaeg);
-  const reduktion = SATSER.aftrapning * maxNul(indkomst - SATSER.indkomstgraense);
+  // Boligydelse lægger et tillæg til boligudgiften, før de 75 % tages. Boligsikring har intet tillæg.
+  const grundbeloeb = S.andel * (boligudgift + (ordning === 'ydelse' ? SATSER.tillaeg : 0));
+  const reduktion = S.aftrapning * maxNul(indkomst - S.indkomstgraense);
   const beregnet = grundbeloeb - reduktion;
-  const egenbetalingMin = Math.max(SATSER.egenbetalingPct * indkomst, SATSER.egenbetalingMin);
+  const egenbetalingMin = ordning === 'ydelse' ? Math.max(SATSER.egenbetalingPct * indkomst, SATSER.egenbetalingMin) : SIKRING.egenbetalingMin;
 
   const efterEgenbetaling = boligudgift - egenbetalingMin;
-  let ydelse = Math.min(beregnet, efterEgenbetaling, SATSER.maxYdelse);
-  // Hvilken grænse er det, der bider? Den mindste af de tre.
+  const loft15 = ordning === 'sikring' ? SIKRING.loftUdenBoern * boligudgift : null;
+  let ydelse = Math.min(beregnet, efterEgenbetaling, S.maxYdelse, loft15 ?? Infinity);
+  // Hvilken grænse er det, der bider? Den mindste af dem.
   let begraenset: Begraensning = 'ingen';
-  if (ydelse === efterEgenbetaling && efterEgenbetaling < beregnet) begraenset = 'egenbetaling';
-  else if (ydelse === SATSER.maxYdelse && beregnet > SATSER.maxYdelse) begraenset = 'maksimum';
+  if (loft15 !== null && ydelse === loft15 && loft15 < beregnet) begraenset = 'femtenprocent';
+  else if (ydelse === efterEgenbetaling && efterEgenbetaling < beregnet) begraenset = 'egenbetaling';
+  else if (ydelse === S.maxYdelse && beregnet > S.maxYdelse) begraenset = 'maksimum';
 
   if (ydelse <= 0) {
     ydelse = 0;
     begraenset = 'ingen-ydelse';
-  } else if (ydelse < SATSER.minimumAar) {
+  } else if (ydelse < S.minimumAar) {
     ydelse = 0;
     begraenset = 'under-minimum';
   }
 
   return {
+    ordning,
     boligudgiftRaa,
     boligudgift,
     arealTilladt: tilladt,
@@ -139,8 +181,10 @@ export function beregnYdelse(boligudgiftRaa: number, areal: number, hus: Husstan
     reduktion,
     beregnet,
     egenbetalingMin,
-    ydelseAar: ydelse,
-    ydelseMd: ydelse / 12,
+    loft15,
+    // Den officielle beregner runder det årlige beløb til hele kroner, før det deles med 12.
+    ydelseAar: Math.round(ydelse),
+    ydelseMd: Math.round(ydelse) / 12,
     begraenset,
   };
 }
@@ -162,8 +206,8 @@ export type LejerInput = {
   vedligehold: Vedligehold;
 };
 
-export function lejerBoligudgift(l: LejerInput): number {
-  const s = SATSER.lejer;
+export function lejerBoligudgift(l: LejerInput, ordning: Ordning = 'ydelse'): number {
+  const s = ordning === 'ydelse' ? SATSER.lejer : SIKRING.lejer;
   let b = l.huslejeMd * 12;
   const a = l.areal;
   if (l.varme === 'i-leje') b -= s.fradragVarme * a;
@@ -210,19 +254,25 @@ export function lejerAlene(i: {
   /** Nettoformue som lejer: bank, aktier, bil og det, der er tilbage af boligen efter gæld. */
   formue: number;
   lejer: LejerInput;
+  /** Folkepensionister får boligydelse, alle andre boligsikring. */
+  ordning?: Ordning;
 }): YdelseResultat & { huslejeOverHalvdelenAfIndkomst: boolean } {
+  const ordning = i.ordning ?? 'ydelse';
   const indkomstAar = i.indkomstMd * 12;
-  const y = beregnYdelse(lejerBoligudgift(i.lejer), i.lejer.areal, {
-    personer: i.personer,
-    indkomstAar,
-    formue: i.formue,
-  });
+  const y = beregnYdelse(
+    lejerBoligudgift(i.lejer, ordning),
+    i.lejer.areal,
+    { personer: i.personer, indkomstAar, formue: i.formue },
+    ordning,
+  );
   return { ...y, huslejeOverHalvdelenAfIndkomst: i.lejer.huslejeMd * 12 > indkomstAar / 2 };
 }
 
 // ── Sammenligning ────────────────────────────────────────────────────────
 
 export type SammenligningInput = {
+  /** Folkepensionister får boligydelse (ejere som lån). Andre får boligsikring som lejere og ingenting som ejere. */
+  ordning?: Ordning;
   personer: 1 | 2;
   indkomstMd: number;
   /** Bank, aktier, bil. Ikke pension, ikke boligen. */
@@ -273,6 +323,7 @@ export type Sammenligning = {
 };
 
 export function sammenlign(i: SammenligningInput): Sammenligning {
+  const ordning = i.ordning ?? 'ydelse';
   const indkomstAar = i.indkomstMd * 12;
   const gaeld = i.ejer.rkGaeld + i.ejer.bankGaeld;
   const salgspris = i.salgspris ?? i.ejer.vurdering;
@@ -285,11 +336,12 @@ export function sammenlign(i: SammenligningInput): Sammenligning {
     indkomstAar,
     formue: formueEjer,
   });
-  const lejerYdelse = beregnYdelse(lejerBoligudgift(i.lejer), i.lejer.areal, {
-    personer: i.personer,
-    indkomstAar,
-    formue: formueLejer,
-  });
+  const lejerYdelse = beregnYdelse(
+    lejerBoligudgift(i.lejer, ordning),
+    i.lejer.areal,
+    { personer: i.personer, indkomstAar, formue: formueLejer },
+    ordning,
+  );
 
   const ejerUdgifter =
     i.ejer.rkYdelseMd + i.ejer.bankYdelseMd + i.ejer.ejendomsskatMd + i.ejer.faellesudgiftMd + i.ejer.varmeVandElMd + i.ejer.forsikringVedligeholdMd;
@@ -307,7 +359,8 @@ export function sammenlign(i: SammenligningInput): Sammenligning {
       varmeVandEl: i.ejer.varmeVandElMd,
       forsikringVedligehold: i.ejer.forsikringVedligeholdMd,
       udgifterMd: ejerUdgifter,
-      laanMd: ejerYdelse.ydelseMd,
+      // Ejere får kun boligstøtte, hvis de modtager folkepension (§ 2).
+      laanMd: ordning === 'ydelse' ? ejerYdelse.ydelseMd : 0,
       nettoMd: ejerNetto,
       detaljer: ejerYdelse,
       formue: formueEjer,

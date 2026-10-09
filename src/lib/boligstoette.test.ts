@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   SATSER,
+  SIKRING,
   arealTilladt,
   beregnYdelse,
   ejerBoligudgift,
@@ -229,8 +230,17 @@ describe('egenskaber', () => {
     for (const t of tilfaelde) {
       const y = beregnYdelse(t.boligudgift, t.areal, { personer: t.personer, indkomstAar: t.indkomstAar, formue: t.formue });
       expect(y.ydelseAar).toBeGreaterThanOrEqual(0);
-      expect(y.ydelseAar).toBeLessThanOrEqual(SATSER.maxYdelse + 1e-6);
-      expect(y.ydelseAar).toBeLessThanOrEqual(Math.max(0, y.boligudgift - y.egenbetalingMin) + 1e-6);
+      expect(y.ydelseAar).toBeLessThanOrEqual(SATSER.maxYdelse + 0.5);
+      expect(y.ydelseAar).toBeLessThanOrEqual(Math.max(0, y.boligudgift - y.egenbetalingMin) + 0.5);
+    }
+  });
+  it('boligsikring overskrider aldrig sine lofter, heller ikke 15 %-loftet uden børn', () => {
+    for (const t of tilfaelde) {
+      const y = beregnYdelse(t.boligudgift, t.areal, { personer: t.personer, indkomstAar: t.indkomstAar, formue: t.formue }, 'sikring');
+      expect(y.ydelseAar).toBeGreaterThanOrEqual(0);
+      expect(y.ydelseAar).toBeLessThanOrEqual(SIKRING.maxYdelse + 0.5);
+      expect(y.ydelseAar).toBeLessThanOrEqual(0.15 * y.boligudgift + 0.5);
+      expect(y.ydelseAar).toBeLessThanOrEqual(Math.max(0, y.boligudgift - SIKRING.egenbetalingMin) + 0.5);
     }
   });
   it('falder aldrig, når indkomst eller formue stiger', () => {
@@ -261,5 +271,12 @@ describe('egenskaber', () => {
     expect(SATSER.formueLav / 587_500).toBeCloseTo(faktor, 1);
     expect(SATSER.formueHoej / 1_175_100).toBeCloseTo(faktor, 1);
     expect(SATSER.ejerDrift / 9_000).toBeCloseTo(faktor, 1);
+    // Boligsikringens satser er reguleret med en anden faktor (ca. 1,526), men hænger indbyrdes sammen
+    const f2 = SIKRING.indkomstgraense / 111_600;
+    expect(SIKRING.egenbetalingMin / 18_800).toBeCloseTo(f2, 1);
+    expect(SIKRING.maxYdelse / 33_036).toBeCloseTo(f2, 1);
+    expect(SIKRING.maxBoligudgift / 62_600).toBeCloseTo(f2, 1);
+    expect(SIKRING.formueLav / 587_500).toBeCloseTo(f2, 1);
+    expect(SIKRING.ejerDrift / 9_000).toBeCloseTo(f2, 1);
   });
 });

@@ -847,13 +847,13 @@ function Boligstoette() {
     <section id="boligstoette" className="px-6 sm:px-10 py-16 sm:py-24 scroll-mt-20" style={{ background: 'var(--fp-cream)' }}>
       <div className="max-w-[1240px] mx-auto grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
         <Reveal className="lg:col-span-5 space-y-4">
-          <p className="fp-kicker">Til dig, der modtager folkepension</p>
+          <p className="fp-kicker">Til dig, der overvejer at leje</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.25] max-w-[340px]">Tjek din boligstøtte</h2>
         </Reveal>
         <Reveal delay={80} className="lg:col-span-7 lg:max-w-[560px] space-y-6">
           <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
-            Som lejer kan du have ret til boligydelse. Skriv, hvad du betaler for at eje i dag, og hvad en lejebolig
-            koster, så ser du begge dele pr. måned, efter boligstøtten er trukket fra.
+            Som lejer kan du have ret til boligstøtte. Folkepensionister får boligydelse, alle andre får boligsikring.
+            Skriv, hvad du betaler for at eje i dag, og hvad en lejebolig koster, så ser du begge dele pr. måned.
           </p>
           <a
             href="/tjek-boligstoette"

@@ -15,9 +15,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   SATSER,
+  SIKRING,
   lejerAlene,
   sammenlign,
   type LejerInput,
+  type Ordning,
   type Sammenligning,
   type Varme,
   type Vedligehold,
@@ -42,10 +44,12 @@ const C = {
 
 
 const TELEFON = '61 78 90 71';
-const LAGER = 'boligstoette-v3';
+const LAGER = 'boligstoette-v4';
 
 type Felter = {
   // trin 1
+  /** Folkepension giver boligydelse, alt andet boligsikring. */
+  folkepension: boolean;
   personer: 1 | 2;
   indkomstMd: string;
   oevrigFormue: string;
@@ -72,6 +76,7 @@ type Felter = {
 };
 
 const EKSEMPEL: Felter = {
+  folkepension: true,
   personer: 1,
   indkomstMd: '17500',
   oevrigFormue: '150000',
@@ -317,6 +322,9 @@ export function Beregner() {
   // Samme opvarmningsregel som Udbetaling Danmarks egen beregner: betaler man varme a conto eller
   // til et varmeselskab, lægges 41,50 kr. pr. m² til. Ellers er varme og varmt vand med i huslejen
   // og trækkes fra. Der spørges ikke til el, vand eller vedligeholdelse.
+  const ordning: Ordning = f.folkepension ? 'ydelse' : 'sikring';
+  const stoette = f.folkepension ? 'Boligydelse' : 'Boligsikring';
+
   const lejerInput: LejerInput = useMemo(() => {
     const saerskilt = f.acontoVarme || f.varmeselskab;
     return {
@@ -338,14 +346,16 @@ export function Beregner() {
         indkomstMd: tal(f.indkomstMd),
         formue: tal(f.oevrigFormue) + tal(f.provenu),
         lejer: lejerInput,
+        ordning,
       }),
-    [f, lejerInput],
+    [f, lejerInput, ordning],
   );
 
   // Trin 2: ejer i dag mod lejer
   const r: Sammenligning = useMemo(
     () =>
       sammenlign({
+        ordning,
         personer: f.personer,
         indkomstMd: tal(f.indkomstMd),
         oevrigFormue: tal(f.oevrigFormue),
@@ -369,7 +379,7 @@ export function Beregner() {
           loebendeMd: f.lejerLoebendeMd === '' ? tal(f.varmeVandElMd) : tal(f.lejerLoebendeMd),
         },
       }),
-    [f, lejerInput],
+    [f, lejerInput, ordning],
   );
 
   const startForfra = () => {
@@ -391,8 +401,10 @@ export function Beregner() {
     trin === 1 ? 'Hvad får du i boligstøtte, hvis du lejer?' : 'Hvad koster det at eje, mod at leje?';
   const intro =
     trin === 1
-      ? 'Til dig, der modtager folkepension. Skriv din indkomst og hvad en lejebolig koster, så ser du, hvad du kan få i boligstøtte pr. måned.'
-      : 'Skriv, hvad du betaler for at eje i dag. Så ser du ejer og lejer side om side pr. måned. Som lejer er boligstøtten et tilskud og trækkes fra. Som ejer kan den kun fås som lån.';
+      ? 'Skriv din indkomst og hvad en lejebolig koster, så ser du, hvad du kan få i boligstøtte pr. måned. Folkepensionister får boligydelse, alle andre får boligsikring.'
+      : f.folkepension
+        ? 'Skriv, hvad du betaler for at eje i dag. Så ser du ejer og lejer side om side pr. måned. Som lejer er boligstøtten et tilskud og trækkes fra. Som ejer kan den kun fås som lån.'
+        : 'Skriv, hvad du betaler for at eje i dag. Så ser du ejer og lejer side om side pr. måned. Uden folkepension kan du ikke få boligstøtte som ejer.';
 
   return (
     <div className="min-h-screen">
@@ -474,6 +486,20 @@ export function Beregner() {
             {trin === 1 ? (
               <div className="space-y-5">
                 <Kort nr="1" titel="Din økonomi">
+                  <Valg
+                    label="Modtager du folkepension?"
+                    hint={
+                      f.folkepension
+                        ? 'Så får du boligydelse som lejer.'
+                        : 'Så får du boligsikring, som er lavere end boligydelse. Har du førtidspension eller seniorpension, så brug Udbetaling Danmarks egen beregner, for reglerne er lidt anderledes.'
+                    }
+                    value={f.folkepension ? 'ja' : 'nej'}
+                    muligheder={[
+                      { v: 'ja', tekst: 'Ja' },
+                      { v: 'nej', tekst: 'Nej' },
+                    ]}
+                    onChange={(v) => sæt('folkepension', v === 'ja')}
+                  />
                   <Valg
                     label="Hvem bor i boligen?"
                     value={f.personer}
@@ -644,7 +670,7 @@ export function Beregner() {
                     <div className="px-5 sm:px-7 pt-6 pb-5" style={{ background: C.mint }}>
                       <div className="flex items-center justify-between gap-3">
                         <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: C.greenDeep, fontWeight: 600 }}>
-                          Boligstøtte som lejer
+                          {stoette} som lejer
                         </div>
                         {eksempel && (
                           <span
@@ -662,7 +688,7 @@ export function Beregner() {
                         {kr(y1.ydelseMd)}
                       </div>
                       <div className="pt-1 text-[17px]" style={{ color: C.greenDeep, fontWeight: 500 }}>
-                        {y1.ydelseAar > 0 ? 'i boligstøtte pr. måned' : 'ikke boligstøtte'}
+                        {y1.ydelseAar > 0 ? `i ${stoette.toLowerCase()} pr. måned` : `ikke ${stoette.toLowerCase()}`}
                       </div>
                       <div className="pt-3 text-[14px] tabular-nums" style={{ color: C.greenDeep }}>
                         {kr(y1.ydelseAar)} om året
@@ -670,7 +696,7 @@ export function Beregner() {
                     </div>
                     <div className="px-5 sm:px-7 py-5">
                       <Linje label="Husleje" vaerdi={tal(f.huslejeMd)} />
-                      <Linje label="Boligydelse (skøn)" vaerdi={y1.ydelseMd} fortegn="−" />
+                      <Linje label={`${stoette} (skøn)`} vaerdi={y1.ydelseMd} fortegn="−" />
                       <div className="rounded-lg px-3 mt-2" style={{ background: C.mintSoft }}>
                         <Linje label="Husleje efter boligstøtte" vaerdi={huslejeEfter} fed />
                       </div>
@@ -692,7 +718,7 @@ export function Beregner() {
 
                   <details className="bg-white rounded-xl px-5 sm:px-7 py-4" style={{ border: C.kantKort }}>
                     <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
-                      Sådan er boligydelsen regnet
+                      Sådan er {stoette.toLowerCase()}n regnet
                     </summary>
                     <div className="pt-4 space-y-4">
                       <Regnestykke titel="Som lejer" y={y1} formue={tal(f.oevrigFormue) + tal(f.provenu)} />
@@ -747,9 +773,11 @@ export function Beregner() {
                         nettoLabel="Du betaler som ejer"
                         fod={
                           <p className="pt-2.5 text-[13px] leading-[1.55]" style={{ color: C.muted }}>
-                            {r.ejer.laanMd > 0
-                              ? `Som ejer kan du søge boligydelse på ca. ${kr(r.ejer.laanMd)} pr. måned, men kun som lån med rente. Den trækkes ikke fra her.`
-                              : 'Med de tal kan du ikke få boligydelse som ejer.'}
+                            {!f.folkepension
+                              ? 'Uden folkepension kan du ikke få boligstøtte som ejer.'
+                              : r.ejer.laanMd > 0
+                                ? `Som ejer kan du søge boligydelse på ca. ${kr(r.ejer.laanMd)} pr. måned, men kun som lån med rente. Den trækkes ikke fra her.`
+                                : 'Med de tal kan du ikke få boligydelse som ejer.'}
                           </p>
                         }
                       />
@@ -762,6 +790,7 @@ export function Beregner() {
                         ].filter((x) => x.v > 0)}
                         sum={r.lejer.udgifterMd}
                         ydelse={r.lejer.boligydelseMd}
+                        stoetteNavn={stoette}
                         netto={r.lejer.nettoMd}
                         nettoLabel="Du betaler som lejer"
                       />
@@ -772,10 +801,10 @@ export function Beregner() {
 
                   <details className="bg-white rounded-xl px-5 sm:px-7 py-4" style={{ border: C.kantKort }}>
                     <summary className="cursor-pointer text-[15px]" style={{ color: C.ink, fontWeight: 500 }}>
-                      Sådan er boligydelsen regnet
+                      Sådan er {stoette.toLowerCase()}n regnet
                     </summary>
                     <div className="pt-4 space-y-6">
-                      <Regnestykke titel="Som ejer (udbetales som lån)" y={r.ejer.detaljer} formue={r.ejer.formue} />
+                      {f.folkepension && <Regnestykke titel="Som ejer (udbetales som lån)" y={r.ejer.detaljer} formue={r.ejer.formue} />}
                       <Regnestykke titel="Som lejer (udbetales som tilskud)" y={r.lejer.detaljer} formue={r.lejer.formue} />
                       <Kontrolleret />
                     </div>
@@ -883,6 +912,7 @@ function Side({
   rækker,
   sum,
   ydelse,
+  stoetteNavn = 'Boligydelse',
   fod,
   netto,
   nettoLabel,
@@ -892,6 +922,7 @@ function Side({
   sum: number;
   /** Boligydelse, der trækkes fra (kun for lejere). Udelades, når støtten er et lån. */
   ydelse?: number;
+  stoetteNavn?: string;
   fod?: React.ReactNode;
   netto: number;
   nettoLabel: string;
@@ -908,7 +939,7 @@ function Side({
         <div style={{ borderTop: `1px solid ${C.rule}`, marginTop: 4 }}>
           <Linje label="Udgifter i alt" vaerdi={sum} fed />
         </div>
-        {ydelse !== undefined && <Linje label="Boligydelse (skøn, tilskud)" vaerdi={ydelse} fortegn="−" />}
+        {ydelse !== undefined && <Linje label={`${stoetteNavn} (skøn, tilskud)`} vaerdi={ydelse} fortegn="−" />}
         <div className="rounded-lg px-3 mt-2" style={{ background: C.mintSoft }}>
           <Linje label={nettoLabel} vaerdi={netto} fed />
         </div>
@@ -919,20 +950,33 @@ function Side({
 }
 
 function Noter({ y, over, laan }: { y: YdelseResultat; over: boolean; laan?: boolean }) {
+  const sikring = y.ordning === 'sikring';
+  const S = sikring ? SIKRING : SATSER;
+  const navn = sikring ? 'boligsikring' : 'boligydelse';
   const noter: string[] = [];
+  if (sikring) {
+    noter.push(
+      'Du modtager ikke folkepension, så du får boligsikring og ikke boligydelse. Boligsikringen er lavere, og uden børn kan den højst være 15 % af boligudgiften.',
+    );
+  }
   if (laan) {
     noter.push(
-      'Som ejer får du boligydelsen som et lån. Det forrentes med Nationalbankens diskonto, har pant i boligen og skal betales tilbage med renter, når du sælger. Som lejer er den et tilskud, du ikke skal betale tilbage.',
+      sikring
+        ? 'Som ejer kan du ikke få boligstøtte, medmindre du modtager folkepension. Som lejer er boligsikringen et tilskud, du ikke skal betale tilbage.'
+        : 'Som ejer får du boligydelsen som et lån. Det forrentes med Nationalbankens diskonto, har pant i boligen og skal betales tilbage med renter, når du sælger. Som lejer er den et tilskud, du ikke skal betale tilbage.',
     );
   }
   if (y.begraenset === 'under-minimum') {
-    noter.push('Boligydelsen som lejer bliver under 365 kr. om måneden, og så udbetales den ikke.');
+    noter.push(`Din ${navn} som lejer bliver under ${fmt.format(Math.round(S.minimumAar / 12))} kr. om måneden, og så udbetales den ikke.`);
   }
   if (y.begraenset === 'ingen-ydelse') {
-    noter.push('Med de tal får du ikke boligydelse som lejer. Det skyldes som regel indkomsten eller formuen.');
+    noter.push(`Med de tal får du ikke ${navn} som lejer. Det skyldes som regel indkomsten eller formuen.`);
   }
   if (y.begraenset === 'maksimum') {
-    noter.push(`Du får den højeste boligydelse, ${fmt.format(SATSER.maxYdelse / 12)} kr. om måneden.`);
+    noter.push(`Du får den højeste ${navn}, ${fmt.format(S.maxYdelse / 12)} kr. om måneden.`);
+  }
+  if (y.begraenset === 'femtenprocent') {
+    noter.push('Du rammer loftet på 15 % af boligudgiften. Lavere indkomst giver derfor ikke mere i støtte.');
   }
   if (y.arealBeskaaret) {
     noter.push(
@@ -940,22 +984,20 @@ function Noter({ y, over, laan }: { y: YdelseResultat; over: boolean; laan?: boo
     );
   }
   if (y.loftBrugt) {
-    noter.push(`Boligudgiften regnes højst med ${fmt.format(SATSER.maxBoligudgift)} kr. om året.`);
+    noter.push(`Boligudgiften regnes højst med ${fmt.format(S.maxBoligudgift)} kr. om året.`);
   }
   if (y.formuetillaeg > 0) {
-    noter.push(
-      `Din formue lægger ${kr(y.formuetillaeg / 12)} om måneden oven i din indkomst. Det trækker boligydelsen ned.`,
-    );
+    noter.push(`Din formue lægger ${kr(y.formuetillaeg / 12)} om måneden oven i din indkomst. Det trækker ${navn}n ned.`);
   }
   if (over) {
     noter.push(
-      'Huslejen er over halvdelen af indkomsten. Så vurderer Udbetaling Danmark din samlede økonomi, før de beslutter, om du får boligydelse (boligstøtteloven § 15).',
+      `Huslejen er over halvdelen af indkomsten. Så vurderer Udbetaling Danmark din samlede økonomi, før de beslutter, om du får ${navn} (boligstøtteloven § 15).`,
     );
   }
   noter.push(
     'Sælger du din bolig og lejer en anden, kan Udbetaling Danmark vurdere, om lejeaftalen er lavet for at få boligstøtte (§ 15). Er huslejen højere end normalt for en tilsvarende bolig, kan de sætte den ned (§ 11).',
   );
-  noter.push('Boligydelsen er skattefri.');
+  noter.push('Boligstøtten er skattefri.');
 
   return (
     <div className="bg-white rounded-xl px-5 sm:px-7 py-5 space-y-2.5" style={{ border: C.kantKort }}>
@@ -979,14 +1021,17 @@ function Noter({ y, over, laan }: { y: YdelseResultat; over: boolean; laan?: boo
 function Kontrolleret() {
   return (
     <p className="text-[12.5px] leading-[1.6]" style={{ color: C.muted }}>
-      Boligydelsen som lejer er regnet efter samme regler og spørgsmål som Udbetaling Danmarks egen beregner på
-      boligstoette.dk og kontrolleret mod den i 49 scenarier for enlige og par, med satserne for {SATSER.aar}. Boligydelse
-      til ejere findes ikke i den beregner, fordi den udbetales som lån.
+      Boligstøtten som lejer er regnet efter samme regler og spørgsmål som Udbetaling Danmarks egen beregner på
+      boligstoette.dk og kontrolleret mod den i 147 scenarier (boligydelse og boligsikring, enlige og par), med satserne
+      for {SATSER.aar}. Boligydelse til ejere findes ikke i den beregner, fordi den udbetales som lån.
     </p>
   );
 }
 
 function Regnestykke({ titel, y, formue }: { titel: string; y: YdelseResultat; formue: number }) {
+  const sikring = y.ordning === 'sikring';
+  const S = sikring ? SIKRING : SATSER;
+  const navn = sikring ? 'boligsikring' : 'boligydelse';
   const rad = (l: string, v: string, fed = false) => (
     <div className="flex items-baseline justify-between gap-4 py-[5px] text-[14px]" style={{ fontWeight: fed ? 600 : 400 }}>
       <span style={{ color: fed ? C.ink : C.muted }}>{l}</span>
@@ -1003,17 +1048,21 @@ function Regnestykke({ titel, y, formue }: { titel: string; y: YdelseResultat; f
       {rad('Boligudgift om året', kr(y.boligudgiftRaa))}
       {y.arealBeskaaret && rad(`Efter arealloft (${y.arealTilladt} m²)`, kr(y.boligudgift))}
       {y.loftBrugt && rad('Efter loft', kr(y.boligudgift))}
-      {rad(`+ tillæg ${fmt.format(SATSER.tillaeg)} kr. · ${SATSER.andel * 100} %`, kr(y.grundbeloeb))}
+      {rad(
+        sikring ? `× ${S.andel * 100} %` : `+ tillæg ${fmt.format(SATSER.tillaeg)} kr. · ${SATSER.andel * 100} %`,
+        kr(y.grundbeloeb),
+      )}
       {rad('Formue', `${minus(formue)}${kr(formue)}`)}
       {rad('Formuetillæg til indkomsten', kr(y.formuetillaeg))}
       {rad('Indkomst inkl. formuetillæg', kr(y.indkomstInklFormue))}
-      {rad(`− 22,5 % over ${fmt.format(SATSER.indkomstgraense)} kr.`, kr(y.reduktion))}
-      {rad('Beregnet boligydelse', `${minus(y.beregnet)}${kr(y.beregnet)}`)}
+      {rad(`− ${S.aftrapning * 100} % over ${fmt.format(S.indkomstgraense)} kr.`, kr(y.reduktion))}
+      {rad(`Beregnet ${navn}`, `${minus(y.beregnet)}${kr(y.beregnet)}`)}
       {rad('Mindste egenbetaling', kr(y.egenbetalingMin))}
-      {rad('Højeste boligydelse', kr(SATSER.maxYdelse))}
+      {rad(`Højeste ${navn}`, kr(S.maxYdelse))}
+      {y.loft15 !== null && rad('Loft: 15 % af boligudgiften (uden børn)', kr(y.loft15))}
       <div style={{ borderTop: `1px solid ${C.rule}`, marginTop: 6 }} />
-      {rad('Boligydelse om året', kr(y.ydelseAar), true)}
-      {rad('Boligydelse pr. måned', kr(y.ydelseMd), true)}
+      {rad(`${sikring ? 'Boligsikring' : 'Boligydelse'} om året`, kr(y.ydelseAar), true)}
+      {rad(`${sikring ? 'Boligsikring' : 'Boligydelse'} pr. måned`, kr(y.ydelseMd), true)}
     </div>
   );
 }
