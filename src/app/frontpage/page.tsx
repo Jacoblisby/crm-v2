@@ -421,6 +421,13 @@ function BlivBoende() {
               Hvis boligen passer til os, kan du i mange tilfælde sælge og fortsætte som
               lejer. Vi gennemgår både pris, husleje og vilkår med dig, før du beslutter noget.
             </p>
+            <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
+              Modtager du folkepension?{' '}
+              <a href="/tjek-boligstoette" className="underline hover:no-underline" style={{ color: 'var(--fp-green)' }}>
+                Se, hvad du kan få i boligstøtte som lejer
+              </a>
+              .
+            </p>
           </div>
         </Reveal>
       </div>

@@ -21,6 +21,7 @@ export function MainHeader() {
   // Auto-skjul CRM-nav på public funnel-routes + design-prototyper
   if (pathname?.startsWith('/salg')) return null;
   if (pathname?.startsWith('/frontpage')) return null;
+  if (pathname?.startsWith('/tjek-boligstoette')) return null;
   if (pathname?.startsWith('/design-preview')) return null;
   if (pathname?.startsWith('/design-vote')) return null;
 
@@ -64,7 +65,7 @@ interface MainProps {
 
 export function MainWrapper({ children }: MainProps) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/salg') || pathname?.startsWith('/frontpage')) {
+  if (pathname?.startsWith('/salg') || pathname?.startsWith('/frontpage') || pathname?.startsWith('/tjek-boligstoette')) {
     // Salg + frontpage har eget layout — ingen CRM-wrapper
     return <>{children}</>;
   }

@@ -6,7 +6,7 @@
  * Viser designerens titler, gemmer v2-display-strenge (mapper til v1-slugs).
  */
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
-import { OptionRowV4 } from '../primitives';
+import { OptionRowV4, V4 } from '../primitives';
 
 const OPTIONS: Array<{ display: string; stateValue: string; sub: string }> = [
   {
@@ -44,6 +44,15 @@ export function EfterSalgV4() {
           onSelect={() => update({ afterSaleRaw: o.stateValue })}
         />
       ))}
+      {(state.afterSaleRaw === 'Vil blive boende som lejer' || state.afterSaleRaw === 'Vil leje en anden bolig') && (
+        <p className="pt-2 text-[14px] leading-[1.6]" style={{ color: V4.muted }}>
+          Modtager du folkepension?{' '}
+          <a href="/tjek-boligstoette" target="_blank" rel="noopener" className="underline hover:no-underline" style={{ color: V4.green }}>
+            Se, hvad du kan få i boligstøtte som lejer
+          </a>
+          .
+        </p>
+      )}
     </div>
   );
 }

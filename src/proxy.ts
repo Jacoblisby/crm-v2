@@ -33,6 +33,7 @@ const KUNDESIDER = [
   '/frontpage',
   '/salg',            // dækker /salg-v4 og prototyperne
   '/tjek-din-pris',
+  '/tjek-boligstoette',
   '/k/',              // brevkoder, når de bygges
 ];
 
@@ -60,7 +61,7 @@ export function proxy(req: NextRequest) {
   // stået et stykke tid.
   if (vaert === CRM) {
     const { pathname, search } = req.nextUrl;
-    const erSaelgerside = ['/frontpage', '/salg', '/tjek-din-pris', '/k/'].some(
+    const erSaelgerside = ['/frontpage', '/salg', '/tjek-din-pris', '/tjek-boligstoette', '/k/'].some(
       (p) => pathname === p || pathname.startsWith(p),
     );
     if (erSaelgerside) {
