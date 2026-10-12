@@ -39,7 +39,7 @@ SEG = lambda s: 'A' if s in 'AC' else 'B'   # brevlistens A+C → A, B+D → B
 
 
 def tael(crm, breve):
-    """Tæl leads pr. segment og trin. Et lead hører til et brev, hvis adressen matcher."""
+    """Tæl leads pr. segment (A og B) og trin. Et lead hører til et brev, hvis adressen matcher."""
     efter_hash = {b['hash']: b for b in breve}
     efter_gade = {}
     for b in breve:
@@ -52,15 +52,16 @@ def tael(crm, breve):
         b = efter_hash.get(l['nogle']) if l.get('nogle') else None
         if not b and l.get('nogleGade') and len(efter_gade.get(l['nogleGade'], [])) == 1:
             b = efter_gade[l['nogleGade']][0]
-        if not b or SEG(b['segment']) == 'B' or til_dato(l['oprettet']) < SENDT_A:
-            continue   # B er ikke sendt, og leads før brevet hører ikke til det
+        if not b or til_dato(l['oprettet']) < SENDT_A:
+            continue   # leads før det første brev hører ikke til kampagnen
+        seg = SEG(b['segment'])
         d = lambda k: bool(l[k])
         koebt, ikke_enige = d('tKoebt'), d('tIkkeEnige')
         bud = d('tBud') or ikke_enige or koebt
         afholdt = d('tAfholdt') or bud
         aftalt = d('tAftalt') or afholdt
         for k, v in (('lead', True), ('booking', d('tBooking')), ('aftalt', aftalt), ('afholdt', afholdt), ('bud', bud), ('koebt', koebt)):
-            tal['A'][k] += bool(v)
+            tal[seg][k] += bool(v)
     return tal
 
 
@@ -86,9 +87,9 @@ def byg(ud):
 
     # ── Breve ───────────────────────────────────────────────────────────
     wb_ = wb.create_sheet('Breve')
-    title(wb_, 'Breve', 'Hvem der har fået brev, hvilket budskab, og hvor mange gange. Skriv sendedatoen i de gule felter, når et segment sendes.', 13)
-    widths(wb_, {'A': 9, 'B': 24, 'C': 9, 'D': 12, 'E': 12, 'F': 9, 'G': 12, 'H': 9, 'I': 9, 'J': 9, 'K': 8, 'L': 46, 'M': 22})
-    header_row(wb_, 4, ['Segment', 'Hvem', 'Antal', 'Heraf reklame-beskyttet', 'Sendt den', 'Sendt', 'Fik brev jul 2025', '0 breve', '1 brev', '2 breve', 'Leads', 'Budskab', 'Brev'])
+    title(wb_, 'Breve', 'Hvem der har fået brev, hvilket budskab, og hvor mange gange. Skriv sendedatoen i de gule felter, når et segment sendes.', 12)
+    widths(wb_, {'A': 9, 'B': 24, 'C': 9, 'D': 12, 'E': 12, 'F': 9, 'G': 12, 'H': 9, 'I': 9, 'J': 9, 'K': 46, 'L': 22})
+    header_row(wb_, 4, ['Segment', 'Hvem', 'Antal', 'Heraf reklame-beskyttet', 'Sendt den', 'Sendt', 'Fik brev jul 2025', '0 breve', '1 brev', '2 breve', 'Budskab', 'Brev'])
     wb_.row_dimensions[4].height = 42
     for j, s in enumerate('AB'):
         r = 5 + j
@@ -102,25 +103,24 @@ def byg(ud):
         fml(wb_, f'H{r}', f'=C{r}-I{r}-J{r}')
         fml(wb_, f'I{r}', f'=IF(E{r}="",G{r},C{r}-G{r})')
         fml(wb_, f'J{r}', f'=IF(E{r}="",0,G{r})')
-        hard(wb_, f'K{r}', tal['A']['lead'] if s == 'A' else 0)
-        lbl(wb_, f'L{r}', BUDSKAB[s])
-        wb_[f'L{r}'].alignment = Alignment(wrap_text=True, vertical='center')
-        c = wb_[f'M{r}']; c.value = BREV[s]; c.hyperlink = LINKS[BREV[s]]; c.font = LINK_FONT
+        lbl(wb_, f'K{r}', BUDSKAB[s])
+        wb_[f'K{r}'].alignment = Alignment(wrap_text=True, vertical='center')
+        c = wb_[f'L{r}']; c.value = BREV[s]; c.hyperlink = LINKS[BREV[s]]; c.font = LINK_FONT
         wb_.row_dimensions[r].height = 32
     lbl(wb_, 'A7', 'I alt', bold=True)
-    for c in 'CDFGHIJK':
+    for c in 'CDFGHIJ':
         fml(wb_, f'{c}7', f'=SUM({c}5:{c}6)', bold=True)
     note(wb_, 'A9', 'Segment A er ejer bor på adressen. Segment B er ejer bor et andet sted. Reklamebeskyttede er med i begge.')
     note(wb_, 'A10', 'Brevene til B lander hos lejeren, ikke ejeren, fordi ejerens postadresse ikke er i datasættet.')
-    note(wb_, 'A11', f'Antal breve pr. modtager er brevet i juli 2025 (hvis modtageren var med) plus brevet i 2026 (hvis sendt). Leads hentet fra CRM {hentet:%d-%m-%Y}.')
+    note(wb_, 'A11', f'Antal breve pr. modtager er brevet i juli 2025 (hvis modtageren var med) plus brevet i 2026 (hvis sendt).')
 
     # ── Funnel ──────────────────────────────────────────────────────────
     ws = wb.create_sheet('Funnel', 0)
-    title(ws, 'Funnel: fra ejerforeninger til køb', f'Hentet fra CRM {hentet:%d-%m-%Y}. Et lead tæller med på alle de trin, det har passeret. Hvert link åbner præcis det brev, den mail eller det script, vi bruger.', 9)
-    widths(ws, {'A': 34, 'B': 11, 'C': 38, 'D': 12, 'E': 10, 'F': 11, 'G': 46, 'H': 32, 'I': 24})
+    title(ws, 'Funnel: fra ejerforeninger til køb', f'Hentet fra CRM {hentet:%d-%m-%Y}. Et lead tæller med på alle de trin, det har passeret. Hvert link åbner præcis det brev, den mail eller det script, vi bruger.', 11)
+    widths(ws, {'A': 34, 'B': 11, 'C': 38, 'D': 12, 'E': 10, 'F': 11, 'G': 12, 'H': 10, 'I': 46, 'J': 32, 'K': 24})
 
     # Top: ejerforeninger → segmenter
-    header_row(ws, 4, ['Fra ejerforeninger til brev', 'Antal', 'Tragt', '% af forrige', '', '', 'Hvad tallet er'])
+    header_row(ws, 4, ['Fra ejerforeninger til brev', 'Antal', 'Tragt', '% af forrige', '', '', '', '', 'Hvad tallet er'])
     ws.row_dimensions[4].height = 26
     top = [
         ('Ejerforeninger identificeret', len(foren), 'foren', 'Alle foreninger i registret på /foreninger'),
@@ -142,30 +142,30 @@ def byg(ud):
             fml(ws, f'D{r}', f'=IF(B{r-1}>0,B{r}/B{r-1},"–")', fmt=PCT)
         elif i in (4, 5):
             fml(ws, f'D{r}', f'=IF($B$8>0,B{r}/$B$8,"–")', fmt=PCT)
-        note(ws, f'G{r}', kom)
+        note(ws, f'I{r}', kom)
         for c in 'BCD':
             ws[f'{c}{r}'].alignment = Alignment(horizontal=('center' if c == 'C' else 'right'), vertical='center')
         ws.row_dimensions[r].height = 22
 
     # Tragten fra brev til køb
     hr = 13
-    header_row(ws, hr, ['Fra brev til køb', 'A: ejer bor', 'Tragt (A)', '% af forrige', 'Faldt fra', 'B: ejer bor ikke', 'Handling', 'Brev, mail eller script', 'Hvornår'])
+    header_row(ws, hr, ['Fra brev til køb', 'A: ejer bor', 'Tragt (A)', 'A: % af forrige', 'A: faldt fra', 'B: ejer bor ikke', 'B: % af forrige', 'B: faldt fra', 'Handling', 'Brev, mail eller script', 'Hvornår'])
     ws.row_dimensions[hr].height = 30
-    A_ = tal['A']
+    A_, B_ = tal['A'], tal['B']
     rows = [
         ('Breve sendt', '=Breve!F5', '=Breve!F6', 'A: ' + BUDSKAB['A'] + ' B: ' + BUDSKAB['B'] + ' Send som Word-fil i Resights, så flettefelterne udfyldes.',
          [('Beboende ejer brev 2', 'Segment A'), ('Udlejer brev 1', 'Segment B')]),
-        ('Lead', A_['lead'], 0, 'Send booking-mailen senest dagen efter, at de har brugt beregneren.',
+        ('Lead', A_['lead'], B_['lead'], 'Send booking-mailen senest dagen efter, at de har brugt beregneren.',
          [('Mail 01 Booking', 'Senest dagen efter')]),
-        ('Booking sendt', A_['booking'], 0, 'Følg op i samme tråd. Uden svar efter tredje opfølgning parkeres leadet.',
+        ('Booking sendt', A_['booking'], B_['booking'], 'Følg op i samme tråd. Uden svar efter tredje opfølgning parkeres leadet.',
          [('Mail 02 Opfølgning 1 dag 3', 'Dag 3'), ('Mail 03 Opfølgning 2 dag 8', 'Dag 8'), ('Mail 04 Opfølgning 3 dag 15', 'Dag 15')]),
-        ('Besigtigelse aftalt', A_['aftalt'], 0, 'Bekræft tiden skriftligt, og påmind dagen før. Kør derud med scriptet.',
+        ('Besigtigelse aftalt', A_['aftalt'], B_['aftalt'], 'Bekræft tiden skriftligt, og påmind dagen før. Kør derud med scriptet.',
          [('Mail 05 Bekræftelse', 'Straks'), ('Mail 06 Påmindelse', 'Dagen før'), ('Script Besigtigelse', 'På dagen')]),
-        ('Besigtigelse afholdt', A_['afholdt'], 0, 'Giv et skriftligt bud senest dagen efter.',
+        ('Besigtigelse afholdt', A_['afholdt'], B_['afholdt'], 'Giv et skriftligt bud senest dagen efter.',
          [('Mail 07 Tak for i dag', 'Samme dag')]),
-        ('Bud afgivet', A_['bud'], 0, 'Send kontantbud, som gælder i 30 dage, og følg op. Tæller også dem, der siden blev uenige om prisen.',
+        ('Bud afgivet', A_['bud'], B_['bud'], 'Send kontantbud, som gælder i 30 dage, og følg op. Tæller også dem, der siden blev uenige om prisen.',
          [('Mail 08 Bud', 'Dagen efter besigtigelsen'), ('Mail 09 Bud-opfølgning dag 3', 'Dag 3')]),
-        ('Købt', A_['koebt'], 0, 'Send de næste skridt, når I er blevet enige.',
+        ('Købt', A_['koebt'], B_['koebt'], 'Send de næste skridt, når I er blevet enige.',
          [('Mail 14 Sådan foregår handlen', 'Når I er enige')]),
     ]
     first = hr + 1
@@ -177,27 +177,29 @@ def byg(ud):
         (fml if isinstance(a, str) else hard)(ws, f'B{r}', a)
         (fml if isinstance(b, str) else hard)(ws, f'F{r}', b)
         if i == 0:
-            fml(ws, f'C{r}', f'=IF(B{r}>0,"Respons: "&ROUND(100*B{lead_r}/B{r},1)&" % blev til et lead","")', fmt='@')
+            fml(ws, f'C{r}', f'="Respons A: "&IF(B{r}>0,ROUND(100*B{lead_r}/B{r},1)&" %","–")&"   B: "&IF(F{r}>0,ROUND(100*F{lead_r}/F{r},1)&" %","–")', fmt='@')
             ws[f'C{r}'].font = _font(False, '64748B', 9, True)
         else:
             fml(ws, f'C{r}', f'=IF($B${lead_r}>0,REPT("█",MAX(IF(B{r}>0,1,0),ROUND(28*B{r}/$B${lead_r},0))),"")', fmt='@')
             ws[f'C{r}'].font = _font(False, '1E293B', 10)
             fml(ws, f'D{r}', f'=IF(B{r-antal_prev}>0,B{r}/B{r-antal_prev},"–")', fmt=PCT)
             fml(ws, f'E{r}', f'=B{r-antal_prev}-B{r}')
-        lbl(ws, f'G{r}', handling)
+            fml(ws, f'G{r}', f'=IF(F{r-antal_prev}>0,F{r}/F{r-antal_prev},"–")', fmt=PCT)
+            fml(ws, f'H{r}', f'=F{r-antal_prev}-F{r}')
+        lbl(ws, f'I{r}', handling)
         for j, (d, hvornaar) in enumerate(dok):
             rr = r + j
-            c = ws[f'H{rr}']; c.value = d; c.hyperlink = LINKS[d]; c.font = LINK_FONT
-            lbl(ws, f'I{rr}', hvornaar)
+            c = ws[f'J{rr}']; c.value = d; c.hyperlink = LINKS[d]; c.font = LINK_FONT
+            lbl(ws, f'K{rr}', hvornaar)
         for rr in range(r, r + antal_r):
-            for c in 'ABCDEFGHI':
+            for c in 'ABCDEFGHIJK':
                 ind = ws[f'{c}{rr}'].alignment.indent
                 ws[f'{c}{rr}'].alignment = Alignment(
                     wrap_text=True, vertical='center' if antal_r == 1 else 'top',
-                    horizontal=('center' if c == 'C' else 'right' if c in 'BDEF' else None), indent=ind)
+                    horizontal=('center' if c == 'C' else 'right' if c in 'BDEFGH' else None), indent=ind)
             ws.row_dimensions[rr].height = 22
         if antal_r > 1:
-            for c in 'ABCDEFG':
+            for c in 'ABCDEFGHI':
                 al = ws[f'{c}{r}'].alignment
                 ws.merge_cells(f'{c}{r}:{c}{r+antal_r-1}')
                 ws[f'{c}{r}'].alignment = Alignment(wrap_text=True, vertical='center', horizontal=al.horizontal, indent=al.indent)
@@ -208,7 +210,7 @@ def byg(ud):
             ws.row_dimensions[r + 1].height = 40
         antal_prev = antal_r
         r += antal_r
-    note(ws, f'A{r+1}', 'Bjælkerne viser segment A i forhold til antal leads. Segment B er ikke sendt endnu. Foreninger og boliger har hver sin skala.')
+    note(ws, f'A{r+1}', 'Bjælkerne viser segment A i forhold til antal leads. Segment B regnes med i kolonnerne til højre. Foreninger og boliger har hver sin skala.')
     for w in wb.worksheets:
         w.sheet_view.showGridLines = False
     wb.save(ud)
