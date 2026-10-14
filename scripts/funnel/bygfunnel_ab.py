@@ -100,7 +100,7 @@ def funnel_fane(wb, seg, ctx):
         hard(ws, f'B{r}', tal[nogle])
         if navn == 'Lead':
             fml(ws, f'C{r}', f'=IF(B{brev_r}>0,B{r}/B{brev_r},"–")', fmt=PCT)
-            fml(ws, f'D{r}', f'=B{brev_r}-B{r}')
+            fml(ws, f'D{r}', f'=IF(B{brev_r}>=B{r},B{brev_r}-B{r},"–")')
         else:
             fml(ws, f'C{r}', f'=IF(B{forrige}>0,B{r}/B{forrige},"–")', fmt=PCT)
             fml(ws, f'D{r}', f'=B{forrige}-B{r}')
