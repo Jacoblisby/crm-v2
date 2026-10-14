@@ -24,6 +24,7 @@ import { leadCommunications, leads } from '@/lib/db/schema';
 import { gemMailHeaders } from '@/lib/mail-traad';
 import { gemUplaceret } from '@/lib/uplaceret';
 import { leadIdFraAdresser } from '@/lib/svaradresse';
+import { erVagtMail } from '@/lib/mailvagt';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -105,7 +106,8 @@ export async function POST(req: NextRequest) {
   const videresendtAf = pakUdVideresendt(email);
 
   // Match til lead — først via In-Reply-To/References, så via from-email
-  const leadId = await findLeadForEmail(email);
+  // Vagtens testmails placeres aldrig på et lead (Jacobs egen mail står på flere test-leads).
+  const leadId = erVagtMail(email.subject) ? null : await findLeadForEmail(email);
   if (!leadId) {
     console.warn(
       `[inbound-email] Intet lead — fra ${email.fromEmail} til ${email.to.join(', ') || '?'}, emne «${email.subject}»`,
@@ -115,6 +117,7 @@ export async function POST(req: NextRequest) {
     // og husleje, fakturaer og nyhedsbreve skal ikke havne på en side uden
     // login. Dem gemmer vi ikke, kun en linje i loggen uden indhold.
     const ligner =
+      erVagtMail(email.subject) ||
       /(Din lejlighed på|Kontantbud på|Sådan foregår handlen|Vi er i gang med din bolig|hvornår passer det, vi kigger forbi)/i.test(email.subject) ||
       /reply\+[0-9a-f-]{36}@/i.test(`${email.to.join(' ')} ${email.text}`);
     if (!ligner) {
