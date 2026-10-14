@@ -17,6 +17,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { runLeadSlaJob } from '@/worker/lead-sla';
+import { runMailvagtWatchdog } from '@/worker/mailvagt-watchdog';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -36,7 +37,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await runLeadSlaJob({ hours: body.hours, dryRun: body.dryRun });
-    return NextResponse.json({ ok: true, ...result });
+    // Samme time-job passer også på mailvagten. Fejler den, må SLA-svaret ikke gå tabt.
+    const mailvagt = body.dryRun ? undefined : await runMailvagtWatchdog().catch((e) => ({ status: `fejl: ${e instanceof Error ? e.message : e}` }));
+    return NextResponse.json({ ok: true, ...result, mailvagt });
   } catch (err) {
     return NextResponse.json(
       { ok: false, error: err instanceof Error ? err.message : String(err) },

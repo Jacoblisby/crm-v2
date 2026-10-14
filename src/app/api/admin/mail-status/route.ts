@@ -48,17 +48,17 @@ const timer = (d: Date | string | null | undefined) =>
 async function uplacerede(token: string | null) {
   // Tabellen oprettes først, når den første mail ikke kan placeres.
   const findes = (await db.execute(sql`SELECT to_regclass('public.inbound_uplaceret') AS t`)) as unknown as { t: string | null }[];
-  if (!findes[0]?.t) return { aabne: 0, aeldsteTimer: null as number | null, token: null as null | { til: string | null; minutterEfter: number }[] };
+  if (!findes[0]?.t) return { aabne: 0, aeldsteTimer: null as number | null, token: null as null | { emne: string | null; til: string | null; minutterEfter: number }[] };
   const r = (await db.execute(sql`
     SELECT count(*)::int AS n, min(oprettet) AS aeldste
     FROM inbound_uplaceret WHERE placeret_paa IS NULL AND (emne IS NULL OR emne NOT LIKE ${'%' + TEST_EMNE + '%'})
   `)) as unknown as { n: number; aeldste: string | null }[];
-  let fundet: { til: string | null; minutterEfter: number }[] | null = null;
+  let fundet: { emne: string | null; til: string | null; minutterEfter: number }[] | null = null;
   if (token) {
     const t = (await db.execute(sql`
-      SELECT til, oprettet FROM inbound_uplaceret WHERE emne LIKE ${`%${TEST_EMNE}%${token}%`} ORDER BY oprettet
-    `)) as unknown as { til: string | null; oprettet: string }[];
-    fundet = t.map((x) => ({ til: x.til, minutterEfter: Math.round((Date.now() - new Date(x.oprettet).getTime()) / 60000) }));
+      SELECT emne, til, oprettet FROM inbound_uplaceret WHERE emne LIKE ${`%${TEST_EMNE}%${token}%`} ORDER BY oprettet
+    `)) as unknown as { emne: string | null; til: string | null; oprettet: string }[];
+    fundet = t.map((x) => ({ emne: x.emne, til: x.til, minutterEfter: Math.round((Date.now() - new Date(x.oprettet).getTime()) / 60000) }));
   }
   return { aabne: r[0]?.n ?? 0, aeldsteTimer: timer(r[0]?.aeldste), token: fundet };
 }
