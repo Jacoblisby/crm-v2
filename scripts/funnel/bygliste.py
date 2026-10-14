@@ -45,8 +45,10 @@ TRIN = {
     'vil-ikke-nu': 'Vil ikke sælge nu', 'koebt': 'Købt', 'arkiv': 'Arkiv',
     'arkiveret': 'Arkiveret', 'vil-ikke-saelge-nu': 'Vil ikke sælge nu', 'ikke-enige-om-pris': 'Ikke enige om pris',
 }
-SEGTEKST = {'A': 'Må kontaktes, ejer bor der', 'B': 'Må kontaktes, ejer bor et andet sted',
-            'C': 'Reklamebeskyttet, ejer bor der', 'D': 'Reklamebeskyttet, ejer bor et andet sted'}
+# Ny segmentering (som i funnelen): A = ejer bor på adressen, B = ejer bor et andet sted.
+# Reklamebeskyttede er med i begge og står i sin egen kolonne. Brevlistens C og D er altså A og B.
+SEGTEKST = {'A': 'Ejer bor på adressen', 'B': 'Ejer bor et andet sted'}
+NYSEG = lambda seg: 'A' if seg in ('A', 'C') else 'B'
 # Foreninger der står to gange i CRM-registret under hvert sit navn
 DUBLET = {'Blomsterparken': 'Lupin, Hvede, Erantis', 'Lindebo': 'ejerforeningen Lindebo 1-29'}
 
@@ -100,7 +102,7 @@ MAILTYPE = {
     'kvittering': 'Kvittering (automatisk)', 'booking': 'Booking eller opfølgning', 'svar': 'Svar i tråden',
     'anden': 'Manuel mail', 'tilbud-auto': 'Automatisk tilbud', 'gammel': 'Fra det gamle CRM',
 }
-SEGRAEKKE = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
+SEGRAEKKE = {'A': 0, 'B': 1}
 
 
 def laes_mails(fil):
@@ -148,7 +150,7 @@ def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
 
     # ── Fane 1: Adresser ────────────────────────────────────────────────
     rows = []
-    for b in sorted(breve, key=lambda x: (SEGRAEKKE[x['seg']], x['forening'], x['adresse'])):
+    for b in sorted(breve, key=lambda x: (SEGRAEKKE[NYSEG(x['seg'])], x['forening'], x['adresse'])):
         u = ejere.get(b['bfe'], {})
         n = ejernavn.get(b['bfe'], {})
         sendt26 = b['seg'] in ('A', 'C')
@@ -161,7 +163,7 @@ def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
         ml = sorted(m for l in ls for m in mails.get(l['id'], []))
         mailtekst = '; '.join(f"{d:%d.%m.%y} {MAILTYPE.get(t, t)}" for d, t in ml)
         rows.append([
-            b['adresse'], b['forening'], b['kvm'], b['seg'], SEGTEKST[b['seg']],
+            b['adresse'], b['forening'], b['kvm'], NYSEG(b['seg']), SEGTEKST[NYSEG(b['seg'])],
             'Ja' if u.get('ejerBorDer') else 'Nej', b['rb'], b['ejertype'], u.get('ejerAlder') if isinstance(u.get('ejerAlder'), (int, float)) else None,
             u.get('cvr') if u.get('cvr') not in (None, '-') else '', ejer_navn, ovrige, ejer_adr,
             k.get('navn', ''), k.get('mail', ''), k.get('tel', ''),
@@ -173,8 +175,6 @@ def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
             len(ml) or None, ml[0][0] if ml else None, ml[-1][0] if ml else None, mailtekst,
             b['bfe'],
         ])
-    for e in sorted(egne, key=lambda x: x['adresse']):
-        rows.append([e['adresse'], e['forening'], None, 'Egen', 'Koncernens egen lejlighed, trukket fra listen', '', '', e['ejertype'], None, '', '', '', '', '', '', '', 'Nej', None, 'Nej', None, 0, None, None, '', None, None, None, '', e['bfe']])
     ws = wb.create_sheet('Ejere')
     ws._wrap = ('Y',)
     header = ['Adresse', 'Forening', 'Kvm', 'Segment', 'Hvad segmentet betyder', 'Ejer bor på adressen', 'Reklame-beskyttet', 'Ejertype',
@@ -184,8 +184,8 @@ def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
     tabel(ws, header, rows, bredder, datokolonner=(18, 20, 23, 26, 27))
     n = len(rows) + 3
     ws.cell(n, 1, f'Leads hentet fra CRM {hentet:%d-%m-%Y}. Ejer er hentet fra Resights-udtrækket (primær ejer). Mail og telefon findes kun for lejligheder, der er blevet til et lead.').font = F(i=True, c='64748B')
-    ws.cell(n + 1, 1, 'Segment A og C fik brev 11.09.2026. B og D er ikke sendt. Ejers adresse på B og D er der, hvor et brev til ejeren selv ville lande.').font = F(i=True, c='64748B')
-    ws.cell(n + 2, 1, 'Jul 2025 er brevrunden 24.07.2025. Koncernens egne lejligheder står nederst og har ikke fået brev.').font = F(i=True, c='64748B')
+    ws.cell(n + 1, 1, 'Segment A fik brev 11.09.2026. B er ikke sendt. Ejers adresse på B er der, hvor et brev til ejeren selv ville lande. Reklamebeskyttede er med i både A og B og har Ja i kolonnen Reklamebeskyttet.').font = F(i=True, c='64748B')
+    ws.cell(n + 2, 1, f'Jul 2025 er brevrunden 24.07.2025. Koncernens egne lejligheder ({len(egne)}) er trukket fra og står ikke på listen.').font = F(i=True, c='64748B')
 
     # ── Fane 2: Ejerforeninger ──────────────────────────────────────────
     rollup = {f['forening']: f for f in json.load(open(ROLLUP))['foreninger']}
