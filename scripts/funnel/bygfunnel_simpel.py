@@ -65,7 +65,7 @@ def tael(crm, breve):
     return tal
 
 
-def byg(ud):
+def byg(ud, ekstra=None):
     crm, breve = hent_crm(), laes_brevliste()
     rollup = {f['forening']: f for f in json.load(open(ROLLUP))['foreninger']}
     tal = tael(crm, breve)
@@ -211,6 +211,8 @@ def byg(ud):
         antal_prev = antal_r
         r += antal_r
     note(ws, f'A{r+1}', 'Bjælkerne viser segment A i forhold til antal leads. Segment B regnes med i kolonnerne til højre. Foreninger og boliger har hver sin skala.')
+    if ekstra:
+        ekstra(wb)
     for w in wb.worksheets:
         w.sheet_view.showGridLines = False
     wb.save(ud)

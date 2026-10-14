@@ -2,8 +2,8 @@
 """
 To fulde lister til brevkampagnen, samlet i én arbejdsmappe i vaulten:
 
-  Adresser         én række pr. lejlighed på brevlisten: adresse, ejer, kontakt,
-                   breve sendt og datoer, og om lejligheden er blevet til et lead
+  Ejere            én række pr. lejlighed på brevlisten, sorteret efter segment A–D:
+                   adresse, ejer, kontakt, breve og mails sendt med datoer, lead
   Ejerforeninger   alle foreninger vi har fundet, hvor de kommer fra, og hvorfor
                    de er med eller ikke er med
 
@@ -96,23 +96,38 @@ def laes_egne():
     return [dict(bfe=int(r[0]), adresse=r[1], forening=r[2], ejertype=r[3]) for r in list(ws.iter_rows(values_only=True))[1:] if r[0]]
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--ejere', required=True)
-    ap.add_argument('--kontakt', required=True)
-    ap.add_argument('-o', '--ud', default=str(VAULT / 'Brevliste og ejerforeninger.xlsx'))
-    a = ap.parse_args()
+MAILTYPE = {
+    'kvittering': 'Kvittering (automatisk)', 'booking': 'Booking eller opfølgning', 'svar': 'Svar i tråden',
+    'anden': 'Manuel mail', 'tilbud-auto': 'Automatisk tilbud', 'gammel': 'Fra det gamle CRM',
+}
+SEGRAEKKE = {'A': 0, 'B': 1, 'C': 2, 'D': 3}
 
+
+def laes_mails(fil):
+    """id|dato tid|type pr. linje → {lead-id: [(datetime, type)]}"""
+    ud = {}
+    if not fil:
+        return ud
+    for linje in open(fil, encoding='utf-8'):
+        p = linje.strip().split('|')
+        if len(p) == 3:
+            ud.setdefault(p[0], []).append((datetime.strptime(p[1], '%Y-%m-%d %H:%M'), p[2]))
+    return ud
+
+
+def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
+    """Tilføjer fanerne Ejere og Ejerforeninger til wb. Returnerer (antal ejere, antal foreninger)."""
+    mails = laes_mails(mail_fil)
     breve = laes_flettefil()
     egne = laes_egne()
-    ejernavn = {int(k): v for k, v in json.load(open(a.ejere)).items()}
+    ejernavn = {int(k): v for k, v in json.load(open(ejere_fil)).items()}
     ejere = {u['bfe']: u for u in json.load(open(EJERE_JSON))['enheder']}
     kontakt = {}
-    for linje in open(a.kontakt, encoding='utf-8'):
+    for linje in open(kontakt_fil, encoding='utf-8'):
         p = linje.rstrip('\n').split('|')
         if len(p) >= 4:
             kontakt[p[0]] = dict(navn=p[1].strip(), mail=p[2].strip(), tel=p[3].strip())
-    crm = hent_crm()
+    crm = crm or hent_crm()
     hentet = til_dato(crm['genereret'])
 
     # lead → brev (samme regel som funnel-regnearket)
@@ -133,7 +148,7 @@ def main():
 
     # ── Fane 1: Adresser ────────────────────────────────────────────────
     rows = []
-    for b in sorted(breve, key=lambda x: (x['forening'], x['adresse'])):
+    for b in sorted(breve, key=lambda x: (SEGRAEKKE[x['seg']], x['forening'], x['adresse'])):
         u = ejere.get(b['bfe'], {})
         n = ejernavn.get(b['bfe'], {})
         sendt26 = b['seg'] in ('A', 'C')
@@ -143,6 +158,8 @@ def main():
         ejer_navn = n.get('ejer') if n.get('ejer') not in (None, '-') else ''
         ovrige = n.get('ovrige') if n.get('ovrige') not in (None, '-') else ''
         ejer_adr = n.get('adr') if n.get('adr') not in (None, '-') else ''
+        ml = sorted(m for l in ls for m in mails.get(l['id'], []))
+        mailtekst = '; '.join(f"{d:%d.%m.%y} {MAILTYPE.get(t, t)}" for d, t in ml)
         rows.append([
             b['adresse'], b['forening'], b['kvm'], b['seg'], SEGTEKST[b['seg']],
             'Ja' if u.get('ejerBorDer') else 'Nej', b['rb'], b['ejertype'], u.get('ejerAlder') if isinstance(u.get('ejerAlder'), (int, float)) else None,
@@ -153,19 +170,18 @@ def main():
             int(b['jul']) + int(sendt26),
             len(ls) or None, til_dato(sidste['oprettet']) if sidste else None,
             TRIN.get(sidste['trinNu'], sidste['trinNu']) if sidste else '',
+            len(ml) or None, ml[0][0] if ml else None, ml[-1][0] if ml else None, mailtekst,
             b['bfe'],
         ])
     for e in sorted(egne, key=lambda x: x['adresse']):
-        rows.append([e['adresse'], e['forening'], None, 'Egen', 'Koncernens egen lejlighed, trukket fra listen', '', '', e['ejertype'], None, '', '', '', '', '', '', '', 'Nej', None, 'Nej', None, 0, None, None, '', e['bfe']])
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = 'Adresser'
-    ws._wrap = ()
+        rows.append([e['adresse'], e['forening'], None, 'Egen', 'Koncernens egen lejlighed, trukket fra listen', '', '', e['ejertype'], None, '', '', '', '', '', '', '', 'Nej', None, 'Nej', None, 0, None, None, '', None, None, None, '', e['bfe']])
+    ws = wb.create_sheet('Ejere')
+    ws._wrap = ('Y',)
     header = ['Adresse', 'Forening', 'Kvm', 'Segment', 'Hvad segmentet betyder', 'Ejer bor på adressen', 'Reklame-beskyttet', 'Ejertype',
               'Ejers alder', 'CVR', 'Ejer', 'Øvrige ejere', 'Ejers adresse', 'Lead: navn', 'Lead: mail', 'Lead: telefon',
-              'Brev jul 2025', 'Sendt jul 2025', 'Brev sep 2026', 'Sendt sep 2026', 'Breve i alt', 'Antal leads', 'Seneste lead oprettet', 'Seneste leads trin', 'BFE']
-    bredder = [40, 24, 6, 8, 30, 10, 11, 14, 8, 11, 30, 26, 40, 24, 30, 14, 9, 12, 9, 12, 8, 7, 13, 22, 10]
-    tabel(ws, header, rows, bredder, datokolonner=(18, 20, 23))
+              'Brev jul 2025', 'Sendt jul 2025', 'Brev sep 2026', 'Sendt sep 2026', 'Breve i alt', 'Antal leads', 'Seneste lead oprettet', 'Seneste leads trin', 'Mails sendt', 'Første mail', 'Seneste mail', 'Mails (dato og type)', 'BFE']
+    bredder = [40, 24, 6, 8, 30, 10, 11, 14, 8, 11, 30, 26, 40, 24, 30, 14, 9, 12, 9, 12, 8, 7, 13, 22, 8, 11, 11, 60, 10]
+    tabel(ws, header, rows, bredder, datokolonner=(18, 20, 23, 26, 27))
     n = len(rows) + 3
     ws.cell(n, 1, f'Leads hentet fra CRM {hentet:%d-%m-%Y}. Ejer er hentet fra Resights-udtrækket (primær ejer). Mail og telefon findes kun for lejligheder, der er blevet til et lead.').font = F(i=True, c='64748B')
     ws.cell(n + 1, 1, 'Segment A og C fik brev 11.09.2026. B og D er ikke sendt. Ejers adresse på B og D er der, hvor et brev til ejeren selv ville lande.').font = F(i=True, c='64748B')
@@ -251,9 +267,22 @@ def main():
     ]):
         ws2.cell(n2 + i, 1, t).font = F(i=True, c='64748B')
 
+    return len(rows), len(frows)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--ejere', required=True)
+    ap.add_argument('--kontakt', required=True)
+    ap.add_argument('--mails')
+    ap.add_argument('-o', '--ud', default=str(VAULT / 'Brevliste og ejerforeninger.xlsx'))
+    a = ap.parse_args()
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    n1, n2 = byg_lister(wb, a.ejere, a.kontakt, a.mails)
     Path(a.ud).parent.mkdir(parents=True, exist_ok=True)
     wb.save(a.ud)
-    print('skrevet', a.ud, len(rows), 'adresser,', len(frows), 'foreninger')
+    print('skrevet', a.ud, n1, 'ejere,', n2, 'foreninger')
 
 
 if __name__ == '__main__':
