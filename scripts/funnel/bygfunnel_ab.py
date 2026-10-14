@@ -121,6 +121,9 @@ def funnel_fane(wb, seg, ctx):
         r += n
     if seg == 'B':
         note(ws, f'A{r+1}', 'Segment B er ikke sendt endnu. Leads her kommer fra ejere, der er nået ind på anden vis, for eksempel via julibrevet 2025.')
+    if tal['uden_liste']:
+        note(ws, f'A{r+1}', f"Heraf {tal['uden_liste']} leads uden for brevlisten (fx Nansensgade 14, hvor der er sendt brev, men adresserne ikke står på listen). De er talt med i Lead og videre, men ikke i Breve sendt.")
+        r += 1
     note(ws, f'A{r+2 if seg == "B" else r+1}', f'Hentet fra CRM {ctx["hentet"]:%d-%m-%Y}. Et lead tæller med på alle de trin, det har passeret. Hvert link åbner præcis det brev, den mail eller det script, vi bruger.')
     return ws
 

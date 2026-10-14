@@ -222,6 +222,11 @@ def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
             beslutning = 'Dublet'
             hvorfor = f"Samme forening som {DUBLET.get(x['navn'], 'en anden post')}, som står under det navn i registret. Tælles dér."
             kilde = 'Oprettet i CRM-registret'
+        elif x['adr'] == 'Nansensgade 14':
+            beslutning = 'Med: brev sendt (ifølge Jacob)'
+            hvorfor = ('Jacob oplyser, at der er sendt brev. Det står hverken på julibrevet eller på brevlisten 11.09.2026, og vi har ingen Resights-ejerdata for foreningen. '
+                       'Et lead fra 09.10.2026 bekræfter, at ejere her har fået kontakt. Dato og modtagere mangler.')
+            kilde = 'Jacobs screening (statusarket)'
         elif x['status'] == 'fravalgt':
             beslutning = 'Fravalgt'
             hvorfor = f"{x['hvorfor']}." if x['hvorfor'] else 'Ingen begrundelse noteret.'
@@ -249,7 +254,7 @@ def byg_lister(wb, ejere_fil, kontakt_fil, mail_fil=None, crm=None):
             'Ja' if t['jul'] else 'Nej', t['jul'] or None, t['ac'] or None, (t['ac'] + t['jul']) if (t['ac'] or t['jul']) else None,
             x['mail'] or '', x['mail2'] or '',
         ])
-    ord_ = {'Med: brev sendt': 0, 'Målgruppe, ikke sendt': 1, 'Undersøges, ikke sendt': 2, 'Fravalgt': 3, 'Dublet': 4}
+    ord_ = {'Med: brev sendt': 0, 'Med: brev sendt (ifølge Jacob)': 0, 'Målgruppe, ikke sendt': 1, 'Undersøges, ikke sendt': 2, 'Fravalgt': 3, 'Dublet': 4}
     frows.sort(key=lambda r: (ord_[r[10]], r[1], r[0]))
     ws2 = wb.create_sheet('Ejerforeninger')
     ws2._wrap = ('L', 'A', 'C')

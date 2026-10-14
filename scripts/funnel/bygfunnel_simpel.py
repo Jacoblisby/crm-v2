@@ -45,16 +45,24 @@ def tael(crm, breve):
     for b in breve:
         efter_gade.setdefault(b['gade'], []).append(b)
     trin = ['lead', 'booking', 'aftalt', 'afholdt', 'bud', 'koebt']
-    tal = {s: {t: 0 for t in trin} for s in 'AB'}
+    tal = {s: {t: 0 for t in trin + ['uden_liste']} for s in 'AB'}
     for l in crm['leads']:
         if l['test'] or not l['oprettet']:
             continue
         b = efter_hash.get(l['nogle']) if l.get('nogle') else None
         if not b and l.get('nogleGade') and len(efter_gade.get(l['nogleGade'], [])) == 1:
             b = efter_gade[l['nogleGade']][0]
-        if not b or til_dato(l['oprettet']) < SENDT_A:
+        if til_dato(l['oprettet']) < SENDT_A:
             continue   # leads før det første brev hører ikke til kampagnen
-        seg = SEG(b['segment'])
+        if b:
+            seg = SEG(b['segment'])
+        elif (l.get('kilde') or '').startswith('boligberegner'):
+            # Brev er sendt ud til flere adresser, end brevlisten dækker (fx Nansensgade 14). Et boligberegner-lead
+            # efter brevet uden for listen tælles som A og vises særskilt.
+            seg = 'A'
+            tal['A']['uden_liste'] += 1
+        else:
+            continue
         d = lambda k: bool(l[k])
         koebt, ikke_enige = d('tKoebt'), d('tIkkeEnige')
         bud = d('tBud') or ikke_enige or koebt
