@@ -212,7 +212,7 @@ def byg(ud, ekstra=None):
         r += antal_r
     note(ws, f'A{r+1}', 'Bjælkerne viser segment A i forhold til antal leads. Segment B regnes med i kolonnerne til højre. Foreninger og boliger har hver sin skala.')
     if ekstra:
-        ekstra(wb)
+        ekstra(wb, dict(tal=tal, hentet=hentet, antal_foreninger=len(foren), udvalgt=len(udvalgt), stoerrelse=stoerrelse))
     for w in wb.worksheets:
         w.sheet_view.showGridLines = False
     wb.save(ud)

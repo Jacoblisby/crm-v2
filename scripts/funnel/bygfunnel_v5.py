@@ -24,7 +24,7 @@ a = ap.parse_args()
 ud = VAULT / f'Funnel boligberegner – v{a.n}.xlsx'
 
 
-def ekstra(wb):
+def ekstra(wb, ctx):
     byg_lister(wb, a.ejere, a.kontakt, a.mails)
     raekke = ['Funnel', 'Ejerforeninger', 'Ejere', 'Breve']
     wb._sheets = [wb[n] for n in raekke]
