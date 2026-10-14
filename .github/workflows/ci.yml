@@ -82,14 +82,22 @@ jobs:
       # «latest» i serverens cache), og en tilbagerulning er en git revert.
       - name: Peg Dockerfile.deploy på det nye billede
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          # Er der kommet nyere kode på main, peger det nyere kørsels billede på Dockerfile.deploy. Så springer vi over.
+          nyere=$(git rev-list --count "$GITHUB_SHA..origin/main" --invert-grep --grep='^deploy: billede')
+          if [ "$nyere" -gt 0 ]; then
+            echo "Nyere commits på main ($nyere). Den kørsel peger på sit eget billede."
+            exit 0
+          fi
+          # Start fra seneste main, så to kørsler tæt på hinanden ikke får en merge-konflikt i Dockerfile.deploy.
+          git checkout -q -B deploy-bot origin/main
           printf '%s\n' \
             '# Skrives automatisk af .github/workflows/ci.yml. Peger på det billede, GitHub har bygget.' \
             'FROM ghcr.io/jacoblisby/crm-v2:sha-${{ github.sha }}' > Dockerfile.deploy
           if ! git diff --quiet -- Dockerfile.deploy; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add Dockerfile.deploy
             git commit -m "deploy: billede sha-${GITHUB_SHA::7} [skip ci]"
-            git pull --rebase origin main
             git push origin HEAD:main
           fi
