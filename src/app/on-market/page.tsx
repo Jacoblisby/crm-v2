@@ -57,6 +57,8 @@ interface OnMarketRow {
   key: string;
   id?: string;
   address: string;
+  city?: string | null;
+  postalCode?: string | null;
   brokerKind: string | null;
   kvm: number | null;
   listPrice: number | null;
@@ -118,6 +120,8 @@ export default async function OnMarketPage({
       key: c.id,
       id: c.id,
       address: c.address,
+      city: c.city,
+      postalCode: c.postalCode,
       brokerKind: c.brokerKind,
       kvm: c.kvm,
       listPrice: c.listPrice,
@@ -280,6 +284,7 @@ export default async function OnMarketPage({
               <thead className="bg-slate-50 text-left">
                 <tr>
                   <th className="px-3 py-2 font-medium">Adresse</th>
+                  <th className="px-3 py-2 font-medium">By</th>
                   <th className="px-3 py-2 font-medium">Review</th>
                   <th className="px-3 py-2 font-medium text-center">Dage</th>
                   <th className="px-3 py-2 font-medium">m²</th>
@@ -303,6 +308,16 @@ export default async function OnMarketPage({
                         <div className="font-medium">{r.address}</div>
                       )}
                       {r.caseNumber != null && <div className="text-xs text-slate-500">Case #{r.caseNumber}</div>}
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      {r.city ? (
+                        <>
+                          {r.city}
+                          {r.postalCode && <span className="ml-1 text-xs text-slate-400">{r.postalCode}</span>}
+                        </>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
                     </td>
                     <td className="px-3 py-2"><ReviewBadge status={r.reviewStatus} /></td>
                     <td className="px-3 py-2 text-center"><DageBadge dage={r.dage} /></td>
