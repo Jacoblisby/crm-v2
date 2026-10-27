@@ -158,7 +158,7 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Indtast din adresse"
+        placeholder="Din adresse"
         autoComplete="street-address"
         className="flex-1 min-w-0 px-2 py-3.5 text-[14.5px] focus:outline-none placeholder:text-[#8b9695]"
         style={{ color: 'var(--fp-ink)' }}
@@ -204,9 +204,10 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
           }}
         >
           {inputRow}
-          {/* Trust-line — inde i pladen, hvid tekst. Stablet og centreret på
-              mobil (som i mobil-framen), på række på desktop. */}
-          <div className="flex flex-col items-center sm:flex-row sm:flex-wrap sm:justify-between gap-x-6 gap-y-1.5 px-1 text-[12.5px] text-white/90 text-center">
+          {/* Trust-line — inde i pladen, hvid tekst, fra 640 px og op. På en
+              smal telefon ligger den under pladen i mørk tekst (se Hero),
+              fordi hvid tekst på glas over lys baggrund er svær at læse. */}
+          <div className="hidden sm:flex sm:flex-row sm:flex-wrap sm:justify-between items-center gap-x-6 gap-y-1.5 px-1 text-[12.5px] text-white/90 text-center">
             <span><strong className="text-white" style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</span>
             <span><strong className="text-white" style={{ fontWeight: 600 }}>Bliv boende</strong> som lejer</span>
             <span><strong className="text-white" style={{ fontWeight: 600 }}>Ingen</strong> mæglersalær</span>

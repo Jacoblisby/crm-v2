@@ -320,32 +320,42 @@ function Hero() {
         />
       </div>
 
-      <div className="relative max-w-[1380px] mx-auto lg:px-10 pt-28 sm:pt-32 lg:pb-12 lg:min-h-[850px] flex flex-col">
+      <div className="relative max-w-[1380px] mx-auto lg:px-10 pt-24 sm:pt-32 lg:pb-12 lg:min-h-[850px] flex flex-col">
         {/* Tekst */}
         <div className="px-6 sm:px-10 lg:px-6 max-w-[560px] space-y-5">
           <p className="fp-kicker">Kontant bud på din lejlighed</p>
-          <h1 className="text-[36px] sm:text-[46px] lg:text-[52px] leading-[1.15]" style={{ color: 'var(--fp-ink)' }}>
+          <h1 className="text-[32px] sm:text-[46px] lg:text-[52px] leading-[1.15]" style={{ color: 'var(--fp-ink)' }}>
             Få din friværdi<br className="hidden lg:inline" /> udbetalt, og bliv<br className="hidden lg:inline" /> boende, hvis du vil.
           </h1>
-          <p className="text-[14.5px] leading-[1.7] max-w-[430px]" style={{ color: 'var(--fp-muted)' }}>
+          <p className="hidden lg:block text-[14.5px] leading-[1.7] max-w-[430px]" style={{ color: 'var(--fp-muted)' }}>
             Du får et kontant bud på din lejlighed på Sjælland. Ingen mægler, ingen
             fremvisninger og intet salær.
           </p>
         </div>
 
         {/* Mobil: foto i fuld bredde, plade hen over (som i mobil-framen) */}
-        <div className="lg:hidden mt-9">
+        <div className="lg:hidden mt-6">
           <div className="fp-photo overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/frontpage/couple-planning-table.jpg"
               alt="Par gennemgår boligpapirer ved spisebordet"
-              className="w-full h-[330px] sm:h-[420px] object-cover"
+              className="w-full h-[250px] sm:h-[360px] object-cover"
             />
           </div>
-          <div id="hero-adresse" className="px-4 sm:px-8 -mt-[132px] relative z-10 pb-8 scroll-mt-28">
+          <div id="hero-adresse" className="px-4 sm:px-8 -mt-[100px] relative z-10 pb-6 scroll-mt-28">
             <AddressCta id="fp-address" variant="plate" />
           </div>
+          {/* Teksten ligger under kortet på mobil, så adressefeltet står over folden */}
+          <p className="px-6 sm:px-10 text-[14.5px] leading-[1.7] max-w-[460px]" style={{ color: 'var(--fp-ink)' }}>
+            Du får et kontant bud på din lejlighed på Sjælland. Ingen mægler, ingen
+            fremvisninger og intet salær.
+          </p>
+          <ul className="sm:hidden px-6 pt-4 pb-12 flex flex-col gap-1.5 text-[13.5px]" style={{ color: 'var(--fp-ink)' }}>
+            <li><strong style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</li>
+            <li><strong style={{ fontWeight: 600 }}>Bliv boende</strong> som lejer</li>
+            <li><strong style={{ fontWeight: 600 }}>Ingen</strong> mæglersalær</li>
+          </ul>
         </div>
 
         {/* Desktop: plade centreret i bunden */}
