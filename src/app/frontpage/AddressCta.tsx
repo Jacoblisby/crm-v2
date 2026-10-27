@@ -204,10 +204,10 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
           }}
         >
           {inputRow}
-          {/* Trust-line — inde i pladen, hvid tekst, fra 640 px og op. På en
-              smal telefon ligger den under pladen i mørk tekst (se Hero),
+          {/* Trust-line — inde i pladen, hvid tekst, kun på desktop (fra 1024 px).
+              Under det ligger den i et smalt grønt banner under hero (se Hero),
               fordi hvid tekst på glas over lys baggrund er svær at læse. */}
-          <div className="hidden sm:flex sm:flex-row sm:flex-wrap sm:justify-between items-center gap-x-6 gap-y-1.5 px-1 text-[12.5px] text-white/90 text-center">
+          <div className="hidden lg:flex lg:flex-row lg:flex-wrap lg:justify-between items-center gap-x-6 gap-y-1.5 px-1 text-[12.5px] text-white/90 text-center">
             <span><strong className="text-white" style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</span>
             <span><strong className="text-white" style={{ fontWeight: 600 }}>Bliv boende</strong> som lejer</span>
             <span><strong className="text-white" style={{ fontWeight: 600 }}>Ingen</strong> mæglersalær</span>

@@ -337,13 +337,29 @@ function Hero() {
             <AddressCta id="fp-address" variant="plate" />
           </div>
           {/* Teksten ligger under kortet på mobil, så adressefeltet står over folden */}
-          <p className="px-6 sm:px-10 text-[14.5px] leading-[1.7] max-w-[460px]" style={{ color: 'var(--fp-ink)' }}>
+          <p className="px-6 sm:px-10 pb-8 text-[14.5px] leading-[1.7] max-w-[460px]" style={{ color: 'var(--fp-ink)' }}>
             Det tager 5 minutter, og du hører fra os inden for 24 timer. Ingen mægler og ingen fremvisninger.
           </p>
-          <ul className="sm:hidden px-6 pt-4 pb-12 flex flex-col gap-1.5 text-[13.5px]" style={{ color: 'var(--fp-ink)' }}>
-            <li><strong style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</li>
-            <li><strong style={{ fontWeight: 600 }}>Bliv boende</strong> som lejer</li>
-            <li><strong style={{ fontWeight: 600 }}>Ingen</strong> mæglersalær</li>
+          {/* Smalt banner med troværdighed, helt ud til kanten. Mørk grøn, så det
+              samler hero og afgrænser den mod næste sektion. */}
+          <ul
+            className="lg:hidden grid grid-cols-3 text-center text-white list-none m-0 p-0"
+            style={{ background: 'var(--fp-green)' }}
+          >
+            {[
+              { top: '87+ boligkøb', bottom: 'siden 2020' },
+              { top: 'Bliv boende', bottom: 'som lejer' },
+              { top: 'Ingen', bottom: 'mæglersalær' },
+            ].map((u, i) => (
+              <li
+                key={u.top}
+                className="px-2 py-3.5"
+                style={{ borderLeft: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.18)' }}
+              >
+                <div className="text-[14px] leading-tight" style={{ fontWeight: 600 }}>{u.top}</div>
+                <div className="text-[11.5px] leading-tight mt-1" style={{ color: 'rgba(255,255,255,0.78)' }}>{u.bottom}</div>
+              </li>
+            ))}
           </ul>
         </div>
 

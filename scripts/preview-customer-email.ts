@@ -11,7 +11,7 @@ import { customerEmailHtml } from '../src/lib/services/customer-email';
 process.stdout.write(customerEmailHtml({
   firstName: 'Bjarne',
   fullAddress: 'Svendborgvej 209, 1., 4700 Næstved',
-  phone: '20 67 15 00',
+  kontakt: '20 67 15 00',
   comparables: [
     { address: 'Svendborgvej 217, 1.', kvm: 69, price: 905000, date: '2026-05-14' },
     { address: 'Svendborgvej 35, st.', kvm: 69, price: 880000, date: '2026-03-02' },

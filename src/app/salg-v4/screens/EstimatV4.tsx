@@ -64,7 +64,7 @@ export function EstimatV4() {
     if (submittedRef.current) return;
     submittedRef.current = true;
 
-    if (!state.fullName || !state.email || !state.phone) return;
+    if (!state.fullName || !state.email) return;
     if (!state.postalCode || !state.kvm) return;
 
     const idemKey = `${state.fullAddress || state.postalCode}|${state.email}`;

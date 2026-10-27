@@ -36,7 +36,8 @@ export async function submitFunnelAction(
   state: FunnelState,
   photoDataUrls: string[],
 ): Promise<SubmitResult> {
-  if (!state.fullName || !state.email || !state.phone) {
+  // Telefon er valgfri (besluttet 27.10.2026). Navn og email er nok til at kontakte sælger.
+  if (!state.fullName || !state.email) {
     return { ok: false, error: 'Mangler kontaktoplysninger' };
   }
   if (!state.postalCode || !state.kvm) {
@@ -301,7 +302,8 @@ export async function submitFunnelAction(
       .set({
         fullName: state.fullName,
         email: state.email,
-        phone: state.phone,
+        // Et tomt telefonfelt må ikke slette et nummer, vi allerede har
+        phone: state.phone || existingLead.phone,
         propertyId: propertyId ?? existingLead.propertyId,
         address: state.fullAddress,
         postalCode: state.postalCode,
@@ -362,7 +364,7 @@ export async function submitFunnelAction(
     .values({
       fullName: state.fullName,
       email: state.email,
-      phone: state.phone,
+      phone: state.phone || null,
       propertyId,
       address: state.fullAddress,
       postalCode: state.postalCode,
@@ -494,7 +496,7 @@ async function sendNotificationEmails(
       `→ https://crm.365ejendom.dk/leads/${leadId}?tab=afkast`,
       ``,
       `Hurtig info:`,
-      `· ${state.fullName} (${state.email}, ${state.phone})`,
+      `· ${state.fullName} (${state.email}${state.phone ? `, ${state.phone}` : ', ingen telefon oplyst'})`,
       `· ${state.fullAddress}`,
       `· ${state.kvm} m² · ${state.rooms ?? '?'} værelser · byggeår ${state.yearBuilt ?? '?'}`,
       `· Stand: ${state.stand}${state.standNote ? ` (${state.standNote})` : ''}`,
@@ -533,7 +535,8 @@ async function sendNotificationEmails(
   const html = customerEmailHtml({
     firstName: state.fullName.split(' ')[0] || 'der',
     fullAddress: state.fullAddress,
-    phone: state.phone,
+    // Telefon er valgfri: uden den kontakter vi på mail
+    kontakt: state.phone || state.email,
     // Kun rigtige handler — ikke boligens egen aktive annonce
     comparables: estimate.comparables
       .filter((c) => !c.isCurrentListing)

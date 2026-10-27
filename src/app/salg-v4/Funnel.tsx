@@ -51,7 +51,7 @@ export function Funnel() {
 
   const canProceed = (() => {
     if (screen.id === 'kontakt')
-      return !!(state.fullName && state.email && state.phone);
+      return !!(state.fullName && state.email);
     if (screen.id === 'efter_salg') return !!state.afterSaleRaw;
     if (screen.id === 'stand')
       return !!(state.kitchenStand && state.bathroomStand && state.livingRoomStand);
@@ -60,7 +60,7 @@ export function Funnel() {
 
   const hint = !canProceed
     ? screen.id === 'kontakt'
-      ? 'Navn, email og telefon'
+      ? 'Navn og email'
       : screen.id === 'stand'
         ? 'Vælg stand for alle tre områder'
         : 'Vælg en mulighed'

@@ -45,7 +45,8 @@ const FONT =
 export interface CustomerEmailInput {
   firstName: string;
   fullAddress: string;
-  phone: string;
+  /** Hvor vi kontakter sælger: telefonnummeret, eller mailen hvis telefon ikke er oplyst. */
+  kontakt: string;
   /** Lokale handler i området — vises kun hvis der er nogen. */
   comparables: { address: string; kvm: number | null; price: number; date?: string | null }[];
 }
@@ -87,7 +88,7 @@ function row(
 }
 
 export function customerEmailHtml(input: CustomerEmailInput): string {
-  const { firstName, fullAddress, phone, comparables } = input;
+  const { firstName, fullAddress, kontakt, comparables } = input;
 
   const compsHtml = comparables
     .slice(0, 5)
@@ -223,7 +224,7 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
         <div style="font-family:${FONT};font-size:16px;font-weight:600;color:${C.white};">Næste skridt</div>
         <p style="margin:8px 0 16px;font-family:${FONT};font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.82);">
           Vi kontakter dig inden for 24 timer på
-          <strong style="color:${C.white};">${escapeHtml(phone)}</strong> og aftaler en gratis,
+          <strong style="color:${C.white};">${escapeHtml(kontakt)}</strong> og aftaler en gratis,
           uforpligtende besigtigelse. Efter besigtigelsen får du et skriftligt bud.
         </p>
         <a href="tel:+4561789071" style="display:inline-block;padding:12px 22px;background:#b5f0ee;border-radius:8px;font-family:${FONT};font-size:14px;font-weight:600;color:${C.greenDeep};text-decoration:none;">

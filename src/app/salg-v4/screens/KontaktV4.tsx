@@ -31,13 +31,13 @@ export function KontaktV4() {
             hint="Her bekræfter vi, at vi har dine oplysninger"
           />
           <FieldV4
-            label="Telefon"
+            label="Telefon (valgfrit)"
             value={state.phone}
             onChange={(v) => update({ phone: v })}
             placeholder="+45 12 34 56 78"
             type="tel"
             autoComplete="tel"
-            hint="Her ringer vi inden for 24 timer"
+            hint="Så kan vi ringe, hvis det er nemmere"
           />
         </div>
       </div>
