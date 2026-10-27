@@ -153,19 +153,10 @@ function Nav() {
             transition: 'box-shadow 320ms ease',
           }}
         >
-          {/* Præcis samme mærke og mål som topbaren på 365ejendom.dk:
-              logo-mærket (307 × 360) vist 34 × 40 px, 24 px inde i en 56 px
-              høj bar. Hvid variant, fordi glasset er mørkt — originalen har
-              sort tekst. */}
-          <a href="#" className="flex items-center" aria-label="365 Ejendomme, til toppen">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/365-ejendomme-hvid.png"
-              alt="365 Ejendomme"
-              width={34}
-              height={40}
-              className="h-7 sm:h-10 w-auto"
-            />
+          {/* Det oprindelige tekstlogo («365 EJENDOM»), som før 21.9.2026 */}
+          <a href="#" className="flex items-baseline gap-1.5 text-white" aria-label="365 Ejendomme, til toppen">
+            <span className="text-[24px] leading-none" style={{ fontWeight: 400 }}>365</span>
+            <span className="text-[11px] tracking-[0.2em]" style={{ fontWeight: 500 }}>EJENDOM</span>
           </a>
 
           <nav className="hidden lg:flex items-center gap-7 text-[13.5px] text-white" style={{ fontWeight: 400 }}>
@@ -207,18 +198,6 @@ function Nav() {
             >
               <Phone size={15} weight="regular" />
               +45 61 78 90 71
-            </a>
-            {/* Mobil: Tjek din pris i selve bjælken, så knappen følger med ved scroll */}
-            <a
-              href="#hero-adresse"
-              onClick={(e) => {
-                e.preventDefault();
-                goToAddressField();
-              }}
-              className="fp-press sm:hidden inline-flex items-center px-3.5 py-2 rounded-lg text-[13px]"
-              style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
-            >
-              Tjek din pris
             </a>
             <button
               type="button"
