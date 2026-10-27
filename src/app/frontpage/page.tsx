@@ -157,7 +157,7 @@ function Nav() {
               logo-mærket (307 × 360) vist 34 × 40 px, 24 px inde i en 56 px
               høj bar. Hvid variant, fordi glasset er mørkt — originalen har
               sort tekst. */}
-          <a href="#" className="flex items-center" aria-label="365 Ejendomme — til toppen">
+          <a href="#" className="flex items-center" aria-label="365 Ejendomme, til toppen">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/365-ejendomme-hvid.png"
@@ -323,15 +323,15 @@ function Hero() {
       <div className="relative max-w-[1380px] mx-auto lg:px-10 pt-28 sm:pt-32 lg:pb-12 lg:min-h-[850px] flex flex-col">
         {/* Tekst */}
         <div className="px-6 sm:px-10 lg:px-6 max-w-[560px] space-y-5">
-          <p className="fp-kicker">Sælg på nye vilkår</p>
+          <p className="fp-kicker">Kontant bud på din lejlighed</p>
           <h1 className="text-[36px] sm:text-[46px] lg:text-[52px] leading-[1.15]" style={{ color: 'var(--fp-ink)' }}>
-            Frigør din friværdi<br className="hidden lg:inline" /> uden nødvendigvis<br className="hidden lg:inline" /> at flytte.
+            Få din friværdi<br className="hidden lg:inline" /> udbetalt, og bliv<br className="hidden lg:inline" /> boende, hvis du vil.
           </h1>
           <p className="text-[14.5px] leading-[1.7] max-w-[430px]" style={{ color: 'var(--fp-muted)' }}>
-            365 Ejendomme køber lejligheder kontant på Sjælland.
+            Du får et kontant bud på din lejlighed på Sjælland. Ingen mægler, ingen
+            fremvisninger og intet salær.
             <br />
-            Du kan sælge direkte til os, undgå fremvisninger og mæglersalær — og i mange
-            tilfælde blive boende som lejer, hvis det passer bedre til din hverdag.
+            Hvis boligen passer til os, kan du blive boende som lejer.
           </p>
         </div>
 
@@ -362,20 +362,19 @@ function Hero() {
 /* ─── 3. Direkte salg — karrusel på mobil, grid på desktop ─────────────────── */
 function DirekteSalg() {
   const cards = [
-    { icon: Handshake, title: 'Direkte køber', body: 'Vi køber boligen direkte af dig.' },
-    { icon: LockSimple, title: 'Diskret proces', body: 'Din bolig behøver ikke komme offentligt på markedet.' },
-    { icon: ClockClockwise, title: 'Fleksibel overtagelse', body: 'Vi finder en timing, der passer til din situation.' },
+    { icon: Handshake, title: 'Intet at vente på', body: 'Vi er køberen. Du får et kontant bud og skal ikke vente på, at en køber dukker op.' },
+    { icon: LockSimple, title: 'Ingen annonce', body: 'Din bolig bliver ikke annonceret, og der kommer ingen fremmede igennem dit hjem.' },
+    { icon: ClockClockwise, title: 'Overtagelse, når det passer dig', body: 'Vi aftaler en dato, der passer til din situation.' },
   ];
   return (
     <section className="px-6 sm:px-10 py-16 sm:py-24" style={{ background: 'var(--fp-cream)' }}>
       <div className="max-w-[1240px] mx-auto space-y-10">
         <Reveal className="text-left sm:text-center space-y-4 max-w-2xl sm:mx-auto">
-          <p className="fp-kicker">Direkte salg</p>
-          <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-balance">En mere rolig måde at sælge på</h2>
+          <p className="fp-kicker">Sådan sælger du</p>
+          <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-balance">Sælg uden at vente på en køber</h2>
           <p className="text-[14px] leading-[1.65]" style={{ color: 'var(--fp-muted)' }}>
-            Hos 365 Ejendomme sælger du direkte til os. Du slipper for åbent hus,
-            fremvisninger og usikker ventetid — og du får mulighed for at tage næste
-            skridt i dit eget tempo.
+            Du sælger direkte til os, så du slipper for åbent hus, fremvisninger og
+            ventetid. Du bestemmer selv, hvornår du tager næste skridt.
           </p>
         </Reveal>
 
@@ -411,17 +410,17 @@ function BlivBoende() {
 
         <Reveal className="px-6 sm:px-10 lg:px-16 pt-16 pb-10 lg:py-20 max-w-[560px]">
           <div className="space-y-5">
-            <p className="fp-kicker">Bliv måske boende</p>
+            <p className="fp-kicker">Bliv boende</p>
             <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">
               Bliv i hjemmet, hvis det passer dig bedst
             </h2>
             <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
-              For nogle handler et salg ikke om at flytte med det samme. Det handler om at
-              få adgang til friværdien og samtidig bevare hverdagen.
+              Du kan få din friværdi og beholde hverdagen. Det passer til dig, der vil
+              sælge uden at flytte med det samme.
             </p>
             <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
-              Hvis boligen passer til os, kan du i mange tilfælde sælge og fortsætte som
-              lejer. Vi gennemgår både pris, husleje og vilkår med dig, før du beslutter noget.
+              Hvis boligen passer til os, kan du sælge og fortsætte som lejer. Vi
+              gennemgår pris, husleje og vilkår med dig, før du beslutter noget.
             </p>
           </div>
         </Reveal>
@@ -465,7 +464,7 @@ function BlivBoende() {
 const DOOR_BADGES = [
   // Mobil: alle tre i venstre side — højre hjørne skal holdes frit til den
   // sticky "Tjek din pris"-knap, ellers lægger de sig oven i hinanden.
-  { icon: Coins, title: 'Friværdi frigivet', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2, amp: 10, dur: 3.5, phase: 0 },
+  { icon: Coins, title: 'Friværdi udbetalt', sub: 'Eksempel: 2.250.000 kr.', pos: 'top-[16%] left-[3%] lg:top-[33%] lg:left-[13%]', drift: 34, tilt: -1.2, amp: 10, dur: 3.5, phase: 0 },
   { icon: HouseLine, title: 'Samme adresse', sub: 'Mulighed for at blive boende', pos: 'top-[40%] left-[11%] lg:top-[53%] lg:left-[35%]', drift: 14, tilt: 0.9, amp: 10, dur: 3.5, phase: 0.6 },
   { icon: FileText, title: 'Klar aftale', sub: 'Pris, husleje og vilkår gennemgås først', pos: 'top-[64%] left-[6%] lg:top-[70%] lg:left-[9%]', drift: 26, tilt: -0.7, amp: 10, dur: 3.5, phase: 1.2 },
 ] as const;
@@ -537,10 +536,10 @@ function DoorPhotoWithBadges() {
 /* ─── 5. Sådan virker det — trin FØR foto på mobil, runde ikoner ───────────── */
 function SaadanVirkerDet() {
   const steps = [
-    { icon: House, title: '1. Start med adressen', body: 'Indtast din adresse, så ser vi på boligen og de offentlige boligdata.' },
-    { icon: ChatsCircle, title: '2. Vi tager en samtale', body: 'Vi taler om din bolig, din situation og dine ønsker.' },
-    { icon: Door, title: '3. Gratis besigtigelse', body: 'Vi ser boligen sammen med dig — helt uforpligtende.' },
-    { icon: FileText, title: '4. Du får et konkret tilbud', body: 'Du vælger selv, om du vil gå videre, vente eller sige nej tak.' },
+    { icon: House, title: '1. Skriv din adresse', body: 'Du får et første tilbud ud fra de offentlige boligdata.' },
+    { icon: ChatsCircle, title: '2. Fortæl om din situation', body: 'Du fortæller om din bolig og dine ønsker. Vi lytter.' },
+    { icon: Door, title: '3. Vi kommer forbi', body: 'Det tager 10 til 15 minutter, er gratis og forpligter dig ikke til noget.' },
+    { icon: FileText, title: '4. Du får et skriftligt bud', body: 'Du bestemmer, om du siger ja, venter eller siger nej tak. Buddet gælder i 30 dage.' },
   ];
   return (
     <section id="saadan-virker-det" className="px-6 sm:px-10 py-16 sm:py-24 scroll-mt-20" style={{ background: 'var(--fp-mint)' }}>
@@ -548,7 +547,7 @@ function SaadanVirkerDet() {
         <Reveal className="space-y-4 max-w-lg">
           <p className="fp-kicker">Sådan virker det</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.25]">
-            Fire enkle trin fra adresse til afklaring
+            Fra adresse til bud i fire trin
           </h2>
         </Reveal>
 
@@ -617,8 +616,7 @@ function Erfaringer() {
           <p className="fp-kicker">Erfaringer fra sælgere</p>
           <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">Andre har stået samme sted</h2>
           <p className="text-[13.5px] leading-[1.65]" style={{ color: 'var(--fp-muted)' }}>
-            Et boligsalg kan være en stor beslutning. Derfor betyder det noget at høre fra
-            andre, der har valgt en mere enkel og diskret vej.
+            Sådan har andre sælgere oplevet det.
           </p>
         </Reveal>
 
@@ -664,16 +662,15 @@ function Trovaerdighed() {
         <div className="px-6 sm:px-10 lg:px-16 pt-16 pb-10 lg:py-20 max-w-[560px] space-y-8">
           <Reveal className="space-y-4">
             <p className="fp-kicker">Tryghed og erfaring</p>
-            <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">Vi køber for at eje</h2>
+            <h2 className="text-[30px] sm:text-[40px] leading-[1.2]">Du sælger til en køber, der bliver</h2>
             <p className="text-[14px] leading-[1.7]" style={{ color: 'var(--fp-muted)' }}>
-              365 Ejendomme har siden 2020 købt boliger på Sjælland og driver i dag
-              lejemål. Vi køber ikke for at presse et hurtigt videresalg igennem — vi
-              køber for at eje, udleje og drive boliger ordentligt.
+              Siden 2020 har 365 Ejendomme købt boliger på Sjælland, og vi udlejer og
+              driver dem selv. Vi køber ikke for at sælge videre i en fart.
             </p>
           </Reveal>
           <div className="space-y-7">
             <Counter target={87} suffix="+" label="boliger købt siden 2020" delay={0} />
-            <Counter target={218} label="lejemål i drift" delay={110} />
+            <Counter target={218} label="lejemål, vi selv driver" delay={110} />
             <Counter target={2.5} decimals={1} suffix=" mio. kr." label="sparet i mæglersalær" delay={220} />
           </div>
         </div>
@@ -756,27 +753,27 @@ function Faq() {
   const items = [
     {
       q: 'Kan jeg blive boende efter salget?',
-      a: 'Ja, i mange tilfælde kan du sælge boligen til 365 Ejendomme og fortsætte som lejer. Det kaldes ofte sale-leaseback. Vi gennemgår mulighederne sammen med dig, så du kender både salgspris, husleje og vilkår, før du beslutter dig.',
+      a: 'Ja, hvis boligen passer til os, kan du sælge og blive boende som lejer. Du kender salgspris, husleje og vilkår, før du beslutter dig. Det kaldes sale-leaseback.',
     },
     {
       q: 'Er det uforpligtende at starte?',
-      a: 'Ja. Du kan indtaste din adresse, få et foreløbigt tilbud og takke nej — helt uden omkostninger eller forpligtelser.',
+      a: 'Ja. Du indtaster din adresse, får et foreløbigt tilbud og kan takke nej uden omkostninger.',
     },
     {
       q: 'Hvordan adskiller I jer fra en mægler?',
-      a: 'En mægler finder en køber. Vi er køberen. Det gør processen mere direkte og forudsigelig.',
+      a: 'En mægler finder en køber til dig. Vi er selv køberen, så du får et bud direkte og slipper for at vente på, at en køber dukker op.',
     },
     {
       q: 'Skal min bolig på markedet?',
-      a: 'Nej. Du sælger direkte til os, så din bolig behøver aldrig komme offentligt på markedet — ingen åbent hus og ingen fremvisninger.',
+      a: 'Nej. Du sælger direkte til os, så boligen ikke bliver annonceret, og der er hverken åbent hus eller fremvisninger.',
     },
     {
       q: 'Betaler jeg mæglersalær?',
-      a: 'Nej. Der er ingen mægler involveret i handlen, så du betaler 0 kr. i salær.',
+      a: 'Nej. Der er ingen mægler i handlen, så du betaler 0 kr. i salær. Vi betaler tinglysningen og vores egen rådgiver.',
     },
     {
       q: 'Køber I alle boliger?',
-      a: 'Vi fokuserer på ejerlejligheder på Sjælland uden for Københavnsområdet. Indtast din adresse, så melder vi hurtigt tilbage, om din bolig passer til os.',
+      a: 'Vi køber ejerlejligheder på Sjælland uden for Københavnsområdet. Skriv din adresse, så får du hurtigt svar på, om din bolig passer.',
     },
   ];
   const [openIdx, setOpenIdx] = useState<number | null>(null);
@@ -879,11 +876,11 @@ function FinalCta() {
       <Reveal className="max-w-[880px] mx-auto text-center space-y-5">
         <p className="fp-kicker" style={{ color: 'rgba(255,255,255,0.65)' }}>Kom i gang</p>
         <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-white text-balance">
-          Hvad kan din bolig frigøre for dig?
+          Hvad får du for din bolig?
         </h2>
         <p className="text-[13.5px] leading-[1.7] max-w-[420px] mx-auto" style={{ color: 'rgba(255,255,255,0.78)' }}>
-          Start med din adresse og få et første indblik i dine muligheder. Det er gratis,
-          diskret og helt uforpligtende.
+          Skriv din adresse og få et første bud. Det er gratis, og du forpligter dig ikke
+          til noget.
         </p>
         <div className="max-w-[440px] mx-auto pt-2">
           <AddressCta id="fp-address-bottom" variant="bar" />
@@ -909,7 +906,7 @@ function FooterBar() {
         <div className="leading-relaxed">
           © 365ejendom <span className="hidden sm:inline">·</span><br className="sm:hidden" />
           Boligselskabet Sommerhave ApS <span className="hidden sm:inline">·</span><br className="sm:hidden" />
-          Naestved <span className="hidden sm:inline">·</span><br className="sm:hidden" />
+          Næstved <span className="hidden sm:inline">·</span><br className="sm:hidden" />
           CVR 41763736
         </div>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">

@@ -21,13 +21,13 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: '365 Ejendomme · Frigør din friværdi uden nødvendigvis at flytte',
+  title: '365 Ejendomme · Få din friværdi udbetalt, og bliv boende, hvis du vil',
   description:
-    '365 Ejendomme køber lejligheder kontant på Sjælland. Sælg direkte til os, undgå fremvisninger og mæglersalær — og bliv i mange tilfælde boende som lejer.',
+    'Få et kontant bud på din lejlighed på Sjælland, uden mægler, fremvisninger og salær. Hvis boligen passer til os, kan du blive boende som lejer.',
   openGraph: {
-    title: '365 Ejendomme · Frigør din friværdi uden nødvendigvis at flytte',
+    title: '365 Ejendomme · Få din friværdi udbetalt, og bliv boende, hvis du vil',
     description:
-      'Sælg direkte til os, undgå fremvisninger og mæglersalær — og bliv i mange tilfælde boende som lejer.',
+      'Få et kontant bud uden mægler og fremvisninger, og bliv boende som lejer, hvis boligen passer til os.',
     type: 'website',
   },
 };
