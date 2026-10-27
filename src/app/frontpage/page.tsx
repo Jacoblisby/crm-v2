@@ -139,9 +139,9 @@ function Nav() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 px-3 sm:px-5 pt-3 sm:pt-4">
+      <header className="sticky top-0 z-40 px-0 sm:px-5 pt-0 sm:pt-4">
         <div
-          className="max-w-[1380px] mx-auto rounded-lg flex items-center justify-between pl-6 pr-2 py-2"
+          className="max-w-[1380px] mx-auto rounded-none sm:rounded-lg flex items-center justify-between pl-4 sm:pl-6 pr-1 sm:pr-2 py-0.5 sm:py-2"
           style={{
             // Designerens endelige spec (Make-fil, version 44, efter 6 forsøg):
             // "Headeren bruger nu præcis samme effekt som søgefeltet og de
@@ -164,7 +164,7 @@ function Nav() {
               alt="365 Ejendomme"
               width={34}
               height={40}
-              className="h-10 w-auto"
+              className="h-7 sm:h-10 w-auto"
             />
           </a>
 
@@ -309,7 +309,7 @@ function Nav() {
    Mobil:   rosa tekstblok → foto i fuld bredde → plade hen over fotoet.      */
 function Hero() {
   return (
-    <section className="relative -mt-[68px] sm:-mt-[76px]" style={{ background: 'var(--fp-rose)' }}>
+    <section className="relative -mt-[48px] sm:-mt-[76px]" style={{ background: 'var(--fp-rose)' }}>
       {/* Desktop-foto: højre halvdel, helt til kanten */}
       <div className="hidden lg:block absolute top-0 right-0 bottom-0" style={{ width: '49%' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -320,7 +320,7 @@ function Hero() {
         />
       </div>
 
-      <div className="relative max-w-[1380px] mx-auto lg:px-10 pt-24 sm:pt-32 lg:pb-12 lg:min-h-[850px] flex flex-col">
+      <div className="relative max-w-[1380px] mx-auto lg:px-10 pt-[76px] sm:pt-32 lg:pb-12 lg:min-h-[850px] flex flex-col">
         {/* Tekst */}
         <div className="px-6 sm:px-10 lg:px-6 max-w-[560px] space-y-5">
           <p className="fp-kicker">Kontant bud på din lejlighed</p>
