@@ -17,6 +17,9 @@ import {
   type V4Ekstra,
 } from '@/lib/beregner';
 
+/** Ejerudgifter pr. år, når sælger ikke har oplyst dem. Samme tal som EstimatV3 bruger. */
+const STANDARD_DRIFT_KR_PR_AAR = 24_000;
+
 export interface SubmitResult {
   ok: boolean;
   leadId?: string;
@@ -53,7 +56,7 @@ export async function submitFunnelAction(
   const heatCost = state.heatPaidViaAssoc
     ? num(state.heatAcontoYearly)
     : num(state.heatUsageLastYearKr);
-  const driftTotal =
+  const driftOplyst =
     num(state.costGrundvaerdi) +
     num(state.costFaellesudgifter) +
     num(state.costRottebekempelse) +
@@ -61,6 +64,10 @@ export async function submitFunnelAction(
     num(state.costForsikringer) +
     num(state.costFaelleslaan) +
     num(state.costAndreDrift);
+  // Flowet spørger ikke længere om udgifter (mødet 23.10.2026). Uden tal ville
+  // drift være 0, og så regner modellen et for højt bud. Derfor en standard,
+  // som rettes ved besigtigelsen. Står i lead-noten, så den ikke overses.
+  const driftTotal = driftOplyst > 0 ? driftOplyst : STANDARD_DRIFT_KR_PR_AAR;
 
   // Haeftelse + andel af EF-restgaeld traekkes begge fra laaneprovenuet ved
   // overdragelse — saa engine'n behandler dem som ét samlet "haeft"-beloeb.
@@ -133,7 +140,7 @@ export async function submitFunnelAction(
   // Billeder fra v4 er allerede uploadet (se FotoUpload); de ændrer ikke
   // routingen, så leadet stadig lander i Ny lead og får et booking-udkast.
   const fotoIds = (state.photoIds ?? []).slice(0, 10);
-  const hasFullData = photoCount >= 3 && driftTotal > 0;
+  const hasFullData = photoCount >= 3 && driftOplyst > 0;
   // Alle nye beregner-leads starter i «Ny lead» — der laves booking-udkast
   // til dem, og så flytter pipelinen dem selv videre. Før røg leads med
   // udgifter udfyldt direkte i «Interesse» og fik aldrig et udkast.
@@ -190,7 +197,7 @@ export async function submitFunnelAction(
     `· Renovation: ${state.costRenovation.toLocaleString('da-DK')}`,
     `· Vand: ${waterCost.toLocaleString('da-DK')} (${state.waterPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
     `· Varme: ${heatCost.toLocaleString('da-DK')} (${state.heatPaidViaAssoc ? 'aconto via EF' : 'forbrug'})`,
-    `· TOTAL: ${driftTotal.toLocaleString('da-DK')} kr/år`,
+    `· TOTAL: ${driftTotal.toLocaleString('da-DK')} kr/år${driftOplyst > 0 ? '' : ' (STANDARD, ikke oplyst af sælger: indhent ved besigtigelsen)'}`,
     state.hasEjerforeningGaeld
       ? `· EF-GÆLD: ydelse ${num(state.costFaelleslaan).toLocaleString('da-DK')} kr/år, andel af restgæld ${num(state.ejerforeningGaeldRestgaeld).toLocaleString('da-DK')} kr (engang)${state.faelleslaanCanPrepay ? `, kan indfries før tid: ${state.faelleslaanCanPrepay === 'ja' ? 'JA' : state.faelleslaanCanPrepay === 'nej' ? 'NEJ' : 'Ved ikke'}` : ''}`
       : '',

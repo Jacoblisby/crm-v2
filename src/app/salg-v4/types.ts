@@ -1,29 +1,33 @@
 /**
- * /salg-v4 — designerens endelige flow, pixel-matchet mod Figma-framesene
- * i "365 ejendomme design Shared" (NXq53grC6JZj0AeCK657Yw).
+ * /salg-v4 — designerens flow, forkortet efter mødet 23.10.2026.
  *
- * Header viser 4 nummererede stages: 1. ADRESSE · 2. BOLIGEN · 3. UDGIFTER · 4. ESTIMAT
+ * Header viser 3 nummererede stages: 1. ADRESSE · 2. BOLIGEN · 3. ESTIMAT
  *
- * Trin (fra framesene 01_Adresse strin 1 → 04_Estimat):
- *   Adresse  1/4 Bekræft · 2/4 Dine oplysninger · 3/4 Hvornår · 4/4 Efter salget
- *   Boligen  1/2 Boligens stand (alle rum som chips) · 2/2 Sidste detaljer
- *   Udgifter 1/2 Boligens udgifter · 2/2 Særlige forhold
- *   Estimat  Dit foreløbige kontanttilbud
+ * Trin: Bekræft · Dine oplysninger · Efter salget · Boligens stand → Estimat.
+ *
+ * Fjernet fra flowet efter mødet (for meget for målgruppen 60+, og de kan
+ * afklares ved besigtigelsen):
+ *   · «Hvornår vil du flytte?»
+ *   · årgang på køkken og bad
+ *   · hvidevarer, billeder og særlige forhold (DetaljerV4)
+ *   · udgifter og lån/gæld i ejerforeningen (UdgifterV4, ForholdV4)
+ * De tre sidste skærme ligger stadig i screens/ men bruges ikke. Mangler
+ * udgifterne, regner submit-action med en standardudgift og skriver det i
+ * lead-noten.
  *
  * State genbruges 100% fra FunnelV2 (samme localStorage-nøgle) — backend urørt.
  */
 import type { FunnelStateV2 } from '../salg-v2/types';
 
-export type V4Stage = 'adresse' | 'boligen' | 'udgifter' | 'estimat';
+export type V4Stage = 'adresse' | 'boligen' | 'estimat';
 
 export const V4_STAGE_LABELS: Record<V4Stage, string> = {
   adresse: 'Adresse',
   boligen: 'Boligen',
-  udgifter: 'Udgifter',
   estimat: 'Estimat',
 };
 
-export const V4_STAGE_ORDER: V4Stage[] = ['adresse', 'boligen', 'udgifter', 'estimat'];
+export const V4_STAGE_ORDER: V4Stage[] = ['adresse', 'boligen', 'estimat'];
 
 export interface V4ScreenDef {
   id: string;
@@ -31,87 +35,44 @@ export interface V4ScreenDef {
   kicker: string;
   title: string;
   sub: string;
-  /** fx "Adresse 1 / 4" — vises som lille caps-counter under sub */
+  /** fx "Trin 1 af 4" — vises som lille caps-counter under sub */
   counter: string;
 }
 
 export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
-  // Fast længde: adresse-delen er ALTID 4 trin. Tidligere skød vi et
-  // "Ny bolig"-trin ind, hvis man svarede "Vil leje en anden bolig" på
-  // "Hvad skal du efter salget?" — det er fjernet, så alle går direkte
-  // videre til Boligens stand.
-  const adresseTotal = 4;
-
-  const screens: V4ScreenDef[] = [
+  const total = 4;
+  return [
     {
       id: 'bekraeft',
       stage: 'adresse',
-      kicker: 'Adresseoplysninger',
+      kicker: 'Din bolig',
       title: 'Bekræft boligens detaljer',
-      sub: 'Disse oplysninger er offentligt tilgængelige fra OIS og BBR. Tjek dem og ret hvis noget er ændret.',
-      counter: `Adresse 1 / ${adresseTotal}`,
+      sub: 'Vi har hentet oplysningerne fra de offentlige registre (OIS og BBR). Ret dem, hvis noget ikke passer.',
+      counter: `Trin 1 af ${total}`,
     },
     {
       id: 'kontakt',
       stage: 'adresse',
       kicker: 'Dine oplysninger',
-      title: 'Hvor sender vi dit tilbud?',
-      sub: 'Vi sender estimatet til dig på e-mail og sms. Hvis du ønsker at gå videre, kan vi tage en kort snak og aftale en gratis besigtigelse.',
-      counter: `Adresse 2 / ${adresseTotal}`,
-    },
-    {
-      id: 'hvornaar',
-      stage: 'adresse',
-      kicker: 'Tidsplan',
-      title: 'Hvornår vil du flytte?',
-      sub: 'Det her påvirker ikke dit tilbud — men hjælper os med at planlægge handlen og din overtagelse.',
-      counter: `Adresse 3 / ${adresseTotal}`,
+      title: 'Hvor vil du gerne modtage dit tilbud?',
+      sub: 'Du får dit foreløbige tilbud på e-mail og sms. Vil du gå videre, aftaler vi en kort snak og en gratis besigtigelse.',
+      counter: `Trin 2 af ${total}`,
     },
     {
       id: 'efter_salg',
       stage: 'adresse',
       kicker: 'Din situation',
       title: 'Hvad skal du efter salget?',
-      sub: 'Fortæl os, hvad du overvejer efter salget. Det hjælper os med at finde den løsning, der passer bedst til din situation.',
-      counter: `Adresse 4 / ${adresseTotal}`,
+      sub: 'Så kan vi finde en løsning, der passer til dig. Dit svar forpligter dig ikke til noget.',
+      counter: `Trin 3 af ${total}`,
     },
-  ];
-
-
-  screens.push(
     {
       id: 'stand',
       stage: 'boligen',
-      kicker: 'Boligen',
-      title: 'Boligens stand',
-      sub: 'Vurder standen på de vigtigste dele af boligen. Det hjælper os med at give et mere præcist tilbud — og du kan vælge det niveau, der passer bedst.',
-      counter: 'Boligen 1 / 2',
+      kicker: 'Din bolig',
+      title: 'Hvordan er boligens stand?',
+      sub: 'Vælg det, der passer bedst. Det giver dig et mere præcist tilbud.',
+      counter: `Trin 4 af ${total}`,
     },
-    {
-      id: 'detaljer',
-      stage: 'boligen',
-      kicker: 'Det sidste om boligen',
-      title: 'Tilføj de sidste detaljer',
-      sub: 'Hvidevarer, billeder og særlige forhold kan hjælpe os med at vurdere boligen mere præcist. Alt er valgfrit — du kan også springe videre.',
-      counter: 'Boligen 2 / 2',
-    },
-    {
-      id: 'udgifter',
-      stage: 'udgifter',
-      kicker: 'Faste udgifter',
-      title: 'Boligens udgifter',
-      sub: 'Jo flere oplysninger du giver, jo mere præcist kan vi beregne tilbuddet — men du kan sagtens gå videre, selvom du mangler nogle tal.',
-      counter: 'Udgifter 1 / 2',
-    },
-    {
-      id: 'forhold',
-      stage: 'udgifter',
-      kicker: 'Særlige forhold',
-      title: 'Er der noget, vi skal tage højde for?',
-      sub: 'Nogle boliger har lån, gæld eller særlige aftaler, som kan påvirke det endelige beløb. Udfyld kun det, der er relevant — og vælg "ved ikke", hvis du er i tvivl.',
-      counter: 'Udgifter 2 / 2',
-    },
-  );
-
-  return screens;
+  ];
 }

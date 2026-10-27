@@ -1,11 +1,15 @@
 'use client';
 
+import { useId } from 'react';
+
 /**
  * v4 primitives — designerens flow-design-sprog (fra Figma-framesene):
  *   - Beige baggrund #F5F2F1 ("Beige 3"), hvide kort m. blød skygge
- *   - Valgt tilstand: HEL flade fyldt teal m. hvid tekst (ingen borders/radioer)
- *   - Chips (stand, Ja/Nej/Ved ikke): rounded-full, hvid m. grå border;
- *     valgt = petroleum fyld m. hvid tekst
+ *   - Valg hvor KUN ÉT kan vælges (OptionRowV4, ChipGroupV4, QuestionRowV4,
+ *     RadioInlineV4) er rigtige radioknapper: en tydelig cirkel, og den valgte
+ *     er udfyldt. Besluttet efter mødet 23.10.2026: de hvide kasser var
+ *     utydelige for målgruppen 60+.
+ *   - Chips (ChipV4) er kun til valg, hvor flere kan vælges
  *   - Inputs: lys flade, hint-tekst under
  */
 
@@ -56,39 +60,77 @@ export function CardLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Flad valg-række: titel venstre, forklaring højre. Valgt = teal fyld. */
+/** Cirklen i en radioknap. Udfyldt = valgt. */
+function RadioDot({ selected }: { selected: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className="shrink-0 inline-flex items-center justify-center rounded-full"
+      style={{
+        width: 22,
+        height: 22,
+        background: '#fff',
+        border: `2px solid ${selected ? V4.green : '#8f9c9a'}`,
+        transition: `border-color 150ms ${EASE}`,
+      }}
+    >
+      <span
+        className="rounded-full"
+        style={{
+          width: 10,
+          height: 10,
+          background: V4.green,
+          transform: selected ? 'scale(1)' : 'scale(0)',
+          transition: `transform 160ms ${EASE}`,
+        }}
+      />
+    </span>
+  );
+}
+
+/**
+ * Valg-række med radioknap til venstre: titel, og forklaringen under på
+ * mobil og til højre på bred skærm. Brug samme `name` til alle rækker i en
+ * gruppe, så piletaster og skærmlæser fungerer.
+ */
 export function OptionRowV4({
   title,
   sub,
   selected,
   onSelect,
+  name = 'valg',
+  compact = false,
 }: {
   title: string;
   sub?: string;
   selected: boolean;
   onSelect: () => void;
+  name?: string;
+  compact?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="w-full px-6 py-5 rounded-[10px] flex items-center justify-between gap-6 text-left transition-[background-color,border-color,box-shadow,scale] active:scale-[0.985]"
+    <label
+      className={`w-full rounded-[10px] flex items-center gap-4 cursor-pointer focus-within:ring-2 ${compact ? 'px-4 py-3' : 'px-5 py-4'}`}
       style={{
-        background: selected ? V4.selected : '#fff',
-        boxShadow: V4.cardShadow,
-        transitionDuration: '180ms',
-        transitionTimingFunction: EASE,
+        background: selected ? V4.mintSoft : '#fff',
+        boxShadow: selected ? `inset 0 0 0 2px ${V4.green}` : compact ? `inset 0 0 0 1px ${V4.border}` : V4.cardShadow,
+        transition: `background-color 160ms ${EASE}, box-shadow 160ms ${EASE}`,
+        ['--tw-ring-color' as never]: V4.selected,
       }}
     >
-      <span className="text-[16px] shrink-0" style={{ color: selected ? '#fff' : V4.ink, fontWeight: 500 }}>
-        {title}
-      </span>
-      {sub && (
-        <span className="text-[13px] text-right" style={{ color: selected ? 'rgba(255,255,255,0.85)' : V4.soft }}>
-          {sub}
+      <input type="radio" name={name} checked={selected} onChange={onSelect} className="sr-only" />
+      <RadioDot selected={selected} />
+      <span className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-6">
+        <span className={compact ? 'text-[15px]' : 'text-[16px]'} style={{ color: V4.ink, fontWeight: selected ? 600 : 500 }}>
+          {title}
         </span>
-      )}
-    </button>
+        {sub && (
+          <span className="text-[13px] sm:text-right" style={{ color: V4.muted }}>
+            {sub}
+          </span>
+        )}
+      </span>
+    </label>
   );
 }
 
@@ -121,20 +163,53 @@ export function ChipV4({
   );
 }
 
+/** Valg af ét niveau (fx stand): lodret liste af radioknapper. */
 export function ChipGroupV4({
   options,
   value,
   onChange,
+  ariaLabel,
 }: {
   options: string[];
   value: string | null | undefined;
   onChange: (v: string) => void;
+  ariaLabel?: string;
 }) {
+  const name = useId();
   return (
-    <div className="flex flex-wrap gap-2">
+    <div role="radiogroup" aria-label={ariaLabel} className="grid gap-2">
       {options.map((o) => (
-        <ChipV4 key={o} label={o} selected={value === o} onClick={() => onChange(o)} />
+        <OptionRowV4 key={o} compact name={name} title={o} selected={value === o} onSelect={() => onChange(o)} />
       ))}
+    </div>
+  );
+}
+
+/** Ja/Nej(/Ved ikke) på én linje: radioknapper ved siden af hinanden. */
+export function RadioInlineV4({
+  options,
+  value,
+  onChange,
+  ariaLabel,
+}: {
+  options: string[];
+  value: string | null | undefined;
+  onChange: (v: string) => void;
+  ariaLabel?: string;
+}) {
+  const name = useId();
+  return (
+    <div role="radiogroup" aria-label={ariaLabel} className="flex items-center gap-5 flex-wrap">
+      {options.map((o) => {
+        const sel = value === o;
+        return (
+          <label key={o} className="inline-flex items-center gap-2 cursor-pointer rounded-md focus-within:ring-2" style={{ ['--tw-ring-color' as never]: V4.selected }}>
+            <input type="radio" name={name} checked={sel} onChange={() => onChange(o)} className="sr-only" />
+            <RadioDot selected={sel} />
+            <span className="text-[14.5px]" style={{ color: V4.ink, fontWeight: sel ? 600 : 400 }}>{o}</span>
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -184,7 +259,7 @@ export function FieldV4({
   );
 }
 
-/** Ja/Nej(/Ved ikke)-spørgsmål på én linje: tekst venstre, chips højre */
+/** Ja/Nej(/Ved ikke)-spørgsmål: tekst til venstre, radioknapper til højre */
 export function QuestionRowV4({
   label,
   options,
@@ -197,13 +272,9 @@ export function QuestionRowV4({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 flex-wrap">
+    <div className="flex items-center justify-between gap-x-6 gap-y-2 flex-wrap">
       <span className="text-[14.5px]" style={{ color: V4.ink }}>{label}</span>
-      <div className="flex gap-2 shrink-0">
-        {options.map((o) => (
-          <ChipV4 key={o} label={o} selected={value === o} onClick={() => onChange(o)} />
-        ))}
-      </div>
+      <RadioInlineV4 options={options} value={value} onChange={onChange} ariaLabel={label} />
     </div>
   );
 }

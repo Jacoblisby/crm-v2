@@ -17,7 +17,7 @@ const OPTIONS: Array<{ display: string; stateValue: string; sub: string }> = [
   {
     display: 'Vil blive boende',
     stateValue: 'Vil blive boende som lejer',
-    sub: 'Du bliver boende og nyder friværdien bekymringsfrit.',
+    sub: 'Du bliver boende og kan bruge pengene.',
   },
   {
     display: 'Vil leje en anden bolig',
@@ -34,10 +34,11 @@ const OPTIONS: Array<{ display: string; stateValue: string; sub: string }> = [
 export function EfterSalgV4() {
   const { state, update } = useFunnelV2();
   return (
-    <div className="space-y-3">
+    <div role="radiogroup" aria-label="Hvad skal du efter salget?" className="space-y-3">
       {OPTIONS.map((o) => (
         <OptionRowV4
           key={o.stateValue}
+          name="efter-salg"
           title={o.display}
           sub={o.sub}
           selected={state.afterSaleRaw === o.stateValue}

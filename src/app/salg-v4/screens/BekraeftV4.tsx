@@ -9,7 +9,7 @@
  */
 import { useState } from 'react';
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
-import { V4, EASE, Card, ChipV4 } from '../primitives';
+import { V4, EASE, Card, RadioInlineV4 } from '../primitives';
 
 export function BekraeftV4() {
   const { state, update } = useFunnelV2();
@@ -26,11 +26,12 @@ export function BekraeftV4() {
       label: 'Boligtype',
       value: state.bekraeftBoligtype,
       edit: (
-        <div className="flex gap-1.5 flex-wrap justify-end">
-          {(['Ejerlejlighed', 'Andelsbolig', 'Rækkehus', 'Villa'] as const).map((o) => (
-            <ChipV4 key={o} label={o} selected={state.bekraeftBoligtype === o} onClick={() => update({ bekraeftBoligtype: o })} />
-          ))}
-        </div>
+        <RadioInlineV4
+          ariaLabel="Boligtype"
+          options={['Ejerlejlighed', 'Andelsbolig', 'Rækkehus', 'Villa']}
+          value={state.bekraeftBoligtype}
+          onChange={(v) => update({ bekraeftBoligtype: v as typeof state.bekraeftBoligtype })}
+        />
       ),
     },
     {
@@ -69,10 +70,12 @@ export function BekraeftV4() {
       label: 'Elevator',
       value: state.hasElevator ? 'Ja' : 'Nej',
       edit: (
-        <div className="flex gap-1.5">
-          <ChipV4 label="Ja" selected={state.hasElevator} onClick={() => update({ hasElevator: true })} />
-          <ChipV4 label="Nej" selected={!state.hasElevator} onClick={() => update({ hasElevator: false })} />
-        </div>
+        <RadioInlineV4
+          ariaLabel="Elevator"
+          options={['Ja', 'Nej']}
+          value={state.hasElevator ? 'Ja' : 'Nej'}
+          onChange={(v) => update({ hasElevator: v === 'Ja' })}
+        />
       ),
     },
     {
@@ -80,10 +83,12 @@ export function BekraeftV4() {
       label: 'Altan/terrasse',
       value: state.hasAltan ? 'Ja' : 'Nej',
       edit: (
-        <div className="flex gap-1.5">
-          <ChipV4 label="Ja" selected={state.hasAltan} onClick={() => update({ hasAltan: true })} />
-          <ChipV4 label="Nej" selected={!state.hasAltan} onClick={() => update({ hasAltan: false })} />
-        </div>
+        <RadioInlineV4
+          ariaLabel="Altan eller terrasse"
+          options={['Ja', 'Nej']}
+          value={state.hasAltan ? 'Ja' : 'Nej'}
+          onChange={(v) => update({ hasAltan: v === 'Ja' })}
+        />
       ),
     },
     {

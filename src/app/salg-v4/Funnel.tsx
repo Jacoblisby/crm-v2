@@ -10,16 +10,12 @@
  */
 import { useState } from 'react';
 import { useFunnelV2 } from '../salg-v2/FunnelV2Context';
-import { getScreensV4, V4_STAGE_LABELS, V4_STAGE_ORDER } from './types';
+import { getScreensV4, V4_STAGE_LABELS, V4_STAGE_ORDER, type V4Stage } from './types';
 import { V4, EASE } from './primitives';
 import { BekraeftV4 } from './screens/BekraeftV4';
 import { KontaktV4 } from './screens/KontaktV4';
-import { HvornaarV4 } from './screens/HvornaarV4';
 import { EfterSalgV4 } from './screens/EfterSalgV4';
 import { StandV4 } from './screens/StandV4';
-import { DetaljerV4 } from './screens/DetaljerV4';
-import { UdgifterV4 } from './screens/UdgifterV4';
-import { ForholdV4 } from './screens/ForholdV4';
 import { EstimatV4 } from './screens/EstimatV4';
 
 export function Funnel() {
@@ -56,24 +52,18 @@ export function Funnel() {
   const canProceed = (() => {
     if (screen.id === 'kontakt')
       return !!(state.fullName && state.email && state.phone);
-    if (screen.id === 'hvornaar') return !!state.moveTimeframeRaw;
     if (screen.id === 'efter_salg') return !!state.afterSaleRaw;
     if (screen.id === 'stand')
       return !!(state.kitchenStand && state.bathroomStand && state.livingRoomStand);
-    // "Udfylder senere" er et bevidst valg — så skal kravet om fællesudgift væk,
-    // ellers sidder man fast bag en knap der aldrig bliver aktiv.
-    if (screen.id === 'udgifter') return state.costsLater || state.costFaellesudgifter > 0;
     return true;
   })();
 
   const hint = !canProceed
     ? screen.id === 'kontakt'
       ? 'Navn, email og telefon'
-      : screen.id === 'udgifter'
-        ? 'Udfyld fællesudgift — eller sæt flueben i "udfylder senere"'
-        : screen.id === 'stand'
-          ? 'Vurder alle tre områder'
-          : 'Vælg en mulighed'
+      : screen.id === 'stand'
+        ? 'Vælg stand for alle tre områder'
+        : 'Vælg en mulighed'
     : null;
 
   const progress = (localIdx + 1) / (screens.length + 1);
@@ -81,13 +71,13 @@ export function Funnel() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: V4.beige }}>
-      <V4Header stage={screen.stage} />
+      <V4Header stage={screen.stage} progress={progress} />
 
       <main className="flex-1">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-10 sm:py-14">
           <div
             key={screen.id}
-            className={`grid lg:grid-cols-12 gap-10 lg:gap-16 ${dir === 1 ? 'v4-enter-frem' : 'v4-enter-tilbage'}`}
+            className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 ${dir === 1 ? 'v4-enter-frem' : 'v4-enter-tilbage'}`}
           >
             {/* Venstre: kicker / titel / sub / counter */}
             <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-36 self-start">
@@ -109,29 +99,15 @@ export function Funnel() {
             <div className="lg:col-span-7">
               {screen.id === 'bekraeft' && <BekraeftV4 />}
               {screen.id === 'kontakt' && <KontaktV4 />}
-              {screen.id === 'hvornaar' && <HvornaarV4 />}
               {screen.id === 'efter_salg' && <EfterSalgV4 />}
               {screen.id === 'stand' && <StandV4 />}
-              {screen.id === 'detaljer' && <DetaljerV4 />}
-              {screen.id === 'udgifter' && <UdgifterV4 />}
-              {screen.id === 'forhold' && <ForholdV4 />}
             </div>
           </div>
         </div>
       </main>
 
-      {/* Bund-bar: progress-streg øverst, Forrige/Næste */}
+      {/* Bund-bar: Forrige/Næste. Progress-baren ligger øverst i headeren. */}
       <footer className="sticky bottom-0 bg-white z-10">
-        <div className="h-[3px] w-full" style={{ background: '#e8e6e2' }}>
-          <div
-            className="h-full"
-            style={{
-              width: `${progress * 100}%`,
-              background: V4.selected,
-              transition: `width 300ms ${EASE}`,
-            }}
-          />
-        </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between">
           <button
             type="button"
@@ -202,11 +178,26 @@ export function Funnel() {
 }
 
 /* ─── Header: logo · nummererede stages · telefon — og adresse-pill under ─── */
-export function V4Header({ stage }: { stage: 'adresse' | 'boligen' | 'udgifter' | 'estimat' }) {
+export function V4Header({ stage, progress = 1 }: { stage: V4Stage; progress?: number }) {
   const { state } = useFunnelV2();
 
   return (
     <header className="sticky top-0 z-20 bg-white/95" style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 1px 0 rgba(28,43,43,0.06)' }}>
+      {/* Progress øverst: tykkere end før og altid synlig, også på mobil */}
+      <div
+        role="progressbar"
+        aria-label="Fremdrift"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+        className="h-[5px] w-full"
+        style={{ background: '#e8e6e2' }}
+      >
+        <div
+          className="h-full"
+          style={{ width: `${progress * 100}%`, background: V4.selected, transition: `width 300ms ${EASE}` }}
+        />
+      </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between gap-4">
         <a href="/frontpage" className="flex items-center shrink-0" aria-label="365 Ejendomme — til forsiden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -248,7 +239,7 @@ export function V4Header({ stage }: { stage: 'adresse' | 'boligen' | 'udgifter' 
       <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 pb-3.5 flex items-center justify-between gap-3">
         {state.fullAddress ? (
           <div
-            className="inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white max-w-full"
+            className="inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white max-w-full min-w-0"
             style={{ boxShadow: '0 3px 12px -4px rgba(28,43,43,0.18)', border: '1px solid #eeece8' }}
           >
             <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: V4.green }}>
