@@ -179,7 +179,7 @@ export function AddressCta({ id, variant = 'plate' }: { id?: string; variant?: '
           />
         ) : (
           <>
-            Tjek din pris
+            Få mit bud
             {/* Pilen fylder for meget på 375 px — der har feltet brug for pladsen */}
             <span className="hidden sm:inline">
               <ArrowIcon />

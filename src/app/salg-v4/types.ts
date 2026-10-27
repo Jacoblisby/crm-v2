@@ -55,7 +55,7 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       stage: 'adresse',
       kicker: 'Dine oplysninger',
       title: 'Hvor vil du gerne modtage dit tilbud?',
-      sub: 'Du får dit foreløbige tilbud på e-mail og sms. Vil du gå videre, aftaler vi en kort snak og en gratis besigtigelse.',
+      sub: 'Vi kontakter dig inden for 24 timer. Så aftaler vi en gratis besigtigelse, og bagefter får du dit skriftlige bud.',
       counter: `Trin 2 af ${total}`,
     },
     {
@@ -71,7 +71,7 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       stage: 'boligen',
       kicker: 'Din bolig',
       title: 'Hvordan er boligens stand?',
-      sub: 'Vælg det, der passer bedst. Det giver dig et mere præcist tilbud.',
+      sub: 'Vælg det, der passer bedst. Det hjælper os med at give dig et præcist bud.',
       counter: `Trin 4 af ${total}`,
     },
   ];

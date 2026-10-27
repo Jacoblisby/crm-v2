@@ -28,7 +28,7 @@ export function KontaktV4() {
             placeholder="navn@email.dk"
             type="email"
             autoComplete="email"
-            hint="Her sender vi estimatet"
+            hint="Her bekræfter vi, at vi har dine oplysninger"
           />
           <FieldV4
             label="Telefon"
@@ -37,7 +37,7 @@ export function KontaktV4() {
             placeholder="+45 12 34 56 78"
             type="tel"
             autoComplete="tel"
-            hint="Kun hvis vi har brug for at følge op"
+            hint="Her ringer vi inden for 24 timer"
           />
         </div>
       </div>

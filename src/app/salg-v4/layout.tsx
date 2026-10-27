@@ -13,9 +13,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Tjek din pris · 365 Ejendomme',
+  title: 'Få dit bud · 365 Ejendomme',
   description:
-    'Få et foreløbigt kontanttilbud på din ejerlejlighed. Uden mægler, fremvisninger og ventetid.',
+    'Svar på fire spørgsmål og hør fra os inden for 24 timer. Kontant bud på din ejerlejlighed, uden mægler og fremvisninger.',
 };
 
 export default function SalgV4Layout({ children }: { children: React.ReactNode }) {

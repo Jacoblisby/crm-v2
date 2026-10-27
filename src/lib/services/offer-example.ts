@@ -58,7 +58,7 @@ export const fmtKr = (n: number) => n.toLocaleString('da-DK');
 
 /** Den besked sælger møder i stedet for et tal — samme ordlyd begge steder. */
 export const NO_AUTO_OFFER = {
-  heading: 'Vi kunne desværre ikke beregne et tilbud automatisk',
+  heading: 'Tak, vi har dine oplysninger',
   body:
-    'Ud fra de oplysninger vi har om boligen, kan vi ikke nå frem til et tilbud, vi tør stå på mål for. En af vores mæglere gennemgår den manuelt og kontakter dig med et estimat inden for 24 timer.',
+    'Vi går din bolig igennem og kontakter dig inden for 24 timer. Så aftaler vi en tid, hvor vi ser boligen, og bagefter får du et skriftligt bud.',
 } as const;

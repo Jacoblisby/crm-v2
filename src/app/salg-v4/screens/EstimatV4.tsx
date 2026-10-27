@@ -27,8 +27,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
 import { submitFunnelAction } from '../../salg/submit-action';
+import { gemTidshorisont } from '../../salg/tidshorisont-action';
 import type { computeEstimate } from '@/lib/services/price-engine';
-import { V4, EASE, Card } from '../primitives';
+import { V4, EASE, Card, OptionRowV4 } from '../primitives';
 import { V4Header } from '../Funnel';
 import {
   OFFER_EXAMPLE,
@@ -56,6 +57,8 @@ export function EstimatV4() {
   const [submit, setSubmit] = useState<SubmitState>({ status: 'idle' });
   const [handlerOpen, setHandlerOpen] = useState(false);
   const submittedRef = useRef(false);
+  const [leadId, setLeadId] = useState<string | null>(null);
+  const [tidshorisont, setTidshorisont] = useState<string | null>(null);
 
   useEffect(() => {
     if (submittedRef.current) return;
@@ -83,6 +86,7 @@ export function EstimatV4() {
       try {
         const r = await submitFunnelAction(state, []);
         if (r.ok) {
+          if (r.leadId) setLeadId(r.leadId);
           if (r.estimate) {
             setEstimate(r.estimate);
             try {
@@ -127,7 +131,7 @@ export function EstimatV4() {
           <Card className="p-6 sm:p-10 space-y-7">
             <div className="text-center space-y-2">
               <div className="text-[11px] tracking-[0.16em] uppercase" style={{ color: V4.soft, fontWeight: 500 }}>
-                Din vurdering
+                Tak
               </div>
               <h1 className="text-[24px] sm:text-[30px] leading-tight" style={{ color: V4.ink, fontWeight: 500 }}>
                 Vi er i gang med din bolig
@@ -155,10 +159,42 @@ export function EstimatV4() {
               <div className="space-y-0.5">
                 <div className="text-[13px]" style={{ color: V4.ink, fontWeight: 600 }}>Du hører fra os inden for 24 timer</div>
                 <div className="text-[12.5px]" style={{ color: V4.muted }}>
-                  Vi har dine oplysninger — du behøver ikke gøre mere.
+                  Vi har dine oplysninger. Du behøver ikke gøre mere.
                 </div>
               </div>
             </div>
+
+            {/* Valgfrit: tidshorisont. Kun lige efter indsendelsen, mens leadet er nyt. */}
+            {leadId && submit.status === 'sent' && (
+              <div className="space-y-3" role="radiogroup" aria-label="Hvornår er det aktuelt for dig?">
+                <div className="space-y-1">
+                  <div className="text-[15px]" style={{ color: V4.ink, fontWeight: 600 }}>
+                    Hvornår er det aktuelt for dig?
+                  </div>
+                  <p className="text-[12.5px]" style={{ color: V4.muted }}>
+                    Valgfrit. Så ringer vi på det rigtige tidspunkt.
+                  </p>
+                </div>
+                {['Hurtigst muligt', '1–3 måneder', '3–6 måneder', '6+ måneder', 'Ved ikke endnu'].map((o) => (
+                  <OptionRowV4
+                    key={o}
+                    compact
+                    name="tidshorisont"
+                    title={o}
+                    selected={tidshorisont === o}
+                    onSelect={() => {
+                      setTidshorisont(o);
+                      void gemTidshorisont(leadId, o).catch(() => {});
+                    }}
+                  />
+                ))}
+                {tidshorisont && (
+                  <p className="text-[12.5px]" style={{ color: V4.green }}>
+                    Tak, det er noteret.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Sammenligning */}
             <div className="text-center space-y-2 pt-2">

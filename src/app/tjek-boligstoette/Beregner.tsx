@@ -858,9 +858,9 @@ function KomIGang() {
     <section className="px-6 sm:px-10 py-20 sm:py-28" style={{ background: 'var(--fp-green)' }}>
       <div className="max-w-[880px] mx-auto text-center space-y-5">
         <p className="fp-kicker" style={{ color: 'rgba(255,255,255,0.65)' }}>Kom i gang</p>
-        <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-white">Hvad kan din bolig frigøre for dig?</h2>
+        <h2 className="text-[30px] sm:text-[40px] leading-[1.2] text-white">Hvad får du for din bolig?</h2>
         <p className="text-[13.5px] leading-[1.7] max-w-[420px] mx-auto" style={{ color: 'rgba(255,255,255,0.78)' }}>
-          Start med din adresse og få et første indblik i dine muligheder. Det er gratis, diskret og helt uforpligtende.
+          Skriv din adresse, så hører du fra os inden for 24 timer. Det er gratis, og du forpligter dig ikke til noget.
         </p>
         <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
           <a
@@ -868,7 +868,7 @@ function KomIGang() {
             className="fp-press inline-flex items-center justify-center px-6 py-3 rounded-lg text-[14px]"
             style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
           >
-            Tjek din pris
+            Få mit bud
           </a>
           <a
             href="tel:+4561789071"

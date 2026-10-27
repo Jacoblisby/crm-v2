@@ -27,14 +27,14 @@ export default function SalgV4Page() {
         <main className="flex-1 flex items-center justify-center px-6 pb-24">
           <div className="w-full max-w-xl text-center space-y-6">
             <div className="text-[12px] tracking-[0.18em] uppercase" style={{ color: V4.ink, fontWeight: 500 }}>
-              Tjek din pris
+              Få dit bud
             </div>
             <h1 className="text-[34px] sm:text-[44px] leading-[1.12]" style={{ color: V4.ink }}>
               Start med din adresse
             </h1>
             <p className="text-[15px] leading-[1.65] max-w-md mx-auto" style={{ color: V4.muted }}>
-              Indtast din adresse, så ser vi på boligen og de offentlige boligdata. Det er
-              gratis, diskret og helt uforpligtende.
+              Skriv din adresse og svar på fire spørgsmål. Det tager 5 minutter, og du hører
+              fra os inden for 24 timer. Det er gratis og uforpligtende.
             </p>
             <AddressCta id="v4-address" />
             <a href="/frontpage" className="inline-block text-[13px] underline hover:no-underline" style={{ color: V4.muted }}>

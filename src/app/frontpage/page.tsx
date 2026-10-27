@@ -69,7 +69,7 @@ const NAV_LINKS = [
   { label: 'Sådan virker det', href: '#saadan-virker-det' },
   { label: 'Erfaringer', href: '#erfaringer' },
   { label: 'FAQ', href: '#faq' },
-  { label: 'Tjek din pris', href: '#hero-adresse' },
+  { label: 'Få mit bud', href: '#hero-adresse' },
 ];
 
 /**
@@ -316,10 +316,10 @@ function Hero() {
         <div className="px-6 sm:px-10 lg:px-6 max-w-[560px] space-y-5">
           <p className="fp-kicker">Gratis og uforpligtende</p>
           <h1 className="text-[32px] sm:text-[46px] lg:text-[52px] leading-[1.15] text-balance" style={{ color: 'var(--fp-ink)' }}>
-            Få et kontant bud<br className="hidden lg:inline" /> på din lejlighed<br className="hidden lg:inline" /> på 5 minutter
+            Få et kontant bud<br className="hidden lg:inline" /> på din lejlighed
           </h1>
           <p className="hidden lg:block text-[14.5px] leading-[1.7] max-w-[430px]" style={{ color: 'var(--fp-muted)' }}>
-            Skriv din adresse. Ingen mægler og ingen fremvisninger.
+            Det tager 5 minutter, og du hører fra os inden for 24 timer. Ingen mægler og ingen fremvisninger.
           </p>
         </div>
 
@@ -338,7 +338,7 @@ function Hero() {
           </div>
           {/* Teksten ligger under kortet på mobil, så adressefeltet står over folden */}
           <p className="px-6 sm:px-10 text-[14.5px] leading-[1.7] max-w-[460px]" style={{ color: 'var(--fp-ink)' }}>
-            Skriv din adresse. Ingen mægler og ingen fremvisninger.
+            Det tager 5 minutter, og du hører fra os inden for 24 timer. Ingen mægler og ingen fremvisninger.
           </p>
           <ul className="sm:hidden px-6 pt-4 pb-12 flex flex-col gap-1.5 text-[13.5px]" style={{ color: 'var(--fp-ink)' }}>
             <li><strong style={{ fontWeight: 600 }}>87+</strong> boligkøb siden 2020</li>
@@ -533,8 +533,8 @@ function DoorPhotoWithBadges() {
 /* ─── 5. Sådan virker det — trin FØR foto på mobil, runde ikoner ───────────── */
 function SaadanVirkerDet() {
   const steps = [
-    { icon: House, title: '1. Skriv din adresse', body: 'Du får et første tilbud ud fra de offentlige boligdata.' },
-    { icon: ChatsCircle, title: '2. Fortæl om din situation', body: 'Du fortæller om din bolig og dine ønsker. Vi lytter.' },
+    { icon: House, title: '1. Skriv din adresse', body: 'Svar på fire korte spørgsmål. Det tager 5 minutter.' },
+    { icon: ChatsCircle, title: '2. Du hører fra os', body: 'Inden for 24 timer kontakter vi dig, lytter til din situation og aftaler en tid.' },
     { icon: Door, title: '3. Vi kommer forbi', body: 'Det tager 10 til 15 minutter, er gratis og forpligter dig ikke til noget.' },
     { icon: FileText, title: '4. Du får et skriftligt bud', body: 'Du bestemmer, om du siger ja, venter eller siger nej tak. Buddet gælder i 30 dage.' },
   ];
@@ -754,7 +754,7 @@ function Faq() {
     },
     {
       q: 'Er det uforpligtende at starte?',
-      a: 'Ja. Du indtaster din adresse, får et foreløbigt tilbud og kan takke nej uden omkostninger.',
+      a: 'Ja. Du indtaster din adresse, hører fra os og kan takke nej på ethvert tidspunkt uden omkostninger.',
     },
     {
       q: 'Hvordan adskiller I jer fra en mægler?',
@@ -876,8 +876,8 @@ function FinalCta() {
           Hvad får du for din bolig?
         </h2>
         <p className="text-[13.5px] leading-[1.7] max-w-[420px] mx-auto" style={{ color: 'rgba(255,255,255,0.78)' }}>
-          Skriv din adresse og få et første bud. Det er gratis, og du forpligter dig ikke
-          til noget.
+          Skriv din adresse, så hører du fra os inden for 24 timer. Det er gratis, og du
+          forpligter dig ikke til noget.
         </p>
         <div className="max-w-[440px] mx-auto pt-2">
           <AddressCta id="fp-address-bottom" variant="bar" />
@@ -969,7 +969,7 @@ function StickyCta() {
       }}
     >
       <MapPin size={16} weight="regular" />
-      Tjek din pris
+      Få mit bud
     </a>
   );
 }

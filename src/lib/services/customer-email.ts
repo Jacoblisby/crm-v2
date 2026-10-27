@@ -145,7 +145,7 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
           Du hører fra os inden for 24 timer
         </div>
         <div style="margin-top:2px;font-family:${FONT};font-size:12.5px;color:${C.muted};">
-          Vi har dine oplysninger — du behøver ikke gøre mere.
+          Vi har dine oplysninger. Du behøver ikke gøre mere.
         </div>
       </td></tr>
     </table>
@@ -222,10 +222,9 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
       <tr><td style="padding:26px;">
         <div style="font-family:${FONT};font-size:16px;font-weight:600;color:${C.white};">Næste skridt</div>
         <p style="margin:8px 0 16px;font-family:${FONT};font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.82);">
-          En af vores mæglere kontakter dig inden for 24 timer på
-          <strong style="color:${C.white};">${escapeHtml(phone)}</strong> med et estimat på boligen,
-          og vi kan samtidig aftale en gratis, uforpligtende besigtigelse. Efter besigtigelsen
-          giver vi et endeligt bindende tilbud.
+          Vi kontakter dig inden for 24 timer på
+          <strong style="color:${C.white};">${escapeHtml(phone)}</strong> og aftaler en gratis,
+          uforpligtende besigtigelse. Efter besigtigelsen får du et skriftligt bud.
         </p>
         <a href="tel:+4561789071" style="display:inline-block;padding:12px 22px;background:#b5f0ee;border-radius:8px;font-family:${FONT};font-size:14px;font-weight:600;color:${C.greenDeep};text-decoration:none;">
           Ring +45 61 78 90 71
@@ -264,7 +263,7 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
   <tr><td style="padding:24px 32px 0;">
     <p style="margin:0;padding-top:16px;border-top:1px solid ${C.rule};font-family:${FONT};font-size:11.5px;line-height:1.6;color:${C.soft};">
       <strong style="color:${C.muted};">Bemærk:</strong> Regneeksemplet ovenfor er en illustration af,
-      hvordan vi regner — ikke et tilbud på din bolig. Dit estimat kommer fra en mægler inden for 24 timer.
+      hvordan vi regner — ikke et tilbud på din bolig. Du hører fra os inden for 24 timer.
     </p>
   </td></tr>
 
