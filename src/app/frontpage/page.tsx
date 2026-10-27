@@ -208,6 +208,18 @@ function Nav() {
               <Phone size={15} weight="regular" />
               +45 61 78 90 71
             </a>
+            {/* Mobil: Tjek din pris i selve bjælken, så knappen følger med ved scroll */}
+            <a
+              href="#hero-adresse"
+              onClick={(e) => {
+                e.preventDefault();
+                goToAddressField();
+              }}
+              className="fp-press sm:hidden inline-flex items-center px-3.5 py-2 rounded-lg text-[13px]"
+              style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
+            >
+              Tjek din pris
+            </a>
             <button
               type="button"
               onClick={() => setOpen(true)}
