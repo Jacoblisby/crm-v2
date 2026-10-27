@@ -350,12 +350,8 @@ function Hero() {
               { top: '87+ boligkøb', bottom: 'siden 2020' },
               { top: 'Bliv boende', bottom: 'som lejer' },
               { top: 'Ingen', bottom: 'mæglersalær' },
-            ].map((u, i) => (
-              <li
-                key={u.top}
-                className="px-2 py-3.5"
-                style={{ borderLeft: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.18)' }}
-              >
+            ].map((u) => (
+              <li key={u.top} className="px-2 py-3.5">
                 <div className="text-[14px] leading-tight" style={{ fontWeight: 600 }}>{u.top}</div>
                 <div className="text-[11.5px] leading-tight mt-1" style={{ color: 'rgba(255,255,255,0.78)' }}>{u.bottom}</div>
               </li>
