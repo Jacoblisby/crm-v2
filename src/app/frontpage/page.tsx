@@ -330,8 +330,6 @@ function Hero() {
           <p className="text-[14.5px] leading-[1.7] max-w-[430px]" style={{ color: 'var(--fp-muted)' }}>
             Du får et kontant bud på din lejlighed på Sjælland. Ingen mægler, ingen
             fremvisninger og intet salær.
-            <br />
-            Hvis boligen passer til os, kan du blive boende som lejer.
           </p>
         </div>
 

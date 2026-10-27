@@ -23,7 +23,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: '365 Ejendomme · Få din friværdi udbetalt, og bliv boende, hvis du vil',
   description:
-    'Få et kontant bud på din lejlighed på Sjælland, uden mægler, fremvisninger og salær. Hvis boligen passer til os, kan du blive boende som lejer.',
+    'Få et kontant bud på din lejlighed på Sjælland, uden mægler, fremvisninger og salær.',
   openGraph: {
     title: '365 Ejendomme · Få din friværdi udbetalt, og bliv boende, hvis du vil',
     description:
