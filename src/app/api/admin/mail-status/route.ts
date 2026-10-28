@@ -19,6 +19,9 @@ import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { events, leadCommunications, leads } from '@/lib/db/schema';
 import { TEST_EMNE } from '@/lib/mailvagt';
+import { booking } from '@/lib/mails';
+import { svaradresse } from '@/lib/svaradresse';
+import { customerEmailHtml } from '@/lib/services/customer-email';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -189,6 +192,43 @@ export async function POST(req: NextRequest) {
   if (action === 'heartbeat') {
     await db.insert(events).values({ actor: 'mailvagt', type: 'mailvagt.heartbeat', payload: {} });
     return NextResponse.json({ ok: true });
+  }
+
+  // Spamtest: sender en mail PRÆCIS som CRM'et sender den, men kun til mail-tester.com.
+  //   ?action=spamtest&til=test-xxxx@srv1.mail-tester.com&type=booking|kvittering
+  if (action === 'spamtest') {
+    const til = req.nextUrl.searchParams.get('til') ?? '';
+    const type = req.nextUrl.searchParams.get('type');
+    if (!/^[a-z0-9-]+@(?:[a-z0-9-]+\.)?mail-tester\.com$/i.test(til)) {
+      return NextResponse.json({ error: 'kun adresser hos mail-tester.com' }, { status: 400 });
+    }
+    if (type !== 'booking' && type !== 'kvittering') return NextResponse.json({ error: 'type skal være booking eller kvittering' }, { status: 400 });
+    const key = process.env.RESEND_API_KEY;
+    if (!key) return NextResponse.json({ ok: false, error: 'RESEND_API_KEY er ikke sat' }, { status: 500 });
+    const from = process.env.EMAIL_FROM || 'administration@365ejendom.dk';
+    const lead = { fullName: 'Test Testesen', address: 'Svendborgvej 131, st, 4700 Næstved', bidDkk: null };
+    const tomtId = '00000000-0000-0000-0000-000000000000';
+    const payload =
+      type === 'booking'
+        ? (() => {
+            const m = booking(lead, null, new Date(Date.now() + 3 * 86_400_000));
+            return { from, to: til, reply_to: svaradresse(tomtId), subject: m.subject, text: m.body };
+          })()
+        : {
+            from,
+            to: til,
+            reply_to: svaradresse(tomtId),
+            subject: 'Vi er i gang med din bolig, Svendborgvej 131, st, 4700 Næstved',
+            html: customerEmailHtml({ firstName: 'Test', fullAddress: lead.address, kontakt: '61 78 90 71', comparables: [] }),
+          };
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000),
+    });
+    const tekst = await res.text();
+    return NextResponse.json({ ok: res.ok, status: res.status, svar: tekst.slice(0, 200) }, { status: res.ok ? 200 : 502 });
   }
 
   if (action === 'send-test') {
