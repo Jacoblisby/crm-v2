@@ -19,9 +19,9 @@ export default function SalgV4Page() {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: V4.beige }}>
         <header className="px-6 py-5">
-          <a href="/frontpage" className="inline-flex items-center" aria-label="365 Ejendomme — til forsiden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/365-ejendomme.png" alt="365 Ejendomme" width={38} height={44} className="h-[44px] w-auto" />
+          <a href="/frontpage" className="inline-flex items-baseline gap-1.5" aria-label="365 Ejendomme, til forsiden" style={{ color: V4.ink }}>
+            <span className="text-[24px] leading-none" style={{ fontWeight: 400 }}>365</span>
+            <span className="text-[11px] tracking-[0.2em]" style={{ fontWeight: 500 }}>EJENDOM</span>
           </a>
         </header>
         <main className="flex-1 flex items-center justify-center px-6 pb-24">

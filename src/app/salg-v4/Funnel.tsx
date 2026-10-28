@@ -4,7 +4,7 @@
  * Funnel v4 — shell pixel-matchet mod Figma-framesene:
  *   - Header: hvid, logo · "1. ADRESSE  2. BOLIGEN  3. UDGIFTER  4. ESTIMAT"
  *     (kun aktiv er mørk) · telefon m. ikon. Under: adresse-pill.
- *   - Skærm-bg: beige #F5F2F1. Split: venstre kicker/H1/sub/counter, højre svar.
+ *   - Skærm-bg: beige #F5F2F1. Split: venstre kicker/H1/sub, højre svar.
  *   - Bund: hvid bar m. tynd petroleum progress-streg ØVERST,
  *     "Forrige" (mint-grå) og "Næste" (petroleum) — kantede knapper.
  */
@@ -74,25 +74,22 @@ export function Funnel() {
       <V4Header stage={screen.stage} progress={progress} />
 
       <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-10 sm:py-14">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-14">
           <div
             key={screen.id}
-            className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 ${dir === 1 ? 'v4-enter-frem' : 'v4-enter-tilbage'}`}
+            className={`grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-10 lg:gap-16 ${dir === 1 ? 'v4-enter-frem' : 'v4-enter-tilbage'}`}
           >
-            {/* Venstre: kicker / titel / sub / counter */}
-            <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-36 self-start">
+            {/* Venstre: kicker / titel / sub */}
+            <div className="lg:col-span-5 space-y-2 sm:space-y-5 lg:sticky lg:top-36 self-start">
               <div className="text-[12px] tracking-[0.18em] uppercase" style={{ color: V4.ink, fontWeight: 500 }}>
                 {screen.kicker}
               </div>
-              <h1 className="text-[34px] sm:text-[42px] leading-[1.15] text-balance" style={{ color: V4.ink, fontWeight: 400 }}>
+              <h1 className="text-[26px] sm:text-[42px] leading-[1.15] text-balance" style={{ color: V4.ink, fontWeight: 400 }}>
                 {screen.title}
               </h1>
-              <p className="text-[14.5px] leading-[1.65] max-w-md" style={{ color: V4.muted }}>
+              <p className="text-[13.5px] sm:text-[14.5px] leading-[1.55] sm:leading-[1.65] max-w-md" style={{ color: V4.muted }}>
                 {screen.sub}
               </p>
-              <div className="text-[12px] tracking-[0.14em] uppercase pt-2" style={{ color: V4.soft }}>
-                {screen.counter}
-              </div>
             </div>
 
             {/* Højre: svar */}
@@ -108,11 +105,11 @@ export function Funnel() {
 
       {/* Bund-bar: Forrige/Næste. Progress-baren ligger øverst i headeren. */}
       <footer className="sticky bottom-0 bg-white z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-3 sm:py-4 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={prev}
-            className="inline-flex items-center gap-2.5 px-6 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97]"
+            className="inline-flex items-center justify-center gap-2.5 flex-1 sm:flex-none sm:w-44 px-4 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97]"
             style={{
               background: V4.prevBtn,
               color: V4.greenDeep,
@@ -126,7 +123,7 @@ export function Funnel() {
             </svg>
             {localIdx === 0 ? 'Til forsiden' : 'Forrige'}
           </button>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-1 sm:flex-none">
             {hint && (
               <span className="text-[12px] hidden sm:inline" style={{ color: V4.soft }}>
                 {hint}
@@ -136,7 +133,7 @@ export function Funnel() {
               type="button"
               onClick={next}
               disabled={!canProceed}
-              className="inline-flex items-center gap-2.5 px-7 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97] disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2.5 w-full sm:w-44 px-4 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97] disabled:cursor-not-allowed"
               style={{
                 background: canProceed ? V4.green : '#dcdad6',
                 color: canProceed ? '#fff' : V4.soft,
@@ -198,14 +195,33 @@ export function V4Header({ stage, progress = 1 }: { stage: V4Stage; progress?: n
           style={{ width: `${progress * 100}%`, background: V4.selected, transition: `width 300ms ${EASE}` }}
         />
       </div>
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between gap-4">
-        <a href="/frontpage" className="flex items-center shrink-0" aria-label="365 Ejendomme — til forsiden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/365-ejendomme.png" alt="365 Ejendomme" width={38} height={44} className="h-[40px] sm:h-[44px] w-auto" />
+
+      {/* Én række: logo · adresse · (desktop: trin) · telefon. Samme tekstlogo som forsiden. */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-2.5 sm:py-4 flex items-center gap-3 sm:gap-5">
+        <a href="/frontpage" className="flex items-baseline gap-1.5 shrink-0" aria-label="365 Ejendomme, til forsiden" style={{ color: V4.ink }}>
+          <span className="text-[22px] sm:text-[24px] leading-none" style={{ fontWeight: 400 }}>365</span>
+          <span className="text-[10px] sm:text-[11px] tracking-[0.2em]" style={{ fontWeight: 500 }}>EJENDOM</span>
         </a>
 
-        {/* Nummererede stages — kun aktiv er mørk */}
-        <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+        {state.fullAddress ? (
+          <div
+            className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white min-w-0 flex-1 sm:flex-none sm:max-w-[340px]"
+            style={{ boxShadow: '0 3px 12px -4px rgba(28,43,43,0.18)', border: '1px solid #eeece8' }}
+          >
+            <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: V4.green }}>
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7M5 9v11h14V9M9 20v-6h6v6" />
+              </svg>
+            </span>
+            {/* Designer: lang adresse får "..." — aldrig 2 linjer */}
+            <span className="text-[12.5px] sm:text-[13px] truncate whitespace-nowrap" style={{ color: V4.ink, fontWeight: 500 }}>
+              {state.fullAddress}
+            </span>
+          </div>
+        ) : null}
+
+        {/* Nummererede trin — kun desktop, kun aktiv er mørk */}
+        <nav className="hidden lg:flex items-center gap-8 xl:gap-10 ml-auto">
           {V4_STAGE_ORDER.map((stageId, i) => {
             const isCurrent = stageId === stage;
             return (
@@ -225,7 +241,7 @@ export function V4Header({ stage, progress = 1 }: { stage: V4Stage; progress?: n
 
         <a
           href="tel:+4561789071"
-          className="hidden sm:inline-flex items-center gap-2 text-[13.5px] shrink-0 hover:opacity-70 transition-opacity"
+          className="hidden sm:inline-flex items-center gap-2 text-[13.5px] shrink-0 hover:opacity-70 transition-opacity ml-auto lg:ml-0"
           style={{ color: V4.ink, fontWeight: 500 }}
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -233,30 +249,6 @@ export function V4Header({ stage, progress = 1 }: { stage: V4Stage; progress?: n
           </svg>
           +45 61 78 90 71
         </a>
-      </div>
-
-      {/* Adresse-pill (mobil-stages vises også her) */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 pb-3.5 flex items-center justify-between gap-3">
-        {state.fullAddress ? (
-          <div
-            className="inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white max-w-full min-w-0"
-            style={{ boxShadow: '0 3px 12px -4px rgba(28,43,43,0.18)', border: '1px solid #eeece8' }}
-          >
-            <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: V4.green }}>
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7M5 9v11h14V9M9 20v-6h6v6" />
-              </svg>
-            </span>
-            {/* Designer: lang adresse får "..." — aldrig 2 linjer */}
-            <span className="text-[13px] truncate whitespace-nowrap" style={{ color: V4.ink, fontWeight: 500 }}>
-              {state.fullAddress}
-            </span>
-          </div>
-        ) : <span />}
-
-        <span className="md:hidden text-[11.5px] uppercase tracking-wide shrink-0" style={{ color: V4.ink, fontWeight: 600 }}>
-          {V4_STAGE_ORDER.indexOf(stage) + 1}. {V4_STAGE_LABELS[stage]}
-        </span>
       </div>
     </header>
   );

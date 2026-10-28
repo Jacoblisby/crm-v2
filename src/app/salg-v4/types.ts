@@ -35,20 +35,16 @@ export interface V4ScreenDef {
   kicker: string;
   title: string;
   sub: string;
-  /** fx "Trin 1 af 4" — vises som lille caps-counter under sub */
-  counter: string;
 }
 
 export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
-  const total = 4;
   return [
     {
       id: 'bekraeft',
       stage: 'adresse',
       kicker: 'Din bolig',
       title: 'Bekræft boligens detaljer',
-      sub: 'Vi har hentet oplysningerne fra de offentlige registre (OIS og BBR). Ret dem, hvis noget ikke passer.',
-      counter: `Trin 1 af ${total}`,
+      sub: 'Rigtige oplysninger giver dig et mere præcist bud. Vi har hentet dem fra de offentlige registre. Ret dem, hvis noget ikke passer.',
     },
     {
       id: 'kontakt',
@@ -56,7 +52,6 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       kicker: 'Dine oplysninger',
       title: 'Hvor vil du gerne modtage dit tilbud?',
       sub: 'Vi kontakter dig inden for 24 timer. Så aftaler vi en gratis besigtigelse, og bagefter får du dit skriftlige bud.',
-      counter: `Trin 2 af ${total}`,
     },
     {
       id: 'efter_salg',
@@ -64,7 +59,6 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       kicker: 'Din situation',
       title: 'Hvad skal du efter salget?',
       sub: 'Så kan vi finde en løsning, der passer til dig. Dit svar forpligter dig ikke til noget.',
-      counter: `Trin 3 af ${total}`,
     },
     {
       id: 'stand',
@@ -72,7 +66,6 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       kicker: 'Din bolig',
       title: 'Hvordan er boligens stand?',
       sub: 'Vælg det, der passer bedst. Det hjælper os med at give dig et præcist bud.',
-      counter: `Trin 4 af ${total}`,
     },
   ];
 }

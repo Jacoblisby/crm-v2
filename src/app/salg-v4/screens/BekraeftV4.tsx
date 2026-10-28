@@ -109,7 +109,7 @@ export function BekraeftV4() {
   return (
     <Card className="overflow-hidden">
       {/* Mint header */}
-      <div className="px-6 py-4 flex items-center justify-between gap-4" style={{ background: V4.mint }}>
+      <div className="px-6 py-3 sm:py-4 flex items-center justify-between gap-4" style={{ background: V4.mint }}>
         <div className="flex items-center gap-3 min-w-0">
           <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: V4.green }}>
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -119,9 +119,6 @@ export function BekraeftV4() {
           <div className="min-w-0">
             <div className="text-[12px] tracking-[0.1em] uppercase" style={{ color: V4.ink, fontWeight: 600 }}>
               Fra OIS og BBR
-            </div>
-            <div className="text-[13px] truncate" style={{ color: V4.muted }}>
-              {state.fullAddress || '—'}
             </div>
           </div>
         </div>
@@ -163,7 +160,7 @@ export function BekraeftV4() {
         {rows.map((r, i) => (
           <div
             key={r.label}
-            className="flex items-center justify-between gap-4 px-6 py-[15px]"
+            className="flex items-center justify-between gap-4 px-6 py-[10px] sm:py-[15px]"
             style={{ borderTop: i === 0 ? 'none' : `1px solid ${V4.border}` }}
           >
             <span className="flex items-center gap-3 text-[14.5px]" style={{ color: V4.ink }}>
