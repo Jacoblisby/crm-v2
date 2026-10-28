@@ -73,8 +73,23 @@ async function resend() {
     const d = await fetch('https://api.resend.com/domains', { headers: h, signal: AbortSignal.timeout(8000) });
     ud.domaenerHttp = d.status;
     if (d.ok) {
-      const j = (await d.json()) as { data?: { name: string; status: string }[] };
-      ud.domaener = (j.data ?? []).map((x) => ({ navn: x.name, status: x.status }));
+      const j = (await d.json()) as { data?: { id: string; name: string; status: string }[] };
+      ud.domaener = await Promise.all(
+        (j.data ?? []).map(async (x) => {
+          // Enkeltopslaget har open/click-tracking og TLS-indstillingen
+          const det = await fetch(`https://api.resend.com/domains/${x.id}`, { headers: h, signal: AbortSignal.timeout(8000) })
+            .then((r) => (r.ok ? (r.json() as Promise<Record<string, unknown>>) : null))
+            .catch(() => null);
+          return {
+            navn: x.name,
+            status: x.status,
+            openTracking: det?.open_tracking ?? null,
+            clickTracking: det?.click_tracking ?? null,
+            tls: det?.tls ?? null,
+            region: det?.region ?? null,
+          };
+        }),
+      );
     }
   } catch (e) {
     ud.domaenerFejl = e instanceof Error ? e.message : String(e);
@@ -92,6 +107,11 @@ async function resend() {
       const pr: Record<string, number> = {};
       for (const x of sidste24) pr[x.last_event ?? 'ukendt'] = (pr[x.last_event ?? 'ukendt'] ?? 0) + 1;
       ud.sidste24t = { antal: sidste24.length, pr };
+      // Alle de seneste (op til 100): levering, afvisning, klager
+      const alle: Record<string, number> = {};
+      for (const x of j.data ?? []) alle[x.last_event ?? 'ukendt'] = (alle[x.last_event ?? 'ukendt'] ?? 0) + 1;
+      const ældste = (j.data ?? []).map((x) => x.created_at).filter(Boolean).sort()[0] ?? null;
+      ud.seneste100 = { antal: (j.data ?? []).length, pr: alle, ældste };
     }
   } catch (e) {
     ud.mailsFejl = e instanceof Error ? e.message : String(e);
@@ -104,6 +124,19 @@ export async function GET(req: NextRequest) {
   if (nej) return nej;
   const token = req.nextUrl.searchParams.get('token');
   if (token && !TOKEN.test(token)) return NextResponse.json({ error: 'ugyldigt token' }, { status: 400 });
+
+  // ?emailId=<resend-id>: leveringsstatus for én udgående mail. Kun status og modtagerens domæne.
+  const emailId = req.nextUrl.searchParams.get('emailId');
+  if (emailId) {
+    if (!/^[0-9a-f-]{36}$/i.test(emailId)) return NextResponse.json({ error: 'ugyldigt emailId' }, { status: 400 });
+    const key = process.env.RESEND_API_KEY;
+    if (!key) return NextResponse.json({ error: 'RESEND_API_KEY er ikke sat' }, { status: 500 });
+    const r = await fetch(`https://api.resend.com/emails/${emailId}`, { headers: { Authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return NextResponse.json({ ok: false, status: r.status });
+    const m = (await r.json()) as { last_event?: string; created_at?: string; to?: string[] | string; from?: string };
+    const til = Array.isArray(m.to) ? m.to[0] : m.to;
+    return NextResponse.json({ ok: true, lastEvent: m.last_event ?? null, oprettet: m.created_at ?? null, tilDomaene: til?.split('@')[1] ?? null, fraDomaene: m.from?.split('@')[1]?.replace('>', '') ?? null });
+  }
 
   const doegn = new Date(Date.now() - 86_400_000);
   const [ind, ud, ubesvarede, hjerteslag, ejer] = await Promise.all([
