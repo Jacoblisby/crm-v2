@@ -2,7 +2,7 @@
 
 /**
  * Funnel v4 — shell pixel-matchet mod Figma-framesene:
- *   - Header: hvid, logo · "1. ADRESSE  2. BOLIGEN  3. UDGIFTER  4. ESTIMAT"
+ *   - Header: hvid, logo · "1. ADRESSE  2. BOLIGEN  3. ESTIMAT"
  *     (kun aktiv er mørk) · telefon m. ikon. Under: adresse-pill.
  *   - Skærm-bg: beige #F5F2F1. Split: venstre kicker/H1/sub, højre svar.
  *   - Bund: hvid bar m. tynd petroleum progress-streg ØVERST,
@@ -68,6 +68,9 @@ export function Funnel() {
 
   const progress = (localIdx + 1) / (screens.length + 1);
   const isLast = localIdx === screens.length - 1;
+  // Sidste trin sender oplysningerne. Tilbuddet kommer efter besigtigelsen, så
+  // knappen må ikke love et tilbud på næste skærm.
+  const nextLabel = isLast ? 'Få et bud' : screen.id === 'bekraeft' ? 'Det passer' : 'Næste';
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: V4.beige }}>
@@ -109,9 +112,10 @@ export function Funnel() {
           <button
             type="button"
             onClick={prev}
-            className="inline-flex items-center justify-center gap-2.5 flex-1 sm:flex-none sm:w-44 px-4 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97]"
+            className="inline-flex items-center justify-center gap-2 flex-[2] sm:flex-none sm:w-36 px-3 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97]"
             style={{
-              background: V4.prevBtn,
+              background: '#fff',
+              boxShadow: `inset 0 0 0 1px ${V4.prevBtn}`,
               color: V4.greenDeep,
               fontWeight: 500,
               transitionDuration: '160ms',
@@ -123,7 +127,7 @@ export function Funnel() {
             </svg>
             {localIdx === 0 ? 'Til forsiden' : 'Forrige'}
           </button>
-          <div className="flex items-center gap-4 flex-1 sm:flex-none">
+          <div className="flex items-center gap-4 flex-[3] sm:flex-none">
             {hint && (
               <span className="text-[12px] hidden sm:inline" style={{ color: V4.soft }}>
                 {hint}
@@ -133,7 +137,7 @@ export function Funnel() {
               type="button"
               onClick={next}
               disabled={!canProceed}
-              className="inline-flex items-center justify-center gap-2.5 w-full sm:w-44 px-4 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97] disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2.5 w-full sm:w-56 px-4 py-3 rounded-md text-[14px] transition-[background-color,box-shadow,scale] active:scale-[0.97] disabled:cursor-not-allowed"
               style={{
                 background: canProceed ? V4.green : '#dcdad6',
                 color: canProceed ? '#fff' : V4.soft,
@@ -142,7 +146,7 @@ export function Funnel() {
                 transitionTimingFunction: EASE,
               }}
             >
-              {isLast ? 'Se mit tilbud' : 'Næste'}
+              {nextLabel}
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -172,6 +176,12 @@ export function Funnel() {
       `}</style>
     </div>
   );
+}
+
+/** «Svendborgvej 69, st, 4700 Næstved» → «Svendborgvej 69, st». Postnr og by ved kunden i forvejen. */
+function kortAdresse(adresse: string): string {
+  const dele = adresse.split(',').map((d) => d.trim()).filter((d) => d && !/^\d{4}\b/.test(d));
+  return dele.length > 0 ? dele.join(', ') : adresse;
 }
 
 /* ─── Header: logo · nummererede stages · telefon — og adresse-pill under ─── */
@@ -205,6 +215,7 @@ export function V4Header({ stage, progress = 1 }: { stage: V4Stage; progress?: n
 
         {state.fullAddress ? (
           <div
+            title={state.fullAddress}
             className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white min-w-0 flex-1 sm:flex-none sm:max-w-[340px]"
             style={{ boxShadow: '0 3px 12px -4px rgba(28,43,43,0.18)', border: '1px solid #eeece8' }}
           >
@@ -215,7 +226,7 @@ export function V4Header({ stage, progress = 1 }: { stage: V4Stage; progress?: n
             </span>
             {/* Designer: lang adresse får "..." — aldrig 2 linjer */}
             <span className="text-[12.5px] sm:text-[13px] truncate whitespace-nowrap" style={{ color: V4.ink, fontWeight: 500 }}>
-              {state.fullAddress}
+              {kortAdresse(state.fullAddress)}
             </span>
           </div>
         ) : null}

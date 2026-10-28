@@ -117,8 +117,8 @@ export function BekraeftV4() {
             </svg>
           </span>
           <div className="min-w-0">
-            <div className="text-[12px] tracking-[0.1em] uppercase" style={{ color: V4.ink, fontWeight: 600 }}>
-              Fra OIS og BBR
+            <div className="text-[13px] leading-tight" style={{ color: V4.ink, fontWeight: 600 }}>
+              Fra offentlige registre
             </div>
           </div>
         </div>
