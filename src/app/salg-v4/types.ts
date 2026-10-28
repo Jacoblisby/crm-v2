@@ -51,7 +51,7 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       stage: 'adresse',
       kicker: 'Dine oplysninger',
       title: 'Hvor vil du gerne modtage dit tilbud?',
-      sub: 'Vi kontakter dig inden for 24 timer. Så aftaler vi en gratis besigtigelse, og bagefter får du dit skriftlige bud.',
+      sub: 'Du hører fra os inden for 24 timer, og det koster ikke noget. Vil du gå videre, ser vi boligen sammen, og du får et skriftligt bud.',
     },
     {
       id: 'efter_salg',
