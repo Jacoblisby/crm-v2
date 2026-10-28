@@ -29,7 +29,6 @@ import {
   List,
   X,
   CaretDown,
-  MapPin,
   Coins,
   HouseLine,
   ArrowUpRight,
@@ -69,7 +68,7 @@ const NAV_LINKS = [
   { label: 'Sådan virker det', href: '#saadan-virker-det' },
   { label: 'Erfaringer', href: '#erfaringer' },
   { label: 'FAQ', href: '#faq' },
-  { label: 'Få mit bud', href: '#hero-adresse' },
+  { label: 'Få et bud', href: '#hero-adresse' },
 ];
 
 /**
@@ -980,8 +979,8 @@ function StickyCta() {
           'opacity 280ms var(--fp-out), transform 320ms var(--fp-settle)',
       }}
     >
-      <MapPin size={16} weight="regular" />
-      Skriv din adresse
+      Få et bud
+      <ArrowRight size={16} weight="regular" />
     </a>
   );
 }

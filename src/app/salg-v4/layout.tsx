@@ -13,7 +13,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Få dit bud · 365 Ejendomme',
+  title: 'Få et bud · 365 Ejendomme',
   description:
     'Svar på fire spørgsmål og hør fra os inden for 24 timer. Kontant bud på din ejerlejlighed, uden mægler og fremvisninger.',
 };

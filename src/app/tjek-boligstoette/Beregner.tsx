@@ -868,7 +868,7 @@ function KomIGang() {
             className="fp-press inline-flex items-center justify-center px-6 py-3 rounded-lg text-[14px]"
             style={{ background: 'var(--fp-cta)', color: '#123f41', fontWeight: 500 }}
           >
-            Få mit bud
+            Få et bud
           </a>
           <a
             href="tel:+4561789071"

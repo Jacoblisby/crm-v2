@@ -27,7 +27,7 @@ export default function SalgV4Page() {
         <main className="flex-1 flex items-center justify-center px-6 pb-24">
           <div className="w-full max-w-xl text-center space-y-6">
             <div className="text-[12px] tracking-[0.18em] uppercase" style={{ color: V4.ink, fontWeight: 500 }}>
-              Få dit bud
+              Få et bud
             </div>
             <h1 className="text-[34px] sm:text-[44px] leading-[1.12]" style={{ color: V4.ink }}>
               Start med din adresse
