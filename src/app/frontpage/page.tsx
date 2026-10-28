@@ -981,7 +981,7 @@ function StickyCta() {
       }}
     >
       <MapPin size={16} weight="regular" />
-      Få mit bud
+      Skriv din adresse
     </a>
   );
 }
