@@ -120,7 +120,7 @@ export interface FunnelStateV2 extends V1State {
   /**
    * "Jeg udfylder udgifterne senere" — sælger kan komme videre uden at have
    * tal på fællesudgift m.m. Slår kravet om fællesudgift fra i Funnel'ens
-   * canProceed, og skrives ind i lead-noten så mægleren ved, at tallene
+   * canProceed, og skrives ind i lead-noten så vi ved, at tallene
    * mangler og skal indhentes ved besigtigelsen.
    */
   costsLater: boolean;

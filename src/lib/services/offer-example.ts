@@ -1,8 +1,8 @@
 /**
  * Priseksempel til sælger-flowet.
  *
- * Vi viser ikke længere et auto-beregnet tilbud til sælgeren — en mægler
- * vender tilbage med estimatet i stedet. Men konceptet ("kontant til os"
+ * Vi viser ikke længere et auto-beregnet tilbud til sælgeren — vi vender
+ * tilbage med et skriftligt bud efter besigtigelsen i stedet. Men konceptet ("kontant til os"
  * kontra "listepris hos mægler") skal stadig kunne forstås, og derfor
  * regner vi det igennem på en rund bolig til 1.000.000 kr.
  *

@@ -288,7 +288,7 @@ export async function submitFunnelAction(
 
   const existingLead = sammeEmail ? sammeSted : undefined;
 
-  // Er der et lead på adressen med en ANDEN person, skal mægleren vide det.
+  // Er der et lead på adressen med en ANDEN person, skal vi vide det.
   const andenPersonSammeSted =
     sammeSted && !sammeEmail
       ? `\n\nOBS: der findes i forvejen et lead på samme adresse — ${sammeSted.fullName ?? 'uden navn'}${sammeSted.email ? ` (${sammeSted.email})` : ''}. Afklar om det er samme bolig eller samme husstand.`

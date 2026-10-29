@@ -178,7 +178,7 @@ export function FunnelV2Provider({ children }: { children: React.ReactNode }) {
           next.notes,
           next.smokeFree ? `Røgfri: ${next.smokeFree}` : '',
           next.econNotes ? `Økonomiske forhold: ${next.econNotes}` : '',
-          // Mægleren skal kunne se at tallene mangler med vilje — ellers
+          // Vi skal kunne se at tallene mangler med vilje — ellers
           // ligner det bare et halvt udfyldt lead.
           next.costsLater ? 'UDGIFTER: sælger udfylder senere — indhent ved besigtigelse' : '',
         ]

@@ -5,8 +5,8 @@
  *
  * Layoutet er designerens, men INDHOLDET af prisboksen er skiftet: sælgeren
  * får ikke længere et auto-beregnet tilbud at se. I stedet står der, at vi
- * ikke kunne beregne et tilbud automatisk, og at en mægler vender tilbage
- * inden for 24 timer. Sammenligningen ("Vores pris vs. ejendomsmægler")
+ * ikke kunne beregne et tilbud automatisk, og at vi vender tilbage
+ * inden for 24 timer. Sammenligningen ("Du får mere ud af at sælge til os")
  * bliver derfor et regneeksempel på en bolig til 1.000.000 kr, så
  * konceptet stadig kan forstås — tallene bor i
  * lib/services/offer-example.ts, fordi mailen bruger de samme.
@@ -107,7 +107,7 @@ export function EstimatV4() {
   }, [state]);
 
   // Sælgeren får IKKE længere et auto-beregnet tal. Estimatet regnes stadig
-  // server-side og følger med i admin-mailen og på leadet, så mægleren har
+  // server-side og følger med i admin-mailen og på leadet, så vi har
   // modellens bud i hånden — det er kun den kundevendte visning, der er væk.
   const ex = OFFER_EXAMPLE;
   const listepris = ex.listPrice;
@@ -202,12 +202,34 @@ export function EstimatV4() {
                 Regneeksempel
               </div>
               <h2 className="text-[20px] sm:text-[23px]" style={{ color: V4.ink, fontWeight: 500 }}>
-                Vores pris vs. ejendomsmægler
+                Du får mere ud af at sælge til os
               </h2>
               <p className="text-[13px]" style={{ color: V4.muted }}>
-                Sådan ser forskellen ud på en bolig til {fmt(OFFER_EXAMPLE.listPrice)} kr. Tallene er
-                et eksempel og altså ikke et tilbud på din bolig.
+                Sådan ser det ud på en bolig til {fmt(OFFER_EXAMPLE.listPrice)} kr. Tallene er et
+                eksempel og ikke et tilbud på din bolig.
               </p>
+            </div>
+
+            {/* Gevinsten — pointen, som sin egen sætning.
+                Grøn, ikke rose: rose er sammenligningens farve (vores kolonne
+                i tabellen), mens konklusionen skal stå i brand-grøn. De to
+                farver skiftevis giver også skærmen rytme. */}
+            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.mint }}>
+              <span className="inline-flex w-9 h-9 rounded-full items-center justify-center mb-3" style={{ background: V4.green }}>
+                <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </span>
+              <div className="text-[24px] sm:text-[30px] leading-none tabular-nums" style={{ color: V4.greenDeep, fontWeight: 700 }}>
+                + {fmt(OFFER_EXAMPLE_GAIN)} kr.
+              </div>
+              <div className="text-[14px] sm:text-[15px] mt-2" style={{ color: V4.ink, fontWeight: 600 }}>
+                mere i lommen hos os i eksemplet
+              </div>
+              <div className="text-[12.5px] mt-3 leading-relaxed max-w-sm mx-auto text-balance" style={{ color: '#41625f' }}>
+                Hos os får du pengene kontant, uden fremvisninger og bankforbehold. Salær,
+                markedsafslag og cirka tre måneders ventetid er udgifter, du ikke får hos os.
+              </div>
             </div>
 
             {/* Side om side. En rigtig <table>, fordi det ER tabeldata — så
@@ -325,29 +347,6 @@ export function EstimatV4() {
               </p>
             </div>
 
-            {/* Gevinsten — pointen, som sin egen sætning.
-                Grøn, ikke rose: rose er sammenligningens farve (vores kolonne
-                i tabellen), mens konklusionen skal stå i brand-grøn. De to
-                farver skiftevis giver også skærmen rytme. */}
-            <div className="rounded-[14px] px-5 py-6 text-center" style={{ background: V4.mint }}>
-              <span className="inline-flex w-9 h-9 rounded-full items-center justify-center mb-3" style={{ background: V4.green }}>
-                <svg className="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              </span>
-              <div className="text-[24px] sm:text-[30px] leading-none tabular-nums" style={{ color: V4.greenDeep, fontWeight: 700 }}>
-                + {fmt(OFFER_EXAMPLE_GAIN)} kr.
-              </div>
-              <div className="text-[14px] sm:text-[15px] mt-2" style={{ color: V4.ink, fontWeight: 600 }}>
-                mere til dig i eksemplet
-              </div>
-              <div className="text-[12.5px] mt-3 leading-relaxed max-w-sm mx-auto text-balance" style={{ color: '#41625f' }}>
-                Mæglerens pris er højere på papiret — men efter salær, markedsafslag og
-                ventetid står du med mindre. Oveni slipper du for fremvisninger,
-                bankforbehold og cirka tre måneders salgsperiode.
-              </div>
-            </div>
-
             {/* Submit-status + disclaimer */}
             {(submit.status === 'sent' || submit.status === 'already') && state.email && (
               <p className="text-[13px] text-center flex items-center justify-center gap-1.5" style={{ color: V4.green }}>
@@ -359,12 +358,12 @@ export function EstimatV4() {
             )}
             {submit.status === 'error' && (
               <p className="text-[13px] text-center" style={{ color: V4.muted }}>
-                Kunne ikke sende mail-bekræftelse — vi har stadig dine oplysninger og ringer alligevel.
+                Kunne ikke sende mail-bekræftelse. Vi har stadig dine oplysninger og ringer alligevel.
               </p>
             )}
             <p className="text-[12.5px]" style={{ color: V4.muted }}>
               <strong style={{ color: V4.ink }}>Bemærk:</strong> Regneeksemplet ovenfor er en illustration af,
-              hvordan vi regner — ikke et tilbud på din bolig. Dit estimat kommer fra en mægler inden for 24 timer.
+              hvordan vi regner — ikke et tilbud på din bolig. Du hører fra os inden for 24 timer og får et skriftligt bud efter besigtigelsen.
             </p>
           </Card>
 
@@ -395,7 +394,7 @@ export function EstimatV4() {
               )}
             </button>
             <p className="text-[13px] mt-1.5" style={{ color: V4.muted }}>
-              Mægleren tager udgangspunkt i offentlige boligdata og tinglyste handler som disse.
+              Vi tager udgangspunkt i offentlige boligdata og tinglyste handler som disse.
             </p>
             <div
               className="grid"
@@ -426,7 +425,7 @@ export function EstimatV4() {
           <div className="rounded-[10px] px-6 sm:px-10 py-8 text-center space-y-4" style={{ background: '#2d5f60' }}>
             <div className="text-[19px] text-white" style={{ fontWeight: 500 }}>Næste skridt</div>
             <p className="text-[13.5px] max-w-md mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              En mægler vender tilbage med et estimat inden for 24 timer. Vil du hellere tale med os med det samme, er du velkommen til at ringe.
+              Du hører fra os inden for 24 timer. Vil du hellere tale med os med det samme, er du velkommen til at ringe.
             </p>
             <div className="max-w-md mx-auto space-y-2.5 pt-1">
               <a

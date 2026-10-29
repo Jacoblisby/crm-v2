@@ -158,11 +158,11 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
       Regneeksempel
     </div>
     <h2 style="margin:8px 0 0;font-family:${FONT};font-size:21px;font-weight:600;color:${C.ink};">
-      Vores pris vs. ejendomsmægler
+      Du får mere ud af at sælge til os
     </h2>
     <p style="margin:8px 0 0;font-family:${FONT};font-size:13px;line-height:1.6;color:${C.muted};">
-      Sådan ser forskellen ud på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
-      Tallene er et eksempel og altså ikke et tilbud på din bolig.
+      Sådan ser det ud på en bolig til ${fmtKr(OFFER_EXAMPLE.listPrice)} kr.
+      Tallene er et eksempel og ikke et tilbud på din bolig.
     </p>
   </td></tr>
 
@@ -189,12 +189,11 @@ export function customerEmailHtml(input: CustomerEmailInput): string {
           + ${fmtKr(OFFER_EXAMPLE_GAIN)} kr.
         </div>
         <div style="margin-top:8px;font-family:${FONT};font-size:14px;font-weight:600;color:${C.ink};">
-          mere til dig i eksemplet
+          mere i lommen hos os i eksemplet
         </div>
         <div style="margin-top:10px;font-family:${FONT};font-size:12.5px;line-height:1.6;color:#41625f;">
-          Mæglerens pris er højere på papiret — men efter salær, markedsafslag og ventetid
-          står du med mindre. Oveni slipper du for fremvisninger, bankforbehold og cirka
-          tre måneders salgsperiode.
+          Hos os får du pengene kontant, uden fremvisninger og bankforbehold. Salær,
+          markedsafslag og cirka tre måneders ventetid er udgifter, du ikke får hos os.
         </div>
       </td></tr>
     </table>
