@@ -3,17 +3,18 @@
  *
  * Header viser 3 nummererede stages: 1. ADRESSE · 2. BOLIGEN · 3. ESTIMAT
  *
- * Trin: Bekræft · Dine oplysninger · Efter salget · Boligens stand → Estimat.
+ * Trin: Bekræft · Dine oplysninger · Efter salget · Boligens stand · Udgifter
+ * (valgfrit, 29.10.2026) → Estimat.
  *
  * Fjernet fra flowet efter mødet (for meget for målgruppen 60+, og de kan
  * afklares ved besigtigelsen):
  *   · «Hvornår vil du flytte?»
  *   · årgang på køkken og bad
  *   · hvidevarer, billeder og særlige forhold (DetaljerV4)
- *   · udgifter og lån/gæld i ejerforeningen (UdgifterV4, ForholdV4)
- * De tre sidste skærme ligger stadig i screens/ men bruges ikke. Mangler
- * udgifterne, regner submit-action med en standardudgift og skriver det i
- * lead-noten.
+ *   · lån/gæld i ejerforeningen (ForholdV4)
+ * Udgifterne (UdgifterV4) er kommet tilbage som valgfrit trin. Springer
+ * sælger det over, regner submit-action med en standardudgift og skriver det
+ * i lead-noten. DetaljerV4 og ForholdV4 ligger i screens/ men bruges ikke.
  *
  * State genbruges 100% fra FunnelV2 (samme localStorage-nøgle) — backend urørt.
  */
@@ -66,6 +67,13 @@ export function getScreensV4(_state: FunnelStateV2): V4ScreenDef[] {
       kicker: 'Din bolig',
       title: 'Hvordan er boligens stand?',
       sub: 'Vælg det, der passer bedst. Det hjælper os med at give dig et præcist bud.',
+    },
+    {
+      id: 'udgifter',
+      stage: 'boligen',
+      kicker: 'Valgfrit',
+      title: 'Hvad koster boligen at eje?',
+      sub: 'Udfyld det, du kender, så får du et mere præcist bud. Resten finder vi sammen ved besigtigelsen.',
     },
   ];
 }

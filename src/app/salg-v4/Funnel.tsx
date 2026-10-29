@@ -16,6 +16,7 @@ import { BekraeftV4 } from './screens/BekraeftV4';
 import { KontaktV4 } from './screens/KontaktV4';
 import { EfterSalgV4 } from './screens/EfterSalgV4';
 import { StandV4 } from './screens/StandV4';
+import { UdgifterV4 } from './screens/UdgifterV4';
 import { EstimatV4 } from './screens/EstimatV4';
 
 export function Funnel() {
@@ -101,6 +102,7 @@ export function Funnel() {
               {screen.id === 'kontakt' && <KontaktV4 />}
               {screen.id === 'efter_salg' && <EfterSalgV4 />}
               {screen.id === 'stand' && <StandV4 />}
+              {screen.id === 'udgifter' && <UdgifterV4 />}
             </div>
           </div>
         </div>

@@ -33,7 +33,7 @@ export default function SalgV4Page() {
               Start med din adresse
             </h1>
             <p className="text-[15px] leading-[1.65] max-w-md mx-auto" style={{ color: V4.muted }}>
-              Skriv din adresse og svar på fire spørgsmål. Det tager 5 minutter, og du hører
+              Skriv din adresse og svar på få spørgsmål. Det tager 5 minutter, og du hører
               fra os inden for 24 timer. Det er gratis og uforpligtende.
             </p>
             <AddressCta id="v4-address" />
