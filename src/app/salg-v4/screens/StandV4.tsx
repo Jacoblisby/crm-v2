@@ -3,15 +3,16 @@
 /**
  * StandV4 — "Boligens stand" (Figma: 02_Boligen trin 1). ÉN skærm for alle rum:
  *   Køkken · Badeværelse · Øvrige rum (radioknapper, ét niveau hver)
- *   + "Har boligen været røgfri?" (Ja/Nej). Årgang på køkken og bad er fjernet
- *   efter mødet 23.10.2026 (for meget for målgruppen).
+ *   + "Har boligen været røgfri?" (Ja/Nej). Årgang på bad er fjernet efter mødet
+ *   23.10.2026; køkkenets årstal er tilbage som valgfrit felt (29.10.2026).
  *
  * Designerens 3 niveauer mapper til prismotorens StandLevel:
  *   Nyrenoveret → nyrenoveret · God men brugt → god · Skal renoveres → slidt
  */
+import { useState } from 'react';
 import { useFunnelV2 } from '../../salg-v2/FunnelV2Context';
 import type { StandLevel } from '@/lib/services/price-engine';
-import { V4, Card, ChipGroupV4, QuestionRowV4 } from '../primitives';
+import { V4, Card, ChipGroupV4, FieldV4, QuestionRowV4 } from '../primitives';
 
 const NIVEAUER = ['Nyrenoveret', 'God men brugt', 'Skal renoveres'];
 
@@ -34,6 +35,15 @@ export function StandV4() {
 
   const display = (s: StandLevel | null) => (s ? STAND_INVERSE[s] : null);
 
+  // Lokal streng, så man kan skrive årstallet ciffer for ciffer; state får kun et gyldigt årstal.
+  const [koekkenAar, setKoekkenAar] = useState(state.kitchenYear ? String(state.kitchenYear) : '');
+  const setAar = (v: string) => {
+    const tal = v.slice(0, 4);
+    setKoekkenAar(tal);
+    const n = Number(tal);
+    update({ kitchenYear: tal.length === 4 && n >= 1900 && n <= new Date().getFullYear() ? n : null });
+  };
+
   return (
     <div className="space-y-5">
       {/* Køkken */}
@@ -48,6 +58,13 @@ export function StandV4() {
           options={NIVEAUER}
           value={display(state.kitchenStand)}
           onChange={(v) => update({ kitchenStand: STAND_MAP[v] })}
+        />
+        <FieldV4
+          label="Årstal for køkkenet (valgfrit)"
+          value={koekkenAar}
+          onChange={setAar}
+          placeholder="Fx 2019"
+          numeric
         />
       </Card>
 
